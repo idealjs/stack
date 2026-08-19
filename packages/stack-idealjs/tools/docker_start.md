@@ -1,5 +1,5 @@
 ---
-sidebar_position: 1
+sidebar_position: 7
 ---
 
 # Docker启动数据库
@@ -54,7 +54,7 @@ docker-compose up --build
 ```
 docker ps
 ```
-![运行容器](./5.png)
+![运行容器](./docker-5.png)
 
 ### 5. 连接到PostgreSQL数据库
 运行以下命令，连接到PostgreSQL数据库：

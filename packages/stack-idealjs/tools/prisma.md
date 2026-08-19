@@ -1,5 +1,5 @@
 ---
-sidebar_position: 1
+sidebar_position: 8
 ---
 
 # Next.js + Prisma + Docker构建全栈
@@ -13,7 +13,7 @@ sidebar_position: 1
 5. 确认已启动数据库
 
 >**提示**                                                                                                                                    
-如果不知道怎么启动数据库，可以参考使用 [Docker启动数据库](/tools/docker/start)文档
+如果不知道怎么启动数据库，可以参考使用 [Docker启动数据库](/tools/docker_start)文档
 
 ## 项目初始化
 - 打开Next.js项目
@@ -62,8 +62,8 @@ npx prisma studio
 #### 4.2 验证数据
 在`Prisma Studio`中，可以查看`User`表的数据，通过添加、编辑或修改记录，验证表是否正确
 
-![添加记录](./verify1.png)
-![添加成功](./verify2.png)
+![添加记录](./prisma-verify1.png)
+![添加成功](./prisma-verify2.png)
 
 ### 5. 在Next.js中使用Prisma
 #### 5.1 设置Prisma客户端

@@ -10,10 +10,12 @@ sidebar_position: 1
 
 ## 内容
 
-1. [安装工具（nodejs、vscode）](./install/nodejs.md)
-2. [Git](./git/index.mdx)
-3. [NVM](./nvm/install_nvm.md)
-4. [Docker](./docker/install.md)
-5. [Prisma](./prisma/prisma.md)
-6. [VSCode 常见问题](./vscode/exception)
-7. [Linux Alias](./linux/alias.md)
+1. [安装 nodejs](./nodejs)
+2. [安装 vscode](./vscode)
+3. [Git](./git)
+4. [NVM](./nvm)
+5. [Docker 安装](./docker_install)
+6. [Docker 启动数据库](./docker_start)
+7. [Prisma](./prisma)
+8. [VSCode 常见问题](./vscode_exception)
+9. [Linux Alias](./linux_alias)

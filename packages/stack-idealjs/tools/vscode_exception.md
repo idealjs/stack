@@ -1,5 +1,5 @@
 ---
-sidebar_position: 1
+sidebar_position: 9
 ---
 
 # 如何处理vscode安装插件异常
@@ -12,17 +12,17 @@ https://marketplace.visualstudio.com
 ```
 如果一切正常，您应该在`https://marketplace.visualstudio.com`有一个Extensions for Visual Studio Code的页面。
 
-![vscode扩展页面](./marketplace.png)
+![vscode扩展页面](./vscode-marketplace.png)
 
 ## 2. 防火墙阻止
 当我们第一次启动调试功能的时候，正常情况vscode会弹出防火墙阻止的界面
 
-![防火墙](./code.png)
+![防火墙](./vscode-code.png)
 
 ## 3. 设置代理
-![设置图片](./setting.png)
+![设置图片](./vscode-setting.png)
 
-![json图片](./json.png)
+![json图片](./vscode-json.png)
 
 在`setting.json`中添加以下代理
 ```

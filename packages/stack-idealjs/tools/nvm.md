@@ -1,3 +1,7 @@
+---
+sidebar_position: 5
+---
+
 # nvm
 - Node.js是用于服务器端JavaScript运行，适合高性能、实时应用
 - NVM用于管理多个Node.js版本，便于在不同项目间切换
