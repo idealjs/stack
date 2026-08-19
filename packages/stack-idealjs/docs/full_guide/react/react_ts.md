@@ -31,3 +31,64 @@ npm install
 ```
 npm run dev
 ```
+
+## 按步引入react包
+
+除了直接用脚手架创建react工程，也可以在一个已有的vanilla工程中，按步引入react包。这个过程可以帮助理解react工程的最小组成。
+
+### 1. 安装依赖
+
+在vanilla工程目录下，运行以下命令
+
+```
+npm install react react-dom
+npm install -D @types/react @types/react-dom @vitejs/plugin-react
+```
+
+### 2. 配置vite
+
+修改`vite.config.ts`，添加react插件
+
+```ts
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
+
+export default defineConfig({
+  plugins: [react()],
+})
+```
+
+### 3. 修改入口文件
+
+把`index.html`中的入口指向react组件文件
+
+```html
+<script type="module" src="/src/main.tsx"></script>
+```
+
+编写`src/main.tsx`
+
+```tsx
+import React from 'react'
+import { createRoot } from 'react-dom/client'
+
+function App() {
+  return <h1>Hello React</h1>
+}
+
+createRoot(document.getElementById('app')!).render(<App />)
+```
+
+同时在`index.html`的`body`中添加挂载点
+
+```html
+<div id="app"></div>
+```
+
+### 4. 运行项目
+
+```
+npm run dev
+```
+
+看到页面输出`Hello React`，说明react已经成功引入。

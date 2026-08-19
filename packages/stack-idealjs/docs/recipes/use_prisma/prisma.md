@@ -13,7 +13,7 @@ sidebar_position: 1
 5. 确认已启动数据库
 
 >**提示**                                                                                                                                    
-如果不知道怎么启动数据库，可以参考使用 [Docker启动数据库](https://github.com/idealjs/stack/blob/main/packages/stack-idealjs/docs/docker/start.md)文档
+如果不知道怎么启动数据库，可以参考使用 [Docker启动数据库](/docs/recipes/docker/start)文档
 
 ## 项目初始化
 - 打开Next.js项目

@@ -7,7 +7,7 @@ sidebar_position: 1
 1. 已创建vanilla ts工程
 
 >**提示**                                  
-若未安装vanilla ts工程，可以参考[vite的入门](https://github.com/idealjs/stack/blob/main/packages/stack-idealjs/docs/vite/vite.md)文档
+若未安装vanilla ts工程，可以参考[vite的入门](/docs/full_guide/vite/)文档
 
 ## 项目初始化
 打开vanilla ts工程
