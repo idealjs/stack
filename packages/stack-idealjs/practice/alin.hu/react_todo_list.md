@@ -1,5 +1,5 @@
 ---
-sidebar_position: 2
+sidebar_position: 5
 ---
 
 # 如何使用react+ts编写前端todo list
@@ -9,7 +9,7 @@ sidebar_position: 2
 1. 已创建react ts工程
 
 >**提示**                                                                                                                                    
-若未创建react ts工程，可以参考[使用vite创建react ts工程](/practice/alin.hu/react/react_ts)文档
+若未创建react ts工程，可以参考[使用vite创建react ts工程](/practice/alin.hu/react_ts)文档
 
 ## 项目初始化
 打开react ts工程
@@ -195,4 +195,4 @@ export default App
 ```
 npm run dev
 ```
-![运行结果](./result2.png)
+![运行结果](./react-result2.png)

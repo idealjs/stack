@@ -1,5 +1,5 @@
 ---
-sidebar_position: 1
+sidebar_position: 3
 ---
 # 如何使用html+ts编写前端todo list
 
@@ -7,7 +7,7 @@ sidebar_position: 1
 1. 已创建vanilla ts工程
 
 >**提示**                                  
-若未安装vanilla ts工程，可以参考[vite的入门](/practice/alin.hu/vite/)文档
+若未安装vanilla ts工程，可以参考[vite的入门](/practice/alin.hu/vite)文档
 
 ## 项目初始化
 打开vanilla ts工程
@@ -197,4 +197,4 @@ function renderTodoList(list: TodoItem[]) {
 ```
 npm run dev
 ```
-![运行效果](./result.png)
+![运行效果](./vanilla-result.png)

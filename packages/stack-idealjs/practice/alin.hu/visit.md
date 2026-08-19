@@ -28,7 +28,7 @@ cd ~/test
 http-server
 ```
 启动成功后，命令行会输出以下网址
-![网址](./console.png)
+![网址](./html-console.png)
 这时，你可以在浏览器中输入 `http://127.0.0.1:8080` 或者`http://localhost:8080` 来访问你的网页
 
 ## 无痕模式
@@ -37,7 +37,7 @@ http-server
 Ctrl+Shift+N
 ```
 按下`F12`，进入检查
-![无痕模式](./image.png)
+![无痕模式](./html-image.png)
 
 ## 先决条件
 - 你需要已经安装并启动 `http-server`。
@@ -50,14 +50,14 @@ Ctrl+Shift+N
 ### 2. 发送 GET 请求
 浏览器会向服务器发送一个路径为 `/` 的 GET 请求。
 
-![请求路径](./get.png)
+![请求路径](./html-get.png)
 
 ## 服务器的工作步骤
 
 ### 1. 查找文件
 当服务器接收到浏览器的请求后，就像一位仓库管理员，会在众多文件中查找 `index.html` 文件。
 
-![文件](./index.png)
+![文件](./html-index.png)
 
 ### 2. 生成 HTTP 响应
 服务器找到文件后，会对其进行处理，将其转换为适合在网络中传输的 HTTP 响应，如同把货物包装好以便运输。
