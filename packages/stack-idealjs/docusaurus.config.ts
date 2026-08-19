@@ -69,6 +69,20 @@ const config: Config = {
     ],
   ],
 
+  plugins: [
+    [
+      "@docusaurus/plugin-content-docs",
+      {
+        id: "tools",
+        path: "tools",
+        routeBasePath: "tools",
+        sidebarPath: "./sidebarsTools.ts",
+        editUrl:
+          "https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/",
+      },
+    ],
+  ],
+
   themeConfig: {
     // Replace with your project's social card
     image: "img/docusaurus-social-card.jpg",
@@ -86,8 +100,9 @@ const config: Config = {
           label: "全栈教程",
         },
         {
-          type: "doc",
-          docId: "tools/index",
+          type: "docSidebar",
+          sidebarId: "toolsSidebar",
+          docsPluginId: "tools",
           position: "left",
           label: "工具使用",
         },
