@@ -81,6 +81,17 @@ const config: Config = {
           "https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/",
       },
     ],
+    [
+      "@docusaurus/plugin-content-docs",
+      {
+        id: "practice",
+        path: "practice",
+        routeBasePath: "practice",
+        sidebarPath: "./sidebarsPractice.ts",
+        editUrl:
+          "https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/",
+      },
+    ],
   ],
 
   themeConfig: {
@@ -105,6 +116,13 @@ const config: Config = {
           docsPluginId: "tools",
           position: "left",
           label: "工具使用",
+        },
+        {
+          type: "docSidebar",
+          sidebarId: "practiceSidebar",
+          docsPluginId: "practice",
+          position: "left",
+          label: "实践经历",
         },
         { to: "/blog", label: "博客", position: "left" },
         {

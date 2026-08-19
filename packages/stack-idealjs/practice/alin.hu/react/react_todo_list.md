@@ -9,7 +9,7 @@ sidebar_position: 2
 1. 已创建react ts工程
 
 >**提示**                                                                                                                                    
-若未创建react ts工程，可以参考[使用vite创建react ts工程](/docs/full_guide/react/react_ts)文档
+若未创建react ts工程，可以参考[使用vite创建react ts工程](/practice/alin.hu/react/react_ts)文档
 
 ## 项目初始化
 打开react ts工程
