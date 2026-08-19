@@ -1,6 +1,6 @@
 {
-  "label": "高级教程",
-  "position": 5,
+  "label": "NVM",
+  "position": 3,
   "link": {
     "type": "generated-index"
   }

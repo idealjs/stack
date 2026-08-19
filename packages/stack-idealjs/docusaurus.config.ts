@@ -85,6 +85,12 @@ const config: Config = {
           position: "left",
           label: "全栈教程",
         },
+        {
+          type: "doc",
+          docId: "tools/index",
+          position: "left",
+          label: "工具使用",
+        },
         { to: "/blog", label: "博客", position: "left" },
         {
           href: "https://github.com/idealjs/stack",
