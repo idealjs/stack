@@ -1,0 +1,179 @@
+/* 课程书架：卡片网格，风格取自设计稿 00（E-learning Learning Plan Dashboard）
+   多彩课程卡 + 顶部 accent 条 + 完成角标。 */
+
+.shelf {
+  padding: 2rem 0 3rem;
+}
+
+.heading {
+  text-align: center;
+}
+
+.subheading {
+  text-align: center;
+  color: var(--ifm-color-emphasis-700);
+  margin-bottom: 2rem;
+}
+
+.grid {
+  display: grid;
+  gap: 1.25rem;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+}
+
+/* ---- 单张卡片 ---- */
+
+.card {
+  --course-color: #6366f1;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: 12px;
+  border: 1px solid var(--ifm-color-emphasis-300);
+  background-color: var(--ifm-card-background-color, var(--ifm-background-color));
+  box-shadow: 0 1px 3px rgb(0 0 0 / 12%);
+  transition:
+    transform 0.15s ease-out,
+    box-shadow 0.15s ease-out,
+    border-color 0.15s ease-out;
+}
+
+.card:hover,
+.card:focus-visible {
+  transform: translateY(-3px);
+  border-color: var(--course-color);
+  box-shadow: 0 6px 20px rgb(0 0 0 / 18%);
+  text-decoration: none;
+}
+
+/* 书脊：卡片左侧的主题色竖条，hover 常亮 */
+.spine {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 4px;
+  background: var(--course-color);
+  opacity: 0.45;
+  transition: opacity 0.15s ease-out;
+}
+
+.card:hover .spine,
+.card:focus-visible .spine {
+  opacity: 1;
+}
+
+/* ---- 媒体区：hover 轮播预期成果 GIF ---- */
+
+.media {
+  aspect-ratio: 16 / 9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background:
+    linear-gradient(135deg, rgb(15 23 42 / 92%), rgb(30 41 59 / 92%));
+  overflow: hidden;
+}
+
+.gif {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.mediaHint {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--ifm-color-emphasis-600);
+  font-size: 0.85rem;
+}
+
+.mediaHintIcon {
+  color: var(--course-color);
+}
+
+/* ---- 内容区 ---- */
+
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 1rem 1.1rem 1.1rem 1.25rem;
+  flex: 1;
+}
+
+.titleRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.title {
+  margin: 0;
+  font-size: 1.05rem;
+}
+
+.card:hover .title {
+  color: var(--course-color);
+}
+
+.doneFlag {
+  flex-shrink: 0;
+  font-size: 0.72rem;
+  padding: 0.15rem 0.55rem;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.done {
+  color: #047857;
+  background: #d1fae5;
+}
+
+.wip {
+  color: #92400e;
+  background: #fef3c7;
+}
+
+[data-theme="dark"] .done {
+  color: #6ee7b7;
+  background: rgb(4 120 87 / 25%);
+}
+
+[data-theme="dark"] .wip {
+  color: #fcd34d;
+  background: rgb(146 64 14 / 25%);
+}
+
+.description {
+  margin: 0;
+  flex: 1;
+  color: var(--ifm-color-emphasis-800);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+/* ---- 关系区：后续列出章节依赖后渲染 chips ---- */
+
+.relations {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  min-height: 1.4rem;
+  align-items: center;
+}
+
+.relationChip {
+  font-size: 0.72rem;
+  padding: 0.1rem 0.5rem;
+  border-radius: 999px;
+  color: var(--course-color);
+  border: 1px solid var(--course-color);
+}
+
+.relationEmpty {
+  font-size: 0.72rem;
+  color: var(--ifm-color-emphasis-500);
+}
