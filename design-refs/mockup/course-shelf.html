@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>课程书架 设计稿 · stack idealjs</title>
+<style>
+  /* ====== 画布与页面基座 ====== */
+  @page { size: 1280px 800px; margin: 0; }
+  *, *::before, *::after { box-sizing: border-box; }
+  html, body {
+    margin: 0;
+    padding: 0;
+    width: 1280px;
+    background: #f8fafc;
+    font-family: "Noto Sans CJK SC", "PingFang SC", "Microsoft YaHei", sans-serif;
+    color: #0f172a;
+    -webkit-font-smoothing: antialiased;
+  }
+  .page {
+    width: 1280px;
+    height: 800px;
+    position: relative;
+    background: #f8fafc;
+    overflow: hidden;
+    page-break-after: always;
+  }
+  .page:last-child { page-break-after: auto; }
+
+  /* 浏览器预览自适应缩放（仅 screen 生效，print 不受影响） */
+  @media screen {
+    html {
+      height: auto;
+      display: flex;
+      justify-content: center;
+      background: #f8fafc;
+    }
+    body {
+      transform-origin: top center;
+      scale: min(1, calc(100vw / 1280px));
+      margin: 0 auto;
+      box-shadow: 0 0 48px rgba(15, 23, 42, 0.18);
+    }
+  }
+
+  /* ====== 通用元素 ====== */
+  .kicker {
+    font-size: 15px;
+    letter-spacing: 4px;
+    font-weight: 500;
+    color: #475569;
+    text-transform: uppercase;
+  }
+  .pagenum {
+    position: absolute;
+    bottom: 28px;
+    right: 40px;
+    font-size: 13px;
+    color: #64748b;
+    letter-spacing: 2px;
+  }
+  .footline {
+    position: absolute;
+    bottom: 28px;
+    left: 40px;
+    font-size: 13px;
+    color: #64748b;
+    letter-spacing: 1px;
+  }
+  .rule { height: 1px; background: #cbd5e1; }
+
+  /* 页首条 */
+  .pagehead {
+    position: absolute;
+    top: 44px;
+    left: 40px;
+    right: 40px;
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+  }
+  .pagehead h2 { margin: 0; font-size: 30px; font-weight: 700; color: #0f172a; }
+  .pagehead .sub { font-size: 15px; color: #475569; }
+
+  /* 标注组件 */
+  .note {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    margin-bottom: 14px;
+  }
+  .note .idx {
+    flex: none;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: #0f172a;
+    color: #ffffff;
+    font-size: 13px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 1px;
+  }
+  .note .txt { font-size: 14.5px; line-height: 1.55; color: #334155; }
+  .note .txt b { color: #0f172a; }
+  .panel {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 22px 24px;
+  }
+  .panel h3 {
+    margin: 0 0 14px;
+    font-size: 17px;
+    font-weight: 700;
+    color: #0f172a;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #e2e8f0;
+  }
+
+  /* ====== P1 封面 ====== */
+  .cover { background: #f8fafc; }
+  .cover .band {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 8px;
+    background: linear-gradient(90deg, #6366f1, #ec4899, #f59e0b, #10b981, #0ea5e9, #8b5cf6);
+  }
+  .cover .kicker-box { position: absolute; top: 72px; left: 80px; }
+  .cover h1 {
+    position: absolute;
+    top: 240px;
+    left: 80px;
+    margin: 0;
+    font-size: 96px;
+    line-height: 1.12;
+    font-weight: 900;
+    color: #0f172a;
+    letter-spacing: 2px;
+  }
+  .cover .subtitle {
+    position: absolute;
+    top: 492px;
+    left: 80px;
+    font-size: 22px;
+    color: #475569;
+    line-height: 1.6;
+  }
+  .cover .meta {
+    position: absolute;
+    bottom: 72px;
+    right: 80px;
+    text-align: right;
+    font-size: 15px;
+    color: #64748b;
+    line-height: 1.9;
+  }
+  .cover .minicards {
+    position: absolute;
+    bottom: 72px;
+    left: 80px;
+    display: flex;
+    gap: 14px;
+  }
+  .minicard {
+    width: 92px;
+    height: 62px;
+    border-radius: 8px;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.08);
+    position: relative;
+  }
+  .minicard::before {
+    content: "";
+    position: absolute;
+    top: 10px; left: 10px;
+    width: 26px; height: 6px;
+    border-radius: 3px;
+    background: var(--c);
+    opacity: 0.85;
+  }
+  .minicard::after {
+    content: "";
+    position: absolute;
+    top: 28px; left: 10px;
+    width: 56px; height: 4px;
+    border-radius: 2px;
+    background: #e2e8f0;
+    box-shadow: 0 8px 0 #e2e8f0, 0 16px 0 #e2e8f0;
+  }
+
+  /* ====== P2 整体布局：浏览器框 mockup ====== */
+  .browser {
+    position: absolute;
+    top: 130px;
+    left: 40px;
+    width: 760px;
+    height: 596px;
+    background: #ffffff;
+    border: 1px solid #dbe2ea;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(15, 23, 42, 0.10);
+  }
+  .browser .bar {
+    height: 38px;
+    border-bottom: 1px solid #e8edf3;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0 16px;
+  }
+  .dot { width: 10px; height: 10px; border-radius: 50%; background: #e2e8f0; }
+  .browser .url {
+    margin-left: 12px;
+    flex: 1;
+    height: 22px;
+    border-radius: 11px;
+    background: #f1f5f9;
+    color: #64748b;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    padding: 0 12px;
+  }
+  /* mock 首页 hero */
+  .mock-hero {
+    height: 96px;
+    background: #2f4bad;
+    color: #ffffff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+  }
+  .mock-hero .t { font-size: 20px; font-weight: 700; }
+  .mock-hero .btns { display: flex; gap: 10px; }
+  .mock-hero .btn {
+    font-size: 11px;
+    padding: 5px 12px;
+    border-radius: 999px;
+    border: 1px solid rgba(255,255,255,0.55);
+  }
+  /* mock 卡片网格 */
+  .mock-shelf { padding: 18px 22px 22px; }
+  .mock-shelf .shelf-title { font-size: 15px; font-weight: 700; color: #0f172a; text-align: center; }
+  .mock-shelf .shelf-sub { font-size: 11px; color: #64748b; text-align: center; margin: 4px 0 14px; }
+  .mock-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  .mock-card {
+    border: 1px solid #e2e8f0;
+    border-radius: 9px;
+    background: #ffffff;
+    position: relative;
+    padding: 8px 10px 10px 12px;
+  }
+  .mock-card .spine {
+    position: absolute; left: 0; top: 0; bottom: 0;
+    width: 3px; border-radius: 9px 0 0 9px;
+    background: var(--c);
+  }
+  .mock-card .ph-media {
+    height: 56px;
+    border-radius: 6px;
+    background: linear-gradient(135deg, #101a30, #1e293b);
+    display: flex; align-items: center; justify-content: center;
+    color: #64748b; font-size: 10px;
+  }
+  .mock-card .ph-title { margin-top: 8px; font-size: 12.5px; font-weight: 700; color: #0f172a; display: flex; justify-content: space-between; align-items: center; }
+  .mock-card .badge { font-size: 9px; border-radius: 999px; padding: 2px 7px; white-space: nowrap; }
+  .badge.done { color: #047857; background: #d1fae5; }
+  .badge.wip { color: #92400e; background: #fef3c7; }
+  .mock-card .ph-desc { margin-top: 5px; font-size: 10px; line-height: 1.5; color: #475569; }
+  /* 标注锚点 */
+  .pin {
+    position: absolute;
+    width: 24px; height: 24px;
+    border-radius: 50%;
+    background: #0f172a; color: #fff;
+    font-size: 13px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 0 0 4px rgba(15,23,42,0.12);
+    z-index: 5;
+  }
+  .coverflow-note {
+    position: absolute;
+    top: 130px;
+    left: 830px;
+    width: 410px;
+  }
+
+  /* ====== P3 卡片解剖 ====== */
+  .bigcard {
+    position: absolute;
+    top: 168px;
+    width: 384px;
+    background: #ffffff;
+    border: 1px solid #dbe2ea;
+    border-radius: 14px;
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.10);
+  }
+  .bigcard.hovered {
+    box-shadow: 0 14px 36px rgba(15, 23, 42, 0.22);
+    border-color: #6366f1;
+    transform: translateY(-6px);
+  }
+  .bigcard .media {
+    height: 200px;
+    border-radius: 13px 13px 0 0;
+    background: linear-gradient(135deg, #0f172a, #1e293b);
+    display: flex; align-items: center; justify-content: center;
+    color: #94a3b8; font-size: 14px;
+    gap: 8px;
+    overflow: hidden;
+  }
+  .bigcard .media img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .bigcard .spinebar {
+    position: absolute; left: 0; top: 0; bottom: 0;
+    width: 5px;
+    background: #6366f1;
+    border-radius: 14px 0 0 14px;
+    opacity: 0.45;
+  }
+  .bigcard.hovered .spinebar { opacity: 1; }
+  .bigcard .cbody { padding: 16px 18px 16px 22px; }
+  .bigcard .crow { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+  .bigcard .ctitle { font-size: 19px; font-weight: 700; color: #0f172a; margin: 0; }
+  .bigcard.hovered .ctitle { color: #6366f1; }
+  .bigcard .cbadge { flex: none; font-size: 12px; border-radius: 999px; padding: 3px 10px; }
+  .bigcard .cdesc { margin: 10px 0 0; font-size: 14.5px; line-height: 1.6; color: #334155; }
+  .bigcard .chips { margin-top: 14px; display: flex; gap: 8px; min-height: 24px; align-items: center; }
+  .chip {
+    font-size: 12px;
+    color: #6366f1;
+    border: 1px solid #6366f1;
+    border-radius: 999px;
+    padding: 2px 10px;
+  }
+  .chip.ghost { color: #94a3b8; border-color: #cbd5e1; }
+  .leadline { position: absolute; height: 1px; background: #94a3b8; z-index: 4; }
+  .leaddot { position: absolute; width: 7px; height: 7px; border-radius: 50%; background: #0f172a; z-index: 4; }
+  .legendbox { position: absolute; width: 236px; }
+
+  /* ====== P4 交互与资产 ====== */
+  .flow {
+    display: flex;
+    align-items: stretch;
+    gap: 0;
+    margin-top: 6px;
+  }
+  .flow .step {
+    flex: 1;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 14px 14px 12px;
+    position: relative;
+    margin-right: 26px;
+  }
+  .flow .step:last-child { margin-right: 0; }
+  .flow .step::after {
+    content: "";
+    position: absolute;
+    right: -20px; top: 50%;
+    width: 14px; height: 14px;
+    border-top: 2px solid #94a3b8;
+    border-right: 2px solid #94a3b8;
+    transform: translateY(-50%) rotate(45deg);
+  }
+  .flow .step:last-child::after { display: none; }
+  .flow .s-no { font-size: 12px; color: #6366f1; font-weight: 700; letter-spacing: 1px; }
+  .flow .s-t { font-size: 15px; font-weight: 700; color: #0f172a; margin: 4px 0 6px; }
+  .flow .s-d { font-size: 12.5px; line-height: 1.55; color: #475569; }
+  table.spec {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13.5px;
+    color: #334155;
+  }
+  table.spec th {
+    text-align: left;
+    font-weight: 700;
+    color: #0f172a;
+    border-bottom: 2px solid #cbd5e1;
+    padding: 8px 10px 8px 0;
+  }
+  table.spec td { border-bottom: 1px solid #e8edf3; padding: 9px 10px 9px 0; vertical-align: top; }
+  table.spec td.k { color: #0f172a; font-weight: 600; white-space: nowrap; }
+
+  /* ====== P5 规范 tokens ====== */
+  .swatches { display: flex; gap: 12px; flex-wrap: wrap; }
+  .swatch { width: 108px; }
+  .swatch .c {
+    height: 54px;
+    border-radius: 9px;
+    border: 1px solid rgba(15,23,42,0.08);
+  }
+  .swatch .n { font-size: 12.5px; font-weight: 700; color: #0f172a; margin-top: 7px; }
+  .swatch .h { font-size: 11.5px; color: #64748b; }
+
+  /* 状态演示小卡 */
+  .statecard {
+    width: 210px;
+    border-radius: 10px;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    padding: 10px 12px;
+    box-shadow: 0 2px 6px rgba(15,23,42,0.08);
+  }
+  .statecard.hov {
+    border-color: #6366f1;
+    box-shadow: 0 10px 26px rgba(15,23,42,0.20);
+    transform: translateY(-4px);
+  }
+  .statecard .m { height: 66px; border-radius: 6px; background: linear-gradient(135deg, #0f172a, #1e293b); }
+  .statecard .t { font-size: 13px; font-weight: 700; color: #0f172a; margin-top: 8px; }
+  .statecard.hov .t { color: #6366f1; }
+</style>
+</head>
+<body>
+
+<!-- ================= P1 封面 ================= -->
+<div class="page cover">
+  <div class="band"></div>
+  <div class="kicker-box">
+    <div class="kicker">STACK IDEALJS · 全栈工程师教程</div>
+    <div class="rule" style="width: 220px; margin-top: 14px;"></div>
+  </div>
+  <h1>课程书架<br>设计稿</h1>
+  <div class="subtitle">
+    课程预览从目录树改为卡片书架 · 每卡承载 title / desc / done / relations<br>
+    悬停卡片即循环播放该部分「学完能得到什么」的预期成果 GIF
+  </div>
+  <div class="minicards">
+    <div class="minicard" style="--c:#6366f1"></div>
+    <div class="minicard" style="--c:#ec4899"></div>
+    <div class="minicard" style="--c:#f59e0b"></div>
+    <div class="minicard" style="--c:#10b981"></div>
+    <div class="minicard" style="--c:#0ea5e9"></div>
+    <div class="minicard" style="--c:#8b5cf6"></div>
+  </div>
+  <div class="meta">
+    v1.0 · 2026-10<br>
+    分支 feat/course-shelf<br>
+    参考 00 · E-learning Learning Plan Dashboard（Dribbble，仅灵感）
+  </div>
+</div>
+
+<!-- ================= P2 整体布局 ================= -->
+<div class="page">
+  <div class="pagehead">
+    <h2>01 整体布局 · 首页桌面态</h2>
+    <span class="sub">视口 1440px · 卡片网格 auto-fill minmax(280px, 1fr)</span>
+  </div>
+
+  <div class="browser">
+    <div class="bar">
+      <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+      <div class="url">idealjs.github.io/stack/</div>
+    </div>
+    <div class="mock-hero">
+      <div class="t">stack idealjs</div>
+      <div class="btns"><span class="btn">快速开始 - 5min ⏱</span><span class="btn">参与讨论</span></div>
+    </div>
+    <div class="mock-shelf">
+      <div class="shelf-title">全栈工程师教程 · 课程书架</div>
+      <div class="shelf-sub">共 6 个部分。悬停卡片，预览学完这一部分能得到什么。</div>
+      <div class="mock-grid">
+        <div class="mock-card" style="--c:#6366f1"><span class="spine"></span>
+          <div class="ph-media">▶ 悬停预览预期成果</div>
+          <div class="ph-title">快速开始 <span class="badge done">✓ 已完成</span></div>
+          <div class="ph-desc">写出第一个网页并在浏览器打开，跑起你的第一个 HTTP 服务器。</div>
+        </div>
+        <div class="mock-card" style="--c:#ec4899"><span class="spine"></span>
+          <div class="ph-media">▶ 悬停预览预期成果</div>
+          <div class="ph-title">快速开始 React <span class="badge done">✓ 已完成</span></div>
+          <div class="ph-desc">用脚手架创建 React 应用，亲手拼出第一个 Todo List。</div>
+        </div>
+        <div class="mock-card" style="--c:#f59e0b"><span class="spine"></span>
+          <div class="ph-media">▶ 悬停预览预期成果</div>
+          <div class="ph-title">更多示例 <span class="badge done">✓ 已完成</span></div>
+          <div class="ph-desc">浮动布局等补充示例，巩固前面攒下的积木。</div>
+        </div>
+        <div class="mock-card" style="--c:#10b981"><span class="spine"></span>
+          <div class="ph-media">▶ 悬停预览预期成果</div>
+          <div class="ph-title">更多 <span class="badge done">✓ 已完成</span></div>
+          <div class="ph-desc">把示例工程构建为可发布产物，看清 build 到底做了什么。</div>
+        </div>
+        <div class="mock-card" style="--c:#0ea5e9"><span class="spine"></span>
+          <div class="ph-media">▶ 悬停预览预期成果</div>
+          <div class="ph-title">全栈基础 <span class="badge wip">写作中</span></div>
+          <div class="ph-desc">从网页到服务与数据库，串起完整的最小全栈闭环。</div>
+        </div>
+        <div class="mock-card" style="--c:#8b5cf6"><span class="spine"></span>
+          <div class="ph-media">▶ 悬停预览预期成果</div>
+          <div class="ph-title">高级教程 <span class="badge done">✓ 已完成</span></div>
+          <div class="ph-desc">数据流、纯函数、CAP——工程上的心智模型。</div>
+        </div>
+      </div>
+    </div>
+    <!-- 标注锚点 -->
+    <span class="pin" style="top: 73px; left: 740px;">1</span>
+    <span class="pin" style="top: 158px; left: 740px;">2</span>
+    <span class="pin" style="top: 258px; left: 740px;">3</span>
+    <span class="pin" style="top: 418px; left: 740px;">4</span>
+  </div>
+
+  <div class="coverflow-note">
+    <div class="panel">
+      <h3>布局要点</h3>
+      <div class="note"><span class="idx">1</span><span class="txt"><b>Hero 入口区</b>：保留「快速开始 5min」与「参与讨论」双按钮，合并为单条 hero，去除旧版双 hero 叠放。</span></div>
+      <div class="note"><span class="idx">2</span><span class="txt"><b>书架标题行</b>：交代总数与悬停玩法，读者未 hover 前即知道卡片有预期成果预览。</span></div>
+      <div class="note"><span class="idx">3</span><span class="txt"><b>卡片网格</b>：六部分各一卡，颜色书脊区分；顺序 = 侧栏学习顺序（垃圾桶/归档不入架）。</span></div>
+      <div class="note"><span class="idx">4</span><span class="txt"><b>整卡可点</b>：卡即链接，进入该部分分类索引页；hover 只做预览不导航。</span></div>
+    </div>
+    <div class="panel" style="margin-top: 18px;">
+      <h3>响应式</h3>
+      <div class="note"><span class="idx">A</span><span class="txt">≥1140px 三列 · 760–1140px 两列 · &lt;760px 单列（触屏降级策略见第 4 页）。</span></div>
+    </div>
+  </div>
+
+  <div class="footline">课程书架设计稿 · stack idealjs</div>
+  <div class="pagenum">02 / 05</div>
+</div>
+
+<!-- ================= P3 卡片解剖 · 默认态与 Hover 态 ================= -->
+<div class="page">
+  <div class="pagehead">
+    <h2>02 卡片解剖 · 默认态 → 悬停态</h2>
+    <span class="sub">GIF 为动画，纸面以静帧 + 标注表达</span>
+  </div>
+
+  <!-- 左：默认态 -->
+  <div class="bigcard" style="left: 60px; top: 118px;">
+    <span class="spinebar"></span>
+    <div class="media"><span>▶</span> 悬停预览预期成果</div>
+    <div class="cbody">
+      <div class="crow">
+        <h3 class="ctitle">快速开始</h3>
+        <span class="cbadge badge done">✓ 已完成</span>
+      </div>
+      <p class="cdesc">写出第一个网页并在浏览器打开，跑起你的第一个 HTTP 服务器。</p>
+      <div class="chips"><span class="chip ghost">关联章节整理中</span></div>
+    </div>
+  </div>
+  <!-- 默认态标注（卡体 top130 · 媒体区130-346 · 标题行≈360 · 描述≈410 · chips≈462 · 卡底≈506） -->
+  <span class="pin" style="top: 205px; left: 466px;">1</span>
+  <span class="pin" style="top: 330px; left: 466px;">2</span>
+  <span class="pin" style="top: 330px; left: 44px;">3</span>
+  <span class="pin" style="top: 382px; left: 466px;">4</span>
+  <span class="pin" style="top: 424px; left: 466px;">5</span>
+  <span class="pin" style="top: 136px; left: 66px;">6</span>
+  <div class="legendbox" style="top: 486px; left: 60px; width: 384px;">
+    <div class="panel" style="padding: 12px 16px;">
+      <h3 style="margin-bottom: 6px;">默认态要素</h3>
+      <div class="note" style="margin-bottom: 4px;"><span class="idx">1</span><span class="txt"><b>媒体区占位</b>：16:9 深色底 + 播放提示，GIF 未加载，首屏零动图流量。</span></div>
+      <div class="note" style="margin-bottom: 4px;"><span class="idx">2</span><span class="txt"><b>标题</b>：章节名，即侧栏分类 label。</span></div>
+      <div class="note" style="margin-bottom: 4px;"><span class="idx">3</span><span class="txt"><b>完成徽标</b>：✓ 已完成 / 写作中，来自 courses.ts 的 done 字段。</span></div>
+      <div class="note" style="margin-bottom: 4px;"><span class="idx">4</span><span class="txt"><b>预期结果一句话</b>：desc 写「学完能做出什么」。</span></div>
+      <div class="note" style="margin-bottom: 0;"><span class="idx">5</span><span class="txt"><b>关系区</b>：关系列出前显示「整理中」，之后渲染 chips。</span></div>
+    </div>
+  </div>
+
+  <!-- 右：悬停态 -->
+  <div class="bigcard hovered" style="left: 700px; top: 118px;">
+    <span class="spinebar"></span>
+    <div class="media"><img src="assets/hello-world-frame.png" alt="GIF 播放中静帧"></div>
+    <div class="cbody">
+      <div class="crow">
+        <h3 class="ctitle">快速开始</h3>
+        <span class="cbadge badge done">✓ 已完成</span>
+      </div>
+      <p class="cdesc">写出第一个网页并在浏览器打开，跑起你的第一个 HTTP 服务器。</p>
+      <div class="chips"><span class="chip ghost">关联章节整理中</span></div>
+    </div>
+  </div>
+  <div class="legendbox" style="top: 486px; left: 700px; width: 384px;">
+    <div class="panel" style="padding: 12px 16px;">
+      <h3 style="margin-bottom: 6px;">悬停态变化</h3>
+      <div class="note" style="margin-bottom: 4px;"><span class="idx">6</span><span class="txt"><b>书脊高亮</b>：主题色竖条透明度 45% → 100%。</span></div>
+      <div class="note" style="margin-bottom: 4px;"><span class="idx">7</span><span class="txt"><b>GIF 挂载</b>：此刻才创建 &lt;img&gt;，按需加载并自动循环播放预期成果。</span></div>
+      <div class="note" style="margin-bottom: 0;"><span class="idx">8</span><span class="txt"><b>上浮 + 染色</b>：卡体上浮、阴影加深、描边与标题染主题色。</span></div>
+    </div>
+  </div>
+
+  <div class="footline">课程书架设计稿 · stack idealjs</div>
+  <div class="pagenum">03 / 05</div>
+</div>
+
+<!-- ================= P4 交互与资产 ================= -->
+<div class="page">
+  <div class="pagehead">
+    <h2>03 交互流程 · 触发矩阵 · GIF 资产规范</h2>
+    <span class="sub">预期成果 GIF = 靶子「预期结果」的非文字化</span>
+  </div>
+
+  <div style="position:absolute; top: 128px; left: 40px; right: 40px;">
+    <div class="panel" style="padding-bottom: 18px;">
+      <h3>悬停播放时序</h3>
+      <div class="flow">
+        <div class="step"><div class="s-no">STEP 1</div><div class="s-t">指针进入</div><div class="s-d">mouseenter / focus-visible 触发 previewing=true。</div></div>
+        <div class="step"><div class="s-no">STEP 2</div><div class="s-t">挂载 img</div><div class="s-d">此刻才渲染 GIF &lt;img&gt;，浏览器按需拉取，首屏不载动图。</div></div>
+        <div class="step"><div class="s-no">STEP 3</div><div class="s-t">循环播放</div><div class="s-d">GIF loop=0 自动循环，无播放控件，静音无声。</div></div>
+        <div class="step"><div class="s-no">STEP 4</div><div class="s-t">移出保持缓存</div><div class="s-d">mouseleave 卸载 &lt;img&gt;；HTTP 缓存仍在，再次悬停瞬时恢复。</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div style="position:absolute; top: 390px; left: 40px; width: 590px;">
+    <div class="panel">
+      <h3>触发矩阵</h3>
+      <table class="spec">
+        <tr><th>设备 / 输入</th><th>行为</th></tr>
+        <tr><td class="k">桌面 · 鼠标 hover</td><td>播放预览，移出停止；点击卡片进入章节。</td></tr>
+        <tr><td class="k">键盘 · Tab focus</td><td>与 hover 同态（可访问性），Enter 进入章节。</td></tr>
+        <tr><td class="k">触屏 · 无 hover</td><td>不做预览态；首次点击直接进入章节，避免误触消耗流量。</td></tr>
+        <tr><td class="k">弱网 / 关闭动图偏好</td><td>后续可选：prefers-reduced-motion 时不自动播放，显示静帧。</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div style="position:absolute; top: 390px; left: 662px; width: 578px;">
+    <div class="panel">
+      <h3>GIF 资产规范（6 张占位已入库）</h3>
+      <table class="spec">
+        <tr><th>项</th><th>约定</th></tr>
+        <tr><td class="k">尺寸 / 画幅</td><td>640 × 360 · 16:9 覆盖媒体区，object-fit: cover。</td></tr>
+        <tr><td class="k">时长与循环</td><td>3–8s · 无限循环（loop=0）· 无声。</td></tr>
+        <tr><td class="k">体积</td><td>单张 ≤ 300KB（当前占位 72–101KB）。</td></tr>
+        <tr><td class="k">命名替换</td><td>static/gifs/&lt;id&gt;.gif 同名覆盖即换片，零代码改动。</td></tr>
+        <tr><td class="k">内容口径</td><td>拍「学完后的真实产物」：浏览器里跑起来的页面、终端输出、可核对的结果。</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="footline">课程书架设计稿 · stack idealjs</div>
+  <div class="pagenum">04 / 05</div>
+</div>
+
+<!-- ================= P5 设计规范 ================= -->
+<div class="page">
+  <div class="pagehead">
+    <h2>04 设计 Tokens · 色板 / 字号 / 状态</h2>
+    <span class="sub">与组件 CourseShelf/styles.module.css 一一对应</span>
+  </div>
+
+  <div style="position:absolute; top: 122px; left: 40px; width: 560px;">
+    <div class="panel">
+      <h3>课程色板（书脊 / 徽标 / chips 主题色）</h3>
+      <div class="swatches">
+        <div class="swatch"><div class="c" style="background:#6366f1"></div><div class="n">快速开始</div><div class="h">#6366F1 indigo</div></div>
+        <div class="swatch"><div class="c" style="background:#ec4899"></div><div class="n">React</div><div class="h">#EC4899 pink</div></div>
+        <div class="swatch"><div class="c" style="background:#f59e0b"></div><div class="n">更多示例</div><div class="h">#F59E0B amber</div></div>
+        <div class="swatch"><div class="c" style="background:#10b981"></div><div class="n">更多</div><div class="h">#10B981 emerald</div></div>
+        <div class="swatch"><div class="c" style="background:#0ea5e9"></div><div class="n">全栈基础</div><div class="h">#0EA5E9 sky</div></div>
+        <div class="swatch"><div class="c" style="background:#8b5cf6"></div><div class="n">高级教程</div><div class="h">#8B5CF6 violet</div></div>
+      </div>
+      <div style="margin-top: 16px;" class="rule"></div>
+      <table class="spec" style="margin-top: 12px;">
+        <tr><th>中性色</th><th>值</th></tr>
+        <tr><td class="k">标题 / 正文 / 弱文字</td><td>#0F172A · #334155 · #64748B（slate 900/700/500）</td></tr>
+        <tr><td class="k">边框 / 页底</td><td>#E2E8F0 · 背景白卡 #FFFFFF 页底 #F8FAFC</td></tr>
+        <tr><td class="k">完成 / 写作中徽标</td><td>字 #047857/#92400E · 底 #D1FAE5/#FEF3C7（暗色主题见组件）</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div style="position:absolute; top: 122px; left: 640px; width: 600px;">
+    <div class="panel">
+      <h3>字号 · 间距 · 圆角</h3>
+      <table class="spec">
+        <tr><th>Token</th><th>值</th><th>用途</th></tr>
+        <tr><td class="k">卡标题</td><td>16.8px / 700</td><td>卡片标题行</td></tr>
+        <tr><td class="k">卡描述</td><td>14.4px / 1.6</td><td>预期结果一句话</td></tr>
+        <tr><td class="k">徽标 / chips</td><td>11.5px</td><td>done 徽标与关系 chips</td></tr>
+        <tr><td class="k">网格间距 / 内边距</td><td>20px / 16·18·20px</td><td>grid gap / 卡内边距</td></tr>
+        <tr><td class="k">圆角</td><td>卡 12px · 媒体区随卡 · chips 999px</td><td>通用</td></tr>
+        <tr><td class="k">书脊</td><td>宽 4px，透明度 45%→100%</td><td>左缘主题色条</td></tr>
+      </table>
+    </div>
+    <div class="panel" style="margin-top: 16px;">
+      <h3 style="margin-bottom: 12px; border:none; padding-bottom: 0;">状态示意</h3>
+      <div style="display:flex; gap: 24px; align-items:flex-start;">
+        <div class="statecard" style="flex:none;"><div class="m"></div><div class="t">default</div></div>
+        <div class="statecard hov" style="flex:none;"><div class="m"></div><div class="t">hover / focus</div></div>
+      </div>
+      <div style="margin-top: 12px; font-size:12.5px; color:#475569; line-height:1.7;">
+        hover / focus-visible：卡体上浮，阴影加深至 0 6px 20px，边框与标题染主题色，书脊透明度升至 100%。键盘 Tab 与鼠标悬停共享同一态。
+      </div>
+    </div>
+  </div>
+
+  <div class="footline">课程书架设计稿 · stack idealjs · 关系 relations 待产品列出后填充 courses.ts</div>
+  <div class="pagenum">05 / 05</div>
+</div>
+
+</body>
+</html>

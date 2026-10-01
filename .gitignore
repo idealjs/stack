@@ -31,3 +31,4 @@ yarn-error.log*
 
 # ZCode local config
 .zcodeignore
+design-refs/mockup/single/
