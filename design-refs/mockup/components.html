@@ -661,25 +661,26 @@
   <div class="story-head">
     <span class="tag">&lt;CourseGraph /&gt;</span>
     <h2>课程路线图 · 线条是构件</h2>
-    <div class="desc">路线的最小构件是线条：直段 / 圆角转角 / 弧线步进 / 分流岔口 / 汇合 / 站点，弯道皆圆弧。CourseCard 由路线串联：岔口分流、弧线并线——网状关系在路线内可读。</div>
+    <div class="desc">路线的最小构件是线条：直段 / 圆角转角 / 直角步进 / 分流岔口 / 汇合 / 站点，横平竖直。CourseCard 由路线串联：岔口分流、并线前进——网状关系在路线内可读。</div>
   </div>
 
   <!-- 组合：CourseCard 之间的路线（双圆弧步进，无斜线） -->
   <div class="canvas" style="top: 138px; left: 40px; width: 880px; height: 330px; padding: 0;">
     <svg class="gedges" width="880" height="330" viewBox="0 0 880 330">
       <path class="edge" d="M 4 165 H 16"/>
-      <path class="edge" d="M 248 165 H 251"/>
-      <path class="edge" d="M 251 165 A 35 35 0 0 0 286 130 A 35 35 0 0 1 321 95  H 324"/>
-      <path class="edge" d="M 251 165 A 35 35 0 0 1 286 200 A 35 35 0 0 0 321 235 H 324"/>
-      <path class="edge" d="M 556 95  H 559 A 35 35 0 0 1 594 130 A 35 35 0 0 0 629 165 H 632"/>
-      <path class="edge" d="M 556 235 H 559 A 35 35 0 0 0 594 200 A 35 35 0 0 1 629 165 H 632"/>
+      <path class="edge" d="M 248 165 H 266"/>
+      <path class="edge" d="M 266 165 A 8 8 0 0 0 274 157 V 103 A 8 8 0 0 1 282 95  H 324"/>
+      <path class="edge" d="M 266 165 A 8 8 0 0 1 274 173 V 227 A 8 8 0 0 0 282 235 H 324"/>
+      <path class="edge" d="M 556 95  H 588 A 8 8 0 0 1 596 103 V 157 A 8 8 0 0 0 604 165 H 632"/>
+      <path class="edge" d="M 556 235 H 588 A 8 8 0 0 0 596 227 V 173 A 8 8 0 0 1 604 165 H 632"/>
       <path class="edge" d="M 864 165 H 876"/>
       <circle class="station" cx="4"   cy="165" r="2.8"/>
-      <circle class="station" cx="286" cy="130" r="2.8"/>
-      <circle class="station" cx="286" cy="200" r="2.8"/>
-      <circle class="station" cx="594" cy="130" r="2.8"/>
-      <circle class="station" cx="594" cy="200" r="2.8"/>
-      <circle class="station" cx="631" cy="165" r="2.8"/>
+      <circle class="station" cx="266" cy="165" r="2.8"/>
+      <circle class="station" cx="276" cy="130" r="2.8"/>
+      <circle class="station" cx="276" cy="200" r="2.8"/>
+      <circle class="station" cx="596" cy="130" r="2.8"/>
+      <circle class="station" cx="596" cy="200" r="2.8"/>
+      <circle class="station" cx="604" cy="165" r="2.8"/>
       <circle class="station" cx="871" cy="165" r="2.8"/>
     </svg>
     <div class="rcard" style="left:16px; top:81px;">
@@ -701,7 +702,7 @@
       <div class="rt"><span class="icotile" style="background:#d1fae5;">📦</span><b>更多</b><span class="st done">✓</span></div>
     </div>
     <div style="position:absolute; right:14px; top:262px; font-size:11px; color:#6b6b6b;">→ 下一程：全栈基础 🔒 · ③ 高级教程</div>
-    <div style="position:absolute; right:12px; top:10px; font-size:11px; color:#6b6b6b;">分流 ×1 · 弧线并线 ×2 · 站点 ×7</div>
+    <div style="position:absolute; right:12px; top:10px; font-size:11px; color:#6b6b6b;">分流 ×1 · 并线 ×2 · 站点 ×8</div>
   </div>
 
   <!-- 构件：线条组件六原语（弯道皆圆弧） -->
@@ -713,19 +714,19 @@
         <div class="vlabel"><b>segment</b> · 直段</div>
       </div>
       <div class="linecard">
-        <svg width="240" height="52" viewBox="0 0 240 52"><path class="edge" d="M 20 42 H 96 A 16 16 0 0 0 112 26 V 8"/><circle class="station" cx="20" cy="42" r="2.8"/><circle class="station" cx="112" cy="8" r="2.8"/></svg>
+        <svg width="240" height="52" viewBox="0 0 240 52"><path class="edge" d="M 20 42 H 90 A 8 8 0 0 0 98 34 V 8"/><circle class="station" cx="20" cy="42" r="2.8"/><circle class="station" cx="98" cy="8" r="2.8"/></svg>
         <div class="vlabel"><b>elbow</b> · 圆角转角</div>
       </div>
       <div class="linecard">
-        <svg width="240" height="52" viewBox="0 0 240 52"><path class="edge" d="M 30 42 H 33 A 16 16 0 0 0 49 26 A 16 16 0 0 1 65 10 H 220"/><circle class="station" cx="30" cy="42" r="2.8"/><circle class="station" cx="49" cy="26" r="2.8"/><circle class="station" cx="220" cy="10" r="2.8"/></svg>
-        <div class="vlabel"><b>arc</b> · 弧线步进</div>
+        <svg width="240" height="52" viewBox="0 0 240 52"><path class="edge" d="M 30 42 H 60 A 8 8 0 0 0 68 34 V 18 A 8 8 0 0 1 76 10 H 220"/><circle class="station" cx="30" cy="42" r="2.8"/><circle class="station" cx="68" cy="26" r="2.8"/><circle class="station" cx="220" cy="10" r="2.8"/></svg>
+        <div class="vlabel"><b>step</b> · 直角步进</div>
       </div>
       <div class="linecard">
-        <svg width="240" height="52" viewBox="0 0 240 52"><path class="edge" d="M 20 26 H 60"/><path class="edge" d="M 60 26 A 10 10 0 0 0 70 16 A 10 10 0 0 1 80 6 H 220"/><path class="edge" d="M 60 26 A 10 10 0 0 1 70 36 A 10 10 0 0 0 80 46 H 220"/><circle class="station" cx="60" cy="26" r="2.8"/></svg>
+        <svg width="240" height="52" viewBox="0 0 240 52"><path class="edge" d="M 20 26 H 54"/><path class="edge" d="M 54 26 A 6 6 0 0 0 60 20 V 14 A 6 6 0 0 1 66 8 H 220"/><path class="edge" d="M 54 26 A 6 6 0 0 1 60 32 V 38 A 6 6 0 0 0 66 44 H 220"/><circle class="station" cx="54" cy="26" r="2.8"/></svg>
         <div class="vlabel"><b>fork</b> · 分流岔口</div>
       </div>
       <div class="linecard">
-        <svg width="240" height="52" viewBox="0 0 240 52"><path class="edge" d="M 20 6 H 150 A 10 10 0 0 1 160 16 A 10 10 0 0 0 170 26 H 220"/><path class="edge" d="M 20 46 H 150 A 10 10 0 0 0 160 36 A 10 10 0 0 1 170 26"/><circle class="station" cx="170" cy="26" r="2.8"/></svg>
+        <svg width="240" height="52" viewBox="0 0 240 52"><path class="edge" d="M 20 8 H 144 A 6 6 0 0 1 150 14 V 20 A 6 6 0 0 0 156 26 H 220"/><path class="edge" d="M 20 44 H 144 A 6 6 0 0 0 150 38 V 32 A 6 6 0 0 1 156 26 H 220"/><circle class="station" cx="156" cy="26" r="2.8"/></svg>
         <div class="vlabel"><b>merge</b> · 汇合并线</div>
       </div>
       <div class="linecard">
@@ -739,9 +740,9 @@
     <h3 style="margin-bottom:8px;">Args</h3>
     <table class="spec tight">
       <tr><th>Prop</th><th>类型</th><th>说明</th></tr>
-      <tr><td class="k"><code>path</code></td><td>Segment[]</td><td>直段/转角/曲线序列</td></tr>
+      <tr><td class="k"><code>path</code></td><td>Segment[]</td><td>直段/转角/步进序列</td></tr>
       <tr><td class="k"><code>forks</code></td><td>Fork[]</td><td>分流岔口（分出车道）</td></tr>
-      <tr><td class="k"><code>merges</code></td><td>Merge[]</td><td>曲线并线点</td></tr>
+      <tr><td class="k"><code>merges</code></td><td>Merge[]</td><td>直角并线点</td></tr>
       <tr><td class="k"><code>stations</code></td><td>Node[]</td><td>站点圆点，锚定卡间槽</td></tr>
       <tr><td class="k"><code>status</code></td><td>无 prop</td><td>不在图上编码</td></tr>
     </table>
@@ -750,8 +751,8 @@
     <h3 style="margin-bottom:6px;">设计原则</h3>
     <div class="note" style="margin-bottom:4px;"><span class="idx">1</span><span class="txt"><b>线只管顺序</b>：状态交给卡片 ✓ / 🔒。</span></div>
     <div class="note" style="margin-bottom:4px;"><span class="idx">2</span><span class="txt"><b>背景级线条</b>：鼠尾草绿 <code>#A2B49B</code> · 1.4px · 划隙 4:2；站点 <code>#758C72</code> 深一档，直径 ≈ 4× 线宽。</span></div>
-    <div class="note" style="margin-bottom:4px;"><span class="idx">3</span><span class="txt"><b>弯道皆圆弧</b>：所有转折由双圆弧步进（R35×2）完成，全图无斜线。</span></div>
-    <div class="note" style="margin-bottom:4px;"><span class="idx">4</span><span class="txt"><b>岔口即分支</b>：快速开始分流出 React 线与示例线，在「更多」弧线并线。</span></div>
+    <div class="note" style="margin-bottom:4px;"><span class="idx">3</span><span class="txt"><b>横平竖直</b>：走向只有水平与垂直，转折用小圆角 R8，全图无斜线。</span></div>
+    <div class="note" style="margin-bottom:4px;"><span class="idx">4</span><span class="txt"><b>岔口即分支</b>：快速开始分流出 React 线与示例线，在「更多」并线。</span></div>
     <div class="note" style="margin-bottom:0;"><span class="idx">5</span><span class="txt">顺序为<b>示例占位</b>，填 courses.ts 自动更新。</span></div>
   </div>
 
