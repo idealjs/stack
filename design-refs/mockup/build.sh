@@ -8,6 +8,13 @@ cd "$(dirname "$0")"
 PDF_SKILL_DIR="${PDF_SKILL_DIR:-$HOME/.zcode/cli/plugins/cache/zcode-plugins-official/pdf/0.1.7/skills/pdf}"
 export PDF_SKILL_DIR
 
+# 本地渲染器（固定 headless-shell 规避系统 Chrome 占用；TMPDIR 重定向规避 /tmp 磁盘配额）
+HTML2POSTER="$PWD/tools/html2poster.js"
+H2P_CHROMIUM="${H2P_CHROMIUM:-$HOME/.cache/ms-playwright/chromium_headless_shell-1234/chrome-headless-shell-linux64/chrome-headless-shell}"
+export HTML2POSTER H2P_CHROMIUM
+mkdir -p "$HOME/.cache/h2p-tmp"
+export TMPDIR="$HOME/.cache/h2p-tmp"
+
 STEMS=("$@")
 if [ ${#STEMS[@]} -eq 0 ]; then
   STEMS=(course-shelf components)
@@ -45,7 +52,7 @@ out_dir = sys.argv[1]
 pages = sorted(glob.glob(f"{out_dir}/page-*.html"), key=lambda p: int(re.search(r"(\d+)", os.path.basename(p)).group(1)))
 for p in pages:
     out = p.replace(".html", ".pdf")
-    subprocess.run(["node", f"{os.environ['PDF_SKILL_DIR']}/scripts/html2poster.js", p, "--output", out, "--width", "1280px"], check=True, capture_output=True)
+    subprocess.run(["node", os.environ['HTML2POSTER'], p, "--output", out, "--width", "1280px"], check=True, capture_output=True)
 print(f"[{out_dir}] rendered {len(pages)} pages")
 EOF
 
