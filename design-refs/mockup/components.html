@@ -163,11 +163,45 @@
   .ev .r3 { font-size: 9.5px; color: #6b6b6b; }
 
   /* P1 目录卡 */
-  .toc-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+  .toc-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; }
   .toc-card { background: #fff; border-radius: 14px; padding: 14px 16px; box-shadow: 0 1px 2px rgba(26,26,26,0.06); }
   .toc-card .t { font-family: "DejaVu Sans Mono", monospace; font-size: 13.5px; font-weight: 700; color: #6d28d9; }
   .toc-card .c { font-size: 12.5px; font-weight: 700; color: #1a1a1a; margin-top: 3px; }
   .toc-card .d { font-size: 11px; color: #8a8a8a; margin-top: 3px; line-height: 1.45; }
+  /* P7 课程关系图 */
+  .gnode {
+    position: absolute; width: 180px; height: 46px;
+    background: #ffffff; border-radius: 12px;
+    display: flex; align-items: center; gap: 9px; padding: 0 14px;
+    box-shadow: 0 1px 2px rgba(26,26,26,0.10);
+  }
+  .gnode .t { font-size: 13px; font-weight: 700; color: #1a1a1a; }
+  .entry-badge {
+    position: absolute; top: -10px; left: -10px;
+    width: 22px; height: 22px; border-radius: 50%;
+    background: #6366f1; color: #ffffff; font-size: 12px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .gedges { position: absolute; inset: 0; pointer-events: none; }
+  .glegend { display: flex; gap: 22px; font-size: 12px; color: #555; align-items: center; }
+  .glegend .sw { display: inline-block; width: 34px; border-top: 2px solid #555; margin-right: 6px; vertical-align: middle; }
+  .glegend .sw.rel { border-top-style: dashed; border-top-color: #b9b9b9; }
+
+  /* P8 入口梳理 */
+  .profile-card {
+    background: #ffffff; border-radius: 16px; padding: 18px 20px;
+    width: 368px; display: flex; flex-direction: column; gap: 11px;
+    box-shadow: 0 1px 2px rgba(26,26,26,0.06);
+  }
+  .profile-card .ph { display: flex; align-items: center; gap: 10px; }
+  .path-chips { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+  .path-chips .arr { color: #8a8a8a; font-size: 11px; }
+  .path-chips .pchip { font-size: 11px; padding: 3px 10px; border-radius: 999px; border: 1px solid #cfcfcd; color: #1a1a1a; background: #ffffff; }
+  .path-chips .pchip.start { border-color: #6366f1; color: #6366f1; font-weight: 700; }
+  table.spec.tight { font-size: 12px; }
+  table.spec.tight th { padding: 4px 10px 4px 0; }
+  table.spec.tight td { padding: 3px 10px 3px 0; }
+
 </style>
 </head>
 <body>
@@ -182,8 +216,8 @@
   <div style="position:absolute; top: 110px; left: 80px; font-size:15px; letter-spacing:4px; font-weight:500; color:#6b6b6b;">STACK IDEALJS · 全栈工程师教程</div>
   <h1 style="position:absolute; top: 158px; left: 80px; margin:0; font-size:74px; line-height:1.15; font-weight:800; color:#1a1a1a;">组件设计稿 · Storybook 拆分</h1>
   <div style="position:absolute; top: 280px; left: 80px; font-size:18px; color:#555; line-height:1.7;">
-    整页设计稿（course-shelf v2）拆解为 8 个可独立实现与验收的组件，每组件一页：变体展示 + Args 表 + 规格。<br>
-    组件即实现单元：Docusaurus 侧按组件对应文件落码，Storybook 页即验收清单。
+    整页设计稿（course-shelf v2）拆解为 10 个可独立实现与验收的组件、9 页 stories：变体展示 + Args 表 + 规格。<br>
+    组件即实现单元：Docusaurus 侧按组件对应文件落码，每页 stories 即验收清单。
   </div>
   <div style="position:absolute; top: 408px; left: 80px; right: 80px;" class="toc-grid">
     <div class="toc-card"><div class="t">&lt;TopBar /&gt;</div><div class="c">黑顶栏</div><div class="d">logo · 菜单 · 当前项高亮 · 🔔 · 头像</div></div>
@@ -193,17 +227,19 @@
     <div class="toc-card"><div class="t">&lt;CourseCard /&gt;</div><div class="c">课程白卡</div><div class="d">图标 · 标题 · 预期一句话 · 状态 · 按钮</div></div>
     <div class="toc-card"><div class="t">&lt;CourseCardMedia /&gt;</div><div class="c">悬停媒体卡</div><div class="d">淡彩底 + 播放钮 + ⏱ GIF 循环</div></div>
     <div class="toc-card"><div class="t">&lt;EventsPanel /&gt;</div><div class="c">事件栏</div><div class="d">彩色条目：类型 · 日期 · 描述 · 时间</div></div>
+    <div class="toc-card"><div class="t">&lt;CourseGraph /&gt;</div><div class="c">课程关系图</div><div class="d">前置实线 · 关联虚线 · 入口 ①②③</div></div>
+    <div class="toc-card"><div class="t">&lt;EntryGuide /&gt;</div><div class="c">入口梳理</div><div class="d">读者画像 → 起点与路径</div></div>
     <div class="toc-card"><div class="t">Atoms</div><div class="c">原子组件</div><div class="d">Pill · CircleButton · Chip · IconTile</div></div>
   </div>
   <div style="position:absolute; bottom: 78px; left: 80px; display:flex; gap:14px;">
-    <div class="stat" style="background:#c9e7f7;"><span class="num">8</span><span class="lab">Components · 组件</span></div>
-    <div class="stat" style="background:#d2f5df;"><span class="num">7</span><span class="lab">Stories · 页</span></div>
+    <div class="stat" style="background:#c9e7f7;"><span class="num">10</span><span class="lab">Components · 组件</span></div>
+    <div class="stat" style="background:#d2f5df;"><span class="num">9</span><span class="lab">Stories · 页</span></div>
     <div class="stat" style="background:#efe6fb;"><span class="num">6</span><span class="lab">Variants · 课程变体</span></div>
   </div>
-  <div style="position:absolute; bottom: 40px; right: 80px; text-align:right; font-size:14px; color:#8a8a8a; line-height:1.8;">
+  <div style="position:absolute; bottom: 62px; right: 80px; text-align:right; font-size:14px; color:#8a8a8a; line-height:1.8;">
     v2.1 · 2026-10 · 派生自 course-shelf v2<br>复刻视觉：Learning Plan Dashboard（仅风格参考）
   </div>
-  <div class="pagenum">01 / 07</div>
+  <div class="pagenum">01 / 09</div>
 </div>
 
 <!-- ================= P2 TopBar · IconRail · SearchPill ================= -->
@@ -274,7 +310,7 @@
   </div>
 
   <div class="footline">组件设计稿 · Storybook 拆分 · stack idealjs</div>
-  <div class="pagenum">02 / 07</div>
+  <div class="pagenum">02 / 09</div>
 </div>
 
 <!-- ================= P3 Atoms：Pill · CircleButton · Chip · IconTile ================= -->
@@ -344,7 +380,7 @@
   </div>
 
   <div class="footline">组件设计稿 · Storybook 拆分 · stack idealjs</div>
-  <div class="pagenum">03 / 07</div>
+  <div class="pagenum">03 / 09</div>
 </div>
 
 <!-- ================= P4 CourseCard ================= -->
@@ -372,7 +408,7 @@
           <div class="icorow"><span class="icotile" style="background:#fce7f3;">⚛️</span></div>
           <div class="ttl">快速开始 React</div>
           <div class="dsc">用脚手架创建 React 应用，亲手拼出第一个 Todo List。</div>
-          <div class="chips"><span class="chip">前置：快速开始</span></div>
+          <div class="chips"><span class="chip">前置：快速开始</span><span class="chip" style="border-style:dashed;">关联：更多示例</span></div>
           <div class="btm"><span class="pill done">✓ Completed 🎉</span><span class="cbtn">✓</span></div>
         </div>
         <div class="vlabel"><b>hello-react</b></div>
@@ -394,7 +430,7 @@
           <div class="icorow"><span class="icotile" style="background:#d1fae5;">📦</span></div>
           <div class="ttl">更多</div>
           <div class="dsc">把示例工程构建为可发布产物，看清 build 做了什么。</div>
-          <div class="chips"><span class="chip">前置：更多示例</span></div>
+          <div class="chips"><span class="chip">前置：快速开始 React</span></div>
           <div class="btm"><span class="pill done">✓ Completed 🎉</span><span class="cbtn">✓</span></div>
         </div>
         <div class="vlabel"><b>more</b></div>
@@ -422,28 +458,29 @@
     </div>
   </div>
 
-  <div style="position:absolute; top: 148px; left: 948px; width: 292px;">
-    <div class="panel">
+  <div style="position:absolute; top: 140px; left: 948px; width: 292px;">
+    <div class="panel" style="padding:14px 18px;">
       <h3>Args</h3>
-      <table class="spec">
+      <table class="spec tight">
         <tr><th>Prop</th><th>类型</th><th>说明</th></tr>
         <tr><td class="k"><code>title</code></td><td>string</td><td>章节名（分类 label）</td></tr>
         <tr><td class="k"><code>desc</code></td><td>string</td><td>预期结果一句话</td></tr>
         <tr><td class="k"><code>done</code></td><td>boolean</td><td>true → ✓ 胶囊 + ✓ 钮</td></tr>
-        <tr><td class="k"><code>relations</code></td><td>string[]</td><td>空 → 虚线占位 chip</td></tr>
+        <tr><td class="k"><code>prerequisites</code></td><td>string[]</td><td>前置章节 → 实线 chip + 图中实线边</td></tr>
+        <tr><td class="k"><code>related</code></td><td>string[]</td><td>关联章节 → 虚线 chip + 图中虚线边</td></tr>
         <tr><td class="k"><code>icon / tint</code></td><td>emoji / hex</td><td>IconTile 底色与图标</td></tr>
         <tr><td class="k"><code>href</code></td><td>string</td><td>章节分类索引路由</td></tr>
       </table>
     </div>
-    <div class="panel" style="margin-top: 12px;">
+    <div class="panel" style="margin-top: 12px; padding:14px 18px;">
       <h3>交互</h3>
-      <div class="note"><span class="idx">1</span><span class="txt">整卡可点 → 进入章节；hover 切换为 <b>&lt;CourseCardMedia /&gt;</b>（见下页）。</span></div>
-      <div class="note"><span class="idx">2</span><span class="txt">Tab focus 与 hover 同态；触屏无预览态。</span></div>
+      <div class="note" style="margin-bottom:4px;"><span class="idx">1</span><span class="txt">整卡可点 → 进入章节；hover 切换为 <b>&lt;CourseCardMedia /&gt;</b>（见下页）。</span></div>
+      <div class="note" style="margin-bottom:0;"><span class="idx">2</span><span class="txt">Tab focus 与 hover 同态；触屏无预览态。</span></div>
     </div>
   </div>
 
   <div class="footline">组件设计稿 · Storybook 拆分 · stack idealjs</div>
-  <div class="pagenum">04 / 07</div>
+  <div class="pagenum">04 / 09</div>
 </div>
 
 <!-- ================= P5 CourseCardMedia ================= -->
@@ -503,7 +540,7 @@
   </div>
 
   <div class="footline">组件设计稿 · Storybook 拆分 · stack idealjs</div>
-  <div class="pagenum">05 / 07</div>
+  <div class="pagenum">05 / 09</div>
 </div>
 
 <!-- ================= P6 StatsRow · EventsPanel ================= -->
@@ -582,7 +619,133 @@
   </div>
 
   <div class="footline">组件设计稿 · Storybook 拆分 · stack idealjs</div>
-  <div class="pagenum">06 / 07</div>
+  <div class="pagenum">06 / 09</div>
+</div>
+
+<!-- ================= P7 CourseGraph 课程关系图 ================= -->
+<div class="page">
+  <div class="story-head">
+    <span class="tag">&lt;CourseGraph /&gt;</span>
+    <h2>课程关系图 · 知识是网，不是线</h2>
+    <div class="desc">节点 = 章节卡；实线箭头 = 前置（prerequisites）；虚线 = 关联（related）；①②③ = 读者入口。</div>
+  </div>
+
+  <div class="canvas" style="top: 146px; left: 40px; width: 1200px; height: 380px;">
+    <div class="gwrap" style="position:absolute; inset:0;">
+      <svg class="gedges" width="1200" height="380" viewBox="0 0 1200 380">
+        <defs>
+          <marker id="arrPre" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#555"/></marker>
+          <marker id="arrRel" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#b9b9b9"/></marker>
+        </defs>
+        <line x1="230" y1="190" x2="314" y2="76"  stroke="#555" stroke-width="2" marker-end="url(#arrPre)"/>
+        <line x1="230" y1="196" x2="314" y2="308" stroke="#555" stroke-width="2" marker-end="url(#arrPre)"/>
+        <line x1="500" y1="80"  x2="594" y2="300" stroke="#555" stroke-width="2" marker-end="url(#arrPre)"/>
+        <line x1="500" y1="73"  x2="874" y2="73"  stroke="#555" stroke-width="2" marker-end="url(#arrPre)"/>
+        <line x1="740" y1="286" x2="940" y2="102" stroke="#555" stroke-width="2" marker-end="url(#arrPre)"/>
+        <line x1="970" y1="100" x2="970" y2="284" stroke="#555" stroke-width="2" marker-end="url(#arrPre)"/>
+        <line x1="504" y1="313" x2="594" y2="313" stroke="#b9b9b9" stroke-width="2" stroke-dasharray="6 5" marker-end="url(#arrRel)"/>
+      </svg>
+      <div class="gnode" style="left:50px; top:170px;"><span class="entry-badge">①</span><span class="icotile" style="background:#e0e7ff;">🌐</span><span class="t">快速开始</span></div>
+      <div class="gnode" style="left:320px; top:50px;"><span class="entry-badge">②</span><span class="icotile" style="background:#fce7f3;">⚛️</span><span class="t">快速开始 React</span></div>
+      <div class="gnode" style="left:320px; top:290px;"><span class="icotile" style="background:#fef3c7;">🧱</span><span class="t">更多示例</span></div>
+      <div class="gnode" style="left:600px; top:290px;"><span class="icotile" style="background:#d1fae5;">📦</span><span class="t">更多</span></div>
+      <div class="gnode" style="left:880px; top:50px;"><span class="icotile" style="background:#e0f2fe;">🔗</span><span class="t">全栈基础</span></div>
+      <div class="gnode" style="left:880px; top:290px;"><span class="entry-badge">③</span><span class="icotile" style="background:#ede9fe;">🧠</span><span class="t">高级教程</span></div>
+      <div class="glegend" style="position:absolute; left:24px; bottom:14px;">
+        <span><span class="sw"></span>前置 prerequisites</span>
+        <span><span class="sw rel"></span>关联 related</span>
+        <span style="color:#6366f1; font-weight:700;">①②③</span><span>读者入口（见下页）</span>
+      </div>
+    </div>
+  </div>
+
+  <div style="position:absolute; top: 544px; left: 40px; width: 590px;" class="panel">
+    <h3>Args</h3>
+    <table class="spec tight">
+      <tr><th>Prop</th><th>类型</th><th>说明</th></tr>
+      <tr><td class="k"><code>nodes</code></td><td>Course[]</td><td>直接取 courses.ts，渲染为迷你章节卡</td></tr>
+      <tr><td class="k"><code>edges.prerequisites</code></td><td>[from,to][]</td><td>实线箭头，由每章 prerequisites 派生</td></tr>
+      <tr><td class="k"><code>edges.related</code></td><td>[from,to][]</td><td>虚线，由 related 派生</td></tr>
+      <tr><td class="k"><code>entryPoints</code></td><td>Entry[]</td><td>①②③ 入口徽标，数据见 EntryGuide</td></tr>
+    </table>
+  </div>
+  <div style="position:absolute; top: 544px; left: 662px; width: 578px;" class="panel">
+    <h3 style="margin-bottom:6px;">为什么要关系图（skill 依据）</h3>
+    <div class="note" style="margin-bottom:4px;"><span class="idx">1</span><span class="txt"><b>知识是网状</b>：有前置也有旁路，线性目录会掩盖它。</span></div>
+    <div class="note" style="margin-bottom:4px;"><span class="idx">2</span><span class="txt"><b>教程是索引</b>：图让「我在哪、缺哪块」一眼可见。</span></div>
+    <div class="note" style="margin-bottom:4px;"><span class="idx">3</span><span class="txt"><b>入口不锁死</b>：③ 直达是合法路径（skill 死原则）。</span></div>
+    <div class="note" style="margin-bottom:0;"><span class="idx">4</span><span class="txt">关系现为<b>示例占位</b>；正式关系填 courses.ts 后图自动更新。卡片 chips 与边一一对应：前置实线、关联虚线。</span></div>
+  </div>
+
+  <div class="footline">组件设计稿 · Storybook 拆分 · stack idealjs</div>
+  <div class="pagenum">07 / 09</div>
+</div>
+
+<!-- ================= P8 EntryGuide 入口梳理 ================= -->
+<div class="page">
+  <div class="story-head">
+    <span class="tag">&lt;EntryGuide /&gt;</span>
+    <h2>入口梳理 · 按读者画像推荐起点</h2>
+    <div class="desc">三类读者三种入口：路径是推荐不是强制；起点章节高亮，沿途章节排成路径 chips。</div>
+  </div>
+
+  <div class="canvas" style="top: 146px; left: 40px; width: 1200px; height: 300px;">
+    <div class="vrow" style="gap: 20px;">
+      <div class="profile-card">
+        <div class="ph"><span class="icotile" style="background:#e0e7ff;">🌱</span><span style="font-size:16px; font-weight:800; color:#1a1a1a;">零基础入门</span></div>
+        <div><span class="pill done" style="font-size:12px;">入口 ① 快速开始</span></div>
+        <div class="path-chips">
+          <span class="pchip start">快速开始</span><span class="arr">→</span>
+          <span class="pchip">React</span><span class="arr">→</span>
+          <span class="pchip">更多示例</span><span class="arr">→</span>
+          <span class="pchip">更多</span><span class="arr">→</span>
+          <span class="pchip">全栈基础</span><span class="arr">→</span>
+          <span class="pchip">高级教程</span>
+        </div>
+        <div style="font-size:12.5px; color:#555; line-height:1.65;">完整链按序走；每步先核对验收产物再前进，认知基础必须在真机跑通。</div>
+      </div>
+      <div class="profile-card">
+        <div class="ph"><span class="icotile" style="background:#fce7f3;">⚛️</span><span style="font-size:16px; font-weight:800; color:#1a1a1a;">写过页面 · 有前端经验</span></div>
+        <div><span class="pill done" style="font-size:12px;">入口 ② 快速开始 React</span></div>
+        <div class="path-chips">
+          <span class="pchip start">React</span><span class="arr">→</span>
+          <span class="pchip">更多</span><span class="arr">→</span>
+          <span class="pchip">全栈基础</span><span class="arr">→</span>
+          <span class="pchip">高级教程</span>
+        </div>
+        <div style="font-size:12.5px; color:#555; line-height:1.65;">「快速开始」降级为查漏清单：实践过的部分直接跳过，撞到陌生积木再回看。</div>
+      </div>
+      <div class="profile-card">
+        <div class="ph"><span class="icotile" style="background:#ede9fe;">🧠</span><span style="font-size:16px; font-weight:800; color:#1a1a1a;">在职补工程思维</span></div>
+        <div><span class="pill done" style="font-size:12px;">入口 ③ 高级教程</span></div>
+        <div class="path-chips">
+          <span class="pchip start">高级教程</span>
+          <span class="pchip">专题按需点读</span>
+        </div>
+        <div style="font-size:12.5px; color:#555; line-height:1.65;">数据流 / 纯函数 / CAP 按需取用；缺上下文时回看「全栈基础」，真机验收不可代劳。</div>
+      </div>
+    </div>
+  </div>
+
+  <div style="position:absolute; top: 480px; left: 40px; width: 590px;" class="panel">
+    <h3>Args</h3>
+    <table class="spec tight">
+      <tr><th>Prop</th><th>类型</th><th>说明</th></tr>
+      <tr><td class="k"><code>profiles[].name</code></td><td>string</td><td>读者画像名</td></tr>
+      <tr><td class="k"><code>profiles[].entry</code></td><td>courseId</td><td>起点章节，对应图中 ①②③</td></tr>
+      <tr><td class="k"><code>profiles[].path</code></td><td>courseId[]</td><td>推荐路径（可空 = 按需点读）</td></tr>
+      <tr><td class="k"><code>profiles[].note</code></td><td>string</td><td>跳读/回看策略一句话</td></tr>
+    </table>
+  </div>
+  <div style="position:absolute; top: 480px; left: 662px; width: 578px;" class="panel">
+    <h3>入口梳理原则</h3>
+    <div class="note"><span class="idx">1</span><span class="txt"><b>路径非强制</b>：推荐序列只做导航，不设锁——任何章节始终可进（skill 死原则）。</span></div>
+    <div class="note"><span class="idx">2</span><span class="txt"><b>与 CourseGraph 共用数据</b>：entries 与图上的入口徽标同源，改一处两处同步。</span></div>
+    <div class="note"><span class="idx">3</span><span class="txt">画像数据入 <b>entries.ts</b>；后续可由读者自选画像并高亮其路径。</span></div>
+  </div>
+
+  <div class="footline">组件设计稿 · Storybook 拆分 · stack idealjs</div>
+  <div class="pagenum">08 / 09</div>
 </div>
 
 <!-- ================= P7 Dashboard 组装 ================= -->
@@ -654,7 +817,7 @@
   <div style="position:absolute; top: 146px; left: 872px; width: 368px;">
     <div class="panel">
       <h3>组件树（实现映射）</h3>
-      <table class="spec">
+      <table class="spec tight">
         <tr><th>设计组件</th><th>实现文件</th></tr>
         <tr><td class="k">DashboardPage</td><td><code>pages/index.tsx</code></td></tr>
         <tr><td class="k">TopBar</td><td>navbar 主题化 <code>docusaurus.config</code></td></tr>
@@ -662,19 +825,20 @@
         <tr><td class="k">StatsRow</td><td><code>CourseShelf/StatsRow</code></td></tr>
         <tr><td class="k">CourseCard(/Media)</td><td><code>CourseShelf/CourseCard</code></td></tr>
         <tr><td class="k">EventsPanel</td><td><code>CourseShelf/EventsPanel</code></td></tr>
-        <tr><td class="k">courses/events 数据</td><td><code>courses.ts / events.ts</code></td></tr>
+        <tr><td class="k">CourseGraph / EntryGuide</td><td><code>CourseShelf/CourseGraph</code> 等</td></tr>
+        <tr><td class="k">数据</td><td><code>courses.ts / events.ts / entries.ts</code></td></tr>
       </table>
     </div>
     <div class="panel" style="margin-top: 12px;">
       <h3>组装要点</h3>
       <div class="note"><span class="idx">1</span><span class="txt">网格 <b>auto-fill minmax(280px, 1fr)</b>；本页示意 2 列，≥1140px 实为 3 列。</span></div>
-      <div class="note"><span class="idx">2</span><span class="txt">各组件可独立验收：本册 02–06 页即逐组件的验收清单。</span></div>
-      <div class="note"><span class="idx">3</span><span class="txt">整页效果见 course-shelf.pdf（v2 整页版）。</span></div>
+      <div class="note"><span class="idx">2</span><span class="txt">各组件可独立验收：本册 02–08 页即逐组件的验收清单。</span></div>
+      <div class="note"><span class="idx">3</span><span class="txt">关系图与入口梳理挂书架上方（默认折叠）或独立路由 /curriculum；整页效果见 course-shelf.pdf。</span></div>
     </div>
   </div>
 
   <div class="footline">组件设计稿 · Storybook 拆分 · stack idealjs</div>
-  <div class="pagenum">07 / 07</div>
+  <div class="pagenum">09 / 09</div>
 </div>
 
 </body>
