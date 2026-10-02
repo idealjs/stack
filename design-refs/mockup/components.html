@@ -183,9 +183,12 @@
     display: flex; align-items: center; justify-content: center;
   }
   .gedges { position: absolute; inset: 0; pointer-events: none; }
+  .gedges .edge { fill: none; stroke-width: 1.5; stroke-linecap: butt; stroke-dasharray: 9 4; }
+  .gedges .edge.pre { stroke: #9a9a98; }
+  .gedges .edge.rel { stroke: #c9c9c7; }
   .glegend { display: flex; gap: 22px; font-size: 12px; color: #555; align-items: center; }
-  .glegend .sw { display: inline-block; width: 34px; border-top: 2px solid #555; margin-right: 6px; vertical-align: middle; }
-  .glegend .sw.rel { border-top-style: dashed; border-top-color: #b9b9b9; }
+  .glegend .sw { display: inline-block; width: 30px; border-top: 1.5px dashed #9a9a98; margin-right: 6px; vertical-align: middle; }
+  .glegend .sw.rel { border-top-color: #c9c9c7; }
 
   /* P8 入口梳理 */
   .profile-card {
@@ -627,23 +630,19 @@
   <div class="story-head">
     <span class="tag">&lt;CourseGraph /&gt;</span>
     <h2>课程关系图 · 知识是网，不是线</h2>
-    <div class="desc">节点 = 章节卡；实线箭头 = 前置（prerequisites）；虚线 = 关联（related）；①②③ = 读者入口。</div>
+    <div class="desc">连线复刻参考稿：细长划虚线折线、小圆角、无箭头，直接抵到卡片边缘；深虚线 = 前置（左→右为学习方向），浅虚线 = 关联；①②③ = 读者入口。</div>
   </div>
 
   <div class="canvas" style="top: 146px; left: 40px; width: 1200px; height: 380px;">
     <div class="gwrap" style="position:absolute; inset:0;">
       <svg class="gedges" width="1200" height="380" viewBox="0 0 1200 380">
-        <defs>
-          <marker id="arrPre" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#555"/></marker>
-          <marker id="arrRel" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#b9b9b9"/></marker>
-        </defs>
-        <line x1="230" y1="190" x2="314" y2="76"  stroke="#555" stroke-width="2" marker-end="url(#arrPre)"/>
-        <line x1="230" y1="196" x2="314" y2="308" stroke="#555" stroke-width="2" marker-end="url(#arrPre)"/>
-        <line x1="500" y1="80"  x2="594" y2="300" stroke="#555" stroke-width="2" marker-end="url(#arrPre)"/>
-        <line x1="500" y1="73"  x2="874" y2="73"  stroke="#555" stroke-width="2" marker-end="url(#arrPre)"/>
-        <line x1="740" y1="286" x2="940" y2="102" stroke="#555" stroke-width="2" marker-end="url(#arrPre)"/>
-        <line x1="970" y1="100" x2="970" y2="284" stroke="#555" stroke-width="2" marker-end="url(#arrPre)"/>
-        <line x1="504" y1="313" x2="594" y2="313" stroke="#b9b9b9" stroke-width="2" stroke-dasharray="6 5" marker-end="url(#arrRel)"/>
+        <path d="M 234 186 H 263 Q 271 186 271 178 V 81 Q 271 73 279 73 H 316"  class="edge pre"/>
+        <path d="M 234 200 H 275 Q 283 200 283 208 V 305 Q 283 313 291 313 H 316" class="edge pre"/>
+        <path d="M 504 73 H 552 Q 560 73 560 81 V 305 Q 560 313 568 313 H 596"  class="edge pre"/>
+        <path d="M 504 73 H 876" class="edge pre"/>
+        <path d="M 690 286 V 158 Q 690 150 698 150 H 912 Q 920 150 920 142 V 100" class="edge pre"/>
+        <path d="M 970 100 V 286" class="edge pre"/>
+        <path d="M 504 313 H 596" class="edge rel"/>
       </svg>
       <div class="gnode" style="left:50px; top:170px;"><span class="entry-badge">①</span><span class="icotile" style="background:#e0e7ff;">🌐</span><span class="t">快速开始</span></div>
       <div class="gnode" style="left:320px; top:50px;"><span class="entry-badge">②</span><span class="icotile" style="background:#fce7f3;">⚛️</span><span class="t">快速开始 React</span></div>
@@ -652,8 +651,8 @@
       <div class="gnode" style="left:880px; top:50px;"><span class="icotile" style="background:#e0f2fe;">🔗</span><span class="t">全栈基础</span></div>
       <div class="gnode" style="left:880px; top:290px;"><span class="entry-badge">③</span><span class="icotile" style="background:#ede9fe;">🧠</span><span class="t">高级教程</span></div>
       <div class="glegend" style="position:absolute; left:24px; bottom:14px;">
-        <span><span class="sw"></span>前置 prerequisites</span>
-        <span><span class="sw rel"></span>关联 related</span>
+        <span><span class="sw"></span>前置 prerequisites（深虚线，左→右为学习方向）</span>
+        <span><span class="sw rel"></span>关联 related（浅虚线）</span>
         <span style="color:#6366f1; font-weight:700;">①②③</span><span>读者入口（见下页）</span>
       </div>
     </div>
@@ -664,8 +663,8 @@
     <table class="spec tight">
       <tr><th>Prop</th><th>类型</th><th>说明</th></tr>
       <tr><td class="k"><code>nodes</code></td><td>Course[]</td><td>直接取 courses.ts，渲染为迷你章节卡</td></tr>
-      <tr><td class="k"><code>edges.prerequisites</code></td><td>[from,to][]</td><td>实线箭头，由每章 prerequisites 派生</td></tr>
-      <tr><td class="k"><code>edges.related</code></td><td>[from,to][]</td><td>虚线，由 related 派生</td></tr>
+      <tr><td class="k"><code>edges.prerequisites</code></td><td>[from,to][]</td><td>深虚线折线，由每章 prerequisites 派生</td></tr>
+      <tr><td class="k"><code>edges.related</code></td><td>[from,to][]</td><td>无向浅虚线，由 related 派生</td></tr>
       <tr><td class="k"><code>entryPoints</code></td><td>Entry[]</td><td>①②③ 入口徽标，数据见 EntryGuide</td></tr>
     </table>
   </div>
@@ -674,7 +673,7 @@
     <div class="note" style="margin-bottom:4px;"><span class="idx">1</span><span class="txt"><b>知识是网状</b>：有前置也有旁路，线性目录会掩盖它。</span></div>
     <div class="note" style="margin-bottom:4px;"><span class="idx">2</span><span class="txt"><b>教程是索引</b>：图让「我在哪、缺哪块」一眼可见。</span></div>
     <div class="note" style="margin-bottom:4px;"><span class="idx">3</span><span class="txt"><b>入口不锁死</b>：③ 直达是合法路径（skill 死原则）。</span></div>
-    <div class="note" style="margin-bottom:0;"><span class="idx">4</span><span class="txt">关系现为<b>示例占位</b>；正式关系填 courses.ts 后图自动更新。卡片 chips 与边一一对应：前置实线、关联虚线。</span></div>
+    <div class="note" style="margin-bottom:0;"><span class="idx">4</span><span class="txt">关系现为<b>示例占位</b>；正式关系填 courses.ts 后图自动更新。连线无箭头，方向由布局流向（左→右）表达；卡片 chips 对应：前置实线边框、关联虚线边框。</span></div>
   </div>
 
   <div class="footline">组件设计稿 · Storybook 拆分 · stack idealjs</div>
