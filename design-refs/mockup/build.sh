@@ -57,7 +57,8 @@ out_dir, stem = sys.argv[1], sys.argv[2]
 pdfs = sorted(glob.glob(f"{out_dir}/page-*.pdf"), key=lambda p: int(re.search(r"(\d+)", os.path.basename(p)).group(1)))
 w = PdfWriter()
 for p in pdfs:
-    w.append(p)
+    # 只取第 1 页：Chromium 打印偶发产生一个空白尾页（几何已验证无溢出）
+    w.append(p, pages=(0, 1))
 w.add_metadata({"/Title": f"课程书架设计稿 · {stem} · stack idealjs", "/Author": "Z.ai", "/Creator": "Z.ai"})
 with open(f"{stem}.pdf", "wb") as f:
     w.write(f)
