@@ -184,8 +184,14 @@
     gap: 10px;
   }
   .bigcard.media-card { background: #e0e7ff; box-shadow: none; }
+  .bigcard .zone16x9 {
+    aspect-ratio: 16 / 9; border-radius: 14px;
+    background: #f7f7f5; border: 1px solid #ececea;
+    display: flex; align-items: center; padding: 14px 16px;
+    font-size: 13.5px; color: #8a8a8a; line-height: 1.6;
+  }
   .bigcard .m-player {
-    height: 190px; border-radius: 14px; background: #e0e7ff;
+    aspect-ratio: 16 / 9; border-radius: 14px; background: #e0e7ff;
     display: flex; align-items: center; justify-content: center; position: relative;
   }
   .bigcard .m-playbtn { width: 56px; height: 56px; border-radius: 50%; background: #111; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 20px; box-shadow: 0 6px 18px rgba(17,17,17,0.3); }
@@ -402,19 +408,17 @@
 <!-- ================= P3 卡片解剖 · 默认态 vs 悬停态 ================= -->
 <div class="page">
   <div class="pagehead">
-    <h2>02 卡片解剖 · 默认白卡 → 悬停媒体卡</h2>
-    <span class="sub">悬停 = 卡内嵌播放器，GIF 循环预期成果</span>
+    <h2>02 卡片解剖 · 默认白卡 → 播放态</h2>
+    <span class="sub">16:9 预期区定时翻转 desc ⇄ GIF，悬停锁定</span>
   </div>
 
   <!-- 左：默认白卡 -->
-  <div class="bigcard" style="left: 56px; top: 118px;">
+  <div class="bigcard" style="left: 56px; top: 106px;">
     <div style="display:flex; justify-content:space-between; align-items:flex-start;">
       <span style="width:38px;height:38px;border-radius:12px;background:#e0e7ff;display:flex;align-items:center;justify-content:center;font-size:18px;">🌐</span>
     </div>
-    <div>
-      <div style="font-size:20px; font-weight:800; color:#1a1a1a;">快速开始</div>
-      <div style="font-size:13.5px; color:#8a8a8a; margin-top:4px;">写出第一个网页并在浏览器打开，跑起你的第一个 HTTP 服务器。</div>
-    </div>
+    <div class="zone16x9">写出第一个网页并在浏览器打开，跑起你的第一个 HTTP 服务器。<br><span style="font-size:11.5px; color:#b1b1af;">16:9 预期区 · desc 常驻，定时 8s 翻转播放 GIF</span></div>
+    <div style="font-size:20px; font-weight:800; color:#1a1a1a;">快速开始</div>
     <div class="chips"><span class="chip">前置：无</span><span class="chip">关联：快速开始 React</span></div>
     <div style="display:flex; align-items:center; justify-content:space-between;">
       <span class="pill done" style="font-size:12px; padding:4px 14px;">✓ Completed 🎉</span>
@@ -422,46 +426,45 @@
     </div>
   </div>
 
-  <!-- 右：悬停媒体卡 -->
-  <div class="bigcard media-card" style="left: 700px; top: 118px;">
+  <!-- 右：播放态（定时翻转/悬停锁定） -->
+  <div class="bigcard media-card" style="left: 700px; top: 106px;">
     <div class="m-player">
       <div class="m-playbtn">▶</div>
       <div class="m-time">⏱ Preview · GIF loop</div>
     </div>
-    <div>
-      <div style="font-size:20px; font-weight:800; color:#1a1a1a;">快速开始</div>
-      <div style="font-size:13.5px; color:#555; margin-top:4px;">预期成果正在卡内循环播放：浏览器打开第一个网页。</div>
-    </div>
+    <div style="font-size:20px; font-weight:800; color:#1a1a1a;">快速开始</div>
+    <div style="font-size:13.5px; color:#555;">预期成果正在预期区循环播放：浏览器打开第一个网页。</div>
     <div style="display:flex; align-items:center; justify-content:space-between;">
       <span class="pill time" style="font-size:12px; padding:4px 14px;">⏱ Watching</span>
       <span class="cbtn" style="width:32px;height:32px;font-size:14px;">▶</span>
     </div>
   </div>
 
-  <!-- pin 标注 -->
-  <span class="pin" style="top: 142px; left: 470px;">1</span>
-  <span class="pin" style="top: 252px; left: 470px;">2</span>
-  <span class="pin" style="top: 335px; left: 470px;">3</span>
-  <span class="pin" style="top: 382px; left: 470px;">4</span>
-  <span class="pin" style="top: 142px; left: 1114px;">5</span>
-  <span class="pin" style="top: 224px; left: 1114px;">6</span>
-  <span class="pin" style="top: 392px; left: 1114px;">7</span>
+  <!-- pin 标注：左卡 top106（icon≈118 / zone 166-388 / title≈398 / chips≈436）右卡同构 -->
+  <span class="pin" style="top: 120px; left: 470px;">1</span>
+  <span class="pin" style="top: 250px; left: 470px;">2</span>
+  <span class="pin" style="top: 402px; left: 470px;">3</span>
+  <span class="pin" style="top: 440px; left: 470px;">4</span>
+  <span class="pin" style="top: 120px; left: 1114px;">5</span>
+  <span class="pin" style="top: 260px; left: 1114px;">6</span>
+  <span class="pin" style="top: 428px; left: 1114px;">7</span>
 
   <!-- 底部两说明面板 -->
-  <div class="legendbox" style="top: 530px; left: 56px;">
+  <div class="legendbox" style="top: 544px; left: 56px;">
     <div class="panel" style="padding: 14px 18px;">
       <h3 style="margin-bottom: 8px;">默认白卡要素</h3>
-      <div class="note" style="margin-bottom: 5px;"><span class="idx">1</span><span class="txt"><b>彩色圆角图标</b>：每章一个 emoji 图标，淡彩圆角底。</span></div>
-      <div class="note" style="margin-bottom: 5px;"><span class="idx">2</span><span class="txt"><b>标题 + 预期结果一句话</b>：desc 写「学完能做出什么」。</span></div>
-      <div class="note" style="margin-bottom: 0;"><span class="idx">3</span><span class="txt"><b>关系 chips</b>：前置 / 关联章节（关系待列，示例为占位）。</span></div>
+      <div class="note" style="margin-bottom: 4px;"><span class="idx">1</span><span class="txt"><b>彩色圆角图标</b>：每章一个 emoji，淡彩圆角底。</span></div>
+      <div class="note" style="margin-bottom: 4px;"><span class="idx">2</span><span class="txt"><b>16:9 预期区</b>：desc 常驻（写「学完能做出什么」），定时 8s 自动翻转为播放 GIF。</span></div>
+      <div class="note" style="margin-bottom: 4px;"><span class="idx">3</span><span class="txt"><b>标题 + 关系 chips</b>：前置 / 关联（示例占位）。</span></div>
+      <div class="note" style="margin-bottom: 0;"><span class="idx">4</span><span class="txt"><b>状态胶囊 + 黑圆确认钮</b>：✓ / Upcoming。</span></div>
     </div>
   </div>
   <div class="legendbox" style="top: 530px; left: 700px;">
     <div class="panel" style="padding: 14px 18px;">
-      <h3 style="margin-bottom: 8px;">悬停媒体卡（复刻播放器）</h3>
-      <div class="note" style="margin-bottom: 5px;"><span class="idx">4</span><span class="txt"><b>状态胶囊 + 黑圆确认钮</b>：✓ Completed 🎉 / Upcoming，点击进入章节。</span></div>
-      <div class="note" style="margin-bottom: 5px;"><span class="idx">5</span><span class="txt"><b>淡彩整卡</b>：白卡变为该章主题淡彩底，视觉即「进入预览」。</span></div>
-      <div class="note" style="margin-bottom: 0;"><span class="idx">6</span><span class="txt"><b>黑色圆形播放钮 + ⏱ 胶囊</b>：复刻原稿标志元素；此刻才挂载 GIF，移出还原白卡。</span></div>
+      <h3 style="margin-bottom: 6px;">播放态（定时翻转 / 悬停锁定）</h3>
+      <div class="note" style="margin-bottom: 4px;"><span class="idx">5</span><span class="txt"><b>淡彩预期区</b>：翻转为该章主题淡彩播放态。</span></div>
+      <div class="note" style="margin-bottom: 4px;"><span class="idx">6</span><span class="txt"><b>黑色圆形播放钮 + ⏱ 胶囊</b>：复刻原稿标志元素，此刻才挂载 GIF 循环。</span></div>
+      <div class="note" style="margin-bottom: 0;"><span class="idx">7</span><span class="txt"><b>翻转规则</b>：定时 8s 或 hover/Tab 即时翻转并锁定；到期/移出还原 desc，缓存保留。</span></div>
     </div>
   </div>
 
@@ -473,17 +476,17 @@
 <div class="page">
   <div class="pagehead">
     <h2>03 交互流程 · 触发矩阵 · GIF 资产规范</h2>
-    <span class="sub">预期成果 GIF = 靶子「预期结果」的非文字化</span>
+    <span class="sub">16:9 预期区 · desc ⇄ GIF 定时轮换 · 悬停锁定</span>
   </div>
 
   <div style="position:absolute; top: 118px; left: 40px; right: 40px;">
     <div class="panel" style="padding-bottom: 18px;">
-      <h3>悬停播放时序</h3>
+      <h3>翻转播放时序</h3>
       <div class="flow">
-        <div class="step"><div class="s-no">STEP 1</div><div class="s-t">指针进入</div><div class="s-d">mouseenter / focus-visible 触发，白卡翻为淡彩媒体卡。</div></div>
-        <div class="step"><div class="s-no">STEP 2</div><div class="s-t">挂载播放器</div><div class="s-d">此刻才渲染 GIF，浏览器按需拉取，首屏零动图流量。</div></div>
+        <div class="step"><div class="s-no">STEP 1</div><div class="s-t">定时 / 指针进入</div><div class="s-d">8s 定时到期，或 mouseenter / focus 即时触发，预期区翻为淡彩播放态。</div></div>
+        <div class="step"><div class="s-no">STEP 2</div><div class="s-t">挂载播放器</div><div class="s-d">此刻才渲染 GIF，按需拉取；悬停/聚焦期间锁定在播放态。</div></div>
         <div class="step"><div class="s-no">STEP 3</div><div class="s-t">循环播放</div><div class="s-d">GIF loop=0 自动循环，卡内嵌播放，无控件无声音。</div></div>
-        <div class="step"><div class="s-no">STEP 4</div><div class="s-t">移出还原</div><div class="s-d">mouseleave 还原白卡；HTTP 缓存保留，再悬停瞬时恢复。</div></div>
+        <div class="step"><div class="s-no">STEP 4</div><div class="s-t">到期 / 移出还原</div><div class="s-d">定时到期或移出还原 desc；GIF 卸载，HTTP 缓存保留。</div></div>
       </div>
     </div>
   </div>
@@ -493,10 +496,10 @@
       <h3>触发矩阵</h3>
       <table class="spec">
         <tr><th>设备 / 输入</th><th>行为</th></tr>
-        <tr><td class="k">桌面 · 鼠标 hover</td><td>白卡 → 媒体卡播放预览；点击卡片进入章节。</td></tr>
+        <tr><td class="k">桌面 · 鼠标 hover</td><td>即时翻转并锁定 GIF；点击卡片进入章节。</td></tr>
         <tr><td class="k">键盘 · Tab focus</td><td>与 hover 同态（可访问性），Enter 进入章节。</td></tr>
-        <tr><td class="k">触屏 · 无 hover</td><td>不做预览态；首次点击直接进入章节，避免误触耗流量。</td></tr>
-        <tr><td class="k">减弱动效偏好</td><td>prefers-reduced-motion 时显示静帧，不自动播放。</td></tr>
+        <tr><td class="k">触屏 · 无 hover</td><td>不自动翻转；点击直接进入章节，避免误触耗流量。</td></tr>
+        <tr><td class="k">减弱动效偏好</td><td>prefers-reduced-motion 时不自动翻转，仅显示 desc。</td></tr>
       </table>
     </div>
   </div>

@@ -139,7 +139,13 @@
     display: flex; flex-direction: column; gap: 5px;
     width: 262px;
   }
-  .ccard .icorow { display: flex; justify-content: space-between; align-items: flex-start; }
+  .ccard .icorow { display: flex; align-items: center; gap: 8px; }
+  .ccard .zone {
+    width: 100%; aspect-ratio: 16 / 9; border-radius: 10px;
+    background: #f7f7f5; border: 1px solid #ececea;
+    display: flex; align-items: center; padding: 10px 12px;
+    font-size: 11px; color: #8a8a8a; line-height: 1.5;
+  }
   .ccard .ttl { font-size: 13.5px; font-weight: 700; color: #1a1a1a; margin: 0; }
   .ccard .dsc { font-size: 11px; line-height: 1.4; color: #8a8a8a; margin: 0; flex: 1; }
   .ccard .btm { display: flex; align-items: center; justify-content: space-between; }
@@ -227,8 +233,8 @@
     <div class="toc-card"><div class="t">&lt;IconRail /&gt;</div><div class="c">左窄图标栏</div><div class="d">40px 宽，图标导航</div></div>
     <div class="toc-card"><div class="t">&lt;SearchPill /&gt;</div><div class="c">搜索胶囊</div><div class="d">页面标题行右侧搜索</div></div>
     <div class="toc-card"><div class="t">&lt;StatsRow /&gt;</div><div class="c">统计卡行</div><div class="d">大数字 + 灰标签，淡彩底</div></div>
-    <div class="toc-card"><div class="t">&lt;CourseCard /&gt;</div><div class="c">课程白卡</div><div class="d">图标 · 标题 · 预期一句话 · 状态 · 按钮</div></div>
-    <div class="toc-card"><div class="t">&lt;CourseCardMedia /&gt;</div><div class="c">悬停媒体卡</div><div class="d">淡彩底 + 播放钮 + ⏱ GIF 循环</div></div>
+    <div class="toc-card"><div class="t">&lt;CourseCard /&gt;</div><div class="c">课程白卡</div><div class="d">16:9 预期区（desc ⇄ GIF）· 状态 · 按钮</div></div>
+    <div class="toc-card"><div class="t">&lt;CourseCardMedia /&gt;</div><div class="c">播放态</div><div class="d">定时翻转/悬停锁定 + ⏱ GIF 循环</div></div>
     <div class="toc-card"><div class="t">&lt;EventsPanel /&gt;</div><div class="c">事件栏</div><div class="d">彩色条目：类型 · 日期 · 描述 · 时间</div></div>
     <div class="toc-card"><div class="t">&lt;CourseGraph /&gt;</div><div class="c">课程关系图</div><div class="d">前置实线 · 关联虚线 · 入口 ①②③</div></div>
     <div class="toc-card"><div class="t">&lt;EntryGuide /&gt;</div><div class="c">入口梳理</div><div class="d">读者画像 → 起点与路径</div></div>
@@ -391,68 +397,58 @@
   <div class="story-head">
     <span class="tag">&lt;CourseCard /&gt;</span>
     <h2>课程白卡 · default 态</h2>
-    <div class="desc">书架的核心单元：六个章节变体共用一个组件，数据全部来自 courses.ts。</div>
+    <div class="desc">书架核心单元：16:9 预期区常驻 desc，定时自动翻转为播放对应 GIF；数据全部来自 courses.ts。</div>
   </div>
 
-  <div class="canvas" style="top: 148px; left: 40px; width: 880px; height: 424px;">
-    <div class="vrow" style="gap: 16px;">
+  <div class="canvas" style="top: 138px; left: 40px; width: 880px; padding: 16px;">
+    <div class="vrow" style="gap: 14px;">
       <div class="variant">
         <div class="ccard">
-          <div class="icorow"><span class="icotile" style="background:#e0e7ff;">🌐</span></div>
-          <div class="ttl">快速开始</div>
-          <div class="dsc">写出第一个网页并在浏览器打开，跑起你的第一个 HTTP 服务器。</div>
+          <div class="icorow"><span class="icotile" style="background:#e0e7ff;">🌐</span><span class="ttl">快速开始</span></div>
+          <div class="zone">写出第一个网页并在浏览器打开，跑起你的第一个 HTTP 服务器。</div>
           <div class="chips"><span class="chip">前置：无</span></div>
           <div class="btm"><span class="pill done">✓ Completed 🎉</span><span class="cbtn">✓</span></div>
         </div>
         <div class="vlabel"><b>hello-world</b></div>
-      </div>
-      <div class="variant">
+      </div><div class="variant">
         <div class="ccard">
-          <div class="icorow"><span class="icotile" style="background:#fce7f3;">⚛️</span></div>
-          <div class="ttl">快速开始 React</div>
-          <div class="dsc">用脚手架创建 React 应用，亲手拼出第一个 Todo List。</div>
+          <div class="icorow"><span class="icotile" style="background:#fce7f3;">⚛️</span><span class="ttl">快速开始 React</span></div>
+          <div class="zone">用脚手架创建 React 应用，亲手拼出第一个 Todo List。</div>
           <div class="chips"><span class="chip">前置：快速开始</span><span class="chip" style="border-style:dashed;">关联：更多示例</span></div>
           <div class="btm"><span class="pill done">✓ Completed 🎉</span><span class="cbtn">✓</span></div>
         </div>
         <div class="vlabel"><b>hello-react</b></div>
-      </div>
-      <div class="variant">
+      </div><div class="variant">
         <div class="ccard">
-          <div class="icorow"><span class="icotile" style="background:#fef3c7;">🧱</span></div>
-          <div class="ttl">更多示例</div>
-          <div class="dsc">浮动布局等补充示例，巩固前面攒下的积木。</div>
+          <div class="icorow"><span class="icotile" style="background:#fef3c7;">🧱</span><span class="ttl">更多示例</span></div>
+          <div class="zone">浮动布局等补充示例，巩固前面攒下的积木。</div>
           <div class="chips"><span class="chip">前置：快速开始</span></div>
           <div class="btm"><span class="pill done">✓ Completed 🎉</span><span class="cbtn">✓</span></div>
         </div>
         <div class="vlabel"><b>more-example</b></div>
       </div>
     </div>
-    <div class="vrow" style="gap: 16px; margin-top: 16px;">
+    <div class="vrow" style="gap: 14px; margin-top: 14px;">
       <div class="variant">
         <div class="ccard">
-          <div class="icorow"><span class="icotile" style="background:#d1fae5;">📦</span></div>
-          <div class="ttl">更多</div>
-          <div class="dsc">把示例工程构建为可发布产物，看清 build 做了什么。</div>
+          <div class="icorow"><span class="icotile" style="background:#d1fae5;">📦</span><span class="ttl">更多</span></div>
+          <div class="zone">把示例工程构建为可发布产物，看清 build 做了什么。</div>
           <div class="chips"><span class="chip">前置：快速开始 React</span></div>
           <div class="btm"><span class="pill done">✓ Completed 🎉</span><span class="cbtn">✓</span></div>
         </div>
         <div class="vlabel"><b>more</b></div>
-      </div>
-      <div class="variant">
+      </div><div class="variant">
         <div class="ccard">
-          <div class="icorow"><span class="icotile" style="background:#e0f2fe;">🔗</span></div>
-          <div class="ttl">全栈基础</div>
-          <div class="dsc">从网页到服务与数据库，串起最小全栈闭环。</div>
+          <div class="icorow"><span class="icotile" style="background:#e0f2fe;">🔗</span><span class="ttl">全栈基础</span></div>
+          <div class="zone">从网页到服务与数据库，串起最小全栈闭环。</div>
           <div class="chips"><span class="chip" style="color:#8a8a8a; border-style:dashed;">关联章节整理中</span></div>
           <div class="btm"><span class="pill wip">Upcoming</span><span class="cbtn">→</span></div>
         </div>
         <div class="vlabel"><b>full-stack</b> · wip 变体</div>
-      </div>
-      <div class="variant">
+      </div><div class="variant">
         <div class="ccard">
-          <div class="icorow"><span class="icotile" style="background:#ede9fe;">🧠</span></div>
-          <div class="ttl">高级教程</div>
-          <div class="dsc">数据流、纯函数、CAP——工程上的心智模型。</div>
+          <div class="icorow"><span class="icotile" style="background:#ede9fe;">🧠</span><span class="ttl">高级教程</span></div>
+          <div class="zone">数据流、纯函数、CAP——工程上的心智模型。</div>
           <div class="chips"><span class="chip">前置：全栈基础</span></div>
           <div class="btm"><span class="pill done">✓ Completed 🎉</span><span class="cbtn">✓</span></div>
         </div>
@@ -466,19 +462,21 @@
       <h3>Args</h3>
       <table class="spec tight">
         <tr><th>Prop</th><th>类型</th><th>说明</th></tr>
-        <tr><td class="k"><code>title</code></td><td>string</td><td>章节名（分类 label）</td></tr>
-        <tr><td class="k"><code>desc</code></td><td>string</td><td>预期结果一句话</td></tr>
-        <tr><td class="k"><code>done</code></td><td>boolean</td><td>true → ✓ 胶囊 + ✓ 钮</td></tr>
-        <tr><td class="k"><code>prerequisites</code></td><td>string[]</td><td>前置章节 → 实线 chip + 图中实线边</td></tr>
-        <tr><td class="k"><code>related</code></td><td>string[]</td><td>关联章节 → 虚线 chip + 图中虚线边</td></tr>
-        <tr><td class="k"><code>icon / tint</code></td><td>emoji / hex</td><td>IconTile 底色与图标</td></tr>
-        <tr><td class="k"><code>href</code></td><td>string</td><td>章节分类索引路由</td></tr>
+        <tr><td class="k"><code>title</code></td><td>string</td><td>章节名</td></tr>
+        <tr><td class="k"><code>desc</code></td><td>string</td><td>预期一句话（16:9 区）</td></tr>
+        <tr><td class="k"><code>done</code></td><td>boolean</td><td>✓ 胶囊 / Upcoming</td></tr>
+        <tr><td class="k"><code>prerequisites</code></td><td>string[]</td><td>前置 → 实线 chip + 图边</td></tr>
+        <tr><td class="k"><code>related</code></td><td>string[]</td><td>关联 → 虚线 chip + 图边</td></tr>
+        <tr><td class="k"><code>icon / tint</code></td><td>emoji / hex</td><td>图标与淡彩底</td></tr>
+        <tr><td class="k"><code>href</code></td><td>string</td><td>章节路由</td></tr>
+        <tr><td class="k"><code>flipInterval</code></td><td>ms</td><td>翻转周期，默认 8000</td></tr>
       </table>
     </div>
     <div class="panel" style="margin-top: 12px; padding:14px 18px;">
       <h3>交互</h3>
-      <div class="note" style="margin-bottom:4px;"><span class="idx">1</span><span class="txt">整卡可点 → 进入章节；hover 切换为 <b>&lt;CourseCardMedia /&gt;</b>（见下页）。</span></div>
-      <div class="note" style="margin-bottom:0;"><span class="idx">2</span><span class="txt">Tab focus 与 hover 同态；触屏无预览态。</span></div>
+      <div class="note" style="margin-bottom:4px;"><span class="idx">1</span><span class="txt">整卡可点进入章节；预期区定时翻转（见下页）。</span></div>
+      <div class="note" style="margin-bottom:4px;"><span class="idx">2</span><span class="txt">hover / Tab：即时翻到 GIF 并锁定，移出恢复定时。</span></div>
+      <div class="note" style="margin-bottom:0;"><span class="idx">3</span><span class="txt">触屏 / 减动效：不自动翻转；首页可用紧凑变体。</span></div>
     </div>
   </div>
 
@@ -490,14 +488,14 @@
 <div class="page">
   <div class="story-head">
     <span class="tag">&lt;CourseCardMedia /&gt;</span>
-    <h2>悬停媒体卡 · hover 态</h2>
-    <div class="desc">CourseCard 的 hover/focus 形态：淡彩整卡 + 黑色圆形播放钮 + ⏱ 胶囊，GIF 此刻才挂载并循环。</div>
+    <h2>播放态 · 定时翻转 / 悬停锁定</h2>
+    <div class="desc">预期区（16:9）翻转化淡彩播放态：黑色圆形播放钮 + ⏱ 胶囊，GIF 此刻才挂载并循环。</div>
   </div>
 
-  <div class="canvas" style="top: 148px; left: 40px; width: 560px; height: 330px;">
+  <div class="canvas" style="top: 146px; left: 40px; width: 560px; height: 434px;">
     <div class="variant">
-      <div class="ccard media" style="--tint:#e0e7ff; width: 512px; height: 282px;">
-        <div class="player" style="min-height: 180px;">
+      <div class="ccard media" style="--tint:#e0e7ff; width: 512px;">
+        <div class="player" style="aspect-ratio: 16 / 9; min-height: 0;">
           <div class="playbtn" style="width:56px; height:56px; font-size:20px;">▶</div>
           <span class="pill time" style="position:absolute; right:12px; top:10px; font-size:12px;">⏱ GIF loop</span>
           <span class="pill time" style="position:absolute; left:12px; bottom:10px; font-size:12px;">预期成果 · 浏览器打开第一个网页</span>
@@ -507,11 +505,11 @@
           <div class="dsc" style="font-size:12px; color:#555;">GIF 来源 static/gifs/hello-world.gif · loop=0 · 悬停期间持续播放</div>
         </div>
       </div>
-      <div class="vlabel"><b>default</b> · tint = #E0E7FF（随章节主题色）</div>
+      <div class="vlabel"><b>playing</b> · 512 × 288（16:9）· tint 随章节主题色</div>
     </div>
   </div>
 
-  <div class="canvas" style="top: 502px; left: 40px; width: 560px; height: 150px;">
+  <div class="canvas" style="top: 600px; left: 40px; width: 560px; height: 140px;">
     <div style="font-size:14px; font-weight:700; color:#1a1a1a; margin-bottom:12px;">六章节 tint 变体（播放器区域）</div>
     <div class="vrow" style="gap: 10px;">
       <div class="variant"><div style="width:70px; height:48px; border-radius:10px; background:#e0e7ff; display:flex; align-items:center; justify-content:center; font-size:12px;">▶</div><div class="vlabel">#E0E7FF</div></div>
@@ -528,6 +526,7 @@
       <h3>播放器规格</h3>
       <table class="spec">
         <tr><th>项</th><th>规格</th></tr>
+        <tr><td class="k">翻转周期</td><td>desc 8s ⇄ GIF 8s（flipInterval 可配）；GIF 内部循环</td></tr>
         <tr><td class="k">播放钮</td><td>黑 #111 圆形 · 卡内 44px / 展示 56px · 阴影 0 4px 14px</td></tr>
         <tr><td class="k">⏱ 胶囊</td><td>右上 GIF loop · 左下成果字幕，白底描边胶囊</td></tr>
         <tr><td class="k">GIF</td><td>640×360 · loop=0 · ≤300KB · hover 时才挂载</td></tr>
@@ -536,9 +535,9 @@
     </div>
     <div class="panel" style="margin-top: 12px;">
       <h3>状态转换</h3>
-      <div class="note"><span class="idx">1</span><span class="txt"><b>default → hover</b>：mouseenter/focus，卡底翻章节淡彩，播放钮 + 胶囊出现，GIF 挂载。</span></div>
-      <div class="note"><span class="idx">2</span><span class="txt"><b>hover → default</b>：mouseleave/blur，还原白卡，GIF 卸载，HTTP 缓存保留。</span></div>
-      <div class="note"><span class="idx">3</span><span class="txt"><b>再次 hover</b>：缓存命中，瞬时恢复播放，无二次流量。</span></div>
+      <div class="note"><span class="idx">1</span><span class="txt"><b>desc → playing</b>：定时 8s 到期，或 hover / Tab 聚焦即时触发；GIF 挂载循环。</span></div>
+      <div class="note"><span class="idx">2</span><span class="txt"><b>锁定</b>：悬停/聚焦期间停在 playing，不翻回；移出后按定时器继续轮换。</span></div>
+      <div class="note"><span class="idx">3</span><span class="txt"><b>playing → desc</b>：定时到期或移出，GIF 卸载、缓存保留，再翻回瞬时恢复。</span></div>
     </div>
   </div>
 
