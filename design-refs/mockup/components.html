@@ -194,8 +194,8 @@
     display: flex; align-items: center; justify-content: center;
   }
   .gedges { position: absolute; inset: 0; pointer-events: none; }
-  .edge { fill: none; stroke-width: 1.2; stroke-linecap: butt; stroke-dasharray: 6 3; stroke: #a3b5af; }
-  .station { fill: #78928a; }
+  .edge { fill: none; stroke-width: 1.4; stroke-linecap: butt; stroke-dasharray: 4 2; stroke: #a2b49b; }
+  .station { fill: #758c72; }
   .glegend { display: flex; gap: 22px; font-size: 12px; color: #555; align-items: center; }
   .glegend .sw { display: inline-block; width: 30px; border-top: 1.5px dashed #9a9a98; margin-right: 6px; vertical-align: middle; }
   .glegend .sw.rel { border-top-color: #c9c9c7; }
@@ -215,20 +215,31 @@
   table.spec.tight th { padding: 4px 10px 4px 0; }
   table.spec.tight td { padding: 3px 10px 3px 0; }
 
-  /* P7 路线图（线条构件版） */
-  .rnode {
-    position: absolute; width: 160px; height: 44px;
-    background: #ffffff; border-radius: 12px;
-    display: flex; align-items: center; gap: 7px; padding: 0 12px;
-    box-shadow: 0 1px 2px rgba(26,26,26,0.10);
+  /* P7 路线图（线条构件版 · 大卡 CourseCard 实例） */
+  .rcard {
+    position: absolute; width: 232px;
+    background: #ffffff; border-radius: 14px; padding: 10px;
+    box-shadow: 0 1px 3px rgba(26,26,26,0.08);
   }
-  .rnode .t { font-size: 12px; font-weight: 700; color: #1a1a1a; flex: 1; }
-  .rnode .st { font-size: 9.5px; padding: 1px 6px; border-radius: 999px; font-weight: 600; }
-  .rnode .st.done { background: #efe6fb; color: #6d28d9; }
-  .rnode .st.lock { background: #ffffff; color: #6b6b6b; border: 1px solid #d5d5d3; }
-  .rnode .icotile { width: 22px; height: 22px; border-radius: 7px; font-size: 12px; }
+  .rcard .rzone {
+    height: 118px; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    position: relative;
+  }
+  .rcard .rzone span { font-size: 34px; }
+  .rcard .rzone i {
+    position: absolute; right: 7px; bottom: 7px; font-style: normal;
+    font-size: 9px; color: #6b6b6b; background: rgba(255,255,255,0.9);
+    padding: 1px 6px; border-radius: 999px; font-weight: 600;
+  }
+  .rcard .rt { display: flex; align-items: center; gap: 7px; margin-top: 9px; }
+  .rcard .rt .icotile { width: 22px; height: 22px; border-radius: 7px; font-size: 12px; flex: none; }
+  .rcard .rt b { font-size: 13px; color: #1a1a1a; flex: 1; }
+  .rcard .st { font-size: 9.5px; padding: 1px 6px; border-radius: 999px; font-weight: 600; flex: none; }
+  .rcard .st.done { background: #efe6fb; color: #6d28d9; }
+  .rcard .st.lock { background: #ffffff; color: #6b6b6b; border: 1px solid #d5d5d3; }
   .linecard {
-    background: #ffffff; border-radius: 14px; padding: 12px 14px 10px;
+    background: #ffffff; border-radius: 14px; padding: 10px 12px 8px;
     display: flex; flex-direction: column; gap: 6px;
     box-shadow: 0 1px 2px rgba(26,26,26,0.06);
   }
@@ -650,62 +661,75 @@
   <div class="story-head">
     <span class="tag">&lt;CourseGraph /&gt;</span>
     <h2>课程路线图 · 线条是构件</h2>
-    <div class="desc">路线的最小构件是线条：直段 / 圆角转角 / 曲线 / 分流岔口 / 汇合 / 站点。主线在岔口分流出两条车道，曲线并线后继续前进——网状关系在路线内可读。</div>
+    <div class="desc">路线的最小构件是线条：直段 / 圆角转角 / 弧线步进 / 分流岔口 / 汇合 / 站点，弯道皆圆弧。CourseCard 由路线串联：岔口分流、弧线并线——网状关系在路线内可读。</div>
   </div>
 
-  <!-- 组合：路线总图（曲线 + 分流 + 并线） -->
-  <div class="canvas" style="top: 138px; left: 40px; width: 880px; height: 306px; padding: 0;">
-    <svg class="gedges" width="880" height="306" viewBox="0 0 880 306">
-      <path class="edge" d="M 12 132 H 22"/>
-      <path class="edge" d="M 182 132 C 207 132, 207 52,  232 52"/>
-      <path class="edge" d="M 182 132 C 207 132, 207 212, 232 212"/>
-      <path class="edge" d="M 392 52  C 417 52,  407 120, 432 120"/>
-      <path class="edge" d="M 392 212 C 417 212, 407 144, 432 144"/>
-      <path class="edge" d="M 592 132 H 632"/>
-      <path class="edge" d="M 712 154 V 232"/>
-      <circle class="station" cx="12"  cy="132" r="2.8"/>
-      <circle class="station" cx="207" cy="132" r="2.8"/>
-      <circle class="station" cx="224" cy="52"  r="2.8"/>
-      <circle class="station" cx="224" cy="212" r="2.8"/>
-      <circle class="station" cx="420" cy="132" r="2.8"/>
-      <circle class="station" cx="624" cy="132" r="2.8"/>
-      <circle class="station" cx="712" cy="224" r="2.8"/>
+  <!-- 组合：CourseCard 之间的路线（双圆弧步进，无斜线） -->
+  <div class="canvas" style="top: 138px; left: 40px; width: 880px; height: 330px; padding: 0;">
+    <svg class="gedges" width="880" height="330" viewBox="0 0 880 330">
+      <path class="edge" d="M 4 165 H 16"/>
+      <path class="edge" d="M 248 165 H 251"/>
+      <path class="edge" d="M 251 165 A 35 35 0 0 0 286 130 A 35 35 0 0 1 321 95  H 324"/>
+      <path class="edge" d="M 251 165 A 35 35 0 0 1 286 200 A 35 35 0 0 0 321 235 H 324"/>
+      <path class="edge" d="M 556 95  H 559 A 35 35 0 0 1 594 130 A 35 35 0 0 0 629 165 H 632"/>
+      <path class="edge" d="M 556 235 H 559 A 35 35 0 0 0 594 200 A 35 35 0 0 1 629 165 H 632"/>
+      <path class="edge" d="M 864 165 H 876"/>
+      <circle class="station" cx="4"   cy="165" r="2.8"/>
+      <circle class="station" cx="286" cy="130" r="2.8"/>
+      <circle class="station" cx="286" cy="200" r="2.8"/>
+      <circle class="station" cx="594" cy="130" r="2.8"/>
+      <circle class="station" cx="594" cy="200" r="2.8"/>
+      <circle class="station" cx="631" cy="165" r="2.8"/>
+      <circle class="station" cx="871" cy="165" r="2.8"/>
     </svg>
-    <div class="rnode" style="left:22px; top:110px;"><span class="entry-badge" style="width:20px;height:20px;font-size:11px;">①</span><span class="icotile" style="background:#e0e7ff;">🌐</span><span class="t">快速开始</span><span class="st done">✓</span></div>
-    <div class="rnode" style="left:232px; top:30px;"><span class="entry-badge" style="width:20px;height:20px;font-size:11px;">②</span><span class="icotile" style="background:#fce7f3;">⚛️</span><span class="t">React</span><span class="st done">✓</span></div>
-    <div class="rnode" style="left:232px; top:190px;"><span class="icotile" style="background:#fef3c7;">🧱</span><span class="t">更多示例</span><span class="st done">✓</span></div>
-    <div class="rnode" style="left:432px; top:110px;"><span class="icotile" style="background:#d1fae5;">📦</span><span class="t">更多</span><span class="st done">✓</span></div>
-    <div class="rnode" style="left:632px; top:110px;"><span class="icotile" style="background:#e0f2fe;">🔗</span><span class="t">全栈基础</span><span class="st lock">🔒</span></div>
-    <div class="rnode" style="left:632px; top:232px;"><span class="entry-badge" style="width:20px;height:20px;font-size:11px;">③</span><span class="icotile" style="background:#ede9fe;">🧠</span><span class="t">高级教程</span><span class="st done">✓</span></div>
-    <div style="position:absolute; right:12px; top:10px; font-size:11px; color:#6b6b6b;">分流岔口 ×1 · 曲线并线 ×2 · 站点 ×7</div>
+    <div class="rcard" style="left:16px; top:81px;">
+      <span class="entry-badge" style="width:20px;height:20px;font-size:11px;">①</span>
+      <div class="rzone" style="background:#e0e7ff;"><span>🌐</span><i>16:9 · GIF</i></div>
+      <div class="rt"><span class="icotile" style="background:#e0e7ff;">🌐</span><b>快速开始</b><span class="st done">✓</span></div>
+    </div>
+    <div class="rcard" style="left:324px; top:11px;">
+      <span class="entry-badge" style="width:20px;height:20px;font-size:11px;">②</span>
+      <div class="rzone" style="background:#fce7f3;"><span>⚛️</span><i>16:9 · GIF</i></div>
+      <div class="rt"><span class="icotile" style="background:#fce7f3;">⚛️</span><b>React</b><span class="st done">✓</span></div>
+    </div>
+    <div class="rcard" style="left:324px; top:151px;">
+      <div class="rzone" style="background:#fef3c7;"><span>🧱</span><i>16:9 · GIF</i></div>
+      <div class="rt"><span class="icotile" style="background:#fef3c7;">🧱</span><b>更多示例</b><span class="st done">✓</span></div>
+    </div>
+    <div class="rcard" style="left:632px; top:81px;">
+      <div class="rzone" style="background:#d1fae5;"><span>📦</span><i>16:9 · GIF</i></div>
+      <div class="rt"><span class="icotile" style="background:#d1fae5;">📦</span><b>更多</b><span class="st done">✓</span></div>
+    </div>
+    <div style="position:absolute; right:14px; top:262px; font-size:11px; color:#6b6b6b;">→ 下一程：全栈基础 🔒 · ③ 高级教程</div>
+    <div style="position:absolute; right:12px; top:10px; font-size:11px; color:#6b6b6b;">分流 ×1 · 弧线并线 ×2 · 站点 ×7</div>
   </div>
 
-  <!-- 构件：线条组件六原语 -->
-  <div class="canvas" style="top: 462px; left: 40px; width: 880px; height: 272px;">
+  <!-- 构件：线条组件六原语（弯道皆圆弧） -->
+  <div class="canvas" style="top: 478px; left: 40px; width: 880px; height: 258px; padding: 16px 22px;">
     <div style="font-size:14px; font-weight:700; color:#1a1a1a; margin-bottom:10px;">&lt;RouteLine /&gt; 线条组件 · 六原语</div>
     <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:12px;">
       <div class="linecard">
-        <svg width="240" height="56" viewBox="0 0 240 56"><path class="edge" d="M 20 28 H 220"/><circle class="station" cx="20" cy="28" r="2.8"/><circle class="station" cx="220" cy="28" r="2.8"/></svg>
+        <svg width="240" height="52" viewBox="0 0 240 52"><path class="edge" d="M 20 26 H 220"/><circle class="station" cx="20" cy="26" r="2.8"/><circle class="station" cx="220" cy="26" r="2.8"/></svg>
         <div class="vlabel"><b>segment</b> · 直段</div>
       </div>
       <div class="linecard">
-        <svg width="240" height="56" viewBox="0 0 240 56"><path class="edge" d="M 20 44 H 105 Q 125 44 125 24 V 10"/><circle class="station" cx="20" cy="44" r="2.8"/></svg>
+        <svg width="240" height="52" viewBox="0 0 240 52"><path class="edge" d="M 20 42 H 96 A 16 16 0 0 0 112 26 V 8"/><circle class="station" cx="20" cy="42" r="2.8"/><circle class="station" cx="112" cy="8" r="2.8"/></svg>
         <div class="vlabel"><b>elbow</b> · 圆角转角</div>
       </div>
       <div class="linecard">
-        <svg width="240" height="56" viewBox="0 0 240 56"><path class="edge" d="M 15 42 C 60 4, 180 58, 225 16"/><circle class="station" cx="15" cy="42" r="2.8"/><circle class="station" cx="225" cy="16" r="2.8"/></svg>
-        <div class="vlabel"><b>curve</b> · 曲线</div>
+        <svg width="240" height="52" viewBox="0 0 240 52"><path class="edge" d="M 30 42 H 33 A 16 16 0 0 0 49 26 A 16 16 0 0 1 65 10 H 220"/><circle class="station" cx="30" cy="42" r="2.8"/><circle class="station" cx="49" cy="26" r="2.8"/><circle class="station" cx="220" cy="10" r="2.8"/></svg>
+        <div class="vlabel"><b>arc</b> · 弧线步进</div>
       </div>
       <div class="linecard">
-        <svg width="240" height="56" viewBox="0 0 240 56"><path class="edge" d="M 20 28 H 80 C 100 28, 100 10, 118 10 H 200"/><path class="edge" d="M 80 28 C 100 28, 100 46, 118 46 H 200"/><circle class="station" cx="80" cy="28" r="2.8"/></svg>
+        <svg width="240" height="52" viewBox="0 0 240 52"><path class="edge" d="M 20 26 H 60"/><path class="edge" d="M 60 26 A 10 10 0 0 0 70 16 A 10 10 0 0 1 80 6 H 220"/><path class="edge" d="M 60 26 A 10 10 0 0 1 70 36 A 10 10 0 0 0 80 46 H 220"/><circle class="station" cx="60" cy="26" r="2.8"/></svg>
         <div class="vlabel"><b>fork</b> · 分流岔口</div>
       </div>
       <div class="linecard">
-        <svg width="240" height="56" viewBox="0 0 240 56"><path class="edge" d="M 20 10 H 95 C 113 10, 113 28, 130 28 H 220"/><path class="edge" d="M 20 46 H 95 C 113 46, 113 28, 130 28"/><circle class="station" cx="130" cy="28" r="2.8"/></svg>
+        <svg width="240" height="52" viewBox="0 0 240 52"><path class="edge" d="M 20 6 H 150 A 10 10 0 0 1 160 16 A 10 10 0 0 0 170 26 H 220"/><path class="edge" d="M 20 46 H 150 A 10 10 0 0 0 160 36 A 10 10 0 0 1 170 26"/><circle class="station" cx="170" cy="26" r="2.8"/></svg>
         <div class="vlabel"><b>merge</b> · 汇合并线</div>
       </div>
       <div class="linecard">
-        <svg width="240" height="56" viewBox="0 0 240 56"><path class="edge" d="M 20 28 H 220"/><circle class="station" cx="90" cy="28" r="2.8"/><circle class="station" cx="170" cy="28" r="2.8"/></svg>
+        <svg width="240" height="52" viewBox="0 0 240 52"><path class="edge" d="M 20 26 H 220"/><circle class="station" cx="90" cy="26" r="3"/><circle class="station" cx="170" cy="26" r="3"/></svg>
         <div class="vlabel"><b>station</b> · 站点（悬浮于卡间槽内）</div>
       </div>
     </div>
@@ -724,10 +748,10 @@
   </div>
   <div style="position:absolute; top: 420px; left: 948px; width: 292px;" class="panel">
     <h3 style="margin-bottom:6px;">设计原则</h3>
-    <div class="note" style="margin-bottom:4px;"><span class="idx">1</span><span class="txt"><b>线只管顺序</b>：状态交给卡片（✓ / 🔒）。</span></div>
-    <div class="note" style="margin-bottom:4px;"><span class="idx">2</span><span class="txt"><b>背景级线条</b>：灰绿 <code>#A3B5AF</code> · 1.2px · 划隙 6:3；站点 <code>#78928A</code> 深一档，直径 ≈ 4× 线宽。</span></div>
-    <div class="note" style="margin-bottom:4px;"><span class="idx">3</span><span class="txt"><b>岔口即分支</b>：快速开始分流出 React 线与示例线，在「更多」并线。</span></div>
-    <div class="note" style="margin-bottom:4px;"><span class="idx">4</span><span class="txt"><b>线条是构件</b>：六原语可拼任意路线。</span></div>
+    <div class="note" style="margin-bottom:4px;"><span class="idx">1</span><span class="txt"><b>线只管顺序</b>：状态交给卡片 ✓ / 🔒。</span></div>
+    <div class="note" style="margin-bottom:4px;"><span class="idx">2</span><span class="txt"><b>背景级线条</b>：鼠尾草绿 <code>#A2B49B</code> · 1.4px · 划隙 4:2；站点 <code>#758C72</code> 深一档，直径 ≈ 4× 线宽。</span></div>
+    <div class="note" style="margin-bottom:4px;"><span class="idx">3</span><span class="txt"><b>弯道皆圆弧</b>：所有转折由双圆弧步进（R35×2）完成，全图无斜线。</span></div>
+    <div class="note" style="margin-bottom:4px;"><span class="idx">4</span><span class="txt"><b>岔口即分支</b>：快速开始分流出 React 线与示例线，在「更多」弧线并线。</span></div>
     <div class="note" style="margin-bottom:0;"><span class="idx">5</span><span class="txt">顺序为<b>示例占位</b>，填 courses.ts 自动更新。</span></div>
   </div>
 
