@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>课程书架 组件设计稿 · Storybook 形式 · stack idealjs</title>
+<style>
+  /* ====== 画布与页面基座（与整页版 v2 一致） ====== */
+  @page { size: 1280px 800px; margin: 0; }
+  *, *::before, *::after { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0; width: 1280px;
+    background: #f0f0ef;
+    font-family: "Noto Sans CJK SC", "PingFang SC", "Microsoft YaHei", sans-serif;
+    color: #1a1a1a;
+    -webkit-font-smoothing: antialiased;
+  }
+  .page {
+    width: 1280px; height: 800px; position: relative;
+    background: #f0f0ef; overflow: hidden; page-break-after: always;
+  }
+  .page:last-child { page-break-after: auto; }
+
+  @media screen {
+    html { height: auto; display: flex; justify-content: center; background: #f0f0ef; }
+    body {
+      transform-origin: top center;
+      scale: min(1, calc(100vw / 1280px));
+      margin: 0 auto;
+      box-shadow: 0 0 48px rgba(15, 23, 42, 0.18);
+    }
+  }
+
+  .pagenum { position: absolute; bottom: 26px; right: 40px; font-size: 13px; color: #8a8a8a; letter-spacing: 2px; }
+  .footline { position: absolute; bottom: 26px; left: 40px; font-size: 13px; color: #8a8a8a; letter-spacing: 1px; }
+
+  /* ====== Storybook 页头 ====== */
+  .story-head { position: absolute; top: 36px; left: 40px; right: 40px; }
+  .story-head .tag {
+    display: inline-block; font-size: 15px; font-weight: 700; color: #6d28d9;
+    background: #efe6fb; border-radius: 8px; padding: 3px 12px;
+    font-family: "DejaVu Sans Mono", "Noto Sans CJK SC", monospace;
+  }
+  .story-head h2 { margin: 8px 0 4px; font-size: 28px; font-weight: 800; color: #1a1a1a; }
+  .story-head .desc { font-size: 14.5px; color: #6b6b6b; }
+
+  /* ====== 展示画布与变体 ====== */
+  .canvas {
+    background: #fbfbfa;
+    border: 1px dashed #cfcfcd;
+    border-radius: 18px;
+    padding: 22px;
+    position: absolute;
+  }
+  .vrow { display: flex; gap: 18px; flex-wrap: wrap; align-items: flex-start; }
+  .variant { display: flex; flex-direction: column; gap: 8px; }
+  .vlabel {
+    font-size: 11.5px; color: #6b6b6b;
+    font-family: "DejaVu Sans Mono", "Noto Sans CJK SC", monospace;
+  }
+  .vlabel b { color: #1a1a1a; }
+
+  .note { display: flex; gap: 10px; align-items: flex-start; margin-bottom: 8px; }
+  .note .idx {
+    flex: none; width: 22px; height: 22px; border-radius: 50%;
+    background: #1a1a1a; color: #ffffff; font-size: 13px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center; margin-top: 1px;
+  }
+  .note .txt { font-size: 13.5px; line-height: 1.55; color: #3d3d3d; }
+  .note .txt b { color: #1a1a1a; }
+  .panel { background: #ffffff; border-radius: 18px; padding: 18px 20px; box-shadow: 0 1px 2px rgba(26,26,26,0.06); }
+  .panel h3 { margin: 0 0 10px; font-size: 16px; font-weight: 700; color: #1a1a1a; }
+
+  table.spec { width: 100%; border-collapse: collapse; font-size: 12.5px; color: #3d3d3d; }
+  table.spec th { text-align: left; font-weight: 700; color: #1a1a1a; border-bottom: 2px solid #d5d5d3; padding: 6px 10px 6px 0; }
+  table.spec td { border-bottom: 1px solid #ececea; padding: 5px 10px 5px 0; vertical-align: top; }
+  table.spec td.k { color: #1a1a1a; font-weight: 600; white-space: nowrap; }
+  table.spec code {
+    font-family: "DejaVu Sans Mono", monospace; font-size: 12px;
+    background: #f4f2fa; color: #6d28d9; border-radius: 5px; padding: 1px 6px;
+  }
+
+  /* ====== 组件本体样式（复用整页版 v2） ====== */
+  .topbar {
+    height: 46px; background: #111111; color: #b9b9b9;
+    border-radius: 12px; display: flex; align-items: center;
+    padding: 0 16px; gap: 22px; font-size: 12.5px;
+  }
+  .topbar .logo { color: #ffffff; font-weight: 800; letter-spacing: 0.5px; font-size: 13.5px; }
+  .topbar .menu { display: flex; gap: 20px; margin: 0 auto; }
+  .topbar .menu span.active { color: #ffffff; font-weight: 600; }
+  .topbar .ava {
+    width: 24px; height: 24px; border-radius: 50%;
+    background: linear-gradient(135deg, #6366f1, #ec4899);
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; font-size: 11px; font-weight: 700;
+  }
+  .topbar .bell { font-size: 14px; }
+
+  .rail {
+    width: 40px; background: #ffffff; border-radius: 12px;
+    display: flex; flex-direction: column; align-items: center;
+    gap: 14px; padding: 14px 0; font-size: 14px; color: #8a8a8a;
+  }
+
+  .searchpill {
+    font-size: 12.5px; color: #8a8a8a; background: #fff;
+    border-radius: 999px; padding: 7px 20px; border: 1px solid #d5d5d3;
+  }
+
+  .stat {
+    border-radius: 16px; padding: 12px 18px 10px;
+    display: flex; flex-direction: column; gap: 2px; min-width: 150px;
+  }
+  .stat .num { font-size: 26px; font-weight: 800; color: #1a1a1a; }
+  .stat .lab { font-size: 11px; color: #6b6b6b; letter-spacing: 0.5px; }
+
+  .pill { font-size: 10.5px; padding: 3px 11px; border-radius: 999px; font-weight: 600; }
+  .pill.done { background: #efe6fb; color: #6d28d9; }
+  .pill.wip { background: #ffffff; color: #6b6b6b; border: 1px solid #d5d5d3; }
+  .pill.time { background: #ffffff; color: #1a1a1a; border: 1px solid #d5d5d3; }
+
+  .cbtn {
+    width: 26px; height: 26px; border-radius: 50%;
+    background: #1a1a1a; color: #ffffff;
+    display: flex; align-items: center; justify-content: center; font-size: 12px;
+  }
+
+  .chip { font-size: 10px; color: #555; border: 1px solid #cfcfcd; border-radius: 999px; padding: 1px 8px; }
+
+  .icotile {
+    width: 26px; height: 26px; border-radius: 9px;
+    display: flex; align-items: center; justify-content: center; font-size: 14px;
+  }
+
+  .ccard {
+    background: #ffffff; border-radius: 16px;
+    padding: 10px 12px 10px 14px;
+    box-shadow: 0 1px 2px rgba(26,26,26,0.06);
+    display: flex; flex-direction: column; gap: 5px;
+    width: 262px;
+  }
+  .ccard .icorow { display: flex; justify-content: space-between; align-items: flex-start; }
+  .ccard .ttl { font-size: 13.5px; font-weight: 700; color: #1a1a1a; margin: 0; }
+  .ccard .dsc { font-size: 11px; line-height: 1.4; color: #8a8a8a; margin: 0; flex: 1; }
+  .ccard .btm { display: flex; align-items: center; justify-content: space-between; }
+  .ccard.media { background: var(--tint, #e0e7ff); box-shadow: none; }
+  .ccard.media .player {
+    flex: 1; min-height: 54px; border-radius: 12px;
+    background: var(--tint, #e0e7ff);
+    display: flex; align-items: center; justify-content: center; position: relative;
+  }
+  .playbtn {
+    width: 44px; height: 44px; border-radius: 50%;
+    background: #111111; color: #ffffff;
+    display: flex; align-items: center; justify-content: center; font-size: 16px;
+    box-shadow: 0 4px 14px rgba(17,17,17,0.28);
+  }
+
+  .ev { border-radius: 14px; padding: 10px 12px; display: flex; flex-direction: column; gap: 3px; width: 224px; }
+  .ev .r1 { display: flex; justify-content: space-between; align-items: center; font-size: 10.5px; font-weight: 700; color: #1a1a1a; }
+  .ev .date { font-size: 9.5px; color: #6b6b6b; font-weight: 600; }
+  .ev .r2 { font-size: 10.5px; color: #555; line-height: 1.45; }
+  .ev .r3 { font-size: 9.5px; color: #6b6b6b; }
+
+  /* P1 目录卡 */
+  .toc-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+  .toc-card { background: #fff; border-radius: 14px; padding: 14px 16px; box-shadow: 0 1px 2px rgba(26,26,26,0.06); }
+  .toc-card .t { font-family: "DejaVu Sans Mono", monospace; font-size: 13.5px; font-weight: 700; color: #6d28d9; }
+  .toc-card .c { font-size: 12.5px; font-weight: 700; color: #1a1a1a; margin-top: 3px; }
+  .toc-card .d { font-size: 11px; color: #8a8a8a; margin-top: 3px; line-height: 1.45; }
+</style>
+</head>
+<body>
+
+<!-- ================= P1 封面 + 组件目录 ================= -->
+<div class="page">
+  <div style="position:absolute; top:0; left:0; right:0; height:46px; background:#111; color:#b9b9b9; display:flex; align-items:center; padding:0 40px; gap:26px; font-size:13px;">
+    <span style="color:#fff; font-weight:800; font-size:15px;">stack·idealjs</span>
+    <span style="display:flex; gap:24px; margin:0 auto;"><span style="color:#fff;">全栈教程 🎓</span><span>工具使用</span><span>博客</span></span>
+    <span style="width:26px; height:26px; border-radius:50%; background:linear-gradient(135deg,#6366f1,#ec4899);"></span>
+  </div>
+  <div style="position:absolute; top: 110px; left: 80px; font-size:15px; letter-spacing:4px; font-weight:500; color:#6b6b6b;">STACK IDEALJS · 全栈工程师教程</div>
+  <h1 style="position:absolute; top: 158px; left: 80px; margin:0; font-size:74px; line-height:1.15; font-weight:800; color:#1a1a1a;">组件设计稿 · Storybook 拆分</h1>
+  <div style="position:absolute; top: 280px; left: 80px; font-size:18px; color:#555; line-height:1.7;">
+    整页设计稿（course-shelf v2）拆解为 8 个可独立实现与验收的组件，每组件一页：变体展示 + Args 表 + 规格。<br>
+    组件即实现单元：Docusaurus 侧按组件对应文件落码，Storybook 页即验收清单。
+  </div>
+  <div style="position:absolute; top: 408px; left: 80px; right: 80px;" class="toc-grid">
+    <div class="toc-card"><div class="t">&lt;TopBar /&gt;</div><div class="c">黑顶栏</div><div class="d">logo · 菜单 · 当前项高亮 · 🔔 · 头像</div></div>
+    <div class="toc-card"><div class="t">&lt;IconRail /&gt;</div><div class="c">左窄图标栏</div><div class="d">40px 宽，图标导航</div></div>
+    <div class="toc-card"><div class="t">&lt;SearchPill /&gt;</div><div class="c">搜索胶囊</div><div class="d">页面标题行右侧搜索</div></div>
+    <div class="toc-card"><div class="t">&lt;StatsRow /&gt;</div><div class="c">统计卡行</div><div class="d">大数字 + 灰标签，淡彩底</div></div>
+    <div class="toc-card"><div class="t">&lt;CourseCard /&gt;</div><div class="c">课程白卡</div><div class="d">图标 · 标题 · 预期一句话 · 状态 · 按钮</div></div>
+    <div class="toc-card"><div class="t">&lt;CourseCardMedia /&gt;</div><div class="c">悬停媒体卡</div><div class="d">淡彩底 + 播放钮 + ⏱ GIF 循环</div></div>
+    <div class="toc-card"><div class="t">&lt;EventsPanel /&gt;</div><div class="c">事件栏</div><div class="d">彩色条目：类型 · 日期 · 描述 · 时间</div></div>
+    <div class="toc-card"><div class="t">Atoms</div><div class="c">原子组件</div><div class="d">Pill · CircleButton · Chip · IconTile</div></div>
+  </div>
+  <div style="position:absolute; bottom: 78px; left: 80px; display:flex; gap:14px;">
+    <div class="stat" style="background:#c9e7f7;"><span class="num">8</span><span class="lab">Components · 组件</span></div>
+    <div class="stat" style="background:#d2f5df;"><span class="num">7</span><span class="lab">Stories · 页</span></div>
+    <div class="stat" style="background:#efe6fb;"><span class="num">6</span><span class="lab">Variants · 课程变体</span></div>
+  </div>
+  <div style="position:absolute; bottom: 40px; right: 80px; text-align:right; font-size:14px; color:#8a8a8a; line-height:1.8;">
+    v2.1 · 2026-10 · 派生自 course-shelf v2<br>复刻视觉：Learning Plan Dashboard（仅风格参考）
+  </div>
+  <div class="pagenum">01 / 07</div>
+</div>
+
+<!-- ================= P2 TopBar · IconRail · SearchPill ================= -->
+<div class="page">
+  <div class="story-head">
+    <span class="tag">&lt;TopBar /&gt; &lt;IconRail /&gt; &lt;SearchPill /&gt;</span>
+    <h2>骨架导航组件</h2>
+    <div class="desc">页面骨架三件套：黑顶栏承载站点导航，左窄栏承载快捷入口，搜索胶囊附属于标题行。</div>
+  </div>
+
+  <div class="canvas" style="top: 150px; left: 40px; width: 760px; height: 250px;">
+    <div class="vrow" style="flex-direction: column; gap: 18px;">
+      <div class="variant">
+        <div class="topbar" style="width: 716px;">
+          <span class="logo">stack·idealjs</span>
+          <span class="menu"><span class="active">全栈教程 🎓</span><span>工具使用</span><span>实践经历</span><span>博客</span></span>
+          <span class="bell">🔔</span>
+          <span class="ava">初</span>
+        </div>
+        <div class="vlabel"><b>default</b> · active = 全栈教程</div>
+      </div>
+      <div class="variant">
+        <div class="topbar" style="width: 716px;">
+          <span class="logo">stack·idealjs</span>
+          <span class="menu"><span>全栈教程 🎓</span><span>工具使用</span><span>实践经历</span><span class="active">博客</span></span>
+          <span class="bell">🔔</span>
+          <span class="ava">初</span>
+        </div>
+        <div class="vlabel"><b>variant</b> · active = 博客（随路由切换）</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="canvas" style="top: 424px; left: 40px; width: 760px; height: 190px;">
+    <div class="vrow" style="gap: 28px;">
+      <div class="variant">
+        <div class="rail" style="height: 128px;"><span>🏠</span><span>📚</span><span>🧩</span><span>⚙️</span></div>
+        <div class="vlabel"><b>&lt;IconRail /&gt;</b> · w 40 · 4 icons</div>
+      </div>
+      <div class="variant">
+        <div class="searchpill">Search…</div>
+        <div class="vlabel"><b>&lt;SearchPill /&gt;</b> · default</div>
+      </div>
+      <div class="variant">
+        <div class="searchpill" style="color:#1a1a1a;">快速开始</div>
+        <div class="vlabel"><b>variant</b> · 已输入</div>
+      </div>
+    </div>
+  </div>
+
+  <div style="position:absolute; top: 150px; left: 828px; width: 412px;">
+    <div class="panel">
+      <h3>&lt;TopBar /&gt; Args</h3>
+      <table class="spec">
+        <tr><th>Prop</th><th>类型</th><th>默认</th><th>说明</th></tr>
+        <tr><td class="k"><code>logo</code></td><td>string</td><td>stack·idealjs</td><td>左侧白色粗体站点名</td></tr>
+        <tr><td class="k"><code>items</code></td><td>string[]</td><td>四项菜单</td><td>全栈教程/工具使用/实践经历/博客</td></tr>
+        <tr><td class="k"><code>active</code></td><td>string</td><td>全栈教程</td><td>当前路由项，白色加粗</td></tr>
+        <tr><td class="k"><code>avatar</code></td><td>string</td><td>初</td><td>渐变圆头像，取首字</td></tr>
+      </table>
+    </div>
+    <div class="panel" style="margin-top: 14px;">
+      <h3>规格说明</h3>
+      <div class="note"><span class="idx">1</span><span class="txt"><b>TopBar</b>：高 46px，底 #111111，菜单居中，当前项 #FFF 600；圆角 12px（页面内嵌时）。</span></div>
+      <div class="note"><span class="idx">2</span><span class="txt"><b>IconRail</b>：白底 40px 宽，图标 14px 灰 #8A8A8A，项间距 14px；首页/书架/积木/设置。</span></div>
+      <div class="note"><span class="idx">3</span><span class="txt"><b>SearchPill</b>：胶囊白底描边，placeholder 灰；输入后文字转主黑。实现映射 Docusaurus navbar search。</span></div>
+    </div>
+  </div>
+
+  <div class="footline">组件设计稿 · Storybook 拆分 · stack idealjs</div>
+  <div class="pagenum">02 / 07</div>
+</div>
+
+<!-- ================= P3 Atoms：Pill · CircleButton · Chip · IconTile ================= -->
+<div class="page">
+  <div class="story-head">
+    <span class="tag">Atoms · Pill / CircleButton / Chip / IconTile</span>
+    <h2>原子组件</h2>
+    <div class="desc">构成卡片与面板的最小单元，四象限展示：每个原子给出全部变体与尺寸规格。</div>
+  </div>
+
+  <!-- 象限 1：Pill -->
+  <div class="canvas" style="top: 146px; left: 40px; width: 590px; height: 196px;">
+    <div style="font-size:15px; font-weight:700; color:#1a1a1a; margin-bottom:14px;">&lt;Pill /&gt; 状态胶囊</div>
+    <div class="vrow" style="gap: 22px;">
+      <div class="variant"><span class="pill done" style="font-size:13px; padding:5px 14px;">✓ Completed 🎉</span><div class="vlabel"><b>done</b> · 紫底 #EFE6FB</div></div>
+      <div class="variant"><span class="pill wip" style="font-size:13px; padding:5px 14px;">Upcoming</span><div class="vlabel"><b>wip</b> · 白底描边</div></div>
+      <div class="variant"><span class="pill time" style="font-size:13px; padding:5px 14px;">⏱ Watching</span><div class="vlabel"><b>time</b> · 白底描边·黑字</div></div>
+    </div>
+    <div style="margin-top:16px; font-size:12px; color:#8a8a8a;">高度统一 24px（页面尺寸）/ 28px（卡片尺寸）· 圆角 999px · 字重 600</div>
+  </div>
+
+  <!-- 象限 2：CircleButton -->
+  <div class="canvas" style="top: 146px; left: 650px; width: 590px; height: 196px;">
+    <div style="font-size:15px; font-weight:700; color:#1a1a1a; margin-bottom:14px;">&lt;CircleButton /&gt; 黑圆按钮</div>
+    <div class="vrow" style="gap: 26px;">
+      <div class="variant"><span class="cbtn" style="width:34px; height:34px; font-size:15px;">✓</span><div class="vlabel"><b>done</b> · 已完成章节</div></div>
+      <div class="variant"><span class="cbtn" style="width:34px; height:34px; font-size:15px;">→</span><div class="vlabel"><b>next</b> · 写作中章节</div></div>
+      <div class="variant"><span class="cbtn" style="width:34px; height:34px; font-size:15px;">▶</span><div class="vlabel"><b>play</b> · 媒体卡播放</div></div>
+    </div>
+    <div style="margin-top:16px; font-size:12px; color:#8a8a8a;">卡内 26px / 解剖展示 34px · 背景 #1A1A1A · 点击进入章节</div>
+  </div>
+
+  <!-- 象限 3：Chip -->
+  <div class="canvas" style="top: 360px; left: 40px; width: 590px; height: 176px;">
+    <div style="font-size:15px; font-weight:700; color:#1a1a1a; margin-bottom:14px;">&lt;Chip /&gt; 关系标签</div>
+    <div class="vrow" style="gap: 18px;">
+      <div class="variant"><span class="chip" style="font-size:12px; padding:3px 12px;">前置：无</span><div class="vlabel"><b>prerequisite</b></div></div>
+      <div class="variant"><span class="chip" style="font-size:12px; padding:3px 12px;">关联：快速开始 React</span><div class="vlabel"><b>relation</b></div></div>
+      <div class="variant"><span class="chip" style="font-size:12px; padding:3px 12px; color:#8a8a8a; border-style:dashed;">关联章节整理中</span><div class="vlabel"><b>empty</b> · 占位虚线</div></div>
+    </div>
+    <div style="margin-top:16px; font-size:12px; color:#8a8a8a;">数据源 courses.ts 的 relations 字段 · 未填时显示占位样式</div>
+  </div>
+
+  <!-- 象限 4：IconTile -->
+  <div class="canvas" style="top: 360px; left: 650px; width: 590px; height: 176px;">
+    <div style="font-size:15px; font-weight:700; color:#1a1a1a; margin-bottom:14px;">&lt;IconTile /&gt; 彩色图标块</div>
+    <div class="vrow" style="gap: 16px;">
+      <div class="variant"><span class="icotile" style="background:#e0e7ff;">🌐</span><div class="vlabel">快速开始</div></div>
+      <div class="variant"><span class="icotile" style="background:#fce7f3;">⚛️</span><div class="vlabel">React</div></div>
+      <div class="variant"><span class="icotile" style="background:#fef3c7;">🧱</span><div class="vlabel">更多示例</div></div>
+      <div class="variant"><span class="icotile" style="background:#d1fae5;">📦</span><div class="vlabel">更多</div></div>
+      <div class="variant"><span class="icotile" style="background:#e0f2fe;">🔗</span><div class="vlabel">全栈基础</div></div>
+      <div class="variant"><span class="icotile" style="background:#ede9fe;">🧠</span><div class="vlabel">高级教程</div></div>
+    </div>
+    <div style="margin-top:16px; font-size:12px; color:#8a8a8a;">26×26 · 圆角 9px · 淡彩底取自课程色映射表</div>
+  </div>
+
+  <div style="position:absolute; top: 534px; left: 40px; right: 40px; padding: 12px 16px;" class="panel" data-spec-panel>
+    <h3 style="margin-bottom:6px;">原子组件规格速查</h3>
+    <table class="spec">
+      <tr><th>原子</th><th>尺寸</th><th>颜色</th><th>圆角</th><th>用途</th></tr>
+      <tr><td class="k">Pill</td><td>高 24/28px</td><td>紫 #EFE6FB / 白底描边</td><td>999px</td><td>完成度与播放状态徽标</td></tr>
+      <tr><td class="k">CircleButton</td><td>26 / 34px</td><td>#1A1A1A + 白字</td><td>50%</td><td>进入章节 / 播放确认</td></tr>
+      <tr><td class="k">Chip</td><td>高 20px</td><td>描边 #CFCFCD 灰字</td><td>999px</td><td>章节前置与关联关系</td></tr>
+      <tr><td class="k">IconTile</td><td>26×26px</td><td>六课程淡彩底</td><td>9px</td><td>卡片左上角章节图标</td></tr>
+    </table>
+  </div>
+
+  <div class="footline">组件设计稿 · Storybook 拆分 · stack idealjs</div>
+  <div class="pagenum">03 / 07</div>
+</div>
+
+<!-- ================= P4 CourseCard ================= -->
+<div class="page">
+  <div class="story-head">
+    <span class="tag">&lt;CourseCard /&gt;</span>
+    <h2>课程白卡 · default 态</h2>
+    <div class="desc">书架的核心单元：六个章节变体共用一个组件，数据全部来自 courses.ts。</div>
+  </div>
+
+  <div class="canvas" style="top: 148px; left: 40px; width: 880px; height: 424px;">
+    <div class="vrow" style="gap: 16px;">
+      <div class="variant">
+        <div class="ccard">
+          <div class="icorow"><span class="icotile" style="background:#e0e7ff;">🌐</span></div>
+          <div class="ttl">快速开始</div>
+          <div class="dsc">写出第一个网页并在浏览器打开，跑起你的第一个 HTTP 服务器。</div>
+          <div class="chips"><span class="chip">前置：无</span></div>
+          <div class="btm"><span class="pill done">✓ Completed 🎉</span><span class="cbtn">✓</span></div>
+        </div>
+        <div class="vlabel"><b>hello-world</b></div>
+      </div>
+      <div class="variant">
+        <div class="ccard">
+          <div class="icorow"><span class="icotile" style="background:#fce7f3;">⚛️</span></div>
+          <div class="ttl">快速开始 React</div>
+          <div class="dsc">用脚手架创建 React 应用，亲手拼出第一个 Todo List。</div>
+          <div class="chips"><span class="chip">前置：快速开始</span></div>
+          <div class="btm"><span class="pill done">✓ Completed 🎉</span><span class="cbtn">✓</span></div>
+        </div>
+        <div class="vlabel"><b>hello-react</b></div>
+      </div>
+      <div class="variant">
+        <div class="ccard">
+          <div class="icorow"><span class="icotile" style="background:#fef3c7;">🧱</span></div>
+          <div class="ttl">更多示例</div>
+          <div class="dsc">浮动布局等补充示例，巩固前面攒下的积木。</div>
+          <div class="chips"><span class="chip">前置：快速开始</span></div>
+          <div class="btm"><span class="pill done">✓ Completed 🎉</span><span class="cbtn">✓</span></div>
+        </div>
+        <div class="vlabel"><b>more-example</b></div>
+      </div>
+    </div>
+    <div class="vrow" style="gap: 16px; margin-top: 16px;">
+      <div class="variant">
+        <div class="ccard">
+          <div class="icorow"><span class="icotile" style="background:#d1fae5;">📦</span></div>
+          <div class="ttl">更多</div>
+          <div class="dsc">把示例工程构建为可发布产物，看清 build 做了什么。</div>
+          <div class="chips"><span class="chip">前置：更多示例</span></div>
+          <div class="btm"><span class="pill done">✓ Completed 🎉</span><span class="cbtn">✓</span></div>
+        </div>
+        <div class="vlabel"><b>more</b></div>
+      </div>
+      <div class="variant">
+        <div class="ccard">
+          <div class="icorow"><span class="icotile" style="background:#e0f2fe;">🔗</span></div>
+          <div class="ttl">全栈基础</div>
+          <div class="dsc">从网页到服务与数据库，串起最小全栈闭环。</div>
+          <div class="chips"><span class="chip" style="color:#8a8a8a; border-style:dashed;">关联章节整理中</span></div>
+          <div class="btm"><span class="pill wip">Upcoming</span><span class="cbtn">→</span></div>
+        </div>
+        <div class="vlabel"><b>full-stack</b> · wip 变体</div>
+      </div>
+      <div class="variant">
+        <div class="ccard">
+          <div class="icorow"><span class="icotile" style="background:#ede9fe;">🧠</span></div>
+          <div class="ttl">高级教程</div>
+          <div class="dsc">数据流、纯函数、CAP——工程上的心智模型。</div>
+          <div class="chips"><span class="chip">前置：全栈基础</span></div>
+          <div class="btm"><span class="pill done">✓ Completed 🎉</span><span class="cbtn">✓</span></div>
+        </div>
+        <div class="vlabel"><b>advance</b></div>
+      </div>
+    </div>
+  </div>
+
+  <div style="position:absolute; top: 148px; left: 948px; width: 292px;">
+    <div class="panel">
+      <h3>Args</h3>
+      <table class="spec">
+        <tr><th>Prop</th><th>类型</th><th>说明</th></tr>
+        <tr><td class="k"><code>title</code></td><td>string</td><td>章节名（分类 label）</td></tr>
+        <tr><td class="k"><code>desc</code></td><td>string</td><td>预期结果一句话</td></tr>
+        <tr><td class="k"><code>done</code></td><td>boolean</td><td>true → ✓ 胶囊 + ✓ 钮</td></tr>
+        <tr><td class="k"><code>relations</code></td><td>string[]</td><td>空 → 虚线占位 chip</td></tr>
+        <tr><td class="k"><code>icon / tint</code></td><td>emoji / hex</td><td>IconTile 底色与图标</td></tr>
+        <tr><td class="k"><code>href</code></td><td>string</td><td>章节分类索引路由</td></tr>
+      </table>
+    </div>
+    <div class="panel" style="margin-top: 12px;">
+      <h3>交互</h3>
+      <div class="note"><span class="idx">1</span><span class="txt">整卡可点 → 进入章节；hover 切换为 <b>&lt;CourseCardMedia /&gt;</b>（见下页）。</span></div>
+      <div class="note"><span class="idx">2</span><span class="txt">Tab focus 与 hover 同态；触屏无预览态。</span></div>
+    </div>
+  </div>
+
+  <div class="footline">组件设计稿 · Storybook 拆分 · stack idealjs</div>
+  <div class="pagenum">04 / 07</div>
+</div>
+
+<!-- ================= P5 CourseCardMedia ================= -->
+<div class="page">
+  <div class="story-head">
+    <span class="tag">&lt;CourseCardMedia /&gt;</span>
+    <h2>悬停媒体卡 · hover 态</h2>
+    <div class="desc">CourseCard 的 hover/focus 形态：淡彩整卡 + 黑色圆形播放钮 + ⏱ 胶囊，GIF 此刻才挂载并循环。</div>
+  </div>
+
+  <div class="canvas" style="top: 148px; left: 40px; width: 560px; height: 330px;">
+    <div class="variant">
+      <div class="ccard media" style="--tint:#e0e7ff; width: 512px; height: 282px;">
+        <div class="player" style="min-height: 180px;">
+          <div class="playbtn" style="width:56px; height:56px; font-size:20px;">▶</div>
+          <span class="pill time" style="position:absolute; right:12px; top:10px; font-size:12px;">⏱ GIF loop</span>
+          <span class="pill time" style="position:absolute; left:12px; bottom:10px; font-size:12px;">预期成果 · 浏览器打开第一个网页</span>
+        </div>
+        <div>
+          <div class="ttl" style="font-size:16px;">快速开始</div>
+          <div class="dsc" style="font-size:12px; color:#555;">GIF 来源 static/gifs/hello-world.gif · loop=0 · 悬停期间持续播放</div>
+        </div>
+      </div>
+      <div class="vlabel"><b>default</b> · tint = #E0E7FF（随章节主题色）</div>
+    </div>
+  </div>
+
+  <div class="canvas" style="top: 502px; left: 40px; width: 560px; height: 150px;">
+    <div style="font-size:14px; font-weight:700; color:#1a1a1a; margin-bottom:12px;">六章节 tint 变体（播放器区域）</div>
+    <div class="vrow" style="gap: 10px;">
+      <div class="variant"><div style="width:70px; height:48px; border-radius:10px; background:#e0e7ff; display:flex; align-items:center; justify-content:center; font-size:12px;">▶</div><div class="vlabel">#E0E7FF</div></div>
+      <div class="variant"><div style="width:70px; height:48px; border-radius:10px; background:#fce7f3; display:flex; align-items:center; justify-content:center; font-size:12px;">▶</div><div class="vlabel">#FCE7F3</div></div>
+      <div class="variant"><div style="width:70px; height:48px; border-radius:10px; background:#fef3c7; display:flex; align-items:center; justify-content:center; font-size:12px;">▶</div><div class="vlabel">#FEF3C7</div></div>
+      <div class="variant"><div style="width:70px; height:48px; border-radius:10px; background:#d1fae5; display:flex; align-items:center; justify-content:center; font-size:12px;">▶</div><div class="vlabel">#D1FAE5</div></div>
+      <div class="variant"><div style="width:70px; height:48px; border-radius:10px; background:#e0f2fe; display:flex; align-items:center; justify-content:center; font-size:12px;">▶</div><div class="vlabel">#E0F2FE</div></div>
+      <div class="variant"><div style="width:70px; height:48px; border-radius:10px; background:#ede9fe; display:flex; align-items:center; justify-content:center; font-size:12px;">▶</div><div class="vlabel">#EDE9FE</div></div>
+    </div>
+  </div>
+
+  <div style="position:absolute; top: 148px; left: 628px; width: 612px;">
+    <div class="panel">
+      <h3>播放器规格</h3>
+      <table class="spec">
+        <tr><th>项</th><th>规格</th></tr>
+        <tr><td class="k">播放钮</td><td>黑 #111 圆形 · 卡内 44px / 展示 56px · 阴影 0 4px 14px</td></tr>
+        <tr><td class="k">⏱ 胶囊</td><td>右上 GIF loop · 左下成果字幕，白底描边胶囊</td></tr>
+        <tr><td class="k">GIF</td><td>640×360 · loop=0 · ≤300KB · hover 时才挂载</td></tr>
+        <tr><td class="k">触屏</td><td>不进入此态，点击直达章节</td></tr>
+      </table>
+    </div>
+    <div class="panel" style="margin-top: 12px;">
+      <h3>状态转换</h3>
+      <div class="note"><span class="idx">1</span><span class="txt"><b>default → hover</b>：mouseenter/focus，卡底翻章节淡彩，播放钮 + 胶囊出现，GIF 挂载。</span></div>
+      <div class="note"><span class="idx">2</span><span class="txt"><b>hover → default</b>：mouseleave/blur，还原白卡，GIF 卸载，HTTP 缓存保留。</span></div>
+      <div class="note"><span class="idx">3</span><span class="txt"><b>再次 hover</b>：缓存命中，瞬时恢复播放，无二次流量。</span></div>
+    </div>
+  </div>
+
+  <div class="footline">组件设计稿 · Storybook 拆分 · stack idealjs</div>
+  <div class="pagenum">05 / 07</div>
+</div>
+
+<!-- ================= P6 StatsRow · EventsPanel ================= -->
+<div class="page">
+  <div class="story-head">
+    <span class="tag">&lt;StatsRow /&gt; · &lt;EventsPanel /&gt;</span>
+    <h2>数据组件 · 统计行与事件栏</h2>
+    <div class="desc">统计行汇报教程规模，事件栏承载章节动态；两者数据均为静态 JSON，可后续接构建脚本生成。</div>
+  </div>
+
+  <div class="canvas" style="top: 148px; left: 40px; width: 700px; height: 168px;">
+    <div style="font-size:14px; font-weight:700; color:#1a1a1a; margin-bottom:12px;">&lt;StatsRow /&gt; 三变体</div>
+    <div class="vrow" style="gap: 14px;">
+      <div class="variant"><div class="stat" style="background:#c9e7f7;"><span class="num">6</span><span class="lab">Total Sections</span></div><div class="vlabel"><b>total</b> · 蓝</div></div>
+      <div class="variant"><div class="stat" style="background:#d2f5df;"><span class="num">5</span><span class="lab">Completed 🎉</span></div><div class="vlabel"><b>done</b> · 绿</div></div>
+      <div class="variant"><div class="stat" style="background:#efe6fb;"><span class="num">1</span><span class="lab">Upcoming</span></div><div class="vlabel"><b>wip</b> · 紫</div></div>
+    </div>
+    <div style="margin-top:12px; font-size:12px; color:#8a8a8a;">数值由 courses.ts 推导：total=length · done=count(done) · wip=total-done</div>
+  </div>
+
+  <div class="canvas" style="top: 340px; left: 40px; width: 700px; height: 312px;">
+    <div style="font-size:14px; font-weight:700; color:#1a1a1a; margin-bottom:12px;">&lt;EventsPanel /&gt; 最近更新 · 四色变体</div>
+    <div class="vrow" style="gap: 14px;">
+      <div class="variant">
+        <div class="ev" style="background:#c9e7f7;">
+          <div class="r1"><span>新增 · Web</span><span class="date">OCT 02</span></div>
+          <div class="r2">「更多示例」补充浮动布局一文</div>
+          <div class="r3">09:00</div>
+        </div>
+        <div class="vlabel"><b>新增</b> · 蓝</div>
+      </div>
+      <div class="variant">
+        <div class="ev" style="background:#e9c8f5;">
+          <div class="r1"><span>章节 · 高级</span><span class="date">SEP 28</span></div>
+          <div class="r2">CAP 一讲更新配图与示例</div>
+          <div class="r3">14:30</div>
+        </div>
+        <div class="vlabel"><b>更新</b> · 紫</div>
+      </div>
+      <div class="variant">
+        <div class="ev" style="background:#f5e6c4;">
+          <div class="r1"><span>计划 · 全栈</span><span class="date">SOON</span></div>
+          <div class="r2">「全栈基础」章节开写</div>
+          <div class="r3">即将开始</div>
+        </div>
+        <div class="vlabel"><b>计划</b> · 黄</div>
+      </div>
+      <div class="variant">
+        <div class="ev" style="background:#d2f5df;">
+          <div class="r1"><span>讨论</span><span class="date">OCT 01</span></div>
+          <div class="r2">讨论区新增 3 帖</div>
+          <div class="r3">20:00</div>
+        </div>
+        <div class="vlabel"><b>讨论</b> · 绿</div>
+      </div>
+    </div>
+  </div>
+
+  <div style="position:absolute; top: 148px; left: 772px; width: 468px;">
+    <div class="panel">
+      <h3>&lt;EventsPanel /&gt; Args</h3>
+      <table class="spec">
+        <tr><th>Prop</th><th>类型</th><th>说明</th></tr>
+        <tr><td class="k"><code>items[]</code></td><td>Event[]</td><td>事件数组，倒序展示</td></tr>
+        <tr><td class="k"><code>type</code></td><td>新增/更新/计划/讨论</td><td>决定淡彩底色</td></tr>
+        <tr><td class="k"><code>date</code></td><td>string</td><td>右上角日期（SOON 等特殊值可）</td></tr>
+        <tr><td class="k"><code>desc / time</code></td><td>string</td><td>动态描述与时间行</td></tr>
+      </table>
+    </div>
+    <div class="panel" style="margin-top: 12px;">
+      <h3>数据与实现</h3>
+      <div class="note"><span class="idx">1</span><span class="txt"><b>StatsRow</b>：纯派生数据，无独立配置；卡宽 flex 均分，圆角 16px。</span></div>
+      <div class="note"><span class="idx">2</span><span class="txt"><b>EventsPanel</b>：数据源 events.ts（新文件）；类型→底色映射：新增蓝/更新紫/计划黄/讨论绿。</span></div>
+      <div class="note"><span class="idx">3</span><span class="txt">事件可由 git log 或 RSS 后续自动生成，先手工维护。</span></div>
+    </div>
+  </div>
+
+  <div class="footline">组件设计稿 · Storybook 拆分 · stack idealjs</div>
+  <div class="pagenum">06 / 07</div>
+</div>
+
+<!-- ================= P7 Dashboard 组装 ================= -->
+<div class="page">
+  <div class="story-head">
+    <span class="tag">&lt;DashboardPage /&gt;</span>
+    <h2>组装 · 组件如何拼成页面</h2>
+    <div class="desc">页面 = TopBar + IconRail + 标题行(SearchPill) + StatsRow + CourseGrid(CourseCard × 6) + EventsPanel。</div>
+  </div>
+
+  <div style="position:absolute; top: 146px; left: 40px; width: 800px; height: 506px; background:#f0f0ef; border-radius:12px; box-shadow:0 8px 26px rgba(26,26,26,0.14);">
+    <div class="topbar" style="border-radius:12px 12px 0 0;">
+      <span class="logo">stack·idealjs</span>
+      <span class="menu"><span class="active">全栈教程 🎓</span><span>工具使用</span><span>博客</span></span>
+      <span class="bell">🔔</span><span class="ava">初</span>
+    </div>
+    <div style="display:flex; height:460px;">
+      <div class="rail" style="height:100%; border-radius:0 0 0 12px;"><span>🏠</span><span>📚</span><span>🧩</span><span>⚙️</span></div>
+      <div style="flex:1; padding:12px 12px 10px; display:flex; flex-direction:column; gap:10px;">
+        <div style="display:flex; align-items:center; justify-content:space-between;">
+          <div style="font-size:17px; font-weight:800; color:#1a1a1a;">全栈工程师教程 📚</div>
+          <div class="searchpill">Search…</div>
+        </div>
+        <div style="display:flex; gap:10px;">
+          <div class="stat" style="flex:1; background:#c9e7f7;"><span class="num" style="font-size:22px;">6</span><span class="lab">Total</span></div>
+          <div class="stat" style="flex:1; background:#d2f5df;"><span class="num" style="font-size:22px;">5</span><span class="lab">Completed 🎉</span></div>
+          <div class="stat" style="flex:1; background:#efe6fb;"><span class="num" style="font-size:22px;">1</span><span class="lab">Upcoming</span></div>
+        </div>
+        <div style="flex:1; display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+          <div class="ccard media" style="--tint:#e0e7ff; width:auto;">
+            <div class="player" style="min-height:44px;"><div class="playbtn" style="width:38px; height:38px; font-size:14px;">▶</div></div>
+            <div class="ttl" style="font-size:12.5px;">快速开始</div>
+          </div>
+          <div class="ccard" style="width:auto;">
+            <div class="icorow"><span class="icotile" style="background:#fce7f3;">⚛️</span></div>
+            <div class="ttl" style="font-size:12.5px;">快速开始 React</div>
+            <div class="btm"><span class="pill done">✓ Completed</span><span class="cbtn" style="width:22px;height:22px;font-size:10px;">✓</span></div>
+          </div>
+          <div class="ccard" style="width:auto;">
+            <div class="icorow"><span class="icotile" style="background:#fef3c7;">🧱</span></div>
+            <div class="ttl" style="font-size:12.5px;">更多示例</div>
+            <div class="btm"><span class="pill done">✓ Completed</span><span class="cbtn" style="width:22px;height:22px;font-size:10px;">✓</span></div>
+          </div>
+          <div class="ccard" style="width:auto;">
+            <div class="icorow"><span class="icotile" style="background:#e0f2fe;">🔗</span></div>
+            <div class="ttl" style="font-size:12.5px;">全栈基础</div>
+            <div class="btm"><span class="pill wip">Upcoming</span><span class="cbtn" style="width:22px;height:22px;font-size:10px;">→</span></div>
+          </div>
+        </div>
+      </div>
+      <div style="width: 190px; padding: 12px 12px 10px 4px; display:flex; flex-direction:column; gap:8px;">
+        <div style="font-size:13px; font-weight:700; color:#1a1a1a;">最近更新 😊</div>
+        <div class="ev" style="background:#c9e7f7; width:auto;">
+          <div class="r1"><span>新增 · Web</span><span class="date">OCT 02</span></div>
+          <div class="r2">「更多示例」补充一文</div>
+        </div>
+        <div class="ev" style="background:#e9c8f5; width:auto;">
+          <div class="r1"><span>章节 · 高级</span><span class="date">SEP 28</span></div>
+          <div class="r2">CAP 更新配图</div>
+        </div>
+        <div class="ev" style="background:#d2f5df; width:auto;">
+          <div class="r1"><span>讨论</span><span class="date">OCT 01</span></div>
+          <div class="r2">新增 3 帖</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div style="position:absolute; top: 146px; left: 872px; width: 368px;">
+    <div class="panel">
+      <h3>组件树（实现映射）</h3>
+      <table class="spec">
+        <tr><th>设计组件</th><th>实现文件</th></tr>
+        <tr><td class="k">DashboardPage</td><td><code>pages/index.tsx</code></td></tr>
+        <tr><td class="k">TopBar</td><td>navbar 主题化 <code>docusaurus.config</code></td></tr>
+        <tr><td class="k">IconRail</td><td><code>CourseShelf/IconRail</code></td></tr>
+        <tr><td class="k">StatsRow</td><td><code>CourseShelf/StatsRow</code></td></tr>
+        <tr><td class="k">CourseCard(/Media)</td><td><code>CourseShelf/CourseCard</code></td></tr>
+        <tr><td class="k">EventsPanel</td><td><code>CourseShelf/EventsPanel</code></td></tr>
+        <tr><td class="k">courses/events 数据</td><td><code>courses.ts / events.ts</code></td></tr>
+      </table>
+    </div>
+    <div class="panel" style="margin-top: 12px;">
+      <h3>组装要点</h3>
+      <div class="note"><span class="idx">1</span><span class="txt">网格 <b>auto-fill minmax(280px, 1fr)</b>；本页示意 2 列，≥1140px 实为 3 列。</span></div>
+      <div class="note"><span class="idx">2</span><span class="txt">各组件可独立验收：本册 02–06 页即逐组件的验收清单。</span></div>
+      <div class="note"><span class="idx">3</span><span class="txt">整页效果见 course-shelf.pdf（v2 整页版）。</span></div>
+    </div>
+  </div>
+
+  <div class="footline">组件设计稿 · Storybook 拆分 · stack idealjs</div>
+  <div class="pagenum">07 / 07</div>
+</div>
+
+</body>
+</html>
