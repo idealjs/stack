@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>课程书架 色彩系统 · 瑞士骨架 × 轻拟物 · stack idealjs</title>
+<style>
+  /* ====== 画布与页面基座（与组件设计稿一致） ====== */
+  @page { size: 1280px 800px; margin: 0; }
+  *, *::before, *::after { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0; width: 1280px;
+    background: #f0f0ef;
+    font-family: "Noto Sans CJK SC", "PingFang SC", "Microsoft YaHei", sans-serif;
+    color: #1a1a1a;
+    -webkit-font-smoothing: antialiased;
+  }
+  .page {
+    width: 1280px; height: 800px; position: relative;
+    background: #f0f0ef; overflow: hidden; page-break-after: always;
+  }
+  .page:last-child { page-break-after: auto; }
+
+  @media screen {
+    html { height: auto; display: flex; justify-content: center; background: #f0f0ef; }
+    body {
+      transform-origin: top center;
+      scale: min(1, calc(100vw / 1280px));
+      margin: 0 auto;
+      box-shadow: 0 0 48px rgba(15, 23, 42, 0.18);
+    }
+  }
+
+  .pagenum { position: absolute; bottom: 26px; right: 40px; font-size: 13px; color: #8a8a8a; letter-spacing: 2px; }
+  .footline { position: absolute; bottom: 26px; left: 40px; font-size: 13px; color: #8a8a8a; letter-spacing: 1px; }
+
+  /* ====== Storybook 页头 ====== */
+  .story-head { position: absolute; top: 36px; left: 40px; right: 40px; }
+  .story-head .tag {
+    display: inline-block; font-size: 15px; font-weight: 700; color: #6d28d9;
+    background: #efe6fb; border-radius: 8px; padding: 3px 12px;
+    font-family: "DejaVu Sans Mono", "Noto Sans CJK SC", monospace;
+  }
+  .story-head h2 { margin: 8px 0 4px; font-size: 28px; font-weight: 800; color: #1a1a1a; }
+  .story-head .desc { font-size: 14.5px; color: #6b6b6b; }
+
+  /* ====== 展示画布 ====== */
+  .canvas {
+    background: #fbfbfa;
+    border: 1px dashed #cfcfcd;
+    border-radius: 18px;
+    padding: 20px 22px;
+    position: absolute;
+  }
+  .panel { background: #ffffff; border-radius: 18px; padding: 18px 20px; box-shadow: 0 1px 2px rgba(26,26,26,0.06); }
+  .panel h3 { margin: 0 0 10px; font-size: 16px; font-weight: 700; color: #1a1a1a; }
+  .note { display: flex; gap: 10px; align-items: flex-start; margin-bottom: 8px; }
+  .note .idx {
+    flex: none; width: 22px; height: 22px; border-radius: 50%;
+    background: #1a1a1a; color: #ffffff; font-size: 13px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center; margin-top: 1px;
+  }
+  .note .txt { font-size: 13px; line-height: 1.55; color: #3d3d3d; }
+  .note .txt b { color: #1a1a1a; }
+
+  table.spec { width: 100%; border-collapse: collapse; font-size: 12px; color: #3d3d3d; }
+  table.spec th { text-align: left; font-weight: 700; color: #1a1a1a; border-bottom: 2px solid #d5d5d3; padding: 5px 8px 5px 0; }
+  table.spec td { border-bottom: 1px solid #ececea; padding: 4px 8px 4px 0; vertical-align: top; }
+  table.spec td.k { color: #1a1a1a; font-weight: 600; white-space: nowrap; }
+  table.spec code {
+    font-family: "DejaVu Sans Mono", monospace; font-size: 11.5px;
+    background: #f4f2fa; color: #6d28d9; border-radius: 5px; padding: 1px 5px;
+  }
+
+  /* ====== 色板 ====== */
+  .group-label { font-size: 13px; font-weight: 700; color: #1a1a1a; margin-bottom: 3px; }
+  .group-label i { font-style: normal; font-weight: 400; font-size: 11.5px; color: #6b6b6b; margin-left: 8px; }
+  .swrow { display: grid; gap: 8px; margin-bottom: 14px; }
+  .sw { min-width: 0; }
+  .sw .blk {
+    height: 42px; border-radius: 8px;
+    box-shadow: inset 0 0 0 1px rgba(26,26,26,0.05);
+  }
+  .sw .tk { font-family: "DejaVu Sans Mono", monospace; font-size: 9.5px; font-weight: 700; color: #1a1a1a; margin-top: 5px; white-space: nowrap; overflow: hidden; }
+  .sw .hx { font-family: "DejaVu Sans Mono", monospace; font-size: 9px; color: #6b6b6b; white-space: nowrap; }
+  .sw .use { font-size: 9.5px; color: #8a8a8a; margin-top: 1px; white-space: nowrap; overflow: hidden; }
+
+  /* ====== 应用样张（第 2 页） ====== */
+  .elev { width: 200px; height: 112px; background: #ffffff; border-radius: 14px; padding: 12px 14px; }
+  .elev .et { font-size: 13px; font-weight: 700; }
+  .elev .ed { font-size: 11px; color: #6b6b6b; margin-top: 4px; line-height: 1.5; }
+  .elev .esh { font-family: "DejaVu Sans Mono", monospace; font-size: 9px; color: #8a8a8a; margin-top: 8px; }
+  .e0 { box-shadow: none; border: 1px solid #d5d5d3; }
+  .e1 { box-shadow: 0 1px 2px rgba(26,26,26,0.06); }
+  .e2 { box-shadow: 0 8px 24px rgba(26,26,26,0.12); transform: translateY(-3px); }
+
+  .pill { display: inline-flex; align-items: center; font-size: 10px; font-weight: 700; padding: 2px 9px; border-radius: 999px; }
+  .pill.done { background: #dcfce7; color: #15803d; }
+  .pill.next { background: #e0e7ff; color: #4338ca; }
+  .pill.lock { background: #ffffff; color: #6b6b6b; border: 1px solid #d5d5d3; }
+
+  .ticket {
+    width: 212px; height: 88px; background: #ffffff; border-radius: 12px;
+    box-shadow: 0 1px 2px rgba(26,26,26,0.06);
+    display: flex; align-items: stretch; position: relative;
+  }
+  .ticket .tl { width: 64px; border-radius: 12px 0 0 12px; display: flex; align-items: center; justify-content: center; font-size: 26px; }
+  .ticket .tb { flex: 1; padding: 12px 12px 10px; display: flex; flex-direction: column; gap: 7px; justify-content: center; }
+  .ticket .tb b { font-size: 13.5px; }
+  .ticket .tb .no { font-family: "DejaVu Sans Mono", monospace; font-size: 9px; color: #8a8a8a; }
+  .ticket .stub {
+    width: 46px; border-left: 1.5px dashed #d5d5d3;
+    display: flex; align-items: center; justify-content: center;
+    font-family: "DejaVu Sans Mono", monospace; font-size: 10px; color: #8a8a8a;
+  }
+  .ticket.punched::before, .ticket.punched::after {
+    content: ""; position: absolute; right: 39px; width: 14px; height: 14px;
+    border-radius: 50%; background: #fbfbfa; box-shadow: inset 0 1px 2px rgba(26,26,26,0.08);
+  }
+  .ticket.punched::before { top: -7px; }
+  .ticket.punched::after { bottom: -7px; }
+
+  .spine {
+    width: 34px; height: 150px; border-radius: 6px 6px 3px 3px;
+    writing-mode: vertical-rl; text-orientation: upright;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 700; letter-spacing: 2px;
+    box-shadow: inset 0 0 0 1px rgba(26,26,26,0.04);
+  }
+
+  .edge { fill: none; stroke-width: 1.4; stroke-linecap: butt; stroke-dasharray: 4 2; stroke: #a2b49b; }
+  .station { fill: #758c72; }
+
+  .rcard {
+    width: 190px; background: #ffffff; border-radius: 12px; padding: 10px;
+    box-shadow: 0 1px 3px rgba(26,26,26,0.08);
+  }
+  .rcard .rzone { height: 95px; border-radius: 7px; display: flex; align-items: center; justify-content: center; position: relative; }
+  .rcard .rzone span { font-size: 30px; }
+  .rcard .rt { display: flex; align-items: center; gap: 6px; margin-top: 8px; }
+  .rcard .rt .icotile { width: 18px; height: 18px; border-radius: 6px; font-size: 10px; flex: none; display: flex; align-items: center; justify-content: center; }
+  .rcard .rt b { font-size: 12.5px; flex: 1; }
+</style>
+</head>
+<body>
+
+<!-- ================= P1 Token 色板 ================= -->
+<div class="page">
+  <div class="story-head">
+    <span class="tag">&lt;ColorSystem /&gt;</span>
+    <h2>色彩系统 · 瑞士骨架 × 轻拟物</h2>
+    <div class="desc">瑞士给骨架：网格、排印、留白、黑白灰信息层。拟物给物件：卡是纸、章是书脊、状态是票、课程关系是线路图。彩色与材质不上文字区。</div>
+  </div>
+
+  <div class="canvas" style="top: 138px; left: 40px; width: 880px; height: 594px;">
+    <div style="font-size:15px; font-weight:700; color:#1a1a1a; margin-bottom:12px;">Token 色板 · 四层分工</div>
+
+    <div class="group-label">① 中性阶 <i>纸与桌面——信息永远坐在这层</i></div>
+    <div class="swrow" style="grid-template-columns: repeat(9, 1fr);">
+      <div class="sw"><div class="blk" style="background:#111111;"></div><div class="tk">ink-900</div><div class="hx">#111111</div><div class="use">顶栏</div></div>
+      <div class="sw"><div class="blk" style="background:#1a1a1a;"></div><div class="tk">ink-800</div><div class="hx">#1a1a1a</div><div class="use">标题</div></div>
+      <div class="sw"><div class="blk" style="background:#555555;"></div><div class="tk">ink-600</div><div class="hx">#555555</div><div class="use">次级正文</div></div>
+      <div class="sw"><div class="blk" style="background:#6b6b6b;"></div><div class="tk">ink-500</div><div class="hx">#6b6b6b</div><div class="use">注脚</div></div>
+      <div class="sw"><div class="blk" style="background:#d5d5d3;"></div><div class="tk">ink-300</div><div class="hx">#d5d5d3</div><div class="use">发丝线</div></div>
+      <div class="sw"><div class="blk" style="background:#ececea;"></div><div class="tk">ink-200</div><div class="hx">#ececea</div><div class="use">分隔线</div></div>
+      <div class="sw"><div class="blk" style="background:#fbfbfa;"></div><div class="tk">canvas</div><div class="hx">#fbfbfa</div><div class="use">画布底</div></div>
+      <div class="sw"><div class="blk" style="background:#ffffff;"></div><div class="tk">paper</div><div class="hx">#ffffff</div><div class="use">纸面·卡</div></div>
+      <div class="sw"><div class="blk" style="background:#f0f0ef;"></div><div class="tk">desk</div><div class="hx">#f0f0ef</div><div class="use">桌面底</div></div>
+    </div>
+
+    <div class="group-label">② 行动 · 靛蓝 <i>「能去哪、做什么」——按钮 / 入口徽章 / 链接</i></div>
+    <div class="swrow" style="grid-template-columns: repeat(4, 1fr);">
+      <div class="sw"><div class="blk" style="background:#6366f1;"></div><div class="tk">accent</div><div class="hx">#6366f1</div><div class="use">主行动</div></div>
+      <div class="sw"><div class="blk" style="background:#4f46e5;"></div><div class="tk">accent-deep</div><div class="hx">#4f46e5</div><div class="use">按下/hover</div></div>
+      <div class="sw"><div class="blk" style="background:#e0e7ff;"></div><div class="tk">accent-tint</div><div class="hx">#e0e7ff</div><div class="use">行动淡底</div></div>
+      <div class="sw"><div class="blk" style="background:#4338ca;"></div><div class="tk">accent-text</div><div class="hx">#4338ca</div><div class="use">淡底文字</div></div>
+    </div>
+
+    <div class="group-label">③ 旅程与完成 · 绿系 <i>「走到哪了」——族内明度分层，路线灰绿 / 完成清绿</i></div>
+    <div class="swrow" style="grid-template-columns: repeat(5, 1fr);">
+      <div class="sw"><div class="blk" style="background:#a2b49b;"></div><div class="tk">route</div><div class="hx">#a2b49b</div><div class="use">路线虚线</div></div>
+      <div class="sw"><div class="blk" style="background:#758c72;"></div><div class="tk">station</div><div class="hx">#758c72</div><div class="use">站点·胶囊</div></div>
+      <div class="sw"><div class="blk" style="background:#dcfce7;"></div><div class="tk">done-bg</div><div class="hx">#dcfce7</div><div class="use">完成淡底</div></div>
+      <div class="sw"><div class="blk" style="background:#15803d;"></div><div class="tk">done-text</div><div class="hx">#15803d</div><div class="use">完成文字</div></div>
+      <div class="sw"><div class="blk" style="background:#ffffff;"></div><div class="tk">lock</div><div class="hx">#6b6b6b</div><div class="use">锁定·灰</div></div>
+    </div>
+
+    <div class="group-label">④ 章节书脊色 <i>「这是谁」——身份不承载状态；tint 只上 16:9 预期区与图标瓦</i></div>
+    <div class="swrow" style="grid-template-columns: repeat(6, 1fr); margin-bottom:0;">
+      <div class="sw"><div class="blk" style="background:#e0e7ff;"></div><div class="tk">ch1 快速开始</div><div class="hx">#e0e7ff</div><div class="use">字 #4338ca</div></div>
+      <div class="sw"><div class="blk" style="background:#fce7f3;"></div><div class="tk">ch2 React</div><div class="hx">#fce7f3</div><div class="use">字 #be185d</div></div>
+      <div class="sw"><div class="blk" style="background:#fef3c7;"></div><div class="tk">ch3 更多示例</div><div class="hx">#fef3c7</div><div class="use">字 #b45309</div></div>
+      <div class="sw"><div class="blk" style="background:#d1fae5;"></div><div class="tk">ch4 更多</div><div class="hx">#d1fae5</div><div class="use">字 #047857</div></div>
+      <div class="sw"><div class="blk" style="background:#e0f2fe;"></div><div class="tk">ch5 全栈基础</div><div class="hx">#e0f2fe</div><div class="use">字 #0369a1</div></div>
+      <div class="sw"><div class="blk" style="background:#ede9fe;"></div><div class="tk">ch6 高级教程</div><div class="hx">#ede9fe</div><div class="use">字 #6d28d9</div></div>
+    </div>
+  </div>
+
+  <div style="position:absolute; top: 138px; left: 948px; width: 292px;" class="panel">
+    <h3>四层分工</h3>
+    <table class="spec">
+      <tr><th>层</th><th>回答</th></tr>
+      <tr><td class="k">中性阶</td><td>信息是什么</td></tr>
+      <tr><td class="k">靛蓝 · 行动</td><td>能去哪、做什么</td></tr>
+      <tr><td class="k">绿 · 旅程</td><td>走到哪了</td></tr>
+      <tr><td class="k">章节色</td><td>这是谁（身份）</td></tr>
+    </table>
+    <div style="font-size:12px; color:#555; line-height:1.6; margin-top:10px;">四层各管一个问题，互不兼职：状态不借用章节色，行动不借用绿。</div>
+  </div>
+  <div style="position:absolute; top: 402px; left: 948px; width: 292px;" class="panel">
+    <h3>设计原则</h3>
+    <div class="note" style="margin-bottom:4px;"><span class="idx">1</span><span class="txt"><b>文字坐中性面</b>：标题正文只在白/灰底；彩色仅作淡底与小徽章。</span></div>
+    <div class="note" style="margin-bottom:4px;"><span class="idx">2</span><span class="txt"><b>饱和度预算</b>：一屏彩色面积 ≤ 10%，大底只有 canvas / paper / desk。</span></div>
+    <div class="note" style="margin-bottom:4px;"><span class="idx">3</span><span class="txt"><b>章节色是身份不是状态</b>：tint 不承载 done / lock。</span></div>
+    <div class="note" style="margin-bottom:4px;"><span class="idx">4</span><span class="txt"><b>材质只上物件</b>：纸卡、书脊、票券、线路可拟物；信息区永远平。</span></div>
+    <div class="note" style="margin-bottom:4px;"><span class="idx">5</span><span class="txt"><b>不用渐变</b>；阴影只三级海拔（见 02 页）。</span></div>
+    <div class="note" style="margin-bottom:0;"><span class="idx">6</span><span class="txt"><b>绿系族内分层</b>：路线 sage 灰绿、完成 clear 绿，靠饱和与明度区分。</span></div>
+  </div>
+
+  <div class="footline">色彩系统 · ColorSystem · stack idealjs</div>
+  <div class="pagenum">01 / 02</div>
+</div>
+
+<!-- ================= P2 应用样张 ================= -->
+<div class="page">
+  <div class="story-head">
+    <span class="tag">&lt;ColorSystem /&gt;</span>
+    <h2>色彩应用 · 海拔、票券与书脊</h2>
+    <div class="desc">拟物出现在物件上：卡片是纸（三级海拔），状态是票（打孔撕线），章节是书脊（竖排 tint）。拿起卡片时播放 GIF——e2 阴影即「被拿起」。</div>
+  </div>
+
+  <div class="canvas" style="top: 138px; left: 40px; width: 880px; height: 322px;">
+    <div style="font-size:15px; font-weight:700; color:#1a1a1a; margin-bottom:12px;">海拔三级 · 卡片是纸</div>
+    <div style="display:flex; gap:16px; margin-bottom:18px; align-items:flex-start;">
+      <div class="elev e0"><div class="et">e0 · 信息区</div><div class="ed">无阴影，发丝线定界。表格、正文、目录。</div><div class="esh">box-shadow: none</div></div>
+      <div class="elev e1"><div class="et">e1 · 纸卡静置</div><div class="ed">1px 落影，纸放在桌上的重量。</div><div class="esh">0 1px 2px · .06</div></div>
+      <div class="elev e2"><div class="et">e2 · 拿起</div><div class="ed">hover 播放 GIF：卡片浮起 3px，大而软的影。</div><div class="esh">0 8px 24px · .12</div></div>
+      <div style="font-size:12px; color:#555; line-height:1.7; width:170px; padding-top:6px;">海拔只上白纸卡；信息区用发丝线定界，不用阴影造假层级。</div>
+    </div>
+
+    <div style="font-size:15px; font-weight:700; color:#1a1a1a; margin-bottom:12px;">票券 · 状态是票</div>
+    <div style="display:flex; gap:24px; align-items:flex-start;">
+      <div class="ticket punched">
+        <div class="tl" style="background:#e0e7ff;">🌐</div>
+        <div class="tb"><b>快速开始</b><span class="pill done">✓ 完成</span><span class="no">No. 001</span></div>
+        <div class="stub">№01</div>
+      </div>
+      <div class="ticket">
+        <div class="tl" style="background:#e0f2fe;">🔗</div>
+        <div class="tb"><b>全栈基础</b><span class="pill lock">🔒 未开始</span><span class="no">No. 005</span></div>
+        <div class="stub" style="border-left-style:solid;">№05</div>
+      </div>
+      <div style="font-size:12px; color:#555; line-height:1.7; width:280px; padding-top:6px;">完成票沿撕线<b>打孔</b>（拟物：检票）；未开始不打孔、撕线为实线。票号 = 章程序号。</div>
+    </div>
+  </div>
+
+  <div class="canvas" style="top: 478px; left: 40px; width: 880px; height: 254px;">
+    <div style="font-size:15px; font-weight:700; color:#1a1a1a; margin-bottom:12px;">书脊与组合 · 章节是书</div>
+    <div style="display:flex; gap:22px; align-items:flex-start;">
+      <div style="display:flex; gap:8px; padding-top:4px; border-bottom:2px solid #d5d5d3; padding-bottom:0;">
+        <div class="spine" style="background:#e0e7ff; color:#4338ca;">快速开始</div>
+        <div class="spine" style="background:#fce7f3; color:#be185d;">React</div>
+        <div class="spine" style="background:#fef3c7; color:#b45309;">更多示例</div>
+        <div class="spine" style="background:#d1fae5; color:#047857;">更多</div>
+        <div class="spine" style="background:#e0f2fe; color:#0369a1;">全栈基础</div>
+        <div class="spine" style="background:#ede9fe; color:#6d28d9;">高级教程</div>
+      </div>
+      <div class="rcard">
+        <div class="rzone" style="background:#e0e7ff;"><span>🌐</span></div>
+        <div class="rt"><span class="icotile" style="background:#e0e7ff;">🌐</span><b>快速开始</b><span class="pill done">✓</span></div>
+      </div>
+      <div style="flex:1; padding-top:6px;">
+        <svg width="360" height="120" viewBox="0 0 360 120">
+          <path class="edge" d="M 8 30 H 118"/>
+          <circle class="station" cx="8" cy="30" r="2.8"/>
+          <path class="edge" d="M 118 30 H 130 A 8 8 0 0 0 138 22 V 14 A 8 8 0 0 1 146 6 H 300"/>
+          <path class="edge" d="M 118 30 H 130 A 8 8 0 0 1 138 38 V 62 A 8 8 0 0 0 146 70 H 297"/>
+          <path class="edge" d="M 8 78 H 80 A 8 8 0 0 1 88 86 V 98"/>
+          <circle class="station" cx="118" cy="30" r="2.8"/>
+          <circle class="station" cx="8" cy="78" r="2.8"/>
+          <rect class="station" x="294" y="60" width="6" height="20" rx="3"/>
+        </svg>
+        <div style="font-size:11px; color:#6b6b6b; margin-top:2px;">线路 token 仅两枚：sage 线 + 站点绿；多线卡口用胶囊。</div>
+      </div>
+    </div>
+  </div>
+
+  <div style="position:absolute; top: 138px; left: 948px; width: 292px;" class="panel">
+    <h3>海拔表</h3>
+    <table class="spec">
+      <tr><th>级</th><th>阴影</th><th>场景</th></tr>
+      <tr><td class="k"><code>e0</code></td><td>无 · 发丝线</td><td>信息区</td></tr>
+      <tr><td class="k"><code>e1</code></td><td>0 1 2 · .06</td><td>纸卡静置</td></tr>
+      <tr><td class="k"><code>e2</code></td><td>0 8 24 · .12</td><td>拿起 / hover</td></tr>
+      <tr><td class="k"><code>e3</code></td><td>0 16 48 · .16</td><td>弹层</td></tr>
+    </table>
+    <div style="font-size:12px; color:#555; line-height:1.6; margin-top:10px;">e2 同时 <code style="font-family:'DejaVu Sans Mono',monospace;font-size:11px;">translateY(-3px)</code>；海拔只上白纸卡。</div>
+  </div>
+  <div style="position:absolute; top: 356px; left: 948px; width: 292px;" class="panel">
+    <h3>票券与书脊</h3>
+    <div class="note" style="margin-bottom:6px;"><span class="idx">1</span><span class="txt"><b>打孔即完成</b>：✓ 票沿虚线撕线打双孔；未开始实线无孔。</span></div>
+    <div class="note" style="margin-bottom:6px;"><span class="idx">2</span><span class="txt"><b>书脊恒宽</b>：34px 竖排，章节 tint 全高铺，名称用配套字色。</span></div>
+    <div class="note" style="margin-bottom:0;"><span class="idx">3</span><span class="txt"><b>撕线即虚线</b>：票券撕线与路线用同一 4:2 点划语言。</span></div>
+  </div>
+
+  <div class="footline">色彩系统 · ColorSystem · stack idealjs</div>
+  <div class="pagenum">02 / 02</div>
+</div>
+
+</body>
+</html>

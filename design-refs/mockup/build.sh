@@ -17,7 +17,7 @@ export TMPDIR="$HOME/.cache/h2p-tmp"
 
 STEMS=("$@")
 if [ ${#STEMS[@]} -eq 0 ]; then
-  STEMS=(course-shelf components)
+  STEMS=(course-shelf components color-system)
 fi
 
 for STEM in "${STEMS[@]}"; do
