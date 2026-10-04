@@ -45,13 +45,12 @@
   .sec-label { font-size: 13.5px; font-weight: 700; color: #1a1a1a; margin-bottom: 8px; }
   .sec-label i { font-style: normal; font-weight: 400; font-size: 11.5px; color: #6b6b6b; margin-left: 8px; }
   .shapechip .box {
-    width: 52px; height: 52px; margin: 0 auto; border-radius: 12px; background: #ffffff;
+    width: 46px; height: 46px; margin: 0 auto; border-radius: 11px; background: #ffffff;
     border: 2px solid #111111; display: flex; align-items: center; justify-content: center;
   }
   .shapechip .sn { font-size: 12px; font-weight: 800; margin-top: 6px; text-align: center; }
-  .shapechip .sm { font-size: 10px; color: #6b6b6b; margin-top: 2px; line-height: 1.4; text-align: center; }
-  .shapechip .src { font-size: 9px; color: #8a8a8a; margin-top: 3px; text-align: center; }
-  .msline { stroke: #111111; stroke-width: 2.5; fill: none; }
+  .shapechip .sm { font-size: 10px; color: #6b6b6b; margin-top: 2px; line-height: 1.3; text-align: center; }
+    .msline { stroke: #111111; stroke-width: 2.5; fill: none; }
   .msstation { stroke: #111111; stroke-width: 2; }
   .msticket {
     width: 216px; background: #fff9f0; border: 2px solid #111111; border-radius: 12px;
@@ -88,48 +87,41 @@
   </div>
 
   <div class="canvas" style="top: 138px; left: 40px; width: 880px; height: 594px;">
-    <div style="display:grid; grid-template-columns:repeat(4, 1fr); gap:14px;">
+    <div style="display:grid; grid-template-columns:repeat(4, 1fr); gap:10px;">
       <div class="shapechip">
         <div class="box"><svg width="30" height="28"><path d="M15 2 L29 26 L1 26 Z" fill="#ff6b6b" stroke="#111" stroke-width="2"/></svg></div>
         <div class="sn">▲ 靶子</div>
         <div class="sm">目标——这一章要做成什么事<br>卡头打头，教程最前</div>
-        <div class="src">skill · 靶子先行</div>
       </div>
       <div class="shapechip">
         <div class="box"><svg width="30" height="28"><circle cx="9" cy="14" r="6" fill="#ffd93d" stroke="#111" stroke-width="2"/><circle cx="22" cy="14" r="6" fill="#fff9f0" stroke="#111" stroke-width="2"/></svg></div>
         <div class="sn">● 积木</div>
         <div class="sm">完成目标的零件；点列实心=已学<br>空心=未学</div>
-        <div class="src">skill · 积木清单</div>
       </div>
       <div class="shapechip">
         <div class="box"><svg width="30" height="28"><circle cx="15" cy="14" r="9" fill="none" stroke="#4ecdc4" stroke-width="4"/><circle cx="15" cy="14" r="9" fill="none" stroke="#111" stroke-width="1.5"/></svg></div>
         <div class="sn">○ 预期</div>
         <div class="sm">做成之后可观察、可核对的样子<br>16:9 相框角标</div>
-        <div class="src">skill · 预期结果</div>
       </div>
       <div class="shapechip">
         <div class="box"><svg width="32" height="28"><path d="M2 18 q3.5 -14 7 0 t7 0 t7 0 t7 0" fill="none" stroke="#5b8def" stroke-width="3" stroke-linecap="round"/></svg></div>
         <div class="sn">～ 代理区</div>
         <div class="sm">无学习价值的过程，交给 agent<br>只给预期与验收</div>
-        <div class="src">skill · 每步先分类</div>
       </div>
       <div class="shapechip">
         <div class="box"><svg width="30" height="28"><rect x="2" y="10" width="26" height="9" fill="#ff8fab" stroke="#111" stroke-width="2"/></svg></div>
         <div class="sn">▬ 价值区</div>
         <div class="sm">有学习价值，过程就地写清<br>露出认知基础</div>
-        <div class="src">skill · 每步先分类</div>
       </div>
       <div class="shapechip">
         <div class="box"><svg width="30" height="28"><path d="M 15 26 L 10 21 L 20 16 L 10 11 L 20 6 L 15 2" fill="none" stroke="#ff6b6b" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/></svg></div>
         <div class="sn">⌇ 脱靶</div>
         <div class="sm">竖立颤抖——图形入口<br>追随图形进入阅读</div>
-        <div class="src">skill · 脱靶提醒</div>
       </div>
       <div class="shapechip">
         <div class="box"><svg width="30" height="28"><path d="M15 3 v22 M4 14 h22" stroke="#a78bfa" stroke-width="4" stroke-linecap="round"/><path d="M15 3 v22 M4 14 h22" stroke="#111" stroke-width="1.2"/></svg></div>
         <div class="sn">＋ 指派</div>
         <div class="sm">位置给坐标、预期当尺子<br>场景管巩固</div>
-        <div class="src">skill · 指派学习</div>
       </div>
       <div style="background:#111; border-radius:14px; padding:14px; display:flex; flex-direction:column; justify-content:center;">
         <div style="font-size:12px; font-weight:800; color:#ffd93d;">一横一竖对举</div>
@@ -137,32 +129,36 @@
       </div>
     </div>
 
-    <div class="sec-label" style="margin-top:18px;">散落规则 <i>形状如何落在空白里</i></div>
-    <table style="width:100%; border-collapse:collapse; font-size:11.5px; color:#3d3d3d;">
+    <div class="sec-label" style="margin-top:10px;">词汇表 · 父子层级 <i>与 ai-era-tutorial 词汇表对齐——父词统摄子词，图形落在子词上</i></div>
+    <table style="width:100%; border-collapse:collapse; font-size:11px; color:#3d3d3d;">
       <tr style="border-bottom:2px solid #d5d5d3;">
-        <th style="text-align:left; padding:5px 8px 5px 0; color:#1a1a1a;">规则</th><th style="text-align:left; padding:5px 8px 5px 0; color:#1a1a1a;">说明</th>
+        <th style="text-align:left; padding:4px 8px 4px 0; color:#1a1a1a; width:86px;">父词</th>
+        <th style="text-align:left; padding:4px 8px 4px 0; color:#1a1a1a; width:168px;">图形 · 子词</th>
+        <th style="text-align:left; padding:4px 8px 4px 0; color:#1a1a1a;">释义（skill 口径）</th>
       </tr>
-      <tr style="border-bottom:1px solid #ececea;"><td style="padding:6px 8px 6px 0; font-weight:700; color:#1a1a1a; width:130px;">密度 ≤ 8 / 屏</td><td style="padding:6px 8px 6px 0;">散落形状总数控制，避免噪化。</td></tr>
-      <tr style="border-bottom:1px solid #ececea;"><td style="padding:6px 8px 6px 0; font-weight:700; color:#1a1a1a;">只在空白</td><td style="padding:6px 8px 6px 0;">永不压字、压卡、压线；与内容保持 ≥ 8px 间距。</td></tr>
-      <tr style="border-bottom:1px solid #ececea;"><td style="padding:6px 8px 6px 0; font-weight:700; color:#1a1a1a;">语境相关</td><td style="padding:6px 8px 6px 0;">页面里的散落形状应与附近内容语义呼应（脱靶内容旁放 ⌇）。</td></tr>
-      <tr><td style="padding:6px 8px 6px 0; font-weight:700; color:#1a1a1a;">尺寸阶梯</td><td style="padding:6px 8px 6px 0;">主标记 28-44px；装饰散落 16-24px；线内标记跟随线规格。</td></tr>
+      <tr style="border-bottom:1px solid #ececea;"><td rowspan="3" style="padding:3px 8px 3px 0; font-weight:800; color:#1a1a1a; vertical-align:top;">靶子</td><td style="padding:3px 8px 3px 0;">▲ 目标</td><td style="padding:3px 8px 3px 0;">做什么</td></tr>
+      <tr style="border-bottom:1px solid #ececea;"><td style="padding:3px 8px 3px 0;">○ 预期结果</td><td style="padding:3px 8px 3px 0;">做成长什么样、怎么核对</td></tr>
+      <tr style="border-bottom:1px solid #ececea;"><td style="padding:3px 8px 3px 0;">● 积木清单</td><td style="padding:3px 8px 3px 0;">要用到的零件——只列用到的；说零件不说知识</td></tr>
+      <tr style="border-bottom:1px solid #ececea;"><td rowspan="2" style="padding:3px 8px 3px 0; font-weight:800; color:#1a1a1a; vertical-align:top;">步骤分类</td><td style="padding:3px 8px 3px 0;">～ 代理区</td><td style="padding:3px 8px 3px 0;">过程无学习价值——交给 agent，只给预期与验收</td></tr>
+      <tr style="border-bottom:1px solid #ececea;"><td style="padding:3px 8px 3px 0;">▬ 价值区</td><td style="padding:3px 8px 3px 0;">过程有学习价值——就地写清，露出认知基础</td></tr>
+      <tr style="border-bottom:1px solid #ececea;"><td rowspan="4" style="padding:3px 8px 3px 0; font-weight:800; color:#1a1a1a; vertical-align:top;">指派学习</td><td style="padding:3px 8px 3px 0;">＋ 三样（图形入口）</td><td style="padding:3px 8px 3px 0;">教材只留三样，讲解交给读者的 agent</td></tr>
+      <tr style="border-bottom:1px solid #ececea;"><td style="padding:3px 8px 3px 0;">　└ 位置</td><td style="padding:3px 8px 3px 0;">知识体系中的哪一部分——给坐标</td></tr>
+      <tr style="border-bottom:1px solid #ececea;"><td style="padding:3px 8px 3px 0;">　└ 预期</td><td style="padding:3px 8px 3px 0;">实践完的结果应长什么样——当尺子</td></tr>
+      <tr style="border-bottom:1px solid #ececea;"><td style="padding:3px 8px 3px 0;">　└ 场景</td><td style="padding:3px 8px 3px 0;">带回 agent 再做的练习——管巩固</td></tr>
+      <tr style="border-bottom:1px solid #ececea;"><td rowspan="2" style="padding:3px 8px 3px 0; font-weight:800; color:#1a1a1a; vertical-align:top;">脱靶提醒</td><td style="padding:3px 8px 3px 0;">⌇ 图形标记</td><td style="padding:3px 8px 3px 0;">不人为挖坑；跟在指派后——先见图形，再读文字</td></tr>
+      <tr style="border-bottom:1px solid #ececea;"><td style="padding:3px 8px 3px 0;">　└ 可能性 / 长相</td><td style="padding:3px 8px 3px 0;">怎么脱靶 ＋ 脱靶时什么样——撞上时认出缺哪块</td></tr>
+      <tr><td style="padding:3px 8px 3px 0; font-weight:800; color:#1a1a1a; vertical-align:top;">认知基础</td><td style="padding:3px 8px 3px 0;">底座纹（真机验收章）</td><td style="padding:3px 8px 3px 0;">env / 库 / 运行环境——脚下的地，<b>不是积木</b>；就地露出，真机验收</td></tr>
     </table>
   </div>
 
   <div style="position:absolute; top: 138px; left: 948px; width: 292px;" class="panel">
-    <h3>形状 → 语义</h3>
-    <table class="spec">
-      <tr><th>形状</th><th>语义</th><th>出处</th></tr>
-      <tr><td class="k">▲ 三角</td><td>目标</td><td>靶子先行</td></tr>
-      <tr><td class="k">● 实心圆</td><td>积木（已学）</td><td>积木清单</td></tr>
-      <tr><td class="k">○ 圆环</td><td>预期结果</td><td>可核对的样子</td></tr>
-      <tr><td class="k">～ 横波</td><td>代理区</td><td>交给 agent</td></tr>
-      <tr><td class="k">▬ 实心条</td><td>价值区</td><td>就地写过程</td></tr>
-      <tr><td class="k">⌇ 竖抖</td><td>脱靶警示</td><td>图形入口</td></tr>
-      <tr><td class="k">＋ 十字</td><td>指派学习</td><td>位置/预期/场景</td></tr>
-    </table>
+    <h3>散落规则</h3>
+    <div class="note" style="margin-bottom:6px;"><span class="idx">1</span><span class="txt"><b>密度 ≤ 8 / 屏</b>：散落形状总数控制，避免噪化。</span></div>
+    <div class="note" style="margin-bottom:6px;"><span class="idx">2</span><span class="txt"><b>只在空白</b>：永不压字、压卡、压线；间距 ≥ 8px。</span></div>
+    <div class="note" style="margin-bottom:6px;"><span class="idx">3</span><span class="txt"><b>语境相关</b>：与附近内容语义呼应（脱靶内容旁放 ⌇）。</span></div>
+    <div class="note" style="margin-bottom:0;"><span class="idx">4</span><span class="txt"><b>尺寸阶梯</b>：主标记 28-44px；装饰散落 16-24px。</span></div>
   </div>
-  <div style="position:absolute; top: 428px; left: 948px; width: 292px;" class="panel">
+  <div style="position:absolute; top: 400px; left: 948px; width: 292px;" class="panel">
     <h3>符号规则</h3>
     <div class="note" style="margin-bottom:6px;"><span class="idx">1</span><span class="txt"><b>装饰即语义</b>：无含义的形状不落版面。</span></div>
     <div class="note" style="margin-bottom:6px;"><span class="idx">2</span><span class="txt"><b>形状即内容定义</b>：读者看到形状即知内容类型。</span></div>
