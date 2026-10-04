@@ -322,12 +322,12 @@
 <div class="page">
   <div class="story-head">
     <span class="tag">&lt;Components /&gt; 4/4</span>
-    <h2>组件 · 指派学习块、脱靶注与入口梳理</h2>
-    <div class="desc">三个配套组件：＋指派学习块（位置/预期/场景三样）、⌇脱靶注（跟在指派后）、入口徽章与读者画像路径。</div>
+    <h2>组件 · 指派学习块、脱靶标记与入口梳理</h2>
+    <div class="desc">三个配套件：＋指派学习块（位置/预期/场景）、⌇脱靶标记（图形入口，读者追随图形进入阅读）、入口徽章与画像路径。</div>
   </div>
 
   <div class="canvas" style="top: 138px; left: 40px; width: 880px; height: 594px;">
-    <div class="sec-label">指派学习块 ＆ 脱靶注 <i>总在指派之后成对出现——普通内容块，非票据</i></div>
+    <div class="sec-label">指派学习块 ＆ 脱靶标记 <i>标记跟在指派后——图形即入口，无容器</i></div>
     <div style="display:flex; gap:24px; align-items:flex-start; margin-bottom:18px;">
       <div style="width:260px; background:#fff9f0; border:2px solid #111; border-radius:12px; box-shadow:5px 5px 0 #111; padding:11px 13px;">
         <div style="display:flex; align-items:center; gap:8px;">
@@ -336,12 +336,15 @@
         </div>
         <div style="font-size:10.5px; color:#3d3d3d; line-height:1.6; margin-top:6px;"><b>位置</b>：包管理家族——npm 的坐标与邻居<br><b>预期</b>：能说清 lockfile 锁住了什么<br><b>场景</b>：加一个依赖 / 换源重装</div>
       </div>
-      <div style="flex:1; background:#fff9f0; border:2px solid #111; border-radius:12px; box-shadow:5px 5px 0 #111; padding:10px 12px;">
-        <div style="display:flex; align-items:center; gap:8px;">
-          <svg width="20" height="20"><path d="M 10 18 L 7 15 L 13 12 L 7 9 L 13 6 L 10 3" fill="none" stroke="#ff6b6b" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/></svg>
-          <b style="font-size:12px;">脱靶提醒 · 跟在指派后</b>
+      <div style="flex:1; padding-top:2px;">
+        <div style="display:flex; gap:11px; align-items:flex-start;">
+          <svg width="24" height="36" style="flex:none;"><path d="M 12 34 L 8 29 L 16 24 L 8 19 L 16 14 L 12 9 L 14 2" fill="none" stroke="#ff6b6b" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round"/></svg>
+          <div>
+            <b style="font-size:12.5px;">脱靶 · 装了但没跑</b>
+            <div style="font-size:10.5px; color:#3d3d3d; line-height:1.55; margin-top:3px;"><b>可能怎么脱靶</b>：命令成功、页面空白。<br><b>脱靶什么样子</b>：缺的是「真机验收」这块积木。</div>
+          </div>
         </div>
-        <div style="font-size:10.5px; color:#3d3d3d; line-height:1.55; margin-top:6px;">写两样：<b>可能怎么脱靶</b>（装了但没跑）＋ <b>脱靶什么样子</b>（命令成功、页面空白）——读者撞上时认得出缺哪块。</div>
+        <div style="font-size:10px; color:#8a7a5c; margin-top:10px; line-height:1.55;">图形即入口：竖抖是第一视觉，无边框无底色，落在内容旁的空白；文字只写两样——怎么脱靶＋脱靶什么样。</div>
       </div>
     </div>
 
@@ -377,7 +380,7 @@
     <table class="spec">
       <tr><th>组件</th><th>关键 prop</th></tr>
       <tr><td class="k">指派学习块</td><td><code>pos</code> · <code>expect</code> · <code>scenes[]</code></td></tr>
-      <tr><td class="k">脱靶注</td><td><code>how</code> 怎么脱靶 · <code>looks</code> 什么样</td></tr>
+      <tr><td class="k">脱靶标记</td><td><code>how</code> 怎么脱靶 · <code>looks</code> 什么样</td></tr>
       <tr><td class="k">画像卡</td><td><code>icon</code> · <code>entry</code> · <code>path[]</code> · <code>note</code></td></tr>
     </table>
     <div style="font-size:12px; color:#555; line-height:1.6; margin-top:10px;">三样缺一即退化为「AI 说啥信啥」（skill 原文）。</div>
@@ -385,7 +388,7 @@
   <div style="position:absolute; top: 400px; left: 948px; width: 292px;" class="panel">
     <h3>原则</h3>
     <div class="note" style="margin-bottom:6px;"><span class="idx">1</span><span class="txt"><b>无锁</b>：状态是推荐不是门槛。</span></div>
-    <div class="note" style="margin-bottom:6px;"><span class="idx">2</span><span class="txt"><b>指派后必有脱靶注</b>：成对出现。</span></div>
+    <div class="note" style="margin-bottom:6px;"><span class="idx">2</span><span class="txt"><b>指派后必有脱靶标记</b>：成对出现，且是图形不是卡片。</span></div>
     <div class="note" style="margin-bottom:0;"><span class="idx">3</span><span class="txt"><b>位置给坐标，预期当尺子，场景管巩固</b>。</span></div>
   </div>
 
