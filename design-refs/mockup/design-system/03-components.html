@@ -92,6 +92,7 @@
   .msticket.pk::after { bottom: -9px; }
   .msline { stroke: #111111; stroke-width: 2.5; fill: none; }
   .msstation { stroke: #111111; stroke-width: 2; }
+  .assign-card { position: absolute; background: #fff9f0; border: 2px solid #111; border-radius: 12px; box-shadow: 5px 5px 0 #111; padding: 9px 11px; }
   .tl-bar { display: flex; border: 2px solid #111; border-radius: 10px; overflow: hidden; height: 30px; }
   .tl-bar div { display: flex; align-items: center; justify-content: center; font-size: 10.5px; font-weight: 700; }
   .pcard { background: #fff9f0; border: 2px solid #111; border-radius: 14px; box-shadow: 5px 5px 0 #111; padding: 12px 14px; width: 252px; }
@@ -246,33 +247,51 @@
   </div>
 
   <div class="canvas" style="top: 138px; left: 40px; width: 880px; height: 594px;">
-    <div class="sec-label">综合拓扑 <i>分流 → 并行 → 胶囊汇入</i></div>
-    <svg width="836" height="180" viewBox="0 0 836 180" style="margin-bottom:12px;">
-      <rect x="10" y="60" width="2" height="60" fill="#c9c9c7"/>
-      <rect x="824" y="18" width="2" height="60" fill="#c9c9c7"/>
-      <rect x="416" y="6" width="2" height="60" fill="#c9c9c7"/>
-      <path class="msline" d="M 11 90 H 60 A 8 8 0 0 0 68 82 V 46 A 8 8 0 0 1 76 38 H 416"/>
-      <path class="msline" d="M 11 90 H 300 A 8 8 0 0 1 308 98 V 134 A 8 8 0 0 0 316 142 H 416"/>
-      <path class="msline" d="M 418 38 H 600 A 8 8 0 0 1 608 46 V 74 A 8 8 0 0 0 616 82 H 748"/>
-      <path class="msline" d="M 418 142 H 600 A 8 8 0 0 0 608 134 V 106 A 8 8 0 0 1 616 98 H 748"/>
-      <circle class="msstation" cx="11" cy="90" r="6" fill="#ffd93d"/>
-      <circle class="msstation" cx="417" cy="38" r="6" fill="#4ecdc4"/>
-      <circle class="msstation" cx="417" cy="142" r="6" fill="#ff8fab"/>
-      <rect x="748" y="60" width="6" height="20" rx="3" fill="#ff6b6b" stroke="#111" stroke-width="2"/>
-      <circle class="msstation" cx="825" cy="82" r="6" fill="#ffd93d"/>
-    </svg>
-    <div style="font-size:11px; color:#6b6b6b; margin-bottom:18px;">灰竖线＝卡边示意；上行支线与下行支线在左侧分流点只相触不共线，右侧四线两两并行（4px）汇入胶囊卡口。</div>
+    <div class="sec-label">组合实例 <i>已验收版直接沿用——四种线形与站点全部在此</i></div>
+    <div style="position:relative; height:348px; margin-bottom:8px;">
+      <svg style="position:absolute; left:0; top:0;" width="836" height="348" viewBox="0 0 836 348">
+        <path class="msline" d="M 299 180 H 302 A 8 8 0 0 0 310 172 V 116 A 8 8 0 0 1 318 108 H 378"/>
+        <path class="msline" d="M 639 108 H 699"/>
+        <path d="M 505 237 V 266" fill="none" stroke="#111" stroke-width="2" stroke-dasharray="4 2"/>
+        <path d="M 560 44 V 22 A 8 8 0 0 0 568 14 H 754 A 8 8 0 0 1 762 22 V 44" fill="none" stroke="#111" stroke-width="2.4" stroke-dasharray="0.1 6" stroke-linecap="round"/>
+        <circle class="msstation" cx="299" cy="180" r="6" fill="#ffd93d"/>
+        <circle class="msstation" cx="378" cy="108" r="6" fill="#4ecdc4"/>
+        <circle class="msstation" cx="639" cy="108" r="6" fill="#ffd93d"/>
+        <circle class="msstation" cx="699" cy="108" r="6" fill="#ff8fab"/>
+      </svg>
+      <div class="mscard" style="position:absolute; left:40px; top:110px; width:250px;">
+        <span class="entry-badge2">①</span>
+        <div class="mszone" style="background:#ff6b6b;"><span>🌐</span></div>
+        <div class="mst"><span class="tri"></span><b>快速开始</b><span class="dots"><i class="on"></i><i class="on"></i><i class="on"></i><i></i></span></div>
+      </div>
+      <div class="mscard" style="position:absolute; left:380px; top:44px; width:250px; transform:rotate(-1deg);">
+        <span class="entry-badge2">②</span>
+        <div class="mszone" style="background:#ff8fab;"><span>⚛️</span></div>
+        <div class="mst"><span class="tri"></span><b>React</b><span class="dots"><i class="on"></i><i class="on"></i><i></i><i></i></span></div>
+      </div>
+      <div class="mscard" style="position:absolute; left:700px; top:44px; width:136px;">
+        <div class="mszone" style="height:78px; background:#5b8def;"><span style="font-size:22px;">🔗</span></div>
+        <div class="mst"><span class="tri"></span><b style="font-size:12px;">全栈基础</b></div>
+      </div>
+      <div class="assign-card" style="left:380px; top:268px; width:216px;">
+        <div style="display:flex; align-items:center; gap:7px;">
+          <svg width="14" height="14"><path d="M7 1 v12 M1 7 h12" stroke="#a78bfa" stroke-width="3" stroke-linecap="round"/><path d="M7 1 v12 M1 7 h12" stroke="#111" stroke-width="1"/></svg>
+          <b style="font-size:11.5px;">指派学习 · npm</b>
+        </div>
+        <div style="font-size:9.5px; color:#3d3d3d; line-height:1.5; margin-top:4px;">位置 / 预期 / 场景</div>
+      </div>
+    </div>
+    <div style="font-size:11px; color:#6b6b6b; margin-bottom:8px;">实线先后主链（直角步进＋直线）；虚线＝相关（React → 指派块）；点线＝同族（React 顶边 → 越过卡顶 → 全栈基础顶边）；右缘站点骑黑影外缘。</div>
 
     <div class="sec-label">实现要点</div>
     <table style="width:100%; border-collapse:collapse; font-size:11.5px; color:#3d3d3d;">
       <tr style="border-bottom:2px solid #d5d5d3;">
         <th style="text-align:left; padding:5px 8px 5px 0; color:#1a1a1a;">要点</th><th style="text-align:left; padding:5px 8px 5px 0; color:#1a1a1a;">说明</th>
       </tr>
-      <tr style="border-bottom:1px solid #ececea;"><td style="padding:6px 8px 6px 0; font-weight:700; color:#1a1a1a; width:150px;">路径数据驱动</td><td style="padding:6px 8px 6px 0;">由 courses.ts 的关系数据自动生成（先后/相关/同族三类边）。</td></tr>
-      <tr style="border-bottom:1px solid #ececea;"><td style="padding:6px 8px 6px 0; font-weight:700; color:#1a1a1a;">自动布线</td><td style="padding:6px 8px 6px 0;">卡位网格化；直角步进由起终点 lanes 差决定；R8 圆角固定。</td></tr>
-      <tr style="border-bottom:1px solid #ececea;"><td style="padding:6px 8px 6px 0; font-weight:700; color:#1a1a1a;">站点渲染层</td><td style="padding:6px 8px 6px 0;">SVG 双层：线在下、站点在上（卡片 DOM 之后），保证半嵌可见。</td></tr>
-      <tr style="border-bottom:1px solid #ececea;"><td style="padding:6px 8px 6px 0; font-weight:700; color:#1a1a1a;">胶囊触发</td><td style="padding:6px 8px 6px 0;">同一卡口入线 ≥ 2 自动聚合为胶囊，线止于胶囊边界。</td></tr>
-      <tr><td style="padding:6px 8px 6px 0; font-weight:700; color:#1a1a1a;">响应式</td><td style="padding:6px 8px 6px 0;">窄屏（&lt;768）退化为纵向书架：线收起，改章节 chips 序列。</td></tr>
+      <tr style="border-bottom:1px solid #ececea;"><td style="padding:5px 8px 5px 0; font-weight:700; color:#1a1a1a; width:150px;">路径数据驱动</td><td style="padding:5px 8px 5px 0;">由 courses.ts 的关系数据自动生成（先后/相关/同族三类边）。</td></tr>
+      <tr style="border-bottom:1px solid #ececea;"><td style="padding:5px 8px 5px 0; font-weight:700; color:#1a1a1a;">自动布线</td><td style="padding:5px 8px 5px 0;">卡位网格化；直角步进由起终点 lanes 差决定；R8 圆角固定。</td></tr>
+      <tr style="border-bottom:1px solid #ececea;"><td style="padding:5px 8px 5px 0; font-weight:700; color:#1a1a1a;">站点渲染层</td><td style="padding:5px 8px 5px 0;">SVG 双层：线在下、站点在上（卡片 DOM 之后），保证半嵌可见。</td></tr>
+      <tr style="border-bottom:1px solid #ececea;"><td style="padding:5px 8px 5px 0; font-weight:700; color:#1a1a1a;">胶囊触发</td><td style="padding:5px 8px 5px 0;">同一卡口入线 ≥ 2 自动聚合为胶囊，线止于胶囊边界。</td></tr>
     </table>
   </div>
 
@@ -291,31 +310,31 @@
     <h3>用线原则</h3>
     <div class="note" style="margin-bottom:6px;"><span class="idx">1</span><span class="txt"><b>线不可缺</b>：章节之间必有关系可读。</span></div>
     <div class="note" style="margin-bottom:6px;"><span class="idx">2</span><span class="txt"><b>先实后虚</b>：主链实线；相关/同族补充。</span></div>
-    <div class="note" style="margin-bottom:0;"><span class="idx">3</span><span class="txt"><b>线只管顺序与关系</b>：状态交给卡片（积木点/打孔）。</span></div>
+    <div class="note" style="margin-bottom:6px;"><span class="idx">3</span><span class="txt"><b>线只管顺序与关系</b>：状态交给卡片（积木点/打孔）。</span></div>
+    <div class="note" style="margin-bottom:0;"><span class="idx">4</span><span class="txt"><b>窄屏退化</b>：&lt;768 时线收起，改章节 chips 序列。</span></div>
   </div>
 
   <div class="footline">设计系统 · 03 组件 · stack idealjs</div>
   <div class="pagenum">03 / 04</div>
 </div>
 
-<!-- ================= P4 指派票、脱靶注与入口梳理 ================= -->
+<!-- ================= P4 指派学习块、脱靶注与入口梳理 ================= -->
 <div class="page">
   <div class="story-head">
     <span class="tag">&lt;Components /&gt; 4/4</span>
-    <h2>组件 · 指派票、脱靶注与入口梳理</h2>
-    <div class="desc">三个配套组件：＋指派票（位置/预期/场景）、⌇脱靶注（跟在指派后）、入口徽章与读者画像路径。</div>
+    <h2>组件 · 指派学习块、脱靶注与入口梳理</h2>
+    <div class="desc">三个配套组件：＋指派学习块（位置/预期/场景三样）、⌇脱靶注（跟在指派后）、入口徽章与读者画像路径。</div>
   </div>
 
   <div class="canvas" style="top: 138px; left: 40px; width: 880px; height: 594px;">
-    <div class="sec-label">指派票 ＆ 脱靶注 <i>总在指派之后成对出现</i></div>
+    <div class="sec-label">指派学习块 ＆ 脱靶注 <i>总在指派之后成对出现——普通内容块，非票据</i></div>
     <div style="display:flex; gap:24px; align-items:flex-start; margin-bottom:18px;">
-      <div class="msticket pk" style="width:260px;">
-        <div class="tl" style="background:#a78bfa;">＋</div>
-        <div class="tb">
-          <b>指派学习 · npm</b>
-          <div style="font-size:10px; color:#3d3d3d; line-height:1.55; margin-top:5px;"><b>位置</b>：包管理家族——npm 的坐标与邻居<br><b>预期</b>：能说清 lockfile 锁住了什么<br><b>场景</b>：加一个依赖 / 换源重装</div>
+      <div style="width:260px; background:#fff9f0; border:2px solid #111; border-radius:12px; box-shadow:5px 5px 0 #111; padding:11px 13px;">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <svg width="16" height="16"><path d="M8 1 v14 M1 8 h14" stroke="#a78bfa" stroke-width="3.5" stroke-linecap="round"/><path d="M8 1 v14 M1 8 h14" stroke="#111" stroke-width="1"/></svg>
+          <b style="font-size:13px;">指派学习 · npm</b>
         </div>
-        <div class="stub" style="border-left-style:solid;">＋</div>
+        <div style="font-size:10.5px; color:#3d3d3d; line-height:1.6; margin-top:6px;"><b>位置</b>：包管理家族——npm 的坐标与邻居<br><b>预期</b>：能说清 lockfile 锁住了什么<br><b>场景</b>：加一个依赖 / 换源重装</div>
       </div>
       <div style="flex:1; background:#fff9f0; border:2px solid #111; border-radius:12px; box-shadow:5px 5px 0 #111; padding:10px 12px;">
         <div style="display:flex; align-items:center; gap:8px;">
@@ -357,11 +376,11 @@
     <h3>组件参数</h3>
     <table class="spec">
       <tr><th>组件</th><th>关键 prop</th></tr>
-      <tr><td class="k">指派票</td><td><code>pos</code> · <code>expect</code> · <code>scenes[]</code></td></tr>
+      <tr><td class="k">指派学习块</td><td><code>pos</code> · <code>expect</code> · <code>scenes[]</code></td></tr>
       <tr><td class="k">脱靶注</td><td><code>how</code> 怎么脱靶 · <code>looks</code> 什么样</td></tr>
       <tr><td class="k">画像卡</td><td><code>icon</code> · <code>entry</code> · <code>path[]</code> · <code>note</code></td></tr>
     </table>
-    <div style="font-size:12px; color:#555; line-height:1.6; margin-top:10px;">指派票三样缺一即退化为「AI 说啥信啥」（skill 原文）。</div>
+    <div style="font-size:12px; color:#555; line-height:1.6; margin-top:10px;">三样缺一即退化为「AI 说啥信啥」（skill 原文）。</div>
   </div>
   <div style="position:absolute; top: 400px; left: 948px; width: 292px;" class="panel">
     <h3>原则</h3>
