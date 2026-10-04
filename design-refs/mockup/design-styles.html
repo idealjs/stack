@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>设计风格探索 · 七种风格 × 课程书架 · stack idealjs</title>
+<style>
+  /* ====== 页面基座（与组件/色彩稿一致） ====== */
+  @page { size: 1280px 800px; margin: 0; }
+  *, *::before, *::after { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0; width: 1280px;
+    background: #f0f0ef;
+    font-family: "Noto Sans CJK SC", "PingFang SC", "Microsoft YaHei", sans-serif;
+    color: #1a1a1a;
+    -webkit-font-smoothing: antialiased;
+  }
+  .page {
+    width: 1280px; height: 800px; position: relative;
+    background: #f0f0ef; overflow: hidden; page-break-after: always;
+  }
+  .page:last-child { page-break-after: auto; }
+
+  @media screen {
+    html { height: auto; display: flex; justify-content: center; background: #f0f0ef; }
+    body { transform-origin: top center; scale: min(1, calc(100vw / 1280px)); margin: 0 auto; box-shadow: 0 0 48px rgba(15, 23, 42, 0.18); }
+  }
+
+  .pagenum { position: absolute; bottom: 26px; right: 40px; font-size: 13px; color: #8a8a8a; letter-spacing: 2px; }
+  .footline { position: absolute; bottom: 26px; left: 40px; font-size: 13px; color: #8a8a8a; letter-spacing: 1px; }
+
+  .story-head { position: absolute; top: 36px; left: 40px; right: 40px; }
+  .story-head .tag {
+    display: inline-block; font-size: 15px; font-weight: 700; color: #6d28d9;
+    background: #efe6fb; border-radius: 8px; padding: 3px 12px;
+    font-family: "DejaVu Sans Mono", "Noto Sans CJK SC", monospace;
+  }
+  .story-head h2 { margin: 8px 0 4px; font-size: 28px; font-weight: 800; color: #1a1a1a; }
+  .story-head .desc { font-size: 14.5px; color: #6b6b6b; }
+
+  .canvas {
+    background: #fbfbfa;
+    border: 1px dashed #cfcfcd;
+    border-radius: 18px;
+    padding: 20px 22px;
+    position: absolute;
+  }
+  .panel { background: #ffffff; border-radius: 18px; padding: 18px 20px; box-shadow: 0 1px 2px rgba(26,26,26,0.06); }
+  .panel h3 { margin: 0 0 10px; font-size: 16px; font-weight: 700; color: #1a1a1a; }
+  .note { display: flex; gap: 10px; align-items: flex-start; margin-bottom: 8px; }
+  .note .idx {
+    flex: none; width: 22px; height: 22px; border-radius: 50%;
+    background: #1a1a1a; color: #ffffff; font-size: 13px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center; margin-top: 1px;
+  }
+  .note .txt { font-size: 13px; line-height: 1.55; color: #3d3d3d; }
+  .note .txt b { color: #1a1a1a; }
+
+  table.spec { width: 100%; border-collapse: collapse; font-size: 12px; color: #3d3d3d; }
+  table.spec th { text-align: left; font-weight: 700; color: #1a1a1a; border-bottom: 2px solid #d5d5d3; padding: 5px 8px 5px 0; }
+  table.spec td { border-bottom: 1px solid #ececea; padding: 4px 8px 4px 0; vertical-align: top; }
+  table.spec td.k { color: #1a1a1a; font-weight: 600; white-space: nowrap; }
+  table.spec code { font-family: "DejaVu Sans Mono", monospace; font-size: 11.5px; background: #f4f2fa; color: #6d28d9; border-radius: 5px; padding: 1px 5px; }
+
+  /* ====== 通用样张元素 ====== */
+  .demo-card { position: absolute; padding: 10px; }
+  .demo-zone { display: flex; align-items: center; justify-content: center; position: relative; }
+  .demo-t { display: flex; align-items: center; gap: 7px; margin-top: 8px; }
+  .swrow2 { display: flex; gap: 10px; align-items: flex-start; position: absolute; }
+  .swchip { width: 92px; }
+  .swchip .b { height: 30px; border-radius: 7px; box-shadow: inset 0 0 0 1px rgba(26,26,26,0.06); }
+  .swchip .n { font-family: "DejaVu Sans Mono", monospace; font-size: 9px; font-weight: 700; margin-top: 4px; white-space: nowrap; }
+  .swchip .h { font-family: "DejaVu Sans Mono", monospace; font-size: 8.5px; color: #6b6b6b; }
+
+  /* 波普本戴点（硬边点阵，非渐变过渡） */
+  .benday { background-image: radial-gradient(circle at 5px 5px, rgba(255,59,107,0.55) 2.2px, transparent 2.4px); background-size: 10px 10px; }
+
+  /* 像素框：硬边阶梯投影 */
+  .pxframe { border: 2px solid #1d2b53; box-shadow: 4px 4px 0 #ffec27; }
+</style>
+</head>
+<body>
+
+<!-- ================= P1 封面 · 七风格目录 ================= -->
+<div class="page">
+  <div class="story-head">
+    <span class="tag">&lt;DesignStyles /&gt;</span>
+    <h2>设计风格探索 · 七种风格 × 课程书架</h2>
+    <div class="desc">同一套课程卡信息（章节卡 · 16:9 预期区 · 状态 · 路线）在七种风格语言下重演，供横向对比与择路。均遵守：不用色彩渐变。</div>
+  </div>
+
+  <div class="canvas" style="top: 138px; left: 40px; width: 880px; height: 594px;">
+    <div style="display:grid; grid-template-columns:repeat(2, 1fr); gap:14px;">
+      <div style="background:#fff; border-radius:14px; padding:16px 18px; border:1px solid #ececea;">
+        <div style="display:flex; align-items:center; gap:10px;"><b style="font-size:15px;">瑞士风格 Swiss</b><span style="font-size:11px; color:#8a8a8a;">02</span></div>
+        <div style="display:flex; gap:5px; margin:9px 0;"><span style="width:22px;height:14px;border-radius:3px;background:#111111;"></span><span style="width:22px;height:14px;border-radius:3px;background:#ffffff;box-shadow:inset 0 0 0 1px #d5d5d3;"></span><span style="width:22px;height:14px;border-radius:3px;background:#f0f0ef;"></span><span style="width:22px;height:14px;border-radius:3px;background:#e4002b;"></span></div>
+        <div style="font-size:12px; color:#555; line-height:1.6;">网格与排印承担一切，红色只做信号。信息密度的最优解。</div>
+      </div>
+      <div style="background:#fff; border-radius:14px; padding:16px 18px; border:1px solid #ececea;">
+        <div style="display:flex; align-items:center; gap:10px;"><b style="font-size:15px;">孟菲斯 Memphis</b><span style="font-size:11px; color:#8a8a8a;">03</span></div>
+        <div style="display:flex; gap:5px; margin:9px 0;"><span style="width:22px;height:14px;border-radius:3px;background:#ff6b6b;"></span><span style="width:22px;height:14px;border-radius:3px;background:#ffd93d;"></span><span style="width:22px;height:14px;border-radius:3px;background:#4ecdc4;"></span><span style="width:22px;height:14px;border-radius:3px;background:#f7f0e8;box-shadow:inset 0 0 0 1px #d5d5d3;"></span></div>
+        <div style="font-size:12px; color:#555; line-height:1.6;">粗黑描边、硬投影与几何涂鸦，欢乐但吵闹。</div>
+      </div>
+      <div style="background:#fff; border-radius:14px; padding:16px 18px; border:1px solid #ececea;">
+        <div style="display:flex; align-items:center; gap:10px;"><b style="font-size:15px;">拼贴风 Collage</b><span style="font-size:11px; color:#8a8a8a;">04</span></div>
+        <div style="display:flex; gap:5px; margin:9px 0;"><span style="width:22px;height:14px;border-radius:3px;background:#d9c7a7;"></span><span style="width:22px;height:14px;border-radius:3px;background:#fffdf5;box-shadow:inset 0 0 0 1px #d5d5d3;"></span><span style="width:22px;height:14px;border-radius:3px;background:#b3402a;"></span><span style="width:22px;height:14px;border-radius:3px;background:#8a7a5c;"></span></div>
+        <div style="font-size:12px; color:#555; line-height:1.6;">纸片、胶带与图钉：知识像剪报被钉在线上，手作感强。</div>
+      </div>
+      <div style="background:#fff; border-radius:14px; padding:16px 18px; border:1px solid #ececea;">
+        <div style="display:flex; align-items:center; gap:10px;"><b style="font-size:15px;">波普风 Pop Art</b><span style="font-size:11px; color:#8a8a8a;">05</span></div>
+        <div style="display:flex; gap:5px; margin:9px 0;"><span style="width:22px;height:14px;border-radius:3px;background:#ffd500;"></span><span style="width:22px;height:14px;border-radius:3px;background:#ff3b6b;"></span><span style="width:22px;height:14px;border-radius:3px;background:#2b6bf3;"></span><span style="width:22px;height:14px;border-radius:3px;background:#111111;"></span></div>
+        <div style="font-size:12px; color:#555; line-height:1.6;">本戴点与爆炸框，完成章节像漫画的 POW！情绪最强。</div>
+      </div>
+      <div style="background:#fff; border-radius:14px; padding:16px 18px; border:1px solid #ececea;">
+        <div style="display:flex; align-items:center; gap:10px;"><b style="font-size:15px;">扁平风 Flat</b><span style="font-size:11px; color:#8a8a8a;">06</span></div>
+        <div style="display:flex; gap:5px; margin:9px 0;"><span style="width:22px;height:14px;border-radius:3px;background:#3b82f6;"></span><span style="width:22px;height:14px;border-radius:3px;background:#22c55e;"></span><span style="width:22px;height:14px;border-radius:3px;background:#f59e0b;"></span><span style="width:22px;height:14px;border-radius:3px;background:#eef2f7;"></span></div>
+        <div style="font-size:12px; color:#555; line-height:1.6;">纯色块分层、无影无纹理，工程实现最省。</div>
+      </div>
+      <div style="background:#fff; border-radius:14px; padding:16px 18px; border:1px solid #ececea;">
+        <div style="display:flex; align-items:center; gap:10px;"><b style="font-size:15px;">像素风 Pixel</b><span style="font-size:11px; color:#8a8a8a;">07</span></div>
+        <div style="display:flex; gap:5px; margin:9px 0;"><span style="width:22px;height:14px;border-radius:3px;background:#1d2b53;"></span><span style="width:22px;height:14px;border-radius:3px;background:#ff004d;"></span><span style="width:22px;height:14px;border-radius:3px;background:#00e436;"></span><span style="width:22px;height:14px;border-radius:3px;background:#fff1e8;"></span></div>
+        <div style="font-size:12px; color:#555; line-height:1.6;">任务地图与 HP 条：学习像通关，游戏化拉满。</div>
+      </div>
+      <div style="background:#fff; border-radius:14px; padding:16px 18px; border:1px solid #ececea;">
+        <div style="display:flex; align-items:center; gap:10px;"><b style="font-size:15px;">极简风 Minimal</b><span style="font-size:11px; color:#8a8a8a;">08</span></div>
+        <div style="display:flex; gap:5px; margin:9px 0;"><span style="width:22px;height:14px;border-radius:3px;background:#111111;"></span><span style="width:22px;height:14px;border-radius:3px;background:#6b6b6b;"></span><span style="width:22px;height:14px;border-radius:3px;background:#d5d5d3;"></span><span style="width:22px;height:14px;border-radius:3px;background:#a2b49b;"></span></div>
+        <div style="font-size:12px; color:#555; line-height:1.6;">留白与发丝线，颜色退到墨阶，仅 sage 一点呼吸。</div>
+      </div>
+      <div style="background:#111111; border-radius:14px; padding:16px 18px; color:#ffffff;">
+        <b style="font-size:15px;">怎么选</b>
+        <div style="font-size:12px; color:#c9c9c7; line-height:1.7; margin-top:8px;">教程站的主风格建议在瑞士 / 扁平 / 极简中取一（信息效率）；孟菲斯 · 波普 · 像素适合做<b style="color:#fff;">成就与彩蛋层</b>；拼贴适合<b style="color:#fff;">实践经历栏目</b>。风格可分层混用，规则见各页右栏。</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footline">设计风格探索 · Design Styles · stack idealjs</div>
+  <div class="pagenum">01 / 08</div>
+</div>
+
+<!-- ================= P2 瑞士风格 ================= -->
+<div class="page">
+  <div class="story-head">
+    <span class="tag">Style · Swiss</span>
+    <h2>瑞士风格 · 网格与排印承担一切</h2>
+    <div class="desc">客观、齐左、大字号对比，红只做信号；卡片无影，靠发丝线与网格定位。信息密度最高的选择。</div>
+  </div>
+
+  <div class="canvas" style="top: 138px; left: 40px; width: 880px; height: 594px;">
+    <div style="position:absolute; left:26px; top:18px; font-size:88px; font-weight:800; line-height:1; color:#111111;">01</div>
+    <div style="position:absolute; left:150px; top:34px;">
+      <div style="font-size:10px; letter-spacing:3px; color:#e4002b; font-weight:700;">COURSE SHELF — FULL-STACK</div>
+      <div style="font-size:21px; font-weight:800; margin-top:4px;">课程书架 · 全栈工程师教程</div>
+      <div style="width:44px; height:3px; background:#e4002b; margin-top:8px;"></div>
+    </div>
+
+    <div class="demo-card" style="left:26px; top:150px; width:236px; background:#ffffff; border:1px solid #d5d5d3;">
+      <div class="demo-zone" style="height:132px; border:1px solid #111111; background:#ffffff;">
+        <span style="font-size:30px;">🌐</span>
+        <span style="position:absolute; right:6px; top:6px; font-size:8.5px; letter-spacing:1px; color:#111111;">16:9</span>
+      </div>
+      <div class="demo-t"><b style="font-size:13px; flex:1;">快速开始</b><span style="background:#111111; color:#fff; font-size:9px; font-weight:700; padding:2px 8px;">✓</span></div>
+    </div>
+    <div class="demo-card" style="left:306px; top:150px; width:236px; background:#ffffff; border:1px solid #d5d5d3;">
+      <div class="demo-zone" style="height:132px; border:1px solid #111111; background:#ffffff;">
+        <span style="font-size:30px;">⚛️</span>
+        <span style="position:absolute; right:6px; top:6px; font-size:8.5px; letter-spacing:1px; color:#111111;">16:9</span>
+      </div>
+      <div class="demo-t"><b style="font-size:13px; flex:1;">React</b><span style="background:#111111; color:#fff; font-size:9px; font-weight:700; padding:2px 8px;">✓</span></div>
+    </div>
+    <div class="demo-card" style="left:586px; top:150px; width:236px; background:#ffffff; border:1px solid #d5d5d3;">
+      <div class="demo-zone" style="height:132px; border:1px solid #111111; background:#ffffff;">
+        <span style="font-size:30px;">🔗</span>
+        <span style="position:absolute; right:6px; top:6px; font-size:8.5px; letter-spacing:1px; color:#8a8a8a;">LOCK</span>
+      </div>
+      <div class="demo-t"><b style="font-size:13px; flex:1;">全栈基础</b><span style="background:#ffffff; color:#8a8a8a; border:1px solid #d5d5d3; font-size:9px; font-weight:700; padding:2px 8px;">○</span></div>
+    </div>
+
+    <svg style="position:absolute; left:0; top:0;" width="880" height="594" viewBox="0 0 880 594">
+      <line x1="26" y1="356" x2="854" y2="356" stroke="#111111" stroke-width="1"/>
+      <rect x="144" y="353" width="6" height="6" fill="#e4002b"/>
+      <rect x="424" y="353" width="6" height="6" fill="#111111"/>
+      <rect x="704" y="353" width="6" height="6" fill="#8a8a8a"/>
+    </svg>
+    <div style="position:absolute; left:26px; top:380px; font-size:10.5px; color:#555555; letter-spacing:1px;">SEQUENCE 01–06 · GRID 12 COL · TYPE 2 STEP</div>
+
+    <div class="swrow2" style="left:26px; bottom:20px;">
+      <div class="swchip"><div class="b" style="background:#111111;"></div><div class="n">ink</div><div class="h">#111111</div></div>
+      <div class="swchip"><div class="b" style="background:#ffffff;"></div><div class="n">paper</div><div class="h">#ffffff</div></div>
+      <div class="swchip"><div class="b" style="background:#f0f0ef;"></div><div class="n">desk</div><div class="h">#f0f0ef</div></div>
+      <div class="swchip"><div class="b" style="background:#8a8a8a;"></div><div class="n">gray</div><div class="h">#8a8a8a</div></div>
+      <div class="swchip"><div class="b" style="background:#e4002b;"></div><div class="n">signal-red</div><div class="h">#e4002b</div></div>
+    </div>
+  </div>
+
+  <div style="position:absolute; top: 138px; left: 948px; width: 292px;" class="panel">
+    <h3>风格 token</h3>
+    <table class="spec">
+      <tr><th>维度</th><th>取值</th></tr>
+      <tr><td class="k">色彩</td><td>黑 / 白 / 灰 + 单一信号红</td></tr>
+      <tr><td class="k">卡片</td><td>无影，1px 发丝边框</td></tr>
+      <tr><td class="k">排印</td><td>大数字 + 小注释，齐左</td></tr>
+      <tr><td class="k">线条</td><td>1px 黑实线</td></tr>
+      <tr><td class="k">站点</td><td>6px 方块（红=当前）</td></tr>
+      <tr><td class="k">状态</td><td>黑块 ✓ / 灰框 ○</td></tr>
+    </table>
+  </div>
+  <div style="position:absolute; top: 388px; left: 948px; width: 292px;" class="panel">
+    <h3>适配判断</h3>
+    <div class="note" style="margin-bottom:6px;"><span class="idx">1</span><span class="txt"><b>适合</b>：教程正文与目录——信息效率天花板。</span></div>
+    <div class="note" style="margin-bottom:6px;"><span class="idx">2</span><span class="txt"><b>慎用</b>：儿童向或庆功场景太冷静。</span></div>
+    <div class="note" style="margin-bottom:0;"><span class="idx">3</span><span class="txt"><b>混用</b>：可作全站骨架，其余风格做局部层。</span></div>
+  </div>
+
+  <div class="footline">设计风格探索 · Swiss · stack idealjs</div>
+  <div class="pagenum">02 / 08</div>
+</div>
+
+<!-- ================= P3 孟菲斯 ================= -->
+<div class="page">
+  <div class="story-head">
+    <span class="tag">Style · Memphis</span>
+    <h2>孟菲斯 · 粗描边与几何涂鸦</h2>
+    <div class="desc">反功能主义的欢乐：高饱和撞色、2px 黑描边、硬投影，圆点波浪三角当装饰。学习不必一脸严肃。</div>
+  </div>
+
+  <div class="canvas" style="top: 138px; left: 40px; width: 880px; height: 594px;">
+    <div class="demo-card" style="left:36px; top:40px; width:236px; background:#ffd93d; border:2px solid #111111; border-radius:16px; box-shadow:5px 5px 0 #111111;">
+      <div class="demo-zone" style="height:132px; background:#f7f0e8; border:2px solid #111111; border-radius:10px;">
+        <span style="font-size:32px;">🌐</span>
+      </div>
+      <div class="demo-t"><b style="font-size:14px; flex:1;">快速开始</b><span style="background:#ff6b6b; color:#fff; border:2px solid #111; font-size:10px; font-weight:800; padding:2px 9px; border-radius:999px;">✓</span></div>
+    </div>
+    <div class="demo-card" style="left:316px; top:64px; width:236px; background:#4ecdc4; border:2px solid #111111; border-radius:16px; box-shadow:5px 5px 0 #111111; transform:rotate(-1.2deg);">
+      <div class="demo-zone" style="height:132px; background:#f7f0e8; border:2px solid #111111; border-radius:10px;">
+        <span style="font-size:32px;">⚛️</span>
+      </div>
+      <div class="demo-t"><b style="font-size:14px; flex:1;">React</b><span style="background:#ffd93d; color:#111; border:2px solid #111; font-size:10px; font-weight:800; padding:2px 9px; border-radius:999px;">✓</span></div>
+    </div>
+    <div class="demo-card" style="left:596px; top:36px; width:236px; background:#ff6b6b; border:2px solid #111111; border-radius:16px; box-shadow:5px 5px 0 #111111;">
+      <div class="demo-zone" style="height:132px; background:#f7f0e8; border:2px solid #111111; border-radius:10px;">
+        <span style="font-size:32px;">🔗</span>
+      </div>
+      <div class="demo-t"><b style="font-size:14px; flex:1;">全栈基础</b><span style="background:#fff; color:#111; border:2px dashed #111; font-size:10px; font-weight:800; padding:2px 9px; border-radius:999px;">?</span></div>
+    </div>
+
+    <svg style="position:absolute; left:0; top:0;" width="880" height="594" viewBox="0 0 880 594">
+      <path d="M 60 300 q 12 -22 24 0 t 24 0 t 24 0 t 24 0 t 24 0 t 24 0" stroke="#ff6b6b" stroke-width="3" fill="none"/>
+      <path d="M 620 320 l 14 24 h -28 z" fill="#4ecdc4" stroke="#111" stroke-width="2"/>
+      <circle cx="560" cy="60" r="7" fill="#ffd93d" stroke="#111" stroke-width="2"/>
+      <circle cx="585" cy="75" r="5" fill="#ff6b6b" stroke="#111" stroke-width="2"/>
+      <circle cx="558" cy="86" r="4" fill="#4ecdc4" stroke="#111" stroke-width="2"/>
+      <line x1="40" y1="360" x2="840" y2="360" stroke="#111111" stroke-width="3"/>
+      <circle cx="150" cy="360" r="7" fill="#ffd93d" stroke="#111" stroke-width="2.5"/>
+      <circle cx="430" cy="360" r="7" fill="#4ecdc4" stroke="#111" stroke-width="2.5"/>
+      <circle cx="710" cy="360" r="7" fill="#ffffff" stroke="#111" stroke-width="2.5"/>
+      <path d="M 825 345 l 6 12 13 2 -9 9 2 13 -12 -6 -12 6 2 -13 -9 -9 13 -2 z" fill="#ff6b6b" stroke="#111" stroke-width="2"/>
+    </svg>
+    <div style="position:absolute; left:36px; top:386px; font-size:11px; color:#111; font-weight:700;">装饰不进正文区：涂鸦只出现在留白与卡片边缘。</div>
+
+    <div class="swrow2" style="left:36px; bottom:20px;">
+      <div class="swchip"><div class="b" style="background:#ff6b6b;"></div><div class="n">coral</div><div class="h">#ff6b6b</div></div>
+      <div class="swchip"><div class="b" style="background:#ffd93d;"></div><div class="n">mustard</div><div class="h">#ffd93d</div></div>
+      <div class="swchip"><div class="b" style="background:#4ecdc4;"></div><div class="n">teal</div><div class="h">#4ecdc4</div></div>
+      <div class="swchip"><div class="b" style="background:#f7f0e8;"></div><div class="n">cream</div><div class="h">#f7f0e8</div></div>
+      <div class="swchip"><div class="b" style="background:#111111;"></div><div class="n">ink</div><div class="h">#111111</div></div>
+    </div>
+  </div>
+
+  <div style="position:absolute; top: 138px; left: 948px; width: 292px;" class="panel">
+    <h3>风格 token</h3>
+    <table class="spec">
+      <tr><th>维度</th><th>取值</th></tr>
+      <tr><td class="k">色彩</td><td>珊瑚 / 芥末 / 湖蓝 + 奶油底</td></tr>
+      <tr><td class="k">卡片</td><td>2px 黑描边 + 5px 硬投影</td></tr>
+      <tr><td class="k">形状</td><td>大圆角，允许 ±1.5° 旋转</td></tr>
+      <tr><td class="k">线条</td><td>3px 黑实线</td></tr>
+      <tr><td class="k">站点</td><td>描边圆点，四色轮换</td></tr>
+      <tr><td class="k">状态</td><td>彩底描边胶囊 / 星形</td></tr>
+    </table>
+  </div>
+  <div style="position:absolute; top: 388px; left: 948px; width: 292px;" class="panel">
+    <h3>适配判断</h3>
+    <div class="note" style="margin-bottom:6px;"><span class="idx">1</span><span class="txt"><b>适合</b>：激励层——成就徽章、里程碑、空状态插画。</span></div>
+    <div class="note" style="margin-bottom:6px;"><span class="idx">2</span><span class="txt"><b>慎用</b>：正文阅读区，噪音大、久看累。</span></div>
+    <div class="note" style="margin-bottom:0;"><span class="idx">3</span><span class="txt"><b>规则</b>：涂鸦只上留白与边缘，永不进文字。</span></div>
+  </div>
+
+  <div class="footline">设计风格探索 · Memphis · stack idealjs</div>
+  <div class="pagenum">03 / 08</div>
+</div>
+
+<!-- ================= P4 拼贴风 ================= -->
+<div class="page">
+  <div class="story-head">
+    <span class="tag">Style · Collage</span>
+    <h2>拼贴风 · 剪报、胶带与图钉</h2>
+    <div class="desc">知识像剪报被钉在线上：牛皮纸、撕边纸片、和纸胶带、邮戳。手作感与档案感并存，适合"经历"类内容。</div>
+  </div>
+
+  <div class="canvas" style="top: 138px; left: 40px; width: 880px; height: 594px; background:#e9e2d2;">
+    <div style="position:absolute; left:0; top:0; right:0; height:200px; background:#d9c7a7; border-radius:17px 17px 0 0;"></div>
+    <div style="position:absolute; left:0; top:200px; right:0; bottom:0; background:#fffdf5;"></div>
+
+    <div class="demo-card" style="left:40px; top:44px; width:238px; background:#fffdf5; border-radius:2px 16px 4px 12px / 12px 4px 14px 6px; box-shadow:2px 3px 8px rgba(90,70,40,0.18); transform:rotate(-1.4deg); border:1px solid #e4dcc8;">
+      <div style="position:absolute; left:-14px; top:-8px; width:58px; height:16px; background:rgba(240,225,190,0.85); transform:rotate(-8deg); box-shadow:0 1px 2px rgba(90,70,40,0.15);"></div>
+      <div class="demo-zone" style="height:130px; background:#efe9da; border-radius:3px;">
+        <span style="font-size:30px;">🌐</span>
+        <span style="position:absolute; right:6px; bottom:6px; font-size:8.5px; color:#8a7a5c; border:1px solid #b8ad93; border-radius:3px; padding:1px 5px; transform:rotate(-2deg);">16:9 · GIF</span>
+      </div>
+      <div class="demo-t"><b style="font-size:13.5px; flex:1;">快速开始</b><span style="color:#b3402a; border:2px solid #b3402a; border-radius:999px; font-size:9.5px; font-weight:800; padding:1px 8px; transform:rotate(-3deg);">✓ 完成</span></div>
+    </div>
+    <div class="demo-card" style="left:330px; top:66px; width:238px; background:#f7f3ea; border-radius:14px 3px 12px 4px / 4px 12px 6px 14px; box-shadow:2px 3px 8px rgba(90,70,40,0.18); transform:rotate(1.1deg); border:1px solid #e4dcc8;">
+      <div style="position:absolute; right:-12px; top:-9px; width:58px; height:16px; background:rgba(217,199,167,0.9); transform:rotate(7deg); box-shadow:0 1px 2px rgba(90,70,40,0.15);"></div>
+      <div class="demo-zone" style="height:130px; background:#e7e0cf; border-radius:3px;">
+        <span style="font-size:30px;">⚛️</span>
+        <span style="position:absolute; right:6px; bottom:6px; font-size:8.5px; color:#8a7a5c; border:1px solid #b8ad93; border-radius:3px; padding:1px 5px; transform:rotate(2deg);">16:9 · GIF</span>
+      </div>
+      <div class="demo-t"><b style="font-size:13.5px; flex:1;">React</b><span style="color:#b3402a; border:2px solid #b3402a; border-radius:999px; font-size:9.5px; font-weight:800; padding:1px 8px; transform:rotate(2deg);">✓ 完成</span></div>
+    </div>
+
+    <div class="demo-card" style="left:620px; top:88px; width:238px; background:#fffdf5; border-radius:12px 3px 10px 4px / 4px 10px 6px 12px; box-shadow:2px 3px 8px rgba(90,70,40,0.18); transform:rotate(1.5deg); border:1px solid #e4dcc8;">
+      <div style="position:absolute; right:-10px; top:-9px; width:54px; height:15px; background:rgba(240,225,190,0.85); transform:rotate(6deg); box-shadow:0 1px 2px rgba(90,70,40,0.15);"></div>
+      <div class="demo-zone" style="height:130px; background:#efe9da; border-radius:3px;">
+        <span style="font-size:30px; opacity:0.75;">🔗</span>
+        <span style="position:absolute; right:6px; bottom:6px; font-size:8.5px; color:#8a7a5c; border:1px solid #b8ad93; border-radius:3px; padding:1px 5px; transform:rotate(-2deg);">16:9 · GIF</span>
+      </div>
+      <div class="demo-t"><b style="font-size:13.5px; flex:1;">全栈基础</b><span style="color:#8a7a5c; border:2px solid #b8ad93; border-radius:999px; font-size:9.5px; font-weight:700; padding:1px 8px;">○ 待读</span></div>
+    </div>
+    <div style="position:absolute; left:40px; top:405px; width:200px; height:118px; background:#fffdf5; border-radius:2px 10px 3px 8px / 8px 3px 10px 4px; transform:rotate(-1deg); box-shadow:2px 3px 8px rgba(90,70,40,0.18); padding:12px 14px;">
+      <div style="font-size:9px; letter-spacing:2px; color:#8a7a5c;">NOTES · 剪报</div>
+      <div style="margin-top:7px; height:3px; background:#d9cdb4; border-radius:2px;"></div>
+      <div style="margin-top:5px; height:3px; background:#d9cdb4; border-radius:2px; width:82%;"></div>
+      <div style="margin-top:5px; height:3px; background:#d9cdb4; border-radius:2px; width:64%;"></div>
+      <div style="margin-top:9px; width:64px; height:64px; border:2px solid #b3402a; border-radius:50%; color:#b3402a; display:flex; align-items:center; justify-content:center; font-size:10px; font-weight:800; transform:rotate(-12deg); margin-left:auto;">已归档</div>
+    </div>
+
+    <svg style="position:absolute; left:0; top:0;" width="880" height="594" viewBox="0 0 880 594">
+      <path d="M 40 320 C 150 300, 260 340, 400 322 S 640 300, 840 326" stroke="#8a7a5c" stroke-width="2" fill="none" stroke-dasharray="7 5"/>
+      <circle cx="120" cy="315" r="6" fill="#b3402a" stroke="#7c2c1d" stroke-width="1.5"/>
+      <circle cx="118" cy="313" r="1.6" fill="#f3c9a5"/>
+      <circle cx="420" cy="320" r="6" fill="#b3402a" stroke="#7c2c1d" stroke-width="1.5"/>
+      <circle cx="418" cy="318" r="1.6" fill="#f3c9a5"/>
+      <circle cx="710" cy="322" r="6" fill="#8a7a5c" stroke="#5f5340" stroke-width="1.5"/>
+      <circle cx="708" cy="320" r="1.6" fill="#e8ddc8"/>
+    </svg>
+    <div style="position:absolute; left:40px; top:352px; font-size:11px; color:#6b5f47;">麻绳点划线 + 图钉：路线像钉在软木板上。</div>
+
+    <div class="swrow2" style="left:40px; bottom:20px;">
+      <div class="swchip"><div class="b" style="background:#d9c7a7;"></div><div class="n">kraft</div><div class="h">#d9c7a7</div></div>
+      <div class="swchip"><div class="b" style="background:#fffdf5;"></div><div class="n">scrap</div><div class="h">#fffdf5</div></div>
+      <div class="swchip"><div class="b" style="background:#efe9da;"></div><div class="n">newsprint</div><div class="h">#efe9da</div></div>
+      <div class="swchip"><div class="b" style="background:#b3402a;"></div><div class="n">pin-red</div><div class="h">#b3402a</div></div>
+      <div class="swchip"><div class="b" style="background:#8a7a5c;"></div><div class="n">twine</div><div class="h">#8a7a5c</div></div>
+    </div>
+  </div>
+
+  <div style="position:absolute; top: 138px; left: 948px; width: 292px;" class="panel">
+    <h3>风格 token</h3>
+    <table class="spec">
+      <tr><th>维度</th><th>取值</th></tr>
+      <tr><td class="k">色彩</td><td>牛皮 / 纸白 / 新闻灰 + 邮戳红</td></tr>
+      <tr><td class="k">卡片</td><td>撕边圆角 + 微旋转 + 软影</td></tr>
+      <tr><td class="k">固定</td><td>和纸胶带（半透米色）</td></tr>
+      <tr><td class="k">线条</td><td>麻绳点划（棕）</td></tr>
+      <tr><td class="k">站点</td><td>图钉圆（红/黄铜）</td></tr>
+      <tr><td class="k">状态</td><td>邮戳圆章「已归档」</td></tr>
+    </table>
+  </div>
+  <div style="position:absolute; top: 388px; left: 948px; width: 292px;" class="panel">
+    <h3>适配判断</h3>
+    <div class="note" style="margin-bottom:6px;"><span class="idx">1</span><span class="txt"><b>适合</b>：实践经历栏目、学员作品墙、更新日志。</span></div>
+    <div class="note" style="margin-bottom:6px;"><span class="idx">2</span><span class="txt"><b>慎用</b>：需要精确对齐的表格与代码块。</span></div>
+    <div class="note" style="margin-bottom:0;"><span class="idx">3</span><span class="txt"><b>规则</b>：旋转只在卡片 ±1.5°，文字永不斜。</span></div>
+  </div>
+
+  <div class="footline">设计风格探索 · Collage · stack idealjs</div>
+  <div class="pagenum">04 / 08</div>
+</div>
+
+<!-- ================= P5 波普风 ================= -->
+<div class="page">
+  <div class="story-head">
+    <span class="tag">Style · Pop Art</span>
+    <h2>波普风 · 本戴点与爆炸框</h2>
+    <div class="desc">漫画分格的 3px 黑描边、本戴点半调、四色撞色；完成章节就该像一格漫画里的 POW！情绪最强的选择。</div>
+  </div>
+
+  <div class="canvas" style="top: 138px; left: 40px; width: 880px; height: 594px; background:#ffd500;">
+    <div class="demo-card" style="left:36px; top:40px; width:236px; background:#ffffff; border:3px solid #111111; border-radius:6px; box-shadow:6px 6px 0 #111111;">
+      <div class="demo-zone benday" style="height:132px; border:2px solid #111; background-color:#ff9ebb;">
+        <span style="font-size:32px; background:#fff; border:2px solid #111; border-radius:8px; padding:4px 8px;">🌐</span>
+      </div>
+      <div class="demo-t"><b style="font-size:15px; flex:1; letter-spacing:0.5px;">快速开始</b><span style="background:#111; color:#ffd500; font-size:10px; font-weight:900; padding:2px 9px;">✓</span></div>
+    </div>
+    <div class="demo-card" style="left:316px; top:40px; width:236px; background:#ffffff; border:3px solid #111111; border-radius:6px; box-shadow:6px 6px 0 #111111;">
+      <div class="demo-zone benday" style="height:132px; border:2px solid #111; background-color:#9ec5ff;">
+        <span style="font-size:32px; background:#fff; border:2px solid #111; border-radius:8px; padding:4px 8px;">⚛️</span>
+      </div>
+      <div class="demo-t"><b style="font-size:15px; flex:1; letter-spacing:0.5px;">React</b><span style="background:#111; color:#ffd500; font-size:10px; font-weight:900; padding:2px 9px;">✓</span></div>
+    </div>
+    <div class="demo-card" style="left:596px; top:40px; width:236px; background:#ffffff; border:3px solid #111111; border-radius:6px; box-shadow:6px 6px 0 #111111;">
+      <div class="demo-zone" style="height:132px; border:2px solid #111; background-color:#eeeeee;">
+        <span style="font-size:32px; filter:grayscale(1); opacity:0.6;">🔗</span>
+        <span style="position:absolute; right:8px; top:8px; background:#111; color:#fff; font-size:9px; font-weight:900; padding:2px 7px;">未解锁</span>
+      </div>
+      <div class="demo-t"><b style="font-size:15px; flex:1; letter-spacing:0.5px;">全栈基础</b></div>
+    </div>
+
+    <svg style="position:absolute; left:0; top:0;" width="880" height="594" viewBox="0 0 880 594">
+      <path d="M 60 236 l 11 23 25 3 -18 17 4 25 -22 -12 -22 12 4 -25 -18 -17 25 -3 z" fill="#ff3b6b" stroke="#111" stroke-width="2.5"/>
+      <path d="M 300 240 l 10 20 22 3 -16 15 4 22 -20 -11 -20 11 4 -22 -16 -15 22 -3 z" fill="#2b6bf3" stroke="#111" stroke-width="2"/>
+      <line x1="36" y1="360" x2="844" y2="360" stroke="#111111" stroke-width="4"/>
+      <path d="M 140 344 l 7 14 15 2 -11 10 3 15 -14 -7 -14 7 3 -15 -11 -10 15 -2 z" fill="#ffd500" stroke="#111" stroke-width="2"/>
+      <path d="M 430 344 l 7 14 15 2 -11 10 3 15 -14 -7 -14 7 3 -15 -11 -10 15 -2 z" fill="#2b6bf3" stroke="#111" stroke-width="2"/>
+      <path d="M 720 344 l 7 14 15 2 -11 10 3 15 -14 -7 -14 7 3 -15 -11 -10 15 -2 z" fill="#ffffff" stroke="#111" stroke-width="2"/>
+    </svg>
+    <div style="position:absolute; left:122px; top:268px; font-size:15px; color:#111; font-weight:900; transform:rotate(-4deg); letter-spacing:1px;">POW!</div>
+    <div style="position:absolute; left:362px; top:268px; font-size:14px; color:#111; font-weight:900; transform:rotate(-3deg); letter-spacing:1px;">DONE!</div>
+    <div style="position:absolute; left:36px; top:390px; font-size:11.5px; color:#111; font-weight:700;">本戴点 = 硬边点阵图案（非色彩渐变）；爆炸框只给"完成"时刻。</div>
+
+    <div class="swrow2" style="left:36px; bottom:20px;">
+      <div class="swchip"><div class="b" style="background:#ffd500;"></div><div class="n">yellow</div><div class="h">#ffd500</div></div>
+      <div class="swchip"><div class="b" style="background:#ff3b6b;"></div><div class="n">pink</div><div class="h">#ff3b6b</div></div>
+      <div class="swchip"><div class="b" style="background:#2b6bf3;"></div><div class="n">blue</div><div class="h">#2b6bf3</div></div>
+      <div class="swchip"><div class="b" style="background:#9ec5ff;"></div><div class="n">halftone-b</div><div class="h">#9ec5ff</div></div>
+      <div class="swchip"><div class="b" style="background:#111111;"></div><div class="n">ink</div><div class="h">#111111</div></div>
+    </div>
+  </div>
+
+  <div style="position:absolute; top: 138px; left: 948px; width: 292px;" class="panel">
+    <h3>风格 token</h3>
+    <table class="spec">
+      <tr><th>维度</th><th>取值</th></tr>
+      <tr><td class="k">色彩</td><td>黄 / 粉 / 蓝 / 黑四色</td></tr>
+      <tr><td class="k">卡片</td><td>3px 黑描边 + 6px 硬投影</td></tr>
+      <tr><td class="k">底纹</td><td>本戴点（硬边点阵）</td></tr>
+      <tr><td class="k">线条</td><td>4px 黑实线</td></tr>
+      <tr><td class="k">站点</td><td>五角星（黄/蓝/白）</td></tr>
+      <tr><td class="k">状态</td><td>POW! 爆炸框 / 黑标未解锁</td></tr>
+    </table>
+  </div>
+  <div style="position:absolute; top: 388px; left: 948px; width: 292px;" class="panel">
+    <h3>适配判断</h3>
+    <div class="note" style="margin-bottom:6px;"><span class="idx">1</span><span class="txt"><b>适合</b>：庆功层——完成弹窗、里程碑海报、分享卡。</span></div>
+    <div class="note" style="margin-bottom:6px;"><span class="idx">2</span><span class="txt"><b>慎用</b>：整站主风格，视觉疲劳快。</span></div>
+    <div class="note" style="margin-bottom:0;"><span class="idx">3</span><span class="txt"><b>规则</b>：爆炸框一屏至多一个，只用给"完成"。</span></div>
+  </div>
+
+  <div class="footline">设计风格探索 · Pop Art · stack idealjs</div>
+  <div class="pagenum">05 / 08</div>
+</div>
+
+<!-- ================= P6 扁平风 ================= -->
+<div class="page">
+  <div class="story-head">
+    <span class="tag">Style · Flat</span>
+    <h2>扁平风 · 纯色块与留白</h2>
+    <div class="desc">无阴影、无描边、无纹理：层级靠色块对比与留白，状态即色块。工程实现最省、缩放最稳。</div>
+  </div>
+
+  <div class="canvas" style="top: 138px; left: 40px; width: 880px; height: 594px; background:#eef2f7;">
+    <div class="demo-card" style="left:36px; top:44px; width:236px; background:#ffffff; border-radius:12px;">
+      <div class="demo-zone" style="height:132px; background:#3b82f6; border-radius:8px 8px 0 0;">
+        <span style="font-size:32px; color:#ffffff;">🌐</span>
+      </div>
+      <div class="demo-t" style="padding:0 2px 2px;"><b style="font-size:13.5px; flex:1;">快速开始</b><span style="background:#22c55e; color:#fff; font-size:9.5px; font-weight:700; padding:2px 9px; border-radius:5px;">完成</span></div>
+    </div>
+    <div class="demo-card" style="left:316px; top:44px; width:236px; background:#ffffff; border-radius:12px;">
+      <div class="demo-zone" style="height:132px; background:#f59e0b; border-radius:8px 8px 0 0;">
+        <span style="font-size:32px; color:#ffffff;">⚛️</span>
+      </div>
+      <div class="demo-t" style="padding:0 2px 2px;"><b style="font-size:13.5px; flex:1;">React</b><span style="background:#22c55e; color:#fff; font-size:9.5px; font-weight:700; padding:2px 9px; border-radius:5px;">完成</span></div>
+    </div>
+    <div class="demo-card" style="left:596px; top:44px; width:236px; background:#ffffff; border-radius:12px;">
+      <div class="demo-zone" style="height:132px; background:#94a3b8; border-radius:8px 8px 0 0;">
+        <span style="font-size:32px; color:#ffffff; opacity:0.7;">🔗</span>
+      </div>
+      <div class="demo-t" style="padding:0 2px 2px;"><b style="font-size:13.5px; flex:1;">全栈基础</b><span style="background:#cbd5e1; color:#475569; font-size:9.5px; font-weight:700; padding:2px 9px; border-radius:5px;">未开始</span></div>
+    </div>
+
+    <svg style="position:absolute; left:0; top:0;" width="880" height="594" viewBox="0 0 880 594">
+      <line x1="36" y1="310" x2="844" y2="310" stroke="#3b82f6" stroke-width="3"/>
+      <circle cx="150" cy="310" r="6" fill="#22c55e"/>
+      <circle cx="430" cy="310" r="6" fill="#22c55e"/>
+      <circle cx="710" cy="310" r="6" fill="#cbd5e1"/>
+    </svg>
+    <div style="position:absolute; left:36px; top:336px; font-size:11px; color:#64748b;">层级完全靠色相对比：章节色块在上、灰阶状态在下、蓝线管路径。</div>
+
+    <div class="swrow2" style="left:36px; bottom:20px;">
+      <div class="swchip"><div class="b" style="background:#3b82f6;"></div><div class="n">primary</div><div class="h">#3b82f6</div></div>
+      <div class="swchip"><div class="b" style="background:#22c55e;"></div><div class="n">done</div><div class="h">#22c55e</div></div>
+      <div class="swchip"><div class="b" style="background:#f59e0b;"></div><div class="n">amber</div><div class="h">#f59e0b</div></div>
+      <div class="swchip"><div class="b" style="background:#94a3b8;"></div><div class="n">locked</div><div class="h">#94a3b8</div></div>
+      <div class="swchip"><div class="b" style="background:#eef2f7;"></div><div class="n">surface</div><div class="h">#eef2f7</div></div>
+    </div>
+  </div>
+
+  <div style="position:absolute; top: 138px; left: 948px; width: 292px;" class="panel">
+    <h3>风格 token</h3>
+    <table class="spec">
+      <tr><th>维度</th><th>取值</th></tr>
+      <tr><td class="k">色彩</td><td>UI 蓝 / 绿 / 琥珀 + 灰阶</td></tr>
+      <tr><td class="k">卡片</td><td>纯白圆角块，无影无边</td></tr>
+      <tr><td class="k">层级</td><td>靠底色分区，不靠描边</td></tr>
+      <tr><td class="k">线条</td><td>3px 主色实线</td></tr>
+      <tr><td class="k">站点</td><td>实心圆，色即状态</td></tr>
+      <tr><td class="k">状态</td><td>色块小标签（圆角 5）</td></tr>
+    </table>
+  </div>
+  <div style="position:absolute; top: 388px; left: 948px; width: 292px;" class="panel">
+    <h3>适配判断</h3>
+    <div class="note" style="margin-bottom:6px;"><span class="idx">1</span><span class="txt"><b>适合</b>：主风格候选——与 Docusaurus 默认气质最近。</span></div>
+    <div class="note" style="margin-bottom:6px;"><span class="idx">2</span><span class="txt"><b>慎用</b>：层级多时区分度下降，需留白纪律。</span></div>
+    <div class="note" style="margin-bottom:0;"><span class="idx">3</span><span class="txt"><b>规则</b>：色块只承载层级，文字永远白底。</span></div>
+  </div>
+
+  <div class="footline">设计风格探索 · Flat · stack idealjs</div>
+  <div class="pagenum">06 / 08</div>
+</div>
+
+<!-- ================= P7 像素风 ================= -->
+<div class="page">
+  <div class="story-head">
+    <span class="tag">Style · Pixel</span>
+    <h2>像素风 · 任务地图与 HP 条</h2>
+    <div class="desc">8-bit 语汇：阶梯硬边框、等宽字、方块点阵路线与进度条。学习即通关，游戏化拉满。</div>
+  </div>
+
+  <div class="canvas" style="top: 138px; left: 40px; width: 880px; height: 594px; background:#1d2b53;">
+    <div class="demo-card pxframe" style="left:36px; top:44px; width:236px; background:#fff1e8;">
+      <div class="demo-zone" style="height:126px; background:#29adff; border:2px solid #1d2b53;">
+        <span style="font-size:32px; filter:saturate(1.4);">🌐</span>
+      </div>
+      <div class="demo-t" style="font-family:'DejaVu Sans Mono', monospace;">
+        <b style="font-size:12px; flex:1;">快速开始</b>
+        <span style="color:#00e436; font-size:11px; font-weight:700;">★ CLEARED</span>
+      </div>
+      <div style="display:flex; gap:3px; margin-top:7px;">
+        <span style="width:34px; height:9px; background:#00e436;"></span><span style="width:34px; height:9px; background:#00e436;"></span><span style="width:34px; height:9px; background:#00e436;"></span><span style="width:34px; height:9px; background:#38b098;"></span>
+      </div>
+    </div>
+    <div class="demo-card pxframe" style="left:316px; top:44px; width:236px; background:#fff1e8;">
+      <div class="demo-zone" style="height:126px; background:#ffec27; border:2px solid #1d2b53;">
+        <span style="font-size:32px;">⚛️</span>
+      </div>
+      <div class="demo-t" style="font-family:'DejaVu Sans Mono', monospace;">
+        <b style="font-size:12px; flex:1;">React</b>
+        <span style="color:#ff004d; font-size:11px; font-weight:700;">▶ PLAYING</span>
+      </div>
+      <div style="display:flex; gap:3px; margin-top:7px;">
+        <span style="width:34px; height:9px; background:#ff004d;"></span><span style="width:34px; height:9px; background:#ff004d;"></span><span style="width:34px; height:9px; background:#7e2553;"></span><span style="width:34px; height:9px; background:#7e2553;"></span>
+      </div>
+    </div>
+    <div class="demo-card pxframe" style="left:596px; top:44px; width:236px; background:#fff1e8;">
+      <div class="demo-zone" style="height:126px; background:#5f574f; border:2px solid #1d2b53;">
+        <span style="font-size:32px; opacity:0.55;">🔗</span>
+      </div>
+      <div class="demo-t" style="font-family:'DejaVu Sans Mono', monospace;">
+        <b style="font-size:12px; flex:1;">全栈基础</b>
+        <span style="color:#5f574f; font-size:11px; font-weight:700;">🔒 LOCKED</span>
+      </div>
+      <div style="display:flex; gap:3px; margin-top:7px;">
+        <span style="width:34px; height:9px; background:#c2c3c7;"></span><span style="width:34px; height:9px; background:#c2c3c7;"></span><span style="width:34px; height:9px; background:#c2c3c7;"></span><span style="width:34px; height:9px; background:#c2c3c7;"></span>
+      </div>
+    </div>
+
+    <svg style="position:absolute; left:0; top:0;" width="880" height="594" viewBox="0 0 880 594">
+      <path d="M 40 330 H 840" stroke="#fff1e8" stroke-width="4" stroke-dasharray="8 8"/>
+      <rect x="146" y="324" width="12" height="12" fill="#00e436"/>
+      <rect x="426" y="324" width="12" height="12" fill="#ffec27"/>
+      <rect x="706" y="324" width="12" height="12" fill="#5f574f"/>
+      <path d="M 846 318 h 12 l 6 -8 v 22 h -6 z" fill="#ff004d"/>
+    </svg>
+    <div style="position:absolute; left:36px; top:356px; font-size:11px; color:#c2c3c7; font-family:'DejaVu Sans Mono', monospace;">QUEST MAP · 方块站点=关卡 · 旗=下一目标 · HP条=学习进度</div>
+
+    <div class="swrow2" style="left:36px; bottom:20px;">
+      <div class="swchip"><div class="b" style="background:#1d2b53; box-shadow:inset 0 0 0 1px rgba(255,241,232,0.55);"></div><div class="n" style="color:#c2c3c7;">navy</div><div class="h" style="color:#8a8a8a;">#1d2b53</div></div>
+      <div class="swchip"><div class="b" style="background:#ff004d;"></div><div class="n" style="color:#c2c3c7;">red</div><div class="h" style="color:#8a8a8a;">#ff004d</div></div>
+      <div class="swchip"><div class="b" style="background:#00e436;"></div><div class="n" style="color:#c2c3c7;">green</div><div class="h" style="color:#8a8a8a;">#00e436</div></div>
+      <div class="swchip"><div class="b" style="background:#ffec27;"></div><div class="n" style="color:#c2c3c7;">yellow</div><div class="h" style="color:#8a8a8a;">#ffec27</div></div>
+      <div class="swchip"><div class="b" style="background:#fff1e8;"></div><div class="n" style="color:#c2c3c7;">cream</div><div class="h" style="color:#8a8a8a;">#fff1e8</div></div>
+    </div>
+  </div>
+
+  <div style="position:absolute; top: 138px; left: 948px; width: 292px;" class="panel">
+    <h3>风格 token</h3>
+    <table class="spec">
+      <tr><th>维度</th><th>取值</th></tr>
+      <tr><td class="k">色彩</td><td>PICO-8 子集（海军蓝底）</td></tr>
+      <tr><td class="k">卡片</td><td>2px 框 + 4px 阶梯硬投影</td></tr>
+      <tr><td class="k">字体</td><td>等宽，全大写状态词</td></tr>
+      <tr><td class="k">线条</td><td>4px 方块点阵（8/8）</td></tr>
+      <tr><td class="k">站点</td><td>12px 方块 = 关卡</td></tr>
+      <tr><td class="k">状态</td><td>★CLEARED / ▶PLAYING / 🔒</td></tr>
+    </table>
+  </div>
+  <div style="position:absolute; top: 388px; left: 948px; width: 292px;" class="panel">
+    <h3>适配判断</h3>
+    <div class="note" style="margin-bottom:6px;"><span class="idx">1</span><span class="txt"><b>适合</b>：成就层与练习系统——关卡、积分、连击。</span></div>
+    <div class="note" style="margin-bottom:6px;"><span class="idx">2</span><span class="txt"><b>慎用</b>：长文阅读（等宽字排中文费力）。</span></div>
+    <div class="note" style="margin-bottom:0;"><span class="idx">3</span><span class="txt"><b>规则</b>：像素装饰不缩放抗锯齿；中文正文回到 Noto。</span></div>
+  </div>
+
+  <div class="footline">设计风格探索 · Pixel · stack idealjs</div>
+  <div class="pagenum">07 / 08</div>
+</div>
+
+<!-- ================= P8 极简风 ================= -->
+<div class="page">
+  <div class="story-head">
+    <span class="tag">Style · Minimal</span>
+    <h2>极简风 · 减到只剩信息</h2>
+    <div class="desc">留白即层级：发丝顶线代替卡片，文字即界面，颜色退到墨阶——只留 sage 一点呼吸。安静到极致。</div>
+  </div>
+
+  <div class="canvas" style="top: 138px; left: 40px; width: 880px; height: 594px; background:#ffffff;">
+    <div style="position:absolute; left:36px; top:44px; width:250px;">
+      <div style="height:1px; background:#111111;"></div>
+      <div class="demo-zone" style="height:120px; border:1px solid #d5d5d3; margin-top:14px;">
+        <span style="font-size:26px; color:#6b6b6b;">🌐</span>
+      </div>
+      <div class="demo-t"><span style="font-size:10px; color:#a2b49b; font-weight:700;">01</span><b style="font-size:13.5px; flex:1; margin-left:4px;">快速开始</b><span style="font-size:11px; color:#111;">✓</span></div>
+    </div>
+    <div style="position:absolute; left:326px; top:44px; width:250px;">
+      <div style="height:1px; background:#111111;"></div>
+      <div class="demo-zone" style="height:120px; border:1px solid #d5d5d3; margin-top:14px;">
+        <span style="font-size:26px; color:#6b6b6b;">⚛️</span>
+      </div>
+      <div class="demo-t"><span style="font-size:10px; color:#a2b49b; font-weight:700;">02</span><b style="font-size:13.5px; flex:1; margin-left:4px;">React</b><span style="font-size:11px; color:#111;">✓</span></div>
+    </div>
+    <div style="position:absolute; left:616px; top:44px; width:250px;">
+      <div style="height:1px; background:#d5d5d3;"></div>
+      <div class="demo-zone" style="height:120px; border:1px solid #ececea; margin-top:14px;">
+        <span style="font-size:26px; color:#c9c9c7;">🔗</span>
+      </div>
+      <div class="demo-t"><span style="font-size:10px; color:#c9c9c7; font-weight:700;">03</span><b style="font-size:13.5px; flex:1; margin-left:4px; color:#8a8a8a;">全栈基础</b><span style="font-size:11px; color:#c9c9c7;">○</span></div>
+    </div>
+
+    <svg style="position:absolute; left:0; top:0;" width="880" height="594" viewBox="0 0 880 594">
+      <line x1="36" y1="270" x2="866" y2="270" stroke="#c9c9c7" stroke-width="0.75"/>
+      <circle cx="161" cy="270" r="2" fill="#a2b49b"/>
+      <circle cx="451" cy="270" r="2" fill="#a2b49b"/>
+      <circle cx="741" cy="270" r="2" fill="#d5d5d3"/>
+    </svg>
+    <div style="position:absolute; left:36px; top:296px; font-size:11px; color:#8a8a8a; letter-spacing:0.5px;">唯一的颜色留给路径（sage）；完成的章节墨色加重，未到的退为浅灰。</div>
+
+    <div class="swrow2" style="left:36px; bottom:20px;">
+      <div class="swchip"><div class="b" style="background:#111111;"></div><div class="n">ink</div><div class="h">#111111</div></div>
+      <div class="swchip"><div class="b" style="background:#6b6b6b;"></div><div class="n">ink-500</div><div class="h">#6b6b6b</div></div>
+      <div class="swchip"><div class="b" style="background:#d5d5d3;"></div><div class="n">hairline</div><div class="h">#d5d5d3</div></div>
+      <div class="swchip"><div class="b" style="background:#ffffff;"></div><div class="n">paper</div><div class="h">#ffffff</div></div>
+      <div class="swchip"><div class="b" style="background:#a2b49b;"></div><div class="n">sage（唯一彩）</div><div class="h">#a2b49b</div></div>
+    </div>
+  </div>
+
+  <div style="position:absolute; top: 138px; left: 948px; width: 292px;" class="panel">
+    <h3>风格 token</h3>
+    <table class="spec">
+      <tr><th>维度</th><th>取值</th></tr>
+      <tr><td class="k">色彩</td><td>墨阶 + 唯一 sage 强调</td></tr>
+      <tr><td class="k">卡片</td><td>发丝顶线，无底无框</td></tr>
+      <tr><td class="k">排印</td><td>序号小字 + 标题，留白分层</td></tr>
+      <tr><td class="k">线条</td><td>0.75px 浅灰</td></tr>
+      <tr><td class="k">站点</td><td>2px 圆点（sage）</td></tr>
+      <tr><td class="k">状态</td><td>墨 ✓ / 浅灰 ○，无底色</td></tr>
+    </table>
+  </div>
+  <div style="position:absolute; top: 388px; left: 948px; width: 292px;" class="panel">
+    <h3>适配判断</h3>
+    <div class="note" style="margin-bottom:6px;"><span class="idx">1</span><span class="txt"><b>适合</b>：正文与长阅读——零干扰。</span></div>
+    <div class="note" style="margin-bottom:6px;"><span class="idx">2</span><span class="txt"><b>慎用</b>：营销页与激励时刻，太平静。</span></div>
+    <div class="note" style="margin-bottom:0;"><span class="idx">3</span><span class="txt"><b>规则</b>：一屏只允许一个彩色元素（sage）。</span></div>
+  </div>
+
+  <div class="footline">设计风格探索 · Minimal · stack idealjs</div>
+  <div class="pagenum">08 / 08</div>
+</div>
+
+</body>
+</html>
