@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>设计系统 · 02 符号形状 · stack idealjs</title>
+<style>
+  @page { size: 1280px 800px; margin: 0; }
+  *, *::before, *::after { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0; width: 1280px; background: #f0f0ef;
+    font-family: "Noto Sans CJK SC", "PingFang SC", "Microsoft YaHei", sans-serif;
+    color: #1a1a1a; -webkit-font-smoothing: antialiased;
+  }
+  .page { width: 1280px; height: 800px; position: relative; background: #f0f0ef; overflow: hidden; page-break-after: always; }
+  .page:last-child { page-break-after: auto; }
+  @media screen {
+    html { height: auto; display: flex; justify-content: center; background: #f0f0ef; }
+    body { transform-origin: top center; scale: min(1, calc(100vw / 1280px)); margin: 0 auto; box-shadow: 0 0 48px rgba(15, 23, 42, 0.18); }
+  }
+  .pagenum { position: absolute; bottom: 26px; right: 40px; font-size: 13px; color: #8a8a8a; letter-spacing: 2px; }
+  .footline { position: absolute; bottom: 26px; left: 40px; font-size: 13px; color: #8a8a8a; letter-spacing: 1px; }
+  .story-head { position: absolute; top: 36px; left: 40px; right: 40px; }
+  .story-head .tag {
+    display: inline-block; font-size: 15px; font-weight: 700; color: #6d28d9;
+    background: #efe6fb; border-radius: 8px; padding: 3px 12px;
+    font-family: "DejaVu Sans Mono", "Noto Sans CJK SC", monospace;
+  }
+  .story-head h2 { margin: 8px 0 4px; font-size: 28px; font-weight: 800; color: #1a1a1a; }
+  .story-head .desc { font-size: 14.5px; color: #6b6b6b; }
+  .canvas { background: #fbfbfa; border: 1px dashed #cfcfcd; border-radius: 18px; padding: 20px 22px; position: absolute; }
+  .panel { background: #ffffff; border-radius: 18px; padding: 18px 20px; box-shadow: 0 1px 2px rgba(26,26,26,0.06); }
+  .panel h3 { margin: 0 0 10px; font-size: 16px; font-weight: 700; color: #1a1a1a; }
+  .note { display: flex; gap: 10px; align-items: flex-start; margin-bottom: 8px; }
+  .note .idx {
+    flex: none; width: 22px; height: 22px; border-radius: 50%;
+    background: #1a1a1a; color: #ffffff; font-size: 13px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center; margin-top: 1px;
+  }
+  .note .txt { font-size: 13px; line-height: 1.55; color: #3d3d3d; }
+  .note .txt b { color: #1a1a1a; }
+  table.spec { width: 100%; border-collapse: collapse; font-size: 12px; color: #3d3d3d; }
+  table.spec th { text-align: left; font-weight: 700; color: #1a1a1a; border-bottom: 2px solid #d5d5d3; padding: 5px 8px 5px 0; }
+  table.spec td { border-bottom: 1px solid #ececea; padding: 4px 8px 4px 0; vertical-align: top; }
+  table.spec td.k { color: #1a1a1a; font-weight: 600; white-space: nowrap; }
+  .sec-label { font-size: 13.5px; font-weight: 700; color: #1a1a1a; margin-bottom: 8px; }
+  .sec-label i { font-style: normal; font-weight: 400; font-size: 11.5px; color: #6b6b6b; margin-left: 8px; }
+  .shapechip .box {
+    width: 52px; height: 52px; margin: 0 auto; border-radius: 12px; background: #ffffff;
+    border: 2px solid #111111; display: flex; align-items: center; justify-content: center;
+  }
+  .shapechip .sn { font-size: 12px; font-weight: 800; margin-top: 6px; text-align: center; }
+  .shapechip .sm { font-size: 10px; color: #6b6b6b; margin-top: 2px; line-height: 1.4; text-align: center; }
+  .shapechip .src { font-size: 9px; color: #8a8a8a; margin-top: 3px; text-align: center; }
+  .msline { stroke: #111111; stroke-width: 2.5; fill: none; }
+  .msstation { stroke: #111111; stroke-width: 2; }
+  .msticket {
+    width: 216px; background: #fff9f0; border: 2px solid #111111; border-radius: 12px;
+    box-shadow: 5px 5px 0 #111111; position: relative; display: flex; align-items: stretch;
+  }
+  .msticket .tl {
+    width: 56px; border: 2px solid #111111; border-left: none; border-radius: 10px 0 0 10px;
+    display: flex; align-items: center; justify-content: center; font-size: 22px; margin-left: -2px;
+  }
+  .msticket .tb { flex: 1; padding: 9px 10px; }
+  .msticket .tb b { font-size: 12.5px; }
+  .msticket .tb .no { font-family: "DejaVu Sans Mono", monospace; font-size: 8.5px; color: #8a7a5c; margin-top: 3px; }
+  .msticket .stub {
+    width: 42px; border-left: 1.5px dashed #111111;
+    display: flex; align-items: center; justify-content: center;
+    font-family: "DejaVu Sans Mono", monospace; font-size: 9.5px; color: #8a7a5c;
+  }
+  .msticket.pk::before, .msticket.pk::after {
+    content: ""; position: absolute; left: 162px; width: 13px; height: 13px;
+    border-radius: 50%; background: #fbfbfa; border: 2px solid #111111;
+  }
+  .msticket.pk::before { top: -9px; }
+  .msticket.pk::after { bottom: -9px; }
+</style>
+</head>
+<body>
+
+<!-- ================= P1 语义形状 ================= -->
+<div class="page">
+  <div class="story-head">
+    <span class="tag">&lt;Symbols /&gt; 1/3</span>
+    <h2>符号、形状 · 语义形状</h2>
+    <div class="desc">七个孟菲斯形状对内容下定义，全部取自 ai-era-tutorial 的概念。散落于空白——装饰即语义，无义不落。</div>
+  </div>
+
+  <div class="canvas" style="top: 138px; left: 40px; width: 880px; height: 594px;">
+    <div style="display:grid; grid-template-columns:repeat(4, 1fr); gap:14px;">
+      <div class="shapechip">
+        <div class="box"><svg width="30" height="28"><path d="M15 2 L29 26 L1 26 Z" fill="#ff6b6b" stroke="#111" stroke-width="2"/></svg></div>
+        <div class="sn">▲ 靶子</div>
+        <div class="sm">目标——这一章要做成什么事<br>卡头打头，教程最前</div>
+        <div class="src">skill · 靶子先行</div>
+      </div>
+      <div class="shapechip">
+        <div class="box"><svg width="30" height="28"><circle cx="9" cy="14" r="6" fill="#ffd93d" stroke="#111" stroke-width="2"/><circle cx="22" cy="14" r="6" fill="#fff9f0" stroke="#111" stroke-width="2"/></svg></div>
+        <div class="sn">● 积木</div>
+        <div class="sm">完成目标的零件；点列实心=已学<br>空心=未学</div>
+        <div class="src">skill · 积木清单</div>
+      </div>
+      <div class="shapechip">
+        <div class="box"><svg width="30" height="28"><circle cx="15" cy="14" r="9" fill="none" stroke="#4ecdc4" stroke-width="4"/><circle cx="15" cy="14" r="9" fill="none" stroke="#111" stroke-width="1.5"/></svg></div>
+        <div class="sn">○ 预期</div>
+        <div class="sm">做成之后可观察、可核对的样子<br>16:9 相框角标</div>
+        <div class="src">skill · 预期结果</div>
+      </div>
+      <div class="shapechip">
+        <div class="box"><svg width="32" height="28"><path d="M2 18 q3.5 -14 7 0 t7 0 t7 0 t7 0" fill="none" stroke="#5b8def" stroke-width="3" stroke-linecap="round"/></svg></div>
+        <div class="sn">～ 代理区</div>
+        <div class="sm">无学习价值的过程，交给 agent<br>只给预期与验收</div>
+        <div class="src">skill · 每步先分类</div>
+      </div>
+      <div class="shapechip">
+        <div class="box"><svg width="30" height="28"><rect x="2" y="10" width="26" height="9" fill="#ff8fab" stroke="#111" stroke-width="2"/></svg></div>
+        <div class="sn">▬ 价值区</div>
+        <div class="sm">有学习价值，过程就地写清<br>露出认知基础</div>
+        <div class="src">skill · 每步先分类</div>
+      </div>
+      <div class="shapechip">
+        <div class="box"><svg width="30" height="28"><path d="M 15 26 L 10 21 L 20 16 L 10 11 L 20 6 L 15 2" fill="none" stroke="#ff6b6b" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/></svg></div>
+        <div class="sn">⌇ 脱靶</div>
+        <div class="sm">竖立颤抖——此处可能脱靶<br>要重点关注</div>
+        <div class="src">skill · 脱靶提醒</div>
+      </div>
+      <div class="shapechip">
+        <div class="box"><svg width="30" height="28"><path d="M15 3 v22 M4 14 h22" stroke="#a78bfa" stroke-width="4" stroke-linecap="round"/><path d="M15 3 v22 M4 14 h22" stroke="#111" stroke-width="1.2"/></svg></div>
+        <div class="sn">＋ 指派</div>
+        <div class="sm">位置给坐标、预期当尺子、场景管巩固<br>三行票承载</div>
+        <div class="src">skill · 指派学习</div>
+      </div>
+      <div style="background:#111; border-radius:14px; padding:14px; display:flex; flex-direction:column; justify-content:center;">
+        <div style="font-size:12px; font-weight:800; color:#ffd93d;">一横一竖对举</div>
+        <div style="font-size:10.5px; color:#c9c9c7; line-height:1.6; margin-top:6px;">代理区＝横波（蓝），脱靶＝竖抖（红）。方向＋色相双重区分，永不混淆。</div>
+      </div>
+    </div>
+
+    <div class="sec-label" style="margin-top:18px;">散落规则 <i>形状如何落在空白里</i></div>
+    <table style="width:100%; border-collapse:collapse; font-size:11.5px; color:#3d3d3d;">
+      <tr style="border-bottom:2px solid #d5d5d3;">
+        <th style="text-align:left; padding:5px 8px 5px 0; color:#1a1a1a;">规则</th><th style="text-align:left; padding:5px 8px 5px 0; color:#1a1a1a;">说明</th>
+      </tr>
+      <tr style="border-bottom:1px solid #ececea;"><td style="padding:6px 8px 6px 0; font-weight:700; color:#1a1a1a; width:130px;">密度 ≤ 8 / 屏</td><td style="padding:6px 8px 6px 0;">散落形状总数控制，避免噪化。</td></tr>
+      <tr style="border-bottom:1px solid #ececea;"><td style="padding:6px 8px 6px 0; font-weight:700; color:#1a1a1a;">只在空白</td><td style="padding:6px 8px 6px 0;">永不压字、压卡、压线；与内容保持 ≥ 8px 间距。</td></tr>
+      <tr style="border-bottom:1px solid #ececea;"><td style="padding:6px 8px 6px 0; font-weight:700; color:#1a1a1a;">语境相关</td><td style="padding:6px 8px 6px 0;">页面里的散落形状应与附近内容语义呼应（脱靶注附近放 ⌇）。</td></tr>
+      <tr><td style="padding:6px 8px 6px 0; font-weight:700; color:#1a1a1a;">尺寸阶梯</td><td style="padding:6px 8px 6px 0;">主标记 28-44px；装饰散落 16-24px；线内标记跟随线规格。</td></tr>
+    </table>
+  </div>
+
+  <div style="position:absolute; top: 138px; left: 948px; width: 292px;" class="panel">
+    <h3>形状 → 语义</h3>
+    <table class="spec">
+      <tr><th>形状</th><th>语义</th><th>出处</th></tr>
+      <tr><td class="k">▲ 三角</td><td>目标</td><td>靶子先行</td></tr>
+      <tr><td class="k">● 实心圆</td><td>积木（已学）</td><td>积木清单</td></tr>
+      <tr><td class="k">○ 圆环</td><td>预期结果</td><td>可核对的样子</td></tr>
+      <tr><td class="k">～ 横波</td><td>代理区</td><td>交给 agent</td></tr>
+      <tr><td class="k">▬ 实心条</td><td>价值区</td><td>就地写过程</td></tr>
+      <tr><td class="k">⌇ 竖抖</td><td>脱靶警示</td><td>重点关注</td></tr>
+      <tr><td class="k">＋ 十字</td><td>指派学习</td><td>位置/预期/场景</td></tr>
+    </table>
+  </div>
+  <div style="position:absolute; top: 428px; left: 948px; width: 292px;" class="panel">
+    <h3>符号规则</h3>
+    <div class="note" style="margin-bottom:6px;"><span class="idx">1</span><span class="txt"><b>装饰即语义</b>：无含义的形状不落版面。</span></div>
+    <div class="note" style="margin-bottom:6px;"><span class="idx">2</span><span class="txt"><b>形状即内容定义</b>：读者看到形状即知内容类型。</span></div>
+    <div class="note" style="margin-bottom:0;"><span class="idx">3</span><span class="txt"><b>黑描边 2px</b>：形状一律描边（细线装饰除外）。</span></div>
+  </div>
+
+  <div class="footline">设计系统 · 02 符号形状 · stack idealjs</div>
+  <div class="pagenum">01 / 03</div>
+</div>
+
+<!-- ================= P2 线条形式 ================= -->
+<div class="page">
+  <div class="story-head">
+    <span class="tag">&lt;Symbols /&gt; 2/3</span>
+    <h2>符号、形状 · 线条形式</h2>
+    <div class="desc">形式即含义：实线=先后、虚线=相关、点线=同族、波浪带=代理交接。拓扑规则全形式通用。</div>
+  </div>
+
+  <div class="canvas" style="top: 138px; left: 40px; width: 880px; height: 594px;">
+    <div style="display:grid; grid-template-columns:repeat(2, 1fr); gap:16px; margin-bottom:16px;">
+      <div style="background:#fff; border:2px solid #111; border-radius:14px; padding:14px 16px;">
+        <svg width="384" height="56" viewBox="0 0 384 56">
+          <rect x="8" y="10" width="2" height="40" fill="#c9c9c7"/><rect x="374" y="4" width="2" height="24" fill="#c9c9c7"/>
+          <path d="M 9 44 H 84 A 8 8 0 0 0 92 36 V 28 A 8 8 0 0 1 100 20 H 374" fill="none" stroke="#111" stroke-width="2.5"/>
+          <circle cx="9" cy="44" r="5.5" fill="#ffd93d" stroke="#111" stroke-width="2"/>
+          <circle cx="375" cy="20" r="5.5" fill="#4ecdc4" stroke="#111" stroke-width="2"/>
+        </svg>
+        <div style="font-size:13px; font-weight:800; margin-top:4px;">实线 ＝ 先后</div>
+        <div style="font-size:11px; color:#555; line-height:1.55; margin-top:3px;">推荐顺序，主线。2.5px ink。<b>唯一带站点</b>的线形；分流/并线用直角步进。</div>
+      </div>
+      <div style="background:#fff; border:2px solid #111; border-radius:14px; padding:14px 16px;">
+        <svg width="384" height="56" viewBox="0 0 384 56">
+          <rect x="8" y="20" width="2" height="20" fill="#c9c9c7"/><rect x="374" y="20" width="2" height="20" fill="#c9c9c7"/>
+          <path d="M 9 30 H 375" fill="none" stroke="#111" stroke-width="2" stroke-dasharray="4 2"/>
+        </svg>
+        <div style="font-size:13px; font-weight:800; margin-top:4px;">虚线 ＝ 相关</div>
+        <div style="font-size:11px; color:#555; line-height:1.55; margin-top:3px;">内容互参，无顺序。2px，4:2 点划。<b>无站点</b>，两端直抵卡边。</div>
+      </div>
+      <div style="background:#fff; border:2px solid #111; border-radius:14px; padding:14px 16px;">
+        <svg width="384" height="56" viewBox="0 0 384 56">
+          <rect x="8" y="20" width="2" height="20" fill="#c9c9c7"/><rect x="374" y="20" width="2" height="20" fill="#c9c9c7"/>
+          <path d="M 9 30 H 375" fill="none" stroke="#111" stroke-width="2.4" stroke-dasharray="0.1 6" stroke-linecap="round"/>
+        </svg>
+        <div style="font-size:13px; font-weight:800; margin-top:4px;">点线 ＝ 同族</div>
+        <div style="font-size:11px; color:#555; line-height:1.55; margin-top:3px;">同一积木家族的章节互连（教一块带一族）。圆点端帽 6px 间距。<b>无站点</b>。</div>
+      </div>
+      <div style="background:#fff; border:2px solid #111; border-radius:14px; padding:14px 16px;">
+        <svg width="384" height="56" viewBox="0 0 384 56">
+          <path d="M 12 28 q 10 -22 20 0 t20 0 t20 0 t20 0 t20 0 t20 0 t20 0 t20 0 t20 0 t20 0 t20 0 t20 0 t20 0 t20 0 t20 0 t20 0 t20 0" fill="none" stroke="#5b8def" stroke-width="3" stroke-linecap="round"/>
+        </svg>
+        <div style="font-size:13px; font-weight:800; margin-top:4px;">波浪带 ＝ 代理交接</div>
+        <div style="font-size:11px; color:#555; line-height:1.55; margin-top:3px;">agent 边界的区域标记（蓝），<b>不连线</b>——是地带不是路径。与 ～ 形状同源。</div>
+      </div>
+    </div>
+
+    <div class="sec-label">拓扑规则 <i>全形式通用——线的几何纪律</i></div>
+    <table style="width:100%; border-collapse:collapse; font-size:11.5px; color:#3d3d3d;">
+      <tr style="border-bottom:2px solid #d5d5d3;">
+        <th style="text-align:left; padding:5px 8px 5px 0; color:#1a1a1a;">规则</th><th style="text-align:left; padding:5px 8px 5px 0; color:#1a1a1a;">规格</th>
+      </tr>
+      <tr style="border-bottom:1px solid #ececea;"><td style="padding:6px 8px 6px 0; font-weight:700; color:#1a1a1a; width:150px;">横平竖直</td><td style="padding:6px 8px 6px 0;">走向只有水平与垂直；无斜线、无大弧。</td></tr>
+      <tr style="border-bottom:1px solid #ececea;"><td style="padding:6px 8px 6px 0; font-weight:700; color:#1a1a1a;">转角 R8</td><td style="padding:6px 8px 6px 0;">转折用 R8 小圆角直角步进。</td></tr>
+      <tr style="border-bottom:1px solid #ececea;"><td style="padding:6px 8px 6px 0; font-weight:700; color:#1a1a1a;">并行不合并</td><td style="padding:6px 8px 6px 0;">多条并行线逐条渲染，间距 4px，不合成一条。</td></tr>
+      <tr style="border-bottom:1px solid #ececea;"><td style="padding:6px 8px 6px 0; font-weight:700; color:#1a1a1a;">线止于卡边</td><td style="padding:6px 8px 6px 0;">起止都落在卡边或站点/胶囊边界，不钻入、不悬空。</td></tr>
+      <tr><td style="padding:6px 8px 6px 0; font-weight:700; color:#1a1a1a;">不共享线段</td><td style="padding:6px 8px 6px 0;">分流的两线只在分岔点相触，随即分开（避免 T 形合流感）。</td></tr>
+    </table>
+  </div>
+
+  <div style="position:absolute; top: 138px; left: 948px; width: 292px;" class="panel">
+    <h3>线形速查</h3>
+    <table class="spec">
+      <tr><th>形式</th><th>含义</th><th>站点</th></tr>
+      <tr><td class="k">实线 2.5px</td><td>先后</td><td>有（四色轮换）</td></tr>
+      <tr><td class="k">虚线 4:2</td><td>相关</td><td>无</td></tr>
+      <tr><td class="k">点线 6 间距</td><td>同族</td><td>无</td></tr>
+      <tr><td class="k">波浪带</td><td>代理交接</td><td>—（区域）</td></tr>
+    </table>
+    <div style="font-size:12px; color:#555; line-height:1.6; margin-top:10px;">同两张卡可以同时存在<b>实线（先后）与虚线（相关）</b>——顺序与互参不互斥。</div>
+  </div>
+  <div style="position:absolute; top: 420px; left: 948px; width: 292px;" class="panel">
+    <h3>用线原则</h3>
+    <div class="note" style="margin-bottom:6px;"><span class="idx">1</span><span class="txt"><b>线不可缺</b>：章节之间必有关系可读。</span></div>
+    <div class="note" style="margin-bottom:6px;"><span class="idx">2</span><span class="txt"><b>先实后虚</b>：主链走实线；相关/同族是补充。</span></div>
+    <div class="note" style="margin-bottom:0;"><span class="idx">3</span><span class="txt"><b>一屏一线形不超 3 类</b>：实＋虚＋点已满，波浪带另算区域。</span></div>
+  </div>
+
+  <div class="footline">设计系统 · 02 符号形状 · stack idealjs</div>
+  <div class="pagenum">02 / 03</div>
+</div>
+
+<!-- ================= P3 站点、胶囊与票券 ================= -->
+<div class="page">
+  <div class="story-head">
+    <span class="tag">&lt;Symbols /&gt; 3/3</span>
+    <h2>符号、形状 · 站点、胶囊与票券</h2>
+    <div class="desc">关系上的铆钉与凭证：站点半嵌卡边（左贴描边、右骑黑影外缘），多线卡口用胶囊，完成用打孔票。</div>
+  </div>
+
+  <div class="canvas" style="top: 138px; left: 40px; width: 880px; height: 594px;">
+    <div class="sec-label">站点 <i>只上先后线——r6 描边圆点，四色轮换</i></div>
+    <div style="display:flex; gap:22px; align-items:flex-start; margin-bottom:18px;">
+      <svg width="400" height="80" viewBox="0 0 400 80">
+        <rect x="100" y="6" width="30" height="68" fill="#fff9f0" stroke="#111" stroke-width="2" rx="5"/>
+        <rect x="290" y="6" width="30" height="68" fill="#fff9f0" stroke="#111" stroke-width="2" rx="5"/>
+        <rect x="280" y="12" width="8" height="56" fill="#111111"/>
+        <path d="M 100 40 H 280" fill="none" stroke="#111" stroke-width="2.5"/>
+        <circle class="msstation" cx="100" cy="40" r="6" fill="#ffd93d"/>
+        <circle class="msstation" cx="284" cy="40" r="6" fill="#4ecdc4"/>
+      </svg>
+      <div style="flex:1; font-size:11.5px; color:#3d3d3d; line-height:1.6;">
+        <b>半嵌卡边</b>：圆心落在卡边上。<br>
+        <b>左贴描边</b>（图左卡右侧无投影）；<b>右骑硬投影外缘</b>（图右）——描边外有 7px 黑影带，站点放在描边会被吞没。<br>
+        线从卡边/影缘出发；同色不相邻。
+      </div>
+    </div>
+
+    <div class="sec-label">胶囊 <i>多线入同一卡口时的站点形态</i></div>
+    <div style="display:flex; gap:22px; align-items:flex-start; margin-bottom:18px;">
+      <svg width="400" height="80" viewBox="0 0 400 80">
+        <path d="M 10 32 H 297" fill="none" stroke="#111" stroke-width="2.5"/>
+        <path d="M 10 36 H 297" fill="none" stroke="#111" stroke-width="2.5"/>
+        <path d="M 10 40 H 297" fill="none" stroke="#111" stroke-width="2.5"/>
+        <rect x="297" y="26" width="6" height="20" rx="3" fill="#ff6b6b" stroke="#111" stroke-width="2"/>
+        <rect x="360" y="12" width="2" height="56" fill="#c9c9c7"/>
+      </svg>
+      <div style="flex:1; font-size:11.5px; color:#3d3d3d; line-height:1.6;">
+        <b>四条规则</b>：① 竖向 6×20，端头半圆（rx=3，胶囊体非椭圆）；② 沿线束排列方向拉伸；③ 端头距最外侧线 ≥ 2× 线宽；④ <b>线止于胶囊边界</b>——圆弧自最外侧线起弯，线沿半径抵达弧起点。
+      </div>
+    </div>
+
+    <div class="sec-label">票券 <i>状态与指派的载体——完成即打孔</i></div>
+    <div style="display:flex; gap:24px; align-items:flex-start;">
+      <div class="msticket pk">
+        <div class="tl" style="background:#ff6b6b;">🌐</div>
+        <div class="tb"><b>快速开始</b><div class="no">No. 001 · 已完成（打孔）</div></div>
+        <div class="stub">№01</div>
+      </div>
+      <div class="msticket">
+        <div class="tl" style="background:#5b8def;">🔗</div>
+        <div class="tb"><b>全栈基础</b><div class="no">No. 005 · 未开始（无孔）</div></div>
+        <div class="stub" style="border-left-style:solid;">№05</div>
+      </div>
+      <div style="flex:1; font-size:11.5px; color:#3d3d3d; line-height:1.6;">
+        <b>完成＝沿撕线打双孔</b>（上下半圆缺口）；未开始撕线为实线、无孔。<br>
+        撕线＝4:2 点划，与虚线同节奏但语境不同（裁剪线非关系线）。票号＝章程序号。指派票复用同一票体（见 03 组件）。
+      </div>
+    </div>
+  </div>
+
+  <div style="position:absolute; top: 138px; left: 948px; width: 292px;" class="panel">
+    <h3>参数速查</h3>
+    <table class="spec">
+      <tr><th>元素</th><th>规格</th></tr>
+      <tr><td class="k">站点</td><td>r6 · 描边 2px · 四色轮换 · 半嵌卡边</td></tr>
+      <tr><td class="k">胶囊</td><td>6×20 · rx3 · 线止于边界 · 距线 ≥2× 线宽</td></tr>
+      <tr><td class="k">并行线</td><td>间距 4px · 逐条渲染</td></tr>
+      <tr><td class="k">票券</td><td>216×~70 · 撕线 4:2 · 打孔 ⌀13</td></tr>
+    </table>
+  </div>
+  <div style="position:absolute; top: 400px; left: 948px; width: 292px;" class="panel">
+    <h3>为什么半嵌</h3>
+    <div class="note" style="margin-bottom:6px;"><span class="idx">1</span><span class="txt">圆心骑卡边＝「到达」的物理感：像铆钉钉入卡片。</span></div>
+    <div class="note" style="margin-bottom:6px;"><span class="idx">2</span><span class="txt">黑影外缘规则是实测教训：描边上的右站点会被投影带吞没。</span></div>
+    <div class="note" style="margin-bottom:0;"><span class="idx">3</span><span class="txt">虚线/点线无站点：相关与同族是「参考」不是「到达」。</span></div>
+  </div>
+
+  <div class="footline">设计系统 · 02 符号形状 · stack idealjs</div>
+  <div class="pagenum">03 / 03</div>
+</div>
+
+</body>
+</html>

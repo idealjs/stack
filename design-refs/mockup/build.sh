@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-# 设计稿构建：把整页 HTML 按顶层 .page 拆成单页 → html2poster 逐页渲染 → 合并为同名 PDF
-# 用法：bash build.sh [stem ...]   # stem 为 design-refs/mockup 下的 html 文件名（不含扩展名）
-# 默认构建 course-shelf 与 components 两个目标
+# 设计稿构建：把整页 HTML 按顶层 .page 拆成单页 → html2poster 逐页渲染 → 合并为 PDF
+# 用法：bash build.sh [src ...]   # src 为相对 mockup 的 html 路径（如 components.html 或 design-system/01-colors.html）
+# 默认：历史 mockup（course-shelf/components/color-system）+ design-system 四部分文档
 set -euo pipefail
 cd "$(dirname "$0")"
 
@@ -15,16 +15,12 @@ export HTML2POSTER H2P_CHROMIUM
 mkdir -p "$HOME/.cache/h2p-tmp"
 export TMPDIR="$HOME/.cache/h2p-tmp"
 
-STEMS=("$@")
-if [ ${#STEMS[@]} -eq 0 ]; then
-  STEMS=(course-shelf components color-system design-system)
-fi
-
-for STEM in "${STEMS[@]}"; do
-  SRC="${STEM}.html"
-  [ -f "$SRC" ] || { echo "!! 缺少 $SRC，跳过"; continue; }
-  OUT_DIR="single-${STEM}"
-  mkdir -p "$OUT_DIR"
+# build_one <src.html> <out.pdf>
+build_one() {
+  local SRC="$1" PDF_OUT="$2"
+  local STEM; STEM=$(basename "${SRC%.html}")
+  local OUT_DIR="single-${STEM}"
+  mkdir -p "$OUT_DIR" "$(dirname "$PDF_OUT")"
 
   # 1. 按顶层 .page 拆单页（固定布局必须走 html2poster，不能用 html2pdf-next）
   python3 - "$SRC" "$OUT_DIR" <<'EOF'
@@ -56,21 +52,30 @@ for p in pages:
 print(f"[{out_dir}] rendered {len(pages)} pages")
 EOF
 
-  # 4. 合并 + 元数据
-  python3 - "$OUT_DIR" "${STEM}" <<'EOF'
+  # 4. 合并 + 元数据（只取第 1 页：Chromium 打印偶发产生一个空白尾页）
+  python3 - "$OUT_DIR" "$PDF_OUT" <<'EOF'
 import glob, os, re, sys
 from pypdf import PdfWriter
-out_dir, stem = sys.argv[1], sys.argv[2]
+out_dir, pdf_out = sys.argv[1], sys.argv[2]
 pdfs = sorted(glob.glob(f"{out_dir}/page-*.pdf"), key=lambda p: int(re.search(r"(\d+)", os.path.basename(p)).group(1)))
 w = PdfWriter()
 for p in pdfs:
-    # 只取第 1 页：Chromium 打印偶发产生一个空白尾页（几何已验证无溢出）
     w.append(p, pages=(0, 1))
-w.add_metadata({"/Title": f"课程书架设计稿 · {stem} · stack idealjs", "/Author": "Z.ai", "/Creator": "Z.ai"})
-with open(f"{stem}.pdf", "wb") as f:
+w.add_metadata({"/Title": f"设计系统 · {os.path.splitext(os.path.basename(pdf_out))[0]} · stack idealjs", "/Author": "Z.ai", "/Creator": "Z.ai"})
+with open(pdf_out, "wb") as f:
     w.write(f)
-print(f"merged {len(pdfs)} pages -> {stem}.pdf")
+print(f"merged {len(pdfs)} pages -> {pdf_out}")
 EOF
 
-  echo "done: ${STEM}.pdf"
+  echo "done: $PDF_OUT"
+}
+
+SRCS=("$@")
+if [ ${#SRCS[@]} -eq 0 ]; then
+  SRCS=(course-shelf.html components.html color-system.html design-system/01-colors.html design-system/02-symbols.html design-system/03-components.html design-system/04-examples.html)
+fi
+
+for SRC in "${SRCS[@]}"; do
+  [ -f "$SRC" ] || { echo "!! 缺少 $SRC，跳过"; continue; }
+  build_one "$SRC" "${SRC%.html}.pdf"
 done

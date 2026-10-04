@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>设计系统 · 03 组件 · stack idealjs</title>
+<style>
+  @page { size: 1280px 800px; margin: 0; }
+  *, *::before, *::after { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0; width: 1280px; background: #f0f0ef;
+    font-family: "Noto Sans CJK SC", "PingFang SC", "Microsoft YaHei", sans-serif;
+    color: #1a1a1a; -webkit-font-smoothing: antialiased;
+  }
+  .page { width: 1280px; height: 800px; position: relative; background: #f0f0ef; overflow: hidden; page-break-after: always; }
+  .page:last-child { page-break-after: auto; }
+  @media screen {
+    html { height: auto; display: flex; justify-content: center; background: #f0f0ef; }
+    body { transform-origin: top center; scale: min(1, calc(100vw / 1280px)); margin: 0 auto; box-shadow: 0 0 48px rgba(15, 23, 42, 0.18); }
+  }
+  .pagenum { position: absolute; bottom: 26px; right: 40px; font-size: 13px; color: #8a8a8a; letter-spacing: 2px; }
+  .footline { position: absolute; bottom: 26px; left: 40px; font-size: 13px; color: #8a8a8a; letter-spacing: 1px; }
+  .story-head { position: absolute; top: 36px; left: 40px; right: 40px; }
+  .story-head .tag {
+    display: inline-block; font-size: 15px; font-weight: 700; color: #6d28d9;
+    background: #efe6fb; border-radius: 8px; padding: 3px 12px;
+    font-family: "DejaVu Sans Mono", "Noto Sans CJK SC", monospace;
+  }
+  .story-head h2 { margin: 8px 0 4px; font-size: 28px; font-weight: 800; color: #1a1a1a; }
+  .story-head .desc { font-size: 14.5px; color: #6b6b6b; }
+  .canvas { background: #fbfbfa; border: 1px dashed #cfcfcd; border-radius: 18px; padding: 20px 22px; position: absolute; }
+  .panel { background: #ffffff; border-radius: 18px; padding: 18px 20px; box-shadow: 0 1px 2px rgba(26,26,26,0.06); }
+  .panel h3 { margin: 0 0 10px; font-size: 16px; font-weight: 700; color: #1a1a1a; }
+  .note { display: flex; gap: 10px; align-items: flex-start; margin-bottom: 8px; }
+  .note .idx {
+    flex: none; width: 22px; height: 22px; border-radius: 50%;
+    background: #1a1a1a; color: #ffffff; font-size: 13px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center; margin-top: 1px;
+  }
+  .note .txt { font-size: 13px; line-height: 1.55; color: #3d3d3d; }
+  .note .txt b { color: #1a1a1a; }
+  table.spec { width: 100%; border-collapse: collapse; font-size: 12px; color: #3d3d3d; }
+  table.spec th { text-align: left; font-weight: 700; color: #1a1a1a; border-bottom: 2px solid #d5d5d3; padding: 5px 8px 5px 0; }
+  table.spec td { border-bottom: 1px solid #ececea; padding: 4px 8px 4px 0; vertical-align: top; }
+  table.spec td.k { color: #1a1a1a; font-weight: 600; white-space: nowrap; }
+  table.spec code { font-family: "DejaVu Sans Mono", monospace; font-size: 11.5px; background: #f4f2fa; color: #6d28d9; border-radius: 5px; padding: 1px 5px; }
+  .sec-label { font-size: 13.5px; font-weight: 700; color: #1a1a1a; margin-bottom: 8px; }
+  .sec-label i { font-style: normal; font-weight: 400; font-size: 11.5px; color: #6b6b6b; margin-left: 8px; }
+
+  .mscard {
+    background: #fff9f0; border: 2px solid #111111; border-radius: 14px;
+    box-shadow: 0 3px 0 #ffffff, 0 5px 0 #eadfc4, 7px 8px 0 #111111;
+    padding: 11px; position: relative;
+  }
+  .mscard .mszone {
+    border-radius: 8px; position: relative;
+    border: 3px solid #111111;
+    box-shadow: inset 0 3px 8px rgba(26,26,26,0.30), inset 0 -1px 0 rgba(255,255,255,0.55);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .mscard .mst { display: flex; align-items: center; gap: 7px; margin-top: 9px; }
+  .mscard .mst .tri { width: 0; height: 0; border-left: 6px solid transparent; border-right: 6px solid transparent; border-bottom: 10px solid #111111; }
+  .mscard .mst b { font-size: 14px; flex: 1; color: #2b1d10; text-shadow: 0 1px 1px rgba(255,255,255,0.9); }
+  .mscard .dots { display: flex; gap: 4px; }
+  .mscard .dots i { width: 7px; height: 7px; border-radius: 50%; border: 1.5px solid #111111; background: #fff; }
+  .mscard .dots i.on { background: #111111; }
+  .mscard.hovering { transform: translateY(-6px); box-shadow: 0 3px 0 #ffffff, 0 5px 0 #eadfc4, 10px 11px 0 #111111; }
+  .entry-badge2 {
+    position: absolute; top: -11px; left: -11px; width: 24px; height: 24px; border-radius: 50%;
+    background: #111111; color: #ffd93d; font-size: 12px; font-weight: 800;
+    display: flex; align-items: center; justify-content: center; border: 2px solid #fff9f0;
+  }
+  .msticket {
+    background: #fff9f0; border: 2px solid #111111; border-radius: 12px;
+    box-shadow: 5px 5px 0 #111111; position: relative; display: flex; align-items: stretch;
+  }
+  .msticket .tl {
+    width: 56px; border: 2px solid #111111; border-left: none; border-radius: 10px 0 0 10px;
+    display: flex; align-items: center; justify-content: center; font-size: 22px; margin-left: -2px;
+  }
+  .msticket .tb { flex: 1; padding: 9px 10px; }
+  .msticket .tb b { font-size: 12.5px; }
+  .msticket .stub {
+    width: 42px; border-left: 1.5px dashed #111111;
+    display: flex; align-items: center; justify-content: center;
+    font-family: "DejaVu Sans Mono", monospace; font-size: 9.5px; color: #8a7a5c;
+  }
+  .msticket.pk::before, .msticket.pk::after {
+    content: ""; position: absolute; left: 202px; width: 13px; height: 13px;
+    border-radius: 50%; background: #fbfbfa; border: 2px solid #111111;
+  }
+  .msticket.pk::before { top: -9px; }
+  .msticket.pk::after { bottom: -9px; }
+  .msline { stroke: #111111; stroke-width: 2.5; fill: none; }
+  .msstation { stroke: #111111; stroke-width: 2; }
+  .tl-bar { display: flex; border: 2px solid #111; border-radius: 10px; overflow: hidden; height: 30px; }
+  .tl-bar div { display: flex; align-items: center; justify-content: center; font-size: 10.5px; font-weight: 700; }
+  .pcard { background: #fff9f0; border: 2px solid #111; border-radius: 14px; box-shadow: 5px 5px 0 #111; padding: 12px 14px; width: 252px; }
+  .pchips { display: flex; flex-wrap: wrap; gap: 5px; align-items: center; margin-top: 9px; }
+  .pchip { font-size: 10.5px; padding: 2px 9px; border-radius: 999px; border: 1.5px solid #111; background: #fff; }
+  .pchip.start { background: #ffd93d; font-weight: 800; }
+  .arr { font-size: 10px; color: #8a7a5c; }
+</style>
+</head>
+<body>
+
+<!-- ================= P1 CourseCard 结构 ================= -->
+<div class="page">
+  <div class="story-head">
+    <span class="tag">&lt;Components /&gt; 1/4</span>
+    <h2>组件 · CourseCard 结构</h2>
+    <div class="desc">教程的入口载体：孟菲斯骨架（黑边＋硬投影）× 拟物纸感（纸叠边＋相框凹槽）。卡头三件套即靶子。</div>
+  </div>
+
+  <div class="canvas" style="top: 138px; left: 40px; width: 880px; height: 594px;">
+    <div style="display:flex; gap:28px; align-items:flex-start;">
+      <div class="mscard" style="width:360px;">
+        <span class="entry-badge2">①</span>
+        <div class="mszone" style="height:186px; background:#ff6b6b;">
+          <span style="font-size:46px;">🌐</span>
+          <svg style="position:absolute; right:8px; bottom:8px;" width="20" height="20"><circle cx="10" cy="10" r="7" fill="none" stroke="#fff9f0" stroke-width="3"/><circle cx="10" cy="10" r="7" fill="none" stroke="#111" stroke-width="1.2"/></svg>
+          <span style="position:absolute; left:8px; top:6px; font-size:9px; color:#fff9f0; font-weight:700; letter-spacing:1px;">预期结果 · GIF</span>
+        </div>
+        <div class="mst">
+          <span class="tri"></span>
+          <b>快速开始</b>
+          <span class="dots"><i class="on"></i><i class="on"></i><i class="on"></i><i></i></span>
+        </div>
+      </div>
+      <div style="flex:1; font-size:12px; color:#3d3d3d; line-height:1.55;">
+        <div style="margin-bottom:10px;"><b>① 黑描边</b>：2px ink——孟菲斯的印刷感边界，一切鲜艳以此收束。</div>
+        <div style="margin-bottom:10px;"><b>② 硬投影</b>：7px 8px 0 ink——平面上的「厚」。</div>
+        <div style="margin-bottom:10px;"><b>③ 纸叠边</b>：白 3px＋暗层 5px 两层堆叠——纸的厚度（拟物）。</div>
+        <div style="margin-bottom:10px;"><b>④ 相框凹槽</b>：3px 黑边＋内阴影——16:9 预期区像装裱的画框，章节色为底。</div>
+        <div style="margin-bottom:10px;"><b>⑤ 卡头三件套＝靶子</b>：▲ 目标（三角＋标题）／ ○ 预期结果（相框 GIF，圆环角标）／ ● 积木点列（实心=已学）。</div>
+        <div style="margin-bottom:10px;"><b>⑥ 入口徽章</b>：①②③ 黑底黄字圆徽，读者画像的推荐起点（非强制）。</div>
+        <div><b>⑦ 压凹标题</b>：暗字＋下白影——铅字压进纸面。</div>
+      </div>
+    </div>
+  </div>
+
+  <div style="position:absolute; top: 138px; left: 948px; width: 292px;" class="panel">
+    <h3>尺寸规格</h3>
+    <table class="spec">
+      <tr><th>项</th><th>规格</th></tr>
+      <tr><td class="k">卡宽</td><td>书架 250 · 解剖 360 · 紧凑 140</td></tr>
+      <tr><td class="k">相框</td><td>16:9（aspect-ratio）· 3px 黑边</td></tr>
+      <tr><td class="k">描边</td><td>2px ink</td></tr>
+      <tr><td class="k">投影</td><td>7px 8px 0 ink（hover 10px 11px）</td></tr>
+      <tr><td class="k">纸叠</td><td>白 3px / 暗层 5px</td></tr>
+      <tr><td class="k">圆角</td><td>卡 14 · 相框 8</td></tr>
+      <tr><td class="k">积木点</td><td>⌀7 · 描边 1.5 · 间距 4</td></tr>
+    </table>
+  </div>
+  <div style="position:absolute; top: 428px; left: 948px; width: 292px;" class="panel">
+    <h3>卡片原则</h3>
+    <div class="note" style="margin-bottom:6px;"><span class="idx">1</span><span class="txt"><b>卡不可缺</b>：入口与预期永远以卡呈现。</span></div>
+    <div class="note" style="margin-bottom:6px;"><span class="idx">2</span><span class="txt"><b>撞色在框内</b>：章节色只进相框，卡面纸色。</span></div>
+    <div class="note" style="margin-bottom:0;"><span class="idx">3</span><span class="txt"><b>卡头即靶子</b>：▲○● 三件套缺一不可（skill · 靶子先行）。</span></div>
+  </div>
+
+  <div class="footline">设计系统 · 03 组件 · stack idealjs</div>
+  <div class="pagenum">01 / 04</div>
+</div>
+
+<!-- ================= P2 CourseCard 交互 ================= -->
+<div class="page">
+  <div class="story-head">
+    <span class="tag">&lt;Components /&gt; 2/4</span>
+    <h2>组件 · CourseCard 交互</h2>
+    <div class="desc">hover 把卡「拿起来」并播放 GIF；desc 与 GIF 每 8000ms 自动翻转；聚焦锁定；触屏与减弱动效不翻转。</div>
+  </div>
+
+  <div class="canvas" style="top: 138px; left: 40px; width: 880px; height: 594px;">
+    <div class="sec-label">三态 <i>静置 → 拿起（hover）→ 翻转周期</i></div>
+    <div style="display:flex; gap:26px; align-items:flex-start; margin-bottom:20px;">
+      <div>
+        <div class="mscard" style="width:250px;">
+          <div class="mszone" style="height:128px; background:#ff6b6b;"><span>🌐</span></div>
+          <div class="mst"><span class="tri"></span><b>快速开始</b><span class="dots"><i class="on"></i><i class="on"></i><i class="on"></i><i></i></span></div>
+        </div>
+        <div style="font-size:11.5px; font-weight:700; margin-top:12px;">① 静置</div>
+        <div style="font-size:10.5px; color:#6b6b6b; line-height:1.5;">7px 8px 硬投影；相框显 desc 摘要或章节色。</div>
+      </div>
+      <div>
+        <div class="mscard hovering" style="width:250px;">
+          <div class="mszone" style="height:128px; background:#ff6b6b;">
+            <span>🌐</span>
+            <span style="position:absolute; left:8px; top:6px; font-size:8.5px; color:#fff9f0; font-weight:700; letter-spacing:1px;">▶ GIF 播放中</span>
+          </div>
+          <div class="mst"><span class="tri"></span><b>快速开始</b><span class="dots"><i class="on"></i><i class="on"></i><i class="on"></i><i></i></span></div>
+        </div>
+        <div style="font-size:11.5px; font-weight:700; margin-top:12px;">② 拿起（hover / 聚焦）</div>
+        <div style="font-size:10.5px; color:#6b6b6b; line-height:1.5;">translateY -3px＋投影加深至 10px 11px；GIF 开始循环播放。</div>
+      </div>
+      <div>
+        <div class="mscard" style="width:250px;">
+          <div class="mszone" style="height:128px; background:#fff9f0; display:block; padding:12px 14px;">
+            <div style="font-size:10.5px; color:#3d3d3d; line-height:1.6;">这一章做成什么：<br>本地跑起一个可交互的页面，理解请求-渲染循环。<br><span style="color:#8a7a5c;">（desc 态 · 每 8s 与 GIF 轮换）</span></div>
+          </div>
+          <div class="mst"><span class="tri"></span><b>快速开始</b><span class="dots"><i class="on"></i><i class="on"></i><i class="on"></i><i></i></span></div>
+        </div>
+        <div style="font-size:11.5px; font-weight:700; margin-top:12px;">③ 翻转（desc ⇄ GIF）</div>
+        <div style="font-size:10.5px; color:#6b6b6b; line-height:1.5;">相框内容每 8000ms 在「文字摘要 / GIF 预期」间轮换。</div>
+      </div>
+    </div>
+
+    <div class="sec-label">翻转时间轴 <i>flipMs = 8000</i></div>
+    <div class="tl-bar" style="margin-bottom:8px;">
+      <div style="flex:1; background:#fff9f0;">desc · 8s</div>
+      <div style="flex:1; background:#ff6b6b; color:#fff9f0;">GIF · 8s</div>
+      <div style="flex:1; background:#fff9f0;">desc · 8s</div>
+      <div style="flex:1; background:#ff6b6b; color:#fff9f0;">GIF · 8s</div>
+      <div style="flex:0.4; background:#111; color:#fff9f0;">…</div>
+    </div>
+    <div style="font-size:11px; color:#6b6b6b;">周期起点：进入视口（IntersectionObserver）；hover / Tab 聚焦即暂停在该态，离开后恢复。</div>
+  </div>
+
+  <div style="position:absolute; top: 138px; left: 948px; width: 292px;" class="panel">
+    <h3>交互参数</h3>
+    <table class="spec">
+      <tr><th>参数</th><th>值</th></tr>
+      <tr><td class="k"><code>flipMs</code></td><td>8000（desc ⇄ GIF）</td></tr>
+      <tr><td class="k"><code>lockOn</code></td><td>hover · Tab 聚焦</td></tr>
+      <tr><td class="k"><code>noFlip</code></td><td>触屏 · prefers-reduced-motion</td></tr>
+      <tr><td class="k"><code>lift</code></td><td>translateY -3px ＋ 投影 10px 11px</td></tr>
+      <tr><td class="k"><code>startOn</code></td><td>进入视口</td></tr>
+    </table>
+  </div>
+  <div style="position:absolute; top: 400px; left: 948px; width: 292px;" class="panel">
+    <h3>可访问性</h3>
+    <div class="note" style="margin-bottom:6px;"><span class="idx">1</span><span class="txt">卡片是链接（&lt;a&gt;），键盘可 Tab 到达，聚焦态＝拿起态。</span></div>
+    <div class="note" style="margin-bottom:6px;"><span class="idx">2</span><span class="txt">GIF 无声；alt ＝ 预期结果一句话。</span></div>
+    <div class="note" style="margin-bottom:0;"><span class="idx">3</span><span class="txt">动效减弱时相框固定显示 desc 态。</span></div>
+  </div>
+
+  <div class="footline">设计系统 · 03 组件 · stack idealjs</div>
+  <div class="pagenum">02 / 04</div>
+</div>
+
+<!-- ================= P3 RouteLine ================= -->
+<div class="page">
+  <div class="story-head">
+    <span class="tag">&lt;Components /&gt; 3/4</span>
+    <h2>组件 · RouteLine</h2>
+    <div class="desc">关系线：线形即含义（见 02 符号），本页是组件级实现——路径、站点、胶囊、分流的完整拓扑。</div>
+  </div>
+
+  <div class="canvas" style="top: 138px; left: 40px; width: 880px; height: 594px;">
+    <div class="sec-label">综合拓扑 <i>分流 → 并行 → 胶囊汇入</i></div>
+    <svg width="836" height="180" viewBox="0 0 836 180" style="margin-bottom:12px;">
+      <rect x="10" y="60" width="2" height="60" fill="#c9c9c7"/>
+      <rect x="824" y="18" width="2" height="60" fill="#c9c9c7"/>
+      <rect x="416" y="6" width="2" height="60" fill="#c9c9c7"/>
+      <path class="msline" d="M 11 90 H 60 A 8 8 0 0 0 68 82 V 46 A 8 8 0 0 1 76 38 H 416"/>
+      <path class="msline" d="M 11 90 H 300 A 8 8 0 0 1 308 98 V 134 A 8 8 0 0 0 316 142 H 416"/>
+      <path class="msline" d="M 418 38 H 600 A 8 8 0 0 1 608 46 V 74 A 8 8 0 0 0 616 82 H 748"/>
+      <path class="msline" d="M 418 142 H 600 A 8 8 0 0 0 608 134 V 106 A 8 8 0 0 1 616 98 H 748"/>
+      <circle class="msstation" cx="11" cy="90" r="6" fill="#ffd93d"/>
+      <circle class="msstation" cx="417" cy="38" r="6" fill="#4ecdc4"/>
+      <circle class="msstation" cx="417" cy="142" r="6" fill="#ff8fab"/>
+      <rect x="748" y="60" width="6" height="20" rx="3" fill="#ff6b6b" stroke="#111" stroke-width="2"/>
+      <circle class="msstation" cx="825" cy="82" r="6" fill="#ffd93d"/>
+    </svg>
+    <div style="font-size:11px; color:#6b6b6b; margin-bottom:18px;">灰竖线＝卡边示意；上行支线与下行支线在左侧分流点只相触不共线，右侧四线两两并行（4px）汇入胶囊卡口。</div>
+
+    <div class="sec-label">实现要点</div>
+    <table style="width:100%; border-collapse:collapse; font-size:11.5px; color:#3d3d3d;">
+      <tr style="border-bottom:2px solid #d5d5d3;">
+        <th style="text-align:left; padding:5px 8px 5px 0; color:#1a1a1a;">要点</th><th style="text-align:left; padding:5px 8px 5px 0; color:#1a1a1a;">说明</th>
+      </tr>
+      <tr style="border-bottom:1px solid #ececea;"><td style="padding:6px 8px 6px 0; font-weight:700; color:#1a1a1a; width:150px;">路径数据驱动</td><td style="padding:6px 8px 6px 0;">由 courses.ts 的关系数据自动生成（先后/相关/同族三类边）。</td></tr>
+      <tr style="border-bottom:1px solid #ececea;"><td style="padding:6px 8px 6px 0; font-weight:700; color:#1a1a1a;">自动布线</td><td style="padding:6px 8px 6px 0;">卡位网格化；直角步进由起终点 lanes 差决定；R8 圆角固定。</td></tr>
+      <tr style="border-bottom:1px solid #ececea;"><td style="padding:6px 8px 6px 0; font-weight:700; color:#1a1a1a;">站点渲染层</td><td style="padding:6px 8px 6px 0;">SVG 双层：线在下、站点在上（卡片 DOM 之后），保证半嵌可见。</td></tr>
+      <tr style="border-bottom:1px solid #ececea;"><td style="padding:6px 8px 6px 0; font-weight:700; color:#1a1a1a;">胶囊触发</td><td style="padding:6px 8px 6px 0;">同一卡口入线 ≥ 2 自动聚合为胶囊，线止于胶囊边界。</td></tr>
+      <tr><td style="padding:6px 8px 6px 0; font-weight:700; color:#1a1a1a;">响应式</td><td style="padding:6px 8px 6px 0;">窄屏（&lt;768）退化为纵向书架：线收起，改章节 chips 序列。</td></tr>
+    </table>
+  </div>
+
+  <div style="position:absolute; top: 138px; left: 948px; width: 292px;" class="panel">
+    <h3>RouteLine 参数</h3>
+    <table class="spec">
+      <tr><th>prop</th><th>说明</th></tr>
+      <tr><td class="k"><code>path</code></td><td>先后边（实线）段序列</td></tr>
+      <tr><td class="k"><code>rel</code></td><td>相关边（虚线 4:2）</td></tr>
+      <tr><td class="k"><code>family</code></td><td>同族边（点线）</td></tr>
+      <tr><td class="k"><code>stations</code></td><td>站点（四色轮换，半嵌）</td></tr>
+      <tr><td class="k"><code>capsule</code></td><td>多线卡口（自动聚合）</td></tr>
+    </table>
+  </div>
+  <div style="position:absolute; top: 400px; left: 948px; width: 292px;" class="panel">
+    <h3>用线原则</h3>
+    <div class="note" style="margin-bottom:6px;"><span class="idx">1</span><span class="txt"><b>线不可缺</b>：章节之间必有关系可读。</span></div>
+    <div class="note" style="margin-bottom:6px;"><span class="idx">2</span><span class="txt"><b>先实后虚</b>：主链实线；相关/同族补充。</span></div>
+    <div class="note" style="margin-bottom:0;"><span class="idx">3</span><span class="txt"><b>线只管顺序与关系</b>：状态交给卡片（积木点/打孔）。</span></div>
+  </div>
+
+  <div class="footline">设计系统 · 03 组件 · stack idealjs</div>
+  <div class="pagenum">03 / 04</div>
+</div>
+
+<!-- ================= P4 指派票、脱靶注与入口梳理 ================= -->
+<div class="page">
+  <div class="story-head">
+    <span class="tag">&lt;Components /&gt; 4/4</span>
+    <h2>组件 · 指派票、脱靶注与入口梳理</h2>
+    <div class="desc">三个配套组件：＋指派票（位置/预期/场景）、⌇脱靶注（跟在指派后）、入口徽章与读者画像路径。</div>
+  </div>
+
+  <div class="canvas" style="top: 138px; left: 40px; width: 880px; height: 594px;">
+    <div class="sec-label">指派票 ＆ 脱靶注 <i>总在指派之后成对出现</i></div>
+    <div style="display:flex; gap:24px; align-items:flex-start; margin-bottom:18px;">
+      <div class="msticket pk" style="width:260px;">
+        <div class="tl" style="background:#a78bfa;">＋</div>
+        <div class="tb">
+          <b>指派学习 · npm</b>
+          <div style="font-size:10px; color:#3d3d3d; line-height:1.55; margin-top:5px;"><b>位置</b>：包管理家族——npm 的坐标与邻居<br><b>预期</b>：能说清 lockfile 锁住了什么<br><b>场景</b>：加一个依赖 / 换源重装</div>
+        </div>
+        <div class="stub" style="border-left-style:solid;">＋</div>
+      </div>
+      <div style="flex:1; background:#fff9f0; border:2px solid #111; border-radius:12px; box-shadow:5px 5px 0 #111; padding:10px 12px;">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <svg width="20" height="20"><path d="M 10 18 L 7 15 L 13 12 L 7 9 L 13 6 L 10 3" fill="none" stroke="#ff6b6b" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/></svg>
+          <b style="font-size:12px;">脱靶提醒 · 跟在指派后</b>
+        </div>
+        <div style="font-size:10.5px; color:#3d3d3d; line-height:1.55; margin-top:6px;">写两样：<b>可能怎么脱靶</b>（装了但没跑）＋ <b>脱靶什么样子</b>（命令成功、页面空白）——读者撞上时认得出缺哪块。</div>
+      </div>
+    </div>
+
+    <div class="sec-label">入口梳理 <i>三类读者三条推荐路径——是推荐不是强制（无锁）</i></div>
+    <div style="display:flex; gap:20px; align-items:flex-start;">
+      <div class="pcard">
+        <div style="display:flex; align-items:center; gap:8px;"><span style="width:26px; height:26px; border-radius:8px; background:#4ecdc4; border:2px solid #111; display:flex; align-items:center; justify-content:center; font-size:14px;">🌱</span><b style="font-size:13px;">零基础入门</b></div>
+        <div class="pchips">
+          <span class="pchip start">① 快速开始</span><span class="arr">→</span><span class="pchip">React</span><span class="arr">→</span><span class="pchip">更多示例</span><span class="arr">→</span><span class="pchip">全栈基础</span>
+        </div>
+        <div style="font-size:10px; color:#8a7a5c; line-height:1.5; margin-top:8px;">完整链按序走；每步先核对预期再前进。</div>
+      </div>
+      <div class="pcard">
+        <div style="display:flex; align-items:center; gap:8px;"><span style="width:26px; height:26px; border-radius:8px; background:#ffd93d; border:2px solid #111; display:flex; align-items:center; justify-content:center; font-size:14px;">⚡</span><b style="font-size:13px;">写过页面的人</b></div>
+        <div class="pchips">
+          <span class="pchip start">② React</span><span class="arr">→</span><span class="pchip">更多示例</span><span class="arr">→</span><span class="pchip">高级教程</span>
+        </div>
+        <div style="font-size:10px; color:#8a7a5c; line-height:1.5; margin-top:8px;">跳过装环境；从组件拼接进入。</div>
+      </div>
+      <div class="pcard">
+        <div style="display:flex; align-items:center; gap:8px;"><span style="width:26px; height:26px; border-radius:8px; background:#a78bfa; border:2px solid #111; display:flex; align-items:center; justify-content:center; font-size:14px;">🧠</span><b style="font-size:13px;">重度 AI 依赖</b></div>
+        <div class="pchips">
+          <span class="pchip start">③ 高级教程</span><span class="arr">→</span><span class="pchip">全栈基础</span>
+        </div>
+        <div style="font-size:10px; color:#8a7a5c; line-height:1.5; margin-top:8px;">从「指挥 agent 做整件事」切入，回头补认知基础。</div>
+      </div>
+    </div>
+    <div style="font-size:11px; color:#6b6b6b; margin-top:14px;">入口徽章 ①②③ 与画像卡对应；路径 chips 可点击直达章节；<b>无锁</b>——任何读者可进任何章（死原则）。</div>
+  </div>
+
+  <div style="position:absolute; top: 138px; left: 948px; width: 292px;" class="panel">
+    <h3>组件参数</h3>
+    <table class="spec">
+      <tr><th>组件</th><th>关键 prop</th></tr>
+      <tr><td class="k">指派票</td><td><code>pos</code> · <code>expect</code> · <code>scenes[]</code></td></tr>
+      <tr><td class="k">脱靶注</td><td><code>how</code> 怎么脱靶 · <code>looks</code> 什么样</td></tr>
+      <tr><td class="k">画像卡</td><td><code>icon</code> · <code>entry</code> · <code>path[]</code> · <code>note</code></td></tr>
+    </table>
+    <div style="font-size:12px; color:#555; line-height:1.6; margin-top:10px;">指派票三样缺一即退化为「AI 说啥信啥」（skill 原文）。</div>
+  </div>
+  <div style="position:absolute; top: 400px; left: 948px; width: 292px;" class="panel">
+    <h3>原则</h3>
+    <div class="note" style="margin-bottom:6px;"><span class="idx">1</span><span class="txt"><b>无锁</b>：状态是推荐不是门槛。</span></div>
+    <div class="note" style="margin-bottom:6px;"><span class="idx">2</span><span class="txt"><b>指派后必有脱靶注</b>：成对出现。</span></div>
+    <div class="note" style="margin-bottom:0;"><span class="idx">3</span><span class="txt"><b>位置给坐标，预期当尺子，场景管巩固</b>。</span></div>
+  </div>
+
+  <div class="footline">设计系统 · 03 组件 · stack idealjs</div>
+  <div class="pagenum">04 / 04</div>
+</div>
+
+</body>
+</html>

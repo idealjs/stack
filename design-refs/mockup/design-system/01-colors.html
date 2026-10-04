@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>设计系统 · 01 颜色 · stack idealjs</title>
+<style>
+  @page { size: 1280px 800px; margin: 0; }
+  *, *::before, *::after { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0; width: 1280px; background: #f0f0ef;
+    font-family: "Noto Sans CJK SC", "PingFang SC", "Microsoft YaHei", sans-serif;
+    color: #1a1a1a; -webkit-font-smoothing: antialiased;
+  }
+  .page { width: 1280px; height: 800px; position: relative; background: #f0f0ef; overflow: hidden; page-break-after: always; }
+  .page:last-child { page-break-after: auto; }
+  @media screen {
+    html { height: auto; display: flex; justify-content: center; background: #f0f0ef; }
+    body { transform-origin: top center; scale: min(1, calc(100vw / 1280px)); margin: 0 auto; box-shadow: 0 0 48px rgba(15, 23, 42, 0.18); }
+  }
+  .pagenum { position: absolute; bottom: 26px; right: 40px; font-size: 13px; color: #8a8a8a; letter-spacing: 2px; }
+  .footline { position: absolute; bottom: 26px; left: 40px; font-size: 13px; color: #8a8a8a; letter-spacing: 1px; }
+  .story-head { position: absolute; top: 36px; left: 40px; right: 40px; }
+  .story-head .tag {
+    display: inline-block; font-size: 15px; font-weight: 700; color: #6d28d9;
+    background: #efe6fb; border-radius: 8px; padding: 3px 12px;
+    font-family: "DejaVu Sans Mono", "Noto Sans CJK SC", monospace;
+  }
+  .story-head h2 { margin: 8px 0 4px; font-size: 28px; font-weight: 800; color: #1a1a1a; }
+  .story-head .desc { font-size: 14.5px; color: #6b6b6b; }
+  .canvas { background: #fbfbfa; border: 1px dashed #cfcfcd; border-radius: 18px; padding: 20px 22px; position: absolute; }
+  .panel { background: #ffffff; border-radius: 18px; padding: 18px 20px; box-shadow: 0 1px 2px rgba(26,26,26,0.06); }
+  .panel h3 { margin: 0 0 10px; font-size: 16px; font-weight: 700; color: #1a1a1a; }
+  .note { display: flex; gap: 10px; align-items: flex-start; margin-bottom: 8px; }
+  .note .idx {
+    flex: none; width: 22px; height: 22px; border-radius: 50%;
+    background: #1a1a1a; color: #ffffff; font-size: 13px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center; margin-top: 1px;
+  }
+  .note .txt { font-size: 13px; line-height: 1.55; color: #3d3d3d; }
+  .note .txt b { color: #1a1a1a; }
+  .sec-label { font-size: 13.5px; font-weight: 700; color: #1a1a1a; margin-bottom: 8px; }
+  .sec-label i { font-style: normal; font-weight: 400; font-size: 11.5px; color: #6b6b6b; margin-left: 8px; }
+  .pair { display: flex; border: 2px solid #111111; border-radius: 12px; overflow: hidden; }
+  .pair div { width: 88px; height: 46px; }
+  .cchip { min-width: 0; }
+  .cchip .b { height: 46px; border-radius: 10px; border: 2px solid #111111; }
+  .cchip .n { font-size: 10.5px; font-weight: 700; margin-top: 5px; white-space: nowrap; }
+  .cchip .h { font-family: "DejaVu Sans Mono", monospace; font-size: 9px; color: #6b6b6b; white-space: nowrap; }
+  .okmk { display: inline-flex; width: 18px; height: 18px; border-radius: 50%; align-items: center; justify-content: center; font-size: 11px; font-weight: 800; }
+  .ok { background: #4ecdc4; color: #111; border: 2px solid #111; }
+  .bad { background: #ff6b6b; color: #fff9f0; border: 2px solid #111; }
+</style>
+</head>
+<body>
+
+<!-- ================= P1 色彩基础 ================= -->
+<div class="page">
+  <div class="story-head">
+    <span class="tag">&lt;Colors /&gt; 1/3</span>
+    <h2>颜色 · 基础</h2>
+    <div class="desc">鲜艳与碰撞是情绪燃料，黑描边是收束，纸色是阅读的安静。三个组成部分：撞色对、中性阶、分工。</div>
+  </div>
+
+  <div class="canvas" style="top: 138px; left: 40px; width: 880px; height: 594px;">
+    <div class="sec-label">撞色对 <i>鲜艳的全部来源——共三对六色，相邻必撞</i></div>
+    <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:16px; margin-bottom:8px;">
+      <div>
+        <div class="pair"><div style="background:#ff6b6b;"></div><div style="background:#4ecdc4;"></div></div>
+        <div style="font-size:10.5px; font-weight:700; margin-top:6px;">对 1 · coral × teal</div>
+        <div style="font-family:'DejaVu Sans Mono',monospace; font-size:9px; color:#6b6b6b;">#FF6B6B × #4ECDC4</div>
+        <div style="font-size:10px; color:#555; margin-top:3px; line-height:1.5;">主用对：课程相框与主图形。</div>
+      </div>
+      <div>
+        <div class="pair"><div style="background:#ffd93d;"></div><div style="background:#a78bfa;"></div></div>
+        <div style="font-size:10.5px; font-weight:700; margin-top:6px;">对 2 · mustard × violet</div>
+        <div style="font-family:'DejaVu Sans Mono',monospace; font-size:9px; color:#6b6b6b;">#FFD93D × #A78BFA</div>
+        <div style="font-size:10px; color:#555; margin-top:3px; line-height:1.5;">辅助对：指派与脱靶等警示类。</div>
+      </div>
+      <div>
+        <div class="pair"><div style="background:#ff8fab;"></div><div style="background:#5b8def;"></div></div>
+        <div style="font-size:10.5px; font-weight:700; margin-top:6px;">对 3 · pink × blue</div>
+        <div style="font-family:'DejaVu Sans Mono',monospace; font-size:9px; color:#6b6b6b;">#FF8FAB × #5B8DEF</div>
+        <div style="font-size:10px; color:#555; margin-top:3px; line-height:1.5;">点缀对：代理区与散落形状。</div>
+      </div>
+    </div>
+    <div style="font-size:11.5px; color:#3d3d3d; line-height:1.6; margin-bottom:18px; border-top:1px solid #ececea; padding-top:10px;">
+      <b>相邻必撞</b>：任何相邻的两个鲜艳色块必须来自<b>不同撞色对</b>；同对两色只允许出现在同一物件的两端（如撞色对样票本身）。鲜艳总面积一屏 ≤ 10%。
+    </div>
+
+    <div class="sec-label">中性阶 <i>纸的世界——字、边、投影、底</i></div>
+    <div style="display:grid; grid-template-columns:repeat(4, 1fr); gap:12px; margin-bottom:18px;">
+      <div class="cchip"><div class="b" style="background:#111111;"></div><div class="n">ink</div><div class="h">#111111</div><div style="font-size:9.5px; color:#8a8a8a; margin-top:2px; line-height:1.45;">描边 2px / 标题正文 / 硬投影 / 站点描边</div></div>
+      <div class="cchip"><div class="b" style="background:#fff9f0;"></div><div class="n">paper</div><div class="h">#FFF9F0</div><div style="font-size:9.5px; color:#8a8a8a; margin-top:2px; line-height:1.45;">卡面 / 页面大底 / 票券面</div></div>
+      <div class="cchip"><div class="b" style="background:#ffffff;"></div><div class="n">stack-1</div><div class="h">#FFFFFF</div><div style="font-size:9.5px; color:#8a8a8a; margin-top:2px; line-height:1.45;">纸叠亮边（卡片第一层 3px）</div></div>
+      <div class="cchip"><div class="b" style="background:#eadfc4;"></div><div class="n">stack-2</div><div class="h">#EADFC4</div><div style="font-size:9.5px; color:#8a8a8a; margin-top:2px; line-height:1.45;">纸叠暗层（卡片第二层 5px）</div></div>
+    </div>
+
+    <div class="sec-label">色彩分工 <i>三层各就各位</i></div>
+    <table style="width:100%; border-collapse:collapse; font-size:11.5px; color:#3d3d3d;">
+      <tr style="border-bottom:2px solid #d5d5d3;">
+        <th style="text-align:left; padding:5px 8px 5px 0; color:#1a1a1a;">层</th><th style="text-align:left; padding:5px 8px 5px 0; color:#1a1a1a;">用色</th><th style="text-align:left; padding:5px 8px 5px 0; color:#1a1a1a;">承载</th>
+      </tr>
+      <tr style="border-bottom:1px solid #ececea;"><td style="padding:6px 8px 6px 0; font-weight:700; color:#1a1a1a;">背景层</td><td style="padding:6px 8px 6px 0;">paper 纯色</td><td style="padding:6px 8px 6px 0;">整页与画布底，永不鲜艳</td></tr>
+      <tr style="border-bottom:1px solid #ececea;"><td style="padding:6px 8px 6px 0; font-weight:700; color:#1a1a1a;">物件层</td><td style="padding:6px 8px 6px 0;">paper 面＋ink 边＋纸叠边</td><td style="padding:6px 8px 6px 0;">课程卡、票券、脱靶注</td></tr>
+      <tr><td style="padding:6px 8px 6px 0; font-weight:700; color:#1a1a1a;">强调层</td><td style="padding:6px 8px 6px 0;">撞色对六色（黑描边内）</td><td style="padding:6px 8px 6px 0;">16:9 相框、语义形状、站点</td></tr>
+    </table>
+  </div>
+
+  <div style="position:absolute; top: 138px; left: 948px; width: 292px;" class="panel">
+    <h3>色彩立场</h3>
+    <div class="note" style="margin-bottom:6px;"><span class="idx">1</span><span class="txt"><b>为什么鲜艳碰撞</b>：教程漫长，撞色给持续的情绪燃料与章节识别度。</span></div>
+    <div class="note" style="margin-bottom:6px;"><span class="idx">2</span><span class="txt"><b>为什么黑描边</b>：无收束的鲜艳会散架；2px ink 让一切彩色变"印刷品"。</span></div>
+    <div class="note" style="margin-bottom:0;"><span class="idx">3</span><span class="txt"><b>为什么纸底</b>：阅读区永远安静；鲜艳只出现在被框住的局部。</span></div>
+  </div>
+  <div style="position:absolute; top: 400px; left: 948px; width: 292px;" class="panel">
+    <h3>鲜艳预算</h3>
+    <div class="note" style="margin-bottom:6px;"><span class="idx">1</span><span class="txt">一屏鲜艳面积 <b>≤ 10%</b>（相框＋形状＋站点合计）。</span></div>
+    <div class="note" style="margin-bottom:6px;"><span class="idx">2</span><span class="txt">同一视口内<b>每对至多两处</b>主用，避免轮转失衡。</span></div>
+    <div class="note" style="margin-bottom:0;"><span class="idx">3</span><span class="txt"><b>禁色彩渐变</b>：立体感只来自描边、硬投影、内阴影。</span></div>
+  </div>
+
+  <div class="footline">设计系统 · 01 颜色 · stack idealjs</div>
+  <div class="pagenum">01 / 03</div>
+</div>
+
+<!-- ================= P2 章节色与轮换 ================= -->
+<div class="page">
+  <div class="story-head">
+    <span class="tag">&lt;Colors /&gt; 2/3</span>
+    <h2>颜色 · 章节色与轮换</h2>
+    <div class="desc">六章六色是章节的身份，只进 16:9 相框与图标瓦；站点四色沿先后线轮换。身份不承载状态。</div>
+  </div>
+
+  <div class="canvas" style="top: 138px; left: 40px; width: 880px; height: 594px;">
+    <div class="sec-label">章节色 <i>六章六色——相框底与图标瓦同源</i></div>
+    <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:14px; margin-bottom:18px;">
+      <div style="display:flex; gap:10px; align-items:center; background:#ffffff; border:2px solid #111; border-radius:12px; padding:10px;">
+        <div style="width:86px; height:52px; background:#ff6b6b; border:2px solid #111; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:20px; box-shadow: inset 0 2px 5px rgba(26,26,26,0.30);">🌐</div>
+        <div><div style="font-size:11.5px; font-weight:800;">ch1 快速开始</div><div style="font-family:'DejaVu Sans Mono',monospace; font-size:9px; color:#6b6b6b;">#FF6B6B · 对1</div><div style="font-size:9.5px; color:#8a7a5c; margin-top:2px;">入门起点</div></div>
+      </div>
+      <div style="display:flex; gap:10px; align-items:center; background:#ffffff; border:2px solid #111; border-radius:12px; padding:10px;">
+        <div style="width:86px; height:52px; background:#ff8fab; border:2px solid #111; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:20px;">⚛️</div>
+        <div><div style="font-size:11.5px; font-weight:800;">ch2 React</div><div style="font-family:'DejaVu Sans Mono',monospace; font-size:9px; color:#6b6b6b;">#FF8FAB · 对3</div><div style="font-size:9.5px; color:#8a7a5c; margin-top:2px;">界面主线</div></div>
+      </div>
+      <div style="display:flex; gap:10px; align-items:center; background:#ffffff; border:2px solid #111; border-radius:12px; padding:10px;">
+        <div style="width:86px; height:52px; background:#ffd93d; border:2px solid #111; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:20px;">🧱</div>
+        <div><div style="font-size:11.5px; font-weight:800;">ch3 更多示例</div><div style="font-family:'DejaVu Sans Mono',monospace; font-size:9px; color:#6b6b6b;">#FFD93D · 对2</div><div style="font-size:9.5px; color:#8a7a5c; margin-top:2px;">拼装练习</div></div>
+      </div>
+      <div style="display:flex; gap:10px; align-items:center; background:#ffffff; border:2px solid #111; border-radius:12px; padding:10px;">
+        <div style="width:86px; height:52px; background:#4ecdc4; border:2px solid #111; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:20px;">📦</div>
+        <div><div style="font-size:11.5px; font-weight:800;">ch4 更多</div><div style="font-family:'DejaVu Sans Mono',monospace; font-size:9px; color:#6b6b6b;">#4ECDC4 · 对1</div><div style="font-size:9.5px; color:#8a7a5c; margin-top:2px;">扩展集</div></div>
+      </div>
+      <div style="display:flex; gap:10px; align-items:center; background:#ffffff; border:2px solid #111; border-radius:12px; padding:10px;">
+        <div style="width:86px; height:52px; background:#5b8def; border:2px solid #111; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:20px;">🔗</div>
+        <div><div style="font-size:11.5px; font-weight:800;">ch5 全栈基础</div><div style="font-family:'DejaVu Sans Mono',monospace; font-size:9px; color:#6b6b6b;">#5B8DEF · 对3</div><div style="font-size:9.5px; color:#8a7a5c; margin-top:2px;">连接与部署</div></div>
+      </div>
+      <div style="display:flex; gap:10px; align-items:center; background:#ffffff; border:2px solid #111; border-radius:12px; padding:10px;">
+        <div style="width:86px; height:52px; background:#a78bfa; border:2px solid #111; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:20px;">🧠</div>
+        <div><div style="font-size:11.5px; font-weight:800;">ch6 高级教程</div><div style="font-family:'DejaVu Sans Mono',monospace; font-size:9px; color:#6b6b6b;">#A78BFA · 对2</div><div style="font-size:9.5px; color:#8a7a5c; margin-top:2px;">进阶专题</div></div>
+      </div>
+    </div>
+
+    <div class="sec-label">站点轮换色 <i>只上先后线（实线），四色沿线路轮换</i></div>
+    <div style="display:flex; gap:26px; align-items:center; margin-bottom:18px;">
+      <svg width="380" height="36" viewBox="0 0 380 36">
+        <path d="M 8 18 H 372" fill="none" stroke="#111111" stroke-width="2.5"/>
+        <circle cx="8" cy="18" r="6" fill="#ffd93d" stroke="#111" stroke-width="2"/>
+        <circle cx="128" cy="18" r="6" fill="#4ecdc4" stroke="#111" stroke-width="2"/>
+        <circle cx="248" cy="18" r="6" fill="#ff8fab" stroke="#111" stroke-width="2"/>
+        <circle cx="372" cy="18" r="6" fill="#ff6b6b" stroke="#111" stroke-width="2"/>
+      </svg>
+      <div style="font-size:11.5px; color:#3d3d3d; line-height:1.6;">描边 2px ink，<b>r=6</b>；<b>同色不相邻</b>；虚线（相关）与点线（同族）<b>不带站点</b>。</div>
+    </div>
+
+    <div class="sec-label">收束示例 <i>鲜艳 × 黑描边 × 纸底的合作</i></div>
+    <div style="display:flex; gap:14px; align-items:center;">
+      <div style="width:132px; height:68px; background:#ff6b6b; border:3px solid #111; border-radius:9px; box-shadow: inset 0 3px 8px rgba(26,26,26,0.30); display:flex; align-items:center; justify-content:center; font-size:24px;">🌐</div>
+      <div style="width:132px; height:68px; background:#ff8fab; border:3px solid #111; border-radius:9px; display:flex; align-items:center; justify-content:center; font-size:24px;">⚛️</div>
+      <div style="font-size:11.5px; color:#3d3d3d; line-height:1.6; flex:1;">相邻相框取不同撞色对（ch1 coral × ch2 pink 跨对相邻）；黑描边与内阴影把鲜艳压回纸面。立体感来自<b>描边＋内阴影</b>，不来自渐变。</div>
+    </div>
+  </div>
+
+  <div style="position:absolute; top: 138px; left: 948px; width: 292px;" class="panel">
+    <h3>章节色规则</h3>
+    <div class="note" style="margin-bottom:6px;"><span class="idx">1</span><span class="txt"><b>只进相框</b>：16:9 预期区底色与图标瓦；卡面永远纸色。</span></div>
+    <div class="note" style="margin-bottom:6px;"><span class="idx">2</span><span class="txt"><b>身份非状态</b>：章节色不表达 done / 进行中；状态用形状。</span></div>
+    <div class="note" style="margin-bottom:6px;"><span class="idx">3</span><span class="txt"><b>相邻即撞色</b>：并排卡片的相框色跨撞色对取色。</span></div>
+    <div class="note" style="margin-bottom:0;"><span class="idx">4</span><span class="txt"><b>新增章节</b>：优先复用六色；超六章再扩第七色（新撞色对）。</span></div>
+  </div>
+  <div style="position:absolute; top: 436px; left: 948px; width: 292px;" class="panel">
+    <h3>状态即形状，不是颜色</h3>
+    <div class="note" style="margin-bottom:6px;"><span class="idx">1</span><span class="txt"><b>完成＝打孔</b>：票券沿撕线打双孔；未开始无孔。</span></div>
+    <div class="note" style="margin-bottom:6px;"><span class="idx">2</span><span class="txt"><b>进度＝积木点</b>：卡头点列，实心=已学。</span></div>
+    <div class="note" style="margin-bottom:0;"><span class="idx">3</span><span class="txt"><b>无锁</b>：状态是推荐不是门槛，卡片永远可入（死原则）。</span></div>
+  </div>
+
+  <div class="footline">设计系统 · 01 颜色 · stack idealjs</div>
+  <div class="pagenum">02 / 03</div>
+</div>
+
+<!-- ================= P3 规则与反例 ================= -->
+<div class="page">
+  <div class="story-head">
+    <span class="tag">&lt;Colors /&gt; 3/3</span>
+    <h2>颜色 · 规则与反例</h2>
+    <div class="desc">每条规则配一对正反示例：左边是禁止的，右边是正确的。审查时逐条对照即可。</div>
+  </div>
+
+  <div class="canvas" style="top: 138px; left: 40px; width: 880px; height: 594px;">
+    <div style="display:flex; flex-direction:column; gap:18px;">
+
+      <div style="display:flex; gap:16px; align-items:center;">
+        <span class="okmk bad">✗</span>
+        <div style="display:flex; border:2px solid #111; border-radius:10px; overflow:hidden;"><div style="width:88px; height:48px; background:#ff6b6b;"></div><div style="width:88px; height:48px; background:#ff6b6b;"></div></div>
+        <span style="font-size:10px; color:#8a8a8a; width:30px;">vs</span>
+        <span class="okmk ok">✓</span>
+        <div style="display:flex; border:2px solid #111; border-radius:10px; overflow:hidden;"><div style="width:88px; height:48px; background:#ff6b6b;"></div><div style="width:88px; height:48px; background:#4ecdc4;"></div></div>
+        <div style="flex:1; font-size:11.5px; color:#3d3d3d; line-height:1.55;"><b>相邻必撞色</b>：同色相邻失去碰撞（✗）；相邻鲜艳必须来自不同撞色对（✓）。</div>
+      </div>
+
+      <div style="display:flex; gap:16px; align-items:center;">
+        <span class="okmk bad">✗</span>
+        <div style="width:176px; height:48px; background:#ffd93d; border-radius:10px;"></div>
+        <span style="font-size:10px; color:#8a8a8a; width:30px;">vs</span>
+        <span class="okmk ok">✓</span>
+        <div style="width:176px; height:48px; background:#ffd93d; border:2px solid #111; border-radius:10px;"></div>
+        <div style="flex:1; font-size:11.5px; color:#3d3d3d; line-height:1.55;"><b>黑描边收束</b>：无描边的鲜艳漂浮刺眼（✗）；一切鲜艳以 2px ink 描边为界（✓）。</div>
+      </div>
+
+      <div style="display:flex; gap:16px; align-items:center;">
+        <span class="okmk bad">✗</span>
+        <div style="width:176px; height:48px; background:#4ecdc4; border:2px solid #111; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; color:#111;">大底鲜艳，字被淹没</div>
+        <span style="font-size:10px; color:#8a8a8a; width:30px;">vs</span>
+        <span class="okmk ok">✓</span>
+        <div style="width:176px; height:48px; background:#fff9f0; border:2px solid #111; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; color:#111;">纸底安放正文</div>
+        <div style="flex:1; font-size:11.5px; color:#3d3d3d; line-height:1.55;"><b>大底纸色</b>：背景与正文区永远 paper（✓）；鲜艳只出现在相框等局部（✗ 为反例）。</div>
+      </div>
+
+      <div style="display:flex; gap:16px; align-items:center;">
+        <span class="okmk bad">✗</span>
+        <div style="width:176px; height:48px; border:2px solid #111; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:10.5px; color:#8a8a8a;">渐变按钮（本稿不渲染，示意）</div>
+        <span style="font-size:10px; color:#8a8a8a; width:30px;">vs</span>
+        <span class="okmk ok">✓</span>
+        <div style="width:176px; height:48px; background:#ff6b6b; border:2px solid #111; border-radius:10px; box-shadow: 4px 4px 0 #111; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:800; color:#fff9f0;">纯色＋硬投影</div>
+        <div style="flex:1; font-size:11.5px; color:#3d3d3d; line-height:1.55;"><b>禁色彩渐变</b>：任何色彩过渡都不用（✗）；立体感来自描边、硬投影与内阴影（✓）。</div>
+      </div>
+
+      <div style="display:flex; gap:16px; align-items:center;">
+        <span class="okmk bad">✗</span>
+        <div style="width:176px; height:48px; background:#fff9f0; border:2px solid #111; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:800; color:#15803d;">✓ 完成（绿色状态）</div>
+        <span style="font-size:10px; color:#8a8a8a; width:30px;">vs</span>
+        <span class="okmk ok">✓</span>
+        <div style="width:176px; height:48px; background:#fff9f0; border:2px solid #111; border-radius:10px; display:flex; align-items:center; justify-content:center; gap:10px; font-size:11px; font-weight:800; color:#111;">● ● ● ○<span style="font-weight:400; color:#8a7a5c;">＋打孔票</span></div>
+        <div style="flex:1; font-size:11.5px; color:#3d3d3d; line-height:1.55;"><b>状态即形状</b>：不用颜色表达完成（✗ 绿 pill 是旧方案）；完成=打孔＋积木实心点（✓）。</div>
+      </div>
+
+    </div>
+  </div>
+
+  <div style="position:absolute; top: 138px; left: 948px; width: 292px;" class="panel">
+    <h3>用色规则速查</h3>
+    <div class="note" style="margin-bottom:6px;"><span class="idx">1</span><span class="txt"><b>鲜艳预算</b> ≤ 10%/屏。</span></div>
+    <div class="note" style="margin-bottom:6px;"><span class="idx">2</span><span class="txt"><b>相邻必撞色</b>（跨对取色）。</span></div>
+    <div class="note" style="margin-bottom:6px;"><span class="idx">3</span><span class="txt"><b>黑描边收束</b> 2px ink。</span></div>
+    <div class="note" style="margin-bottom:0;"><span class="idx">4</span><span class="txt"><b>大底纸色</b>，白只作纸叠亮边。</span></div>
+  </div>
+  <div style="position:absolute; top: 400px; left: 948px; width: 292px;" class="panel">
+    <h3>审查方法</h3>
+    <div class="note" style="margin-bottom:6px;"><span class="idx">1</span><span class="txt">截图转灰度：层级仍可辨＝描边结构成立。</span></div>
+    <div class="note" style="margin-bottom:6px;"><span class="idx">2</span><span class="txt">数鲜艳面积：框选相框＋形状＋站点，估算占比。</span></div>
+    <div class="note" style="margin-bottom:0;"><span class="idx">3</span><span class="txt">找同色相邻：任何两块同色鲜艳贴在一起即违规。</span></div>
+  </div>
+
+  <div class="footline">设计系统 · 01 颜色 · stack idealjs</div>
+  <div class="pagenum">03 / 03</div>
+</div>
+
+</body>
+</html>

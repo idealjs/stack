@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>设计系统 · 04 样例 · stack idealjs</title>
+<style>
+  @page { size: 1280px 800px; margin: 0; }
+  *, *::before, *::after { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0; width: 1280px; background: #f0f0ef;
+    font-family: "Noto Sans CJK SC", "PingFang SC", "Microsoft YaHei", sans-serif;
+    color: #1a1a1a; -webkit-font-smoothing: antialiased;
+  }
+  .page { width: 1280px; height: 800px; position: relative; background: #f0f0ef; overflow: hidden; page-break-after: always; }
+  .page:last-child { page-break-after: auto; }
+  @media screen {
+    html { height: auto; display: flex; justify-content: center; background: #f0f0ef; }
+    body { transform-origin: top center; scale: min(1, calc(100vw / 1280px)); margin: 0 auto; box-shadow: 0 0 48px rgba(15, 23, 42, 0.18); }
+  }
+  .pagenum { position: absolute; bottom: 26px; right: 40px; font-size: 13px; color: #8a8a8a; letter-spacing: 2px; }
+  .footline { position: absolute; bottom: 26px; left: 40px; font-size: 13px; color: #8a8a8a; letter-spacing: 1px; }
+  .story-head { position: absolute; top: 36px; left: 40px; right: 40px; }
+  .story-head .tag {
+    display: inline-block; font-size: 15px; font-weight: 700; color: #6d28d9;
+    background: #efe6fb; border-radius: 8px; padding: 3px 12px;
+    font-family: "DejaVu Sans Mono", "Noto Sans CJK SC", monospace;
+  }
+  .story-head h2 { margin: 8px 0 4px; font-size: 28px; font-weight: 800; color: #1a1a1a; }
+  .story-head .desc { font-size: 14.5px; color: #6b6b6b; }
+  .canvas { background: #fbfbfa; border: 1px dashed #cfcfcd; border-radius: 18px; padding: 20px 22px; position: absolute; }
+  .panel { background: #ffffff; border-radius: 18px; padding: 18px 20px; box-shadow: 0 1px 2px rgba(26,26,26,0.06); }
+  .panel h3 { margin: 0 0 10px; font-size: 16px; font-weight: 700; color: #1a1a1a; }
+  .note { display: flex; gap: 10px; align-items: flex-start; margin-bottom: 8px; }
+  .note .idx {
+    flex: none; width: 22px; height: 22px; border-radius: 50%;
+    background: #1a1a1a; color: #ffffff; font-size: 13px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center; margin-top: 1px;
+  }
+  .note .txt { font-size: 13px; line-height: 1.55; color: #3d3d3d; }
+  .note .txt b { color: #1a1a1a; }
+  table.spec { width: 100%; border-collapse: collapse; font-size: 12px; color: #3d3d3d; }
+  table.spec th { text-align: left; font-weight: 700; color: #1a1a1a; border-bottom: 2px solid #d5d5d3; padding: 5px 8px 5px 0; }
+  table.spec td { border-bottom: 1px solid #ececea; padding: 4px 8px 4px 0; vertical-align: top; }
+  table.spec td.k { color: #1a1a1a; font-weight: 600; white-space: nowrap; }
+  .sec-label { font-size: 13.5px; font-weight: 700; color: #1a1a1a; margin-bottom: 8px; }
+  .sec-label i { font-style: normal; font-weight: 400; font-size: 11.5px; color: #6b6b6b; margin-left: 8px; }
+
+  .mscard {
+    background: #fff9f0; border: 2px solid #111111; border-radius: 14px;
+    box-shadow: 0 3px 0 #ffffff, 0 5px 0 #eadfc4, 7px 8px 0 #111111;
+    padding: 11px; position: absolute;
+  }
+  .mscard .mszone {
+    height: 128px; border-radius: 8px; position: relative;
+    border: 3px solid #111111;
+    box-shadow: inset 0 3px 8px rgba(26,26,26,0.30), inset 0 -1px 0 rgba(255,255,255,0.55);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .mscard .mszone span { font-size: 30px; }
+  .mscard .mst { display: flex; align-items: center; gap: 7px; margin-top: 9px; }
+  .mscard .mst .tri { width: 0; height: 0; border-left: 6px solid transparent; border-right: 6px solid transparent; border-bottom: 10px solid #111111; }
+  .mscard .mst b { font-size: 14px; flex: 1; color: #2b1d10; text-shadow: 0 1px 1px rgba(255,255,255,0.9); }
+  .mscard .dots { display: flex; gap: 4px; }
+  .mscard .dots i { width: 7px; height: 7px; border-radius: 50%; border: 1.5px solid #111111; background: #fff; }
+  .mscard .dots i.on { background: #111111; }
+  .entry-badge2 {
+    position: absolute; top: -11px; left: -11px; width: 24px; height: 24px; border-radius: 50%;
+    background: #111111; color: #ffd93d; font-size: 12px; font-weight: 800;
+    display: flex; align-items: center; justify-content: center; border: 2px solid #fff9f0;
+  }
+  .msticket {
+    width: 216px; background: #fff9f0; border: 2px solid #111111; border-radius: 12px;
+    box-shadow: 5px 5px 0 #111111; position: absolute; display: flex; align-items: stretch;
+  }
+  .msticket .tl {
+    width: 56px; border: 2px solid #111111; border-left: none; border-radius: 10px 0 0 10px;
+    display: flex; align-items: center; justify-content: center; font-size: 22px; margin-left: -2px;
+  }
+  .msticket .tb { flex: 1; padding: 9px 10px; }
+  .msticket .tb b { font-size: 12.5px; }
+  .msticket .tb .no { font-family: "DejaVu Sans Mono", monospace; font-size: 8.5px; color: #8a7a5c; margin-top: 3px; }
+  .msticket .stub {
+    width: 42px; border-left: 1.5px dashed #111111;
+    display: flex; align-items: center; justify-content: center;
+    font-family: "DejaVu Sans Mono", monospace; font-size: 9.5px; color: #8a7a5c;
+  }
+  .msticket.pk::before, .msticket.pk::after {
+    content: ""; position: absolute; left: 162px; width: 13px; height: 13px;
+    border-radius: 50%; background: #fff9f0; border: 2px solid #111111;
+  }
+  .msticket.pk::before { top: -9px; }
+  .msticket.pk::after { bottom: -9px; }
+  .msline { stroke: #111111; stroke-width: 2.5; fill: none; }
+  .msstation { stroke: #111111; stroke-width: 2; }
+</style>
+</head>
+<body>
+
+<!-- ================= P1 组合场景 ================= -->
+<div class="page">
+  <div class="story-head">
+    <span class="tag">&lt;Examples /&gt; 1/2</span>
+    <h2>样例 · 组合场景</h2>
+    <div class="desc">全系统同台：拟物卡＋三种关系线＋指派票与脱靶注＋散落语义形状。这一页可直接当实现验收的对照图。</div>
+  </div>
+
+  <div class="canvas" style="top: 138px; left: 40px; width: 880px; height: 594px; padding: 0; overflow: hidden; background:#fff9f0;">
+    <svg style="position:absolute; left:0; top:0;" width="880" height="594" viewBox="0 0 880 594">
+      <path d="M 560 8 l 16 28 h -32 z" fill="#ffd93d" stroke="#111" stroke-width="2.5"/>
+      <circle cx="812" cy="96" r="8" fill="#4ecdc4" stroke="#111" stroke-width="2"/>
+      <circle cx="838" cy="82" r="5" fill="#ff8fab" stroke="#111" stroke-width="2"/>
+      <circle cx="826" cy="118" r="4" fill="#ffd93d" stroke="#111" stroke-width="2"/>
+      <path d="M 24 330 q 8 -22 16 0 t16 0 t16 0 t16 0" fill="none" stroke="#5b8def" stroke-width="3" stroke-linecap="round"/>
+      <path d="M 762 270 l 10 20 22 3 -16 15 4 22 -20 -11 -20 11 4 -22 -16 -15 22 -3 z" fill="#a78bfa" stroke="#111" stroke-width="2"/>
+      <path d="M 76 544 L 70 537 L 82 530 L 70 523 L 82 516 L 76 509" fill="none" stroke="#ff6b6b" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+      <circle cx="852" cy="192" r="10" fill="none" stroke="#4ecdc4" stroke-width="4"/><circle cx="852" cy="192" r="10" fill="none" stroke="#111" stroke-width="1.5"/>
+      <path d="M 624 470 v22 M613 481 h22" stroke="#a78bfa" stroke-width="4" stroke-linecap="round"/><path d="M 624 470 v22 M613 481 h22" stroke="#111" stroke-width="1.2"/>
+      <path d="M 810 250 v20 M800 260 h20" stroke="#5b8def" stroke-width="4" stroke-linecap="round"/><path d="M 810 250 v20 M800 260 h20" stroke="#111" stroke-width="1.2"/>
+
+      <path class="msline" d="M 299 180 H 302 A 8 8 0 0 0 310 172 V 116 A 8 8 0 0 1 318 108 H 378"/>
+      <path class="msline" d="M 639 108 H 699"/>
+      <path d="M 505 237 V 266" fill="none" stroke="#111" stroke-width="2" stroke-dasharray="4 2"/>
+      <path d="M 600 237 V 150 H 698" fill="none" stroke="#111" stroke-width="2.4" stroke-dasharray="0.1 6" stroke-linecap="round"/>
+      <circle class="msstation" cx="299" cy="180" r="6" fill="#ffd93d"/>
+      <circle class="msstation" cx="378" cy="108" r="6" fill="#4ecdc4"/>
+      <circle class="msstation" cx="639" cy="108" r="6" fill="#ffd93d"/>
+      <circle class="msstation" cx="699" cy="108" r="6" fill="#ff8fab"/>
+    </svg>
+
+    <div class="mscard" style="left:40px; top:110px; width:250px;">
+      <span class="entry-badge2">①</span>
+      <div class="mszone" style="background:#ff6b6b;"><span>🌐</span>
+        <span style="position:absolute; left:6px; top:5px; font-size:8.5px; color:#fff9f0; font-weight:700; letter-spacing:1px;">预期结果 · GIF</span>
+      </div>
+      <div class="mst"><span class="tri"></span><b>快速开始</b><span class="dots"><i class="on"></i><i class="on"></i><i class="on"></i><i></i></span></div>
+    </div>
+
+    <div class="mscard" style="left:380px; top:44px; width:250px; transform:rotate(-1deg);">
+      <span class="entry-badge2">②</span>
+      <div class="mszone" style="background:#ff8fab;"><span>⚛️</span></div>
+      <div class="mst"><span class="tri"></span><b>React</b><span class="dots"><i class="on"></i><i class="on"></i><i></i><i></i></span></div>
+    </div>
+
+    <div class="mscard" style="left:700px; top:44px; width:140px;">
+      <div class="mszone" style="height:78px; background:#5b8def;"><span style="font-size:22px;">🔗</span></div>
+      <div class="mst"><span class="tri"></span><b style="font-size:12px;">全栈基础</b></div>
+    </div>
+
+    <div class="msticket pk" style="left:380px; top:268px;">
+      <div class="tl" style="background:#a78bfa;">＋</div>
+      <div class="tb"><b>指派学习 · npm</b><div class="no">位置 / 预期 / 场景</div></div>
+      <div class="stub">＋</div>
+    </div>
+
+    <div style="position:absolute; left:40px; top:420px; width:300px;">
+      <div style="display:flex; align-items:center; gap:8px;">
+        <svg width="22" height="22"><path d="M 11 20 L 8 17 L 14 14 L 8 11 L 14 8 L 11 4" fill="none" stroke="#ff6b6b" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/></svg>
+        <b style="font-size:12px;">脱靶提醒</b>
+      </div>
+      <div style="font-size:11px; color:#3d3d3d; line-height:1.6; margin-top:6px;">常见脱靶：装了但没跑。脱靶的样子——命令成功、页面空白；此时缺的是"真机验收"这块积木。</div>
+    </div>
+
+    <div style="position:absolute; left:380px; top:430px; display:flex; align-items:center; gap:8px;">
+      <svg width="40" height="20"><path d="M2 12 q5 -16 10 0 t10 0 t10 0" fill="none" stroke="#5b8def" stroke-width="3" stroke-linecap="round"/></svg>
+      <span style="font-size:11px; color:#3d3d3d;"><b>代理区</b>：安装交给 agent，只验收产物</span>
+    </div>
+    <div style="position:absolute; left:660px; top:430px; display:flex; align-items:center; gap:8px;">
+      <svg width="34" height="20"><rect x="2" y="6" width="30" height="9" fill="#ff8fab" stroke="#111" stroke-width="2"/></svg>
+      <span style="font-size:11px; color:#3d3d3d;"><b>价值区</b>：过程就地写清</span>
+    </div>
+
+    <div style="position:absolute; left:40px; top:562px; font-size:10.5px; color:#8a7a5c;">形状散落于空白，每个都有含义：▲ 靶子 · ● 积木 · ○ 预期 · ～ 代理区 · ▬ 价值区 · ⌇ 脱靶 · ＋ 指派；线：实＝先后 · 虚＝相关 · 点＝同族</div>
+  </div>
+
+  <div style="position:absolute; top: 138px; left: 948px; width: 292px;" class="panel">
+    <h3>场景读法</h3>
+    <div class="note" style="margin-bottom:6px;"><span class="idx">1</span><span class="txt"><b>主线</b>：快速开始 →（直角步进）→ React →（直线）→ 全栈基础；四枚站点半嵌卡边。</span></div>
+    <div class="note" style="margin-bottom:6px;"><span class="idx">2</span><span class="txt"><b>虚线</b>：React 底边 → 指派票顶边（相关：票属于该章扩展）。</span></div>
+    <div class="note" style="margin-bottom:6px;"><span class="idx">3</span><span class="txt"><b>点线</b>：React → 全栈基础（同族：工程基础一族）。</span></div>
+    <div class="note" style="margin-bottom:0;"><span class="idx">4</span><span class="txt"><b>指派票</b>打孔＝已完成过一次；脱靶注跟在其叙事之后。</span></div>
+  </div>
+  <div style="position:absolute; top: 420px; left: 948px; width: 292px;" class="panel">
+    <h3>对照检查</h3>
+    <div class="note" style="margin-bottom:6px;"><span class="idx">1</span><span class="txt">三卡相框色：coral / pink / blue——相邻跨对 ✓。</span></div>
+    <div class="note" style="margin-bottom:6px;"><span class="idx">2</span><span class="txt">散落形状 8 枚，全部在空白 ✓。</span></div>
+    <div class="note" style="margin-bottom:0;"><span class="idx">3</span><span class="txt">右站点骑黑影外缘（快速开始右、React 右），左站点贴描边 ✓。</span></div>
+  </div>
+
+  <div class="footline">设计系统 · 04 样例 · stack idealjs</div>
+  <div class="pagenum">01 / 02</div>
+</div>
+
+<!-- ================= P2 概念映射与落地 ================= -->
+<div class="page">
+  <div class="story-head">
+    <span class="tag">&lt;Examples /&gt; 2/2</span>
+    <h2>样例 · 概念映射与落地</h2>
+    <div class="desc">ai-era-tutorial 的每个概念都有对应组件；落地清单指出三个页面各自用哪些件。</div>
+  </div>
+
+  <div class="canvas" style="top: 138px; left: 40px; width: 880px; height: 594px;">
+    <div class="sec-label">概念 → 组件映射 <i>skill 八概念的视觉落点</i></div>
+    <table class="spec" style="font-size:12.5px; margin-bottom:20px;">
+      <tr><th style="width:190px;">skill 概念</th><th>组件落点</th></tr>
+      <tr><td class="k">靶子先行</td><td>卡头三件套：▲ 目标 ＋ ○ 16:9 预期区 ＋ ● 积木点列</td></tr>
+      <tr><td class="k">步骤 = 目标 ＋ 验收产物</td><td>卡内验收行（○ 空环待勾，不写键位）</td></tr>
+      <tr><td class="k">代理区 / 价值区</td><td>～ 横波带（交给 agent）／ ▬ 实心条（过程就地展开）</td></tr>
+      <tr><td class="k">指派学习</td><td>＋ 三行票：位置（坐标）/ 预期（尺子）/ 场景（巩固）</td></tr>
+      <tr><td class="k">脱靶提醒</td><td>⌇ 竖抖注，永远跟在指派后</td></tr>
+      <tr><td class="k">认知基础</td><td>底座纹与「真机验收」章（env / 运行环境就地露出）</td></tr>
+      <tr><td class="k">入口梳理</td><td>①②③ 徽章 ＋ 读者画像路径 chips</td></tr>
+      <tr><td class="k">死原则</td><td><b>无锁</b>：状态 = 推荐，卡永远可入；不写死 AI 规则</td></tr>
+    </table>
+
+    <div class="sec-label">落地清单 <i>三个页面各用哪些件</i></div>
+    <table style="width:100%; border-collapse:collapse; font-size:11.5px; color:#3d3d3d;">
+      <tr style="border-bottom:2px solid #d5d5d3;">
+        <th style="text-align:left; padding:5px 8px 5px 0; color:#1a1a1a; width:130px;">页面</th><th style="text-align:left; padding:5px 8px 5px 0; color:#1a1a1a;">组件组合</th>
+      </tr>
+      <tr style="border-bottom:1px solid #ececea;"><td style="padding:7px 8px 7px 0; font-weight:700; color:#1a1a1a;">首页 · 书架</td><td style="padding:7px 8px 7px 0;">CourseCard 网格 ＋ RouteLine（实线主链＋虚线相关）＋ 入口画像卡；散落形状 ≤ 8。</td></tr>
+      <tr style="border-bottom:1px solid #ececea;"><td style="padding:7px 8px 7px 0; font-weight:700; color:#1a1a1a;">教程页 · 正文</td><td style="padding:7px 8px 7px 0;">卡头三件套置顶；正文中 ～ 代理带与 ▬ 价值条分节；指派票＋脱靶注成对；○ 验收行收尾。</td></tr>
+      <tr><td style="padding:7px 8px 7px 0; font-weight:700; color:#1a1a1a;">工具页 / 实践页</td><td style="padding:7px 8px 7px 0;">轻量用形状语言（无卡无线）；实践经历可用拼贴式纸片——单独风格层，不混入主线。</td></tr>
+    </table>
+  </div>
+
+  <div style="position:absolute; top: 138px; left: 948px; width: 292px;" class="panel">
+    <h3>组合规则</h3>
+    <div class="note" style="margin-bottom:6px;"><span class="idx">1</span><span class="txt"><b>撞色在框内</b>：章节色只进 16:9 相框，卡面纸色。</span></div>
+    <div class="note" style="margin-bottom:6px;"><span class="idx">2</span><span class="txt"><b>站点贴边</b>：左贴描边、右骑硬投影外缘；虚/点线无站点。</span></div>
+    <div class="note" style="margin-bottom:6px;"><span class="idx">3</span><span class="txt"><b>入口徽章</b> ①②③：推荐起点，非强制。</span></div>
+    <div class="note" style="margin-bottom:0;"><span class="idx">4</span><span class="txt"><b>形状不压内容</b>：只在空白，密度 ≤ 8/屏。</span></div>
+  </div>
+  <div style="position:absolute; top: 420px; left: 948px; width: 292px;" class="panel">
+    <h3>实现顺序建议</h3>
+    <div class="note" style="margin-bottom:6px;"><span class="idx">1</span><span class="txt">CourseCard（含翻转交互）→ 首页书架。</span></div>
+    <div class="note" style="margin-bottom:6px;"><span class="idx">2</span><span class="txt">RouteLine（数据驱动布线）→ 关系可读。</span></div>
+    <div class="note" style="margin-bottom:6px;"><span class="idx">3</span><span class="txt">指派票＋脱靶注 → 教程正文改造。</span></div>
+    <div class="note" style="margin-bottom:0;"><span class="idx">4</span><span class="txt">GIF 素材逐章录制（16:9，无声循环）。</span></div>
+  </div>
+
+  <div class="footline">设计系统 · 04 样例 · stack idealjs</div>
+  <div class="pagenum">02 / 02</div>
+</div>
+
+</body>
+</html>
