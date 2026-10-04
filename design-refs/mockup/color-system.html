@@ -74,12 +74,13 @@
   /* ====== 色板 ====== */
   .group-label { font-size: 13px; font-weight: 700; color: #1a1a1a; margin-bottom: 3px; }
   .group-label i { font-style: normal; font-weight: 400; font-size: 11.5px; color: #6b6b6b; margin-left: 8px; }
-  .swrow { display: grid; gap: 8px; margin-bottom: 14px; }
+  .swrow { display: grid; gap: 8px; margin-bottom: 10px; }
   .sw { min-width: 0; }
   .sw .blk {
-    height: 42px; border-radius: 8px;
+    height: 34px; border-radius: 8px; position: relative; overflow: hidden;
     box-shadow: inset 0 0 0 1px rgba(26,26,26,0.05);
   }
+  .sw .blk .ov { position: absolute; inset: 0; }
   .sw .tk { font-family: "DejaVu Sans Mono", monospace; font-size: 9.5px; font-weight: 700; color: #1a1a1a; margin-top: 5px; white-space: nowrap; overflow: hidden; }
   .sw .hx { font-family: "DejaVu Sans Mono", monospace; font-size: 9px; color: #6b6b6b; white-space: nowrap; }
   .sw .use { font-size: 9.5px; color: #8a8a8a; margin-top: 1px; white-space: nowrap; overflow: hidden; }
@@ -139,6 +140,44 @@
   .rcard .rt { display: flex; align-items: center; gap: 6px; margin-top: 8px; }
   .rcard .rt .icotile { width: 18px; height: 18px; border-radius: 6px; font-size: 10px; flex: none; display: flex; align-items: center; justify-content: center; }
   .rcard .rt b { font-size: 12.5px; flex: 1; }
+
+  /* ====== 玻璃风格（第 3 页） ====== */
+  .glass {
+    border-radius: 14px; border: 1px solid rgba(255,255,255,0.65);
+    box-shadow: 0 8px 24px rgba(26,26,26,0.10), inset 0 1px 0 rgba(255,255,255,0.9);
+    backdrop-filter: blur(8px);
+  }
+  .glass.strong { background: rgba(255,255,255,0.72); }
+  .glass.mid { background: rgba(255,255,255,0.55); }
+  .glass.light { background: rgba(255,255,255,0.40); }
+  .gtopbar { position: absolute; display: flex; align-items: center; gap: 18px; padding: 0 16px; height: 44px; }
+  .gtopbar .glogo { font-size: 13px; font-weight: 800; color: #1a1a1a; letter-spacing: 0.5px; }
+  .gtopbar .gmenu { display: flex; gap: 14px; font-size: 11.5px; color: #555555; }
+  .gtopbar .gmenu span.on { color: #1a1a1a; font-weight: 700; }
+  .gpill {
+    height: 24px; border-radius: 999px; background: rgba(255,255,255,0.45);
+    border: 1px solid rgba(255,255,255,0.6); display: flex; align-items: center;
+    padding: 0 12px; font-size: 10.5px; color: #6b6b6b; gap: 6px;
+  }
+  .gcard { position: absolute; padding: 10px; }
+  .gcard .gzone {
+    border-radius: 8px; background: rgba(255,255,255,0.25);
+    border: 1px solid rgba(255,255,255,0.4);
+    display: flex; align-items: center; justify-content: center; position: relative;
+  }
+  .gcard .gzone span { font-size: 28px; }
+  .gcard .gzone i {
+    position: absolute; right: 6px; bottom: 6px; font-style: normal;
+    font-size: 8.5px; color: #3d3d3d; background: rgba(255,255,255,0.72);
+    padding: 1px 5px; border-radius: 999px; font-weight: 600;
+  }
+  .gcard .gt { display: flex; align-items: center; gap: 6px; margin-top: 8px; }
+  .gcard .gt .gico {
+    width: 18px; height: 18px; border-radius: 6px;
+    background: rgba(255,255,255,0.55); border: 1px solid rgba(255,255,255,0.6);
+    display: flex; align-items: center; justify-content: center; font-size: 10px;
+  }
+  .gcard .gt b { font-size: 12.5px; flex: 1; color: #1a1a1a; }
 </style>
 </head>
 <body>
@@ -193,6 +232,15 @@
       <div class="sw"><div class="blk" style="background:#e0f2fe;"></div><div class="tk">ch5 全栈基础</div><div class="hx">#e0f2fe</div><div class="use">字 #0369a1</div></div>
       <div class="sw"><div class="blk" style="background:#ede9fe;"></div><div class="tk">ch6 高级教程</div><div class="hx">#ede9fe</div><div class="use">字 #6d28d9</div></div>
     </div>
+
+    <div class="group-label">⑤ 玻璃面 · 半透明白 <i>表面而非颜色层——浮在任意色域之上，四层分工不变（样票铺在 sage 上演示）</i></div>
+    <div class="swrow" style="grid-template-columns: repeat(5, 1fr); margin-bottom:0;">
+      <div class="sw"><div class="blk" style="background:#a2b49b;"><div class="ov" style="background:rgba(255,255,255,0.72);"></div></div><div class="tk">glass-strong</div><div class="hx">white ·72</div><div class="use">文字面</div></div>
+      <div class="sw"><div class="blk" style="background:#a2b49b;"><div class="ov" style="background:rgba(255,255,255,0.55);"></div></div><div class="tk">glass</div><div class="hx">white ·55</div><div class="use">卡面</div></div>
+      <div class="sw"><div class="blk" style="background:#a2b49b;"><div class="ov" style="background:rgba(255,255,255,0.40);"></div></div><div class="tk">glass-light</div><div class="hx">white ·40</div><div class="use">HUD 图例</div></div>
+      <div class="sw"><div class="blk" style="background:#a2b49b;"><div class="ov" style="background:rgba(255,255,255,0.12); border-top:1px solid rgba(255,255,255,0.65);"></div></div><div class="tk">glass-line</div><div class="hx">1px ·65</div><div class="use">亮边</div></div>
+      <div class="sw"><div class="blk" style="background:#a2b49b;"><div class="ov" style="background:rgba(255,255,255,0.12); box-shadow: inset 0 1px 0 rgba(255,255,255,0.9);"></div></div><div class="tk">glass-edge</div><div class="hx">inset ·90</div><div class="use">内高光</div></div>
+    </div>
   </div>
 
   <div style="position:absolute; top: 138px; left: 948px; width: 292px;" class="panel">
@@ -217,7 +265,7 @@
   </div>
 
   <div class="footline">色彩系统 · ColorSystem · stack idealjs</div>
-  <div class="pagenum">01 / 02</div>
+  <div class="pagenum">01 / 03</div>
 </div>
 
 <!-- ================= P2 应用样张 ================= -->
@@ -303,7 +351,97 @@
   </div>
 
   <div class="footline">色彩系统 · ColorSystem · stack idealjs</div>
-  <div class="pagenum">02 / 02</div>
+  <div class="pagenum">02 / 03</div>
+</div>
+
+
+<!-- ================= P3 玻璃风格预览 ================= -->
+<div class="page">
+  <div class="story-head">
+    <span class="tag">&lt;GlassStyle /&gt;</span>
+    <h2>玻璃风格预览 · 表面而非颜色层</h2>
+    <div class="desc">玻璃是纸之外的另一种表面：半透白 + 1px 亮边 + 内高光。它必须跨越色域边界才可见——平放在白桌上等于不存在。四层颜色分工不变，玻璃只换载体。</div>
+  </div>
+
+  <div class="canvas" style="top: 138px; left: 40px; width: 880px; height: 594px; padding: 0; overflow: hidden;">
+    <div style="position:absolute; left:0; top:0; width:880px; height:190px; background:#e0f2fe;"></div>
+    <div style="position:absolute; left:240px; top:150px; width:640px; height:210px; background:#fce7f3;"></div>
+    <div style="position:absolute; left:0; top:360px; width:880px; height:234px; background:#d1fae5;"></div>
+    <div style="position:absolute; left:664px; top:134px; font-size:10.5px; color:#3e6f96;">ch5 蓝色域</div>
+    <div style="position:absolute; left:250px; top:340px; font-size:10.5px; color:#9d6b86;">ch2 粉色域</div>
+    <div style="position:absolute; left:16px; top:576px; font-size:10.5px; color:#4a7a5c;">ch4 绿色域</div>
+
+    <svg style="position:absolute; left:0; top:0;" width="880" height="594" viewBox="0 0 880 594">
+      <path class="edge" d="M 0 92 H 880"/>
+      <circle class="station" cx="40" cy="92" r="2.8"/>
+      <circle class="station" cx="420" cy="92" r="2.8"/>
+      <circle class="station" cx="700" cy="92" r="2.8"/>
+      <path class="edge" d="M 0 430 H 694"/>
+      <circle class="station" cx="40" cy="430" r="2.8"/>
+      <circle class="station" cx="360" cy="430" r="2.8"/>
+      <rect class="station" x="694" y="420" width="6" height="20" rx="3"/>
+    </svg>
+
+    <div class="glass strong gtopbar" style="left:16px; top:16px; width:520px;">
+      <span class="glogo">stack·idealjs</span>
+      <div class="gmenu"><span class="on">课程</span><span>工具</span><span>实践</span></div>
+      <div class="gpill" style="margin-left:auto;">🔍 搜索章节…</div>
+    </div>
+
+    <div class="glass light" style="position:absolute; left:664px; top:60px; width:200px; height:64px; padding:10px 12px;">
+      <svg width="176" height="26" viewBox="0 0 176 26">
+        <path class="edge" d="M 4 13 H 150"/>
+        <circle class="station" cx="4" cy="13" r="2.4"/>
+        <rect class="station" x="150" y="8" width="6" height="10" rx="3"/>
+      </svg>
+      <div style="font-size:9.5px; color:#3d3d3d; margin-top:2px;">线路 HUD · 线从玻璃下穿过</div>
+    </div>
+
+    <div class="glass mid gcard" style="left:56px; top:120px; width:250px;">
+      <div class="gzone" style="height:129px;"><span>🌐</span><i>16:9 · GIF</i></div>
+      <div class="gt"><span class="gico">🌐</span><b>快速开始</b><span class="pill done">✓</span></div>
+    </div>
+    <div class="glass mid gcard" style="left:344px; top:230px; width:250px;">
+      <div class="gzone" style="height:129px;"><span>⚛️</span><i>16:9 · GIF</i></div>
+      <div class="gt"><span class="gico">⚛️</span><b>React</b><span class="pill done">✓</span></div>
+    </div>
+
+    <div class="ticket glass mid punched" style="left:620px; top:330px;">
+      <div class="tl" style="background:rgba(224,231,254,0.85);">🌐</div>
+      <div class="tb"><b>快速开始</b><span class="pill done">✓ 完成</span><span class="no">No. 001</span></div>
+      <div class="stub">№01</div>
+    </div>
+
+    <div style="position:absolute; left:56px; top:472px; width:520px; font-size:11.5px; color:#2f5b41; line-height:1.7;">
+      预期区 = 彩色磨砂：章节色透过 glass-light 显色；文字只上 glass-strong（白底 ≥ 72%）。<br>
+      卡片跨在色域边界上——半透明在边界处才被看见，这是玻璃的构图纪律。
+    </div>
+  </div>
+
+  <div style="position:absolute; top: 138px; left: 948px; width: 292px;" class="panel">
+    <h3>玻璃 token</h3>
+    <table class="spec">
+      <tr><th>token</th><th>值</th><th>用途</th></tr>
+      <tr><td class="k"><code>glass-strong</code></td><td>white ·72</td><td>文字面</td></tr>
+      <tr><td class="k"><code>glass</code></td><td>white ·55</td><td>卡面</td></tr>
+      <tr><td class="k"><code>glass-light</code></td><td>white ·40</td><td>HUD / 图例</td></tr>
+      <tr><td class="k"><code>glass-line</code></td><td>1px ·65</td><td>亮边</td></tr>
+      <tr><td class="k"><code>glass-edge</code></td><td>inset ·90</td><td>内高光</td></tr>
+      <tr><td class="k"><code>glass-shadow</code></td><td>0 8 24 ·.10</td><td>投影</td></tr>
+    </table>
+  </div>
+  <div style="position:absolute; top: 380px; left: 948px; width: 292px;" class="panel">
+    <h3>玻璃规则</h3>
+    <div class="note" style="margin-bottom:4px;"><span class="idx">1</span><span class="txt"><b>玻璃是表面不是颜色</b>：四层分工不变，玻璃只是纸之外的载体。</span></div>
+    <div class="note" style="margin-bottom:4px;"><span class="idx">2</span><span class="txt"><b>文字只上 strong</b>：承载文字的玻璃白底 ≥ 72%，保住 ink 对比。</span></div>
+    <div class="note" style="margin-bottom:4px;"><span class="idx">3</span><span class="txt"><b>必须跨色域</b>：玻璃要骑在颜色边界上；平放白桌等于看不见。</span></div>
+    <div class="note" style="margin-bottom:4px;"><span class="idx">4</span><span class="txt"><b>玻璃也是预算</b>：一屏 ≤ 3 件，与饱和度预算同理。</span></div>
+    <div class="note" style="margin-bottom:4px;"><span class="idx">5</span><span class="txt"><b>线可穿玻璃</b>：线路与站点允许从 glass-light 下穿过（HUD）。</span></div>
+    <div class="note" style="margin-bottom:0;"><span class="idx">6</span><span class="txt"><b>不加渐变描边</b>：亮度来自 1px 亮边 + 内高光，不是渐变。</span></div>
+  </div>
+
+  <div class="footline">色彩系统 · GlassStyle · stack idealjs</div>
+  <div class="pagenum">03 / 03</div>
 </div>
 
 </body>
