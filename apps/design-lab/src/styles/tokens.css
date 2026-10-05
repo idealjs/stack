@@ -1,0 +1,33 @@
+@import 'tailwindcss';
+
+/* ===== 设计系统 tokens（孟菲斯 × 拟物卡）===== */
+@theme {
+  /* 撞色对（鲜艳的全部来源，相邻必撞） */
+  --color-clash1a: #ff6b6b; /* coral  · ch1 */
+  --color-clash1b: #4ecdc4; /* teal    · ch4 */
+  --color-clash2a: #ffd93d; /* mustard · ch3 */
+  --color-clash2b: #a78bfa; /* violet  · ch6 */
+  --color-clash3a: #ff8fab; /* pink    · ch2 */
+  --color-clash3b: #5b8def; /* blue    · ch5 */
+
+  /* 中性阶（纸的世界） */
+  --color-ink: #111111;
+  --color-paper: #fff9f0;
+  --color-stack1: #ffffff;
+  --color-stack2: #eadfc4;
+  --color-mute: #8a7a5c;
+  --color-body: #3d3d3d;
+
+  /* 章节色别名 */
+  --color-ch1: #ff6b6b;
+  --color-ch2: #ff8fab;
+  --color-ch3: #ffd93d;
+  --color-ch4: #4ecdc4;
+  --color-ch5: #5b8def;
+  --color-ch6: #a78bfa;
+}
+
+/* 语义形状通用 */
+.sem-shadow {
+  filter: drop-shadow(0 1px 0 rgba(255, 255, 255, 0.9));
+}
