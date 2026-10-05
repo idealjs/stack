@@ -6,7 +6,6 @@ export function Ticket({ chapter, done }: { chapter: Chapter; done: boolean }) {
   return (
     <div
       className={`relative flex w-[216px] items-stretch overflow-hidden rounded-xl border-2 border-ink bg-paper shadow-[5px_5px_0_var(--color-ink)] ${done ? 'ticket-pk' : ''}`}
-      style={{ ['--tk-color' as string]: chapter.color }}
     >
       {/* 头部媒体块：章节色纯填充，无独立边框（由票体裁切） */}
       <div className="flex w-14 shrink-0 items-center justify-center text-[22px]" style={{ background: chapter.color }}>{chapter.emoji}</div>
@@ -21,14 +20,6 @@ export function Ticket({ chapter, done }: { chapter: Chapter; done: boolean }) {
       >
         №{String(chapter.id).padStart(2, '0')}
       </div>
-      <style>{`
-        .ticket-pk::before, .ticket-pk::after {
-          content: ''; position: absolute; left: 160px; width: 14px; height: 14px;
-          border-radius: 50%; background: var(--color-paper); border: 2px solid var(--color-ink);
-        }
-        .ticket-pk::before { top: -10px; }
-        .ticket-pk::after { bottom: -10px; }
-      `}</style>
     </div>
   )
 }

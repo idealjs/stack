@@ -9,7 +9,7 @@ import { Bar, Cross, MissMark, Ring, Tremble, Tri, Wave } from '../../components
 const nodes = {
   1: { id: 1, borderLeft: 40, right: 299, y: 180 },
   2: { id: 2, borderLeft: 378, right: 639, y: 108 },
-  4: { id: 4, borderLeft: 698, right: 848, y: 108 },
+  5: { id: 5, borderLeft: 698, right: 848, y: 108 },
 } as const
 
 const SCATTER = [

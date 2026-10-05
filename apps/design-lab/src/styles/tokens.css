@@ -31,3 +31,22 @@
 .sem-shadow {
   filter: drop-shadow(0 1px 0 rgba(255, 255, 255, 0.9));
 }
+
+/* 票券打孔：⌀14 圆跨边，被 overflow-hidden 裁成半圆缺口（完成票专用） */
+.ticket-pk::before,
+.ticket-pk::after {
+  content: '';
+  position: absolute;
+  left: 160px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--color-paper);
+  border: 2px solid var(--color-ink);
+}
+.ticket-pk::before {
+  top: -10px;
+}
+.ticket-pk::after {
+  bottom: -10px;
+}
