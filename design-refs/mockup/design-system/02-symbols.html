@@ -254,44 +254,13 @@
 <div class="page">
   <div class="story-head">
     <span class="tag">&lt;Symbols /&gt; 3/3</span>
-    <h2>符号、形状 · 站点、胶囊与票券</h2>
-    <div class="desc">关系上的铆钉与凭证：站点半嵌卡边（左贴描边、右骑黑影外缘），多线卡口用胶囊，完成用打孔票。</div>
+    <h2>符号、形状 · 票券</h2>
+    <div class="desc">票券只做一件事：表达完成状态——完成＝沿撕线打孔，未开始＝实线无孔。站点与胶囊属 RouteLine（见 03 组件）。</div>
   </div>
 
   <div class="canvas" style="top: 138px; left: 40px; width: 880px; height: 594px;">
-    <div class="sec-label">站点 <i>只上先后线——r6 描边圆点，四色轮换</i></div>
-    <div style="display:flex; gap:22px; align-items:flex-start; margin-bottom:18px;">
-      <svg width="400" height="80" viewBox="0 0 400 80">
-        <rect x="100" y="6" width="30" height="68" fill="#fff9f0" stroke="#111" stroke-width="2" rx="5"/>
-        <rect x="290" y="6" width="30" height="68" fill="#fff9f0" stroke="#111" stroke-width="2" rx="5"/>
-        <rect x="280" y="12" width="8" height="56" fill="#111111"/>
-        <path d="M 130 40 H 280" fill="none" stroke="#111" stroke-width="2.5"/>
-        <circle class="msstation" cx="130" cy="40" r="6" fill="#ffd93d"/>
-        <circle class="msstation" cx="284" cy="40" r="6" fill="#4ecdc4"/>
-      </svg>
-      <div style="flex:1; font-size:11.5px; color:#3d3d3d; line-height:1.6;">
-        <b>半嵌卡边</b>：圆心落在卡边上。<br>
-        <b>左贴描边</b>（图左卡右侧无投影）；<b>右骑硬投影外缘</b>（图右）——描边外有 7px 黑影带，站点放在描边会被吞没。<br>
-        线从卡边/影缘出发；同色不相邻。
-      </div>
-    </div>
-
-    <div class="sec-label">胶囊 <i>多线入同一卡口时的站点形态</i></div>
-    <div style="display:flex; gap:22px; align-items:flex-start; margin-bottom:18px;">
-      <svg width="400" height="80" viewBox="0 0 400 80">
-        <path d="M 10 32 H 297" fill="none" stroke="#111" stroke-width="2.5"/>
-        <path d="M 10 36 H 297" fill="none" stroke="#111" stroke-width="2.5"/>
-        <path d="M 10 40 H 297" fill="none" stroke="#111" stroke-width="2.5"/>
-        <rect x="297" y="26" width="6" height="20" rx="3" fill="#ff6b6b" stroke="#111" stroke-width="2"/>
-        <rect x="360" y="12" width="2" height="56" fill="#c9c9c7"/>
-      </svg>
-      <div style="flex:1; font-size:11.5px; color:#3d3d3d; line-height:1.6;">
-        <b>四条规则</b>：① 竖向 6×20，端头半圆（rx=3，胶囊体非椭圆）；② 沿线束排列方向拉伸；③ 端头距最外侧线 ≥ 2× 线宽；④ <b>线止于胶囊边界</b>——圆弧自最外侧线起弯，线沿半径抵达弧起点。
-      </div>
-    </div>
-
     <div class="sec-label">票券 <i>状态的载体——完成即打孔</i></div>
-    <div style="display:flex; gap:24px; align-items:flex-start;">
+    <div style="display:flex; gap:24px; align-items:flex-start; margin-bottom:18px;">
       <div class="msticket pk">
         <div class="tl" style="background:#ff6b6b;">🌐</div>
         <div class="tb"><b>快速开始</b><div class="no">No. 001 · 已完成（打孔）</div></div>
@@ -307,23 +276,34 @@
         撕线＝4:2 点划，与虚线同节奏但语境不同（裁剪线非关系线）。票号＝章程序号。<b>票券只表达完成状态</b>，不作其他用途。
       </div>
     </div>
+
+    <div class="sec-label">实现规则 <i>裁切式——单一描边的做法</i></div>
+    <table style="width:100%; border-collapse:collapse; font-size:11.5px; color:#3d3d3d;">
+      <tr style="border-bottom:2px solid #d5d5d3;">
+        <th style="text-align:left; padding:5px 8px 5px 0; color:#1a1a1a; width:140px;">项</th><th style="text-align:left; padding:5px 8px 5px 0; color:#1a1a1a;">规格</th>
+      </tr>
+      <tr style="border-bottom:1px solid #ececea;"><td style="padding:6px 8px 6px 0; font-weight:700; color:#1a1a1a;">结构</td><td style="padding:6px 8px 6px 0;">216×70 · 描边 2px · 圆角 12 · 硬投影 5px 5px 0 ink · <b>overflow hidden</b></td></tr>
+      <tr style="border-bottom:1px solid #ececea;"><td style="padding:6px 8px 6px 0; font-weight:700; color:#1a1a1a;">头部色块</td><td style="padding:6px 8px 6px 0;">章节色纯填充、<b>无独立描边</b>——由票体裁切出干净圆角（嵌套色块永不自带边框）</td></tr>
+      <tr style="border-bottom:1px solid #ececea;"><td style="padding:6px 8px 6px 0; font-weight:700; color:#1a1a1a;">打孔</td><td style="padding:6px 8px 6px 0;">⌀14 圆跨边 ±10px，被 overflow 裁成半圆缺口，内弧带描边</td></tr>
+      <tr><td style="padding:6px 8px 6px 0; font-weight:700; color:#1a1a1a;">撕线</td><td style="padding:6px 8px 6px 0;">stub 左缘 1.5px；完成＝4:2 点划，未开始＝实线</td></tr>
+    </table>
   </div>
 
   <div style="position:absolute; top: 138px; left: 948px; width: 292px;" class="panel">
-    <h3>参数速查</h3>
+    <h3>票券参数</h3>
     <table class="spec">
       <tr><th>元素</th><th>规格</th></tr>
-      <tr><td class="k">站点</td><td>r6 · 描边 2px · 四色轮换 · 半嵌卡边</td></tr>
-      <tr><td class="k">胶囊</td><td>6×20 · rx3 · 线止于边界 · 距线 ≥2× 线宽</td></tr>
-      <tr><td class="k">并行线</td><td>间距 4px · 逐条渲染</td></tr>
-      <tr><td class="k">票券</td><td>216×~70 · 撕线 4:2 · 打孔 ⌀13</td></tr>
+      <tr><td class="k">票体</td><td>216×70 · 2px ink · R12 · 硬投影 5,5</td></tr>
+      <tr><td class="k">头部色块</td><td>56px 宽 · 章节色 · 无框（裁切式）</td></tr>
+      <tr><td class="k">打孔</td><td>⌀14 · 半圆缺口 ×2（撕线上下）</td></tr>
+      <tr><td class="k">撕线</td><td>完成 4:2 点划 · 未开始实线</td></tr>
     </table>
   </div>
   <div style="position:absolute; top: 400px; left: 948px; width: 292px;" class="panel">
-    <h3>为什么半嵌</h3>
-    <div class="note" style="margin-bottom:6px;"><span class="idx">1</span><span class="txt">圆心骑卡边＝「到达」的物理感：像铆钉钉入卡片。</span></div>
-    <div class="note" style="margin-bottom:6px;"><span class="idx">2</span><span class="txt">黑影外缘规则是实测教训：描边上的右站点会被投影带吞没。</span></div>
-    <div class="note" style="margin-bottom:0;"><span class="idx">3</span><span class="txt">虚线/点线无站点：相关与同族是「参考」不是「到达」。</span></div>
+    <h3>状态规则</h3>
+    <div class="note" style="margin-bottom:6px;"><span class="idx">1</span><span class="txt"><b>打孔即完成</b>：孔是唯一的完成信号，不引入颜色。</span></div>
+    <div class="note" style="margin-bottom:6px;"><span class="idx">2</span><span class="txt"><b>无锁</b>：未开始不打孔、不上锁，可随时进入。</span></div>
+    <div class="note" style="margin-bottom:0;"><span class="idx">3</span><span class="txt"><b>一票一章</b>：票号＝章程序号，不混合多章。</span></div>
   </div>
 
   <div class="footline">设计系统 · 02 符号形状 · stack idealjs</div>
