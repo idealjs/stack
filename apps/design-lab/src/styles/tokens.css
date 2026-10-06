@@ -13,10 +13,12 @@
   /* 中性阶（纸的世界） */
   --color-ink: #111111;
   --color-paper: #fff9f0;
-  --color-stack1: #ffffff;
-  --color-stack2: #eadfc4;
   --color-mute: #8a7a5c;
   --color-body: #3d3d3d;
+
+  /* 统一硬投影——唯一投影配方，所有基础组件复用（rest / 拿起） */
+  --shadow-hard: 5px 5px 0 var(--color-ink);
+  --shadow-hard-lift: 8px 8px 0 var(--color-ink);
 
   /* 章节色别名 */
   --color-ch1: #ff6b6b;
@@ -25,11 +27,6 @@
   --color-ch4: #4ecdc4;
   --color-ch5: #5b8def;
   --color-ch6: #a78bfa;
-}
-
-/* 语义形状通用 */
-.sem-shadow {
-  filter: drop-shadow(0 1px 0 rgba(255, 255, 255, 0.9));
 }
 
 /* 票券打孔：两端各以 1/4 圆做差集（完成票专用）。

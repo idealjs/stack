@@ -18,7 +18,7 @@ export function App() {
           <a
             key={p.href}
             href={p.href}
-            className="rounded-2xl border-2 border-ink bg-paper p-5 no-underline shadow-[7px_8px_0_var(--color-ink)] transition-transform hover:-translate-y-[3px]"
+            className="rounded-2xl border-2 border-ink bg-paper p-5 no-underline shadow-hard transition-transform hover:-translate-y-[3px] hover:shadow-hard-lift"
           >
             <b className="text-[17px] text-ink">{p.name}</b>
             <p className="m-0 mt-1 text-[12.5px] text-[#6b6b6b]">{p.desc}</p>

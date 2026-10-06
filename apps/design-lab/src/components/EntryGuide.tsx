@@ -5,7 +5,7 @@ export function EntryGuide() {
   return (
     <div className="flex flex-wrap gap-5">
       {PROFILES.map((p) => (
-        <div key={p.name} className="w-[252px] rounded-xl border-2 border-ink bg-paper p-3 shadow-[5px_5px_0_var(--color-ink)]">
+        <div key={p.name} data-comp="entry-card" className="w-[252px] rounded-xl border-2 border-ink bg-paper p-3 shadow-hard">
           <div className="flex items-center gap-2">
             <span
               className="flex h-[26px] w-[26px] items-center justify-center rounded-lg border-2 border-ink text-[14px]"

@@ -5,7 +5,8 @@ import type { Chapter } from '../lib/types'
 export function Ticket({ chapter, done }: { chapter: Chapter; done: boolean }) {
   return (
     <div
-      className={`relative flex w-[216px] items-stretch overflow-hidden rounded-xl border-2 border-ink bg-paper shadow-[5px_5px_0_var(--color-ink)] ${done ? 'ticket-pk' : ''}`}
+      data-comp="ticket"
+      className={`relative flex w-[216px] items-stretch overflow-hidden rounded-xl border-2 border-ink bg-paper shadow-hard ${done ? 'ticket-pk' : ''}`}
     >
       {/* 头部媒体块：章节色纯填充，无独立边框（由票体裁切） */}
       <div className="flex w-14 shrink-0 items-center justify-center text-[22px]" style={{ background: chapter.color }}>{chapter.emoji}</div>
@@ -39,7 +40,7 @@ export function AssignBlock({
   miss: { how: string; looks: string }
 }) {
   return (
-    <div className="w-[260px] rounded-xl border-2 border-ink bg-paper p-3 shadow-[5px_5px_0_var(--color-ink)]">
+    <div data-comp="assign" className="w-[260px] rounded-xl border-2 border-ink bg-paper p-3 shadow-hard">
       <div className="flex items-center gap-2">
         <svg width="16" height="16" viewBox="0 0 18 18" aria-hidden>
           <path d="M9 1 v16 M1 9 h16" stroke="var(--color-clash2b)" strokeWidth="3.5" strokeLinecap="round" />

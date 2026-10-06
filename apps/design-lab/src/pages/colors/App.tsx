@@ -8,8 +8,6 @@ const PAIRS = [
 const NEUTRALS = [
   { c: '#111111', n: 'ink', h: '#111111 · 描边/字/硬投影' },
   { c: '#FFF9F0', n: 'paper', h: '#FFF9F0 · 卡面/大底' },
-  { c: '#FFFFFF', n: 'stack-1', h: '#FFFFFF · 纸叠亮边' },
-  { c: '#EADFC4', n: 'stack-2', h: '#EADFC4 · 纸叠暗层' },
 ]
 const CHAPTERS6 = [
   { c: '#FF6B6B', n: 'ch1 快速开始' }, { c: '#FF8FAB', n: 'ch2 React' }, { c: '#FFD93D', n: 'ch3 更多示例' },
@@ -56,7 +54,7 @@ export function App() {
         </div>
       </Section>
       <Section label="中性阶" note="纸的世界——字、边、投影、底">
-        <div className="grid grid-cols-4 gap-3">{NEUTRALS.map((x) => <Chip key={x.n} {...x} />)}</div>
+        <div className="grid grid-cols-2 gap-3">{NEUTRALS.map((x) => <Chip key={x.n} {...x} />)}</div>
       </Section>
       <Section label="章节色" note="六章六色，只进 16:9 相框与图标瓦">
         <div className="grid grid-cols-6 gap-3">{CHAPTERS6.map((x) => <Chip key={x.n} {...x} h={x.c} />)}</div>
@@ -73,7 +71,7 @@ export function App() {
             <div className="h-10 w-40 rounded-lg bg-clash2a" />
           </DoDont>
           <DoDont text="一切鲜艳以 2px ink 描边为界">
-            <div className="h-10 w-40 rounded-lg border-2 border-ink bg-clash2a shadow-[4px_4px_0_var(--color-ink)]" />
+            <div className="h-10 w-40 rounded-lg border-2 border-ink bg-clash2a shadow-hard" />
           </DoDont>
           <DoDont bad text="大底鲜艳，字被淹没">
             <div className="flex h-10 w-40 items-center justify-center rounded-lg border-2 border-ink bg-clash1b text-[11px] font-bold">大底鲜艳</div>

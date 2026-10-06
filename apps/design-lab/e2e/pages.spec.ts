@@ -38,7 +38,7 @@ test.describe('全局画布', () => {
 test.describe('CourseCard 规格契约', () => {
   test.beforeEach(async ({ page }) => await page.goto('/components.html'))
 
-  test('2px ink 描边 + 硬投影 + 纸叠三层边', async ({ page }) => {
+  test('2px ink 描边 + 统一硬投影（单层 ink，无纸叠）', async ({ page }) => {
     const card = page.locator('a[href="#ch1"]').first()
     await expect(card).toBeVisible()
     const s = await card.evaluate((el) => {
@@ -47,8 +47,23 @@ test.describe('CourseCard 规格契约', () => {
     })
     expect(s.bw).toBe('2px')
     expect(s.bc).toBe('rgb(17, 17, 17)')
-    expect((s.shadow.match(/rgb|#/g) ?? []).length).toBeGreaterThanOrEqual(4) // 三层纸叠+硬投影（按色值计数）
-    expect(s.shadow).toContain('rgb(17, 17, 17)')
+    // 唯一配方 --shadow-hard：恰好一层 ink 硬投影（tw 变体层均为透明占位），无纸叠多层
+    expect(s.shadow.split('rgb(17, 17, 17)').length - 1).toBe(1)
+    expect(s.shadow).toContain('rgb(17, 17, 17) 5px 5px 0px 0px')
+  })
+
+  test('基础组件投影统一：同一 token 复用，不得各写各的', async ({ page }) => {
+    const { kinds, shadows } = await page.evaluate(() => {
+      const els = [...document.querySelectorAll('[data-comp]')]
+      return {
+        kinds: [...new Set(els.map((el) => el.dataset.comp))].sort(),
+        shadows: els.map((el) => getComputedStyle(el).boxShadow),
+      }
+    })
+    expect(kinds).toEqual(['assign', 'course-card', 'entry-card', 'ticket']) // 四类基础组件都有钩子
+    expect(shadows.length).toBeGreaterThanOrEqual(6)
+    expect(new Set(shadows).size).toBe(1) // 计算值完全一致＝样式复用
+    expect(shadows[0]).toContain('rgb(17, 17, 17) 5px 5px 0px 0px')
   })
 
   test('16:9 相框：比例、3px 黑边、内阴影、章节撞色', async ({ page }) => {

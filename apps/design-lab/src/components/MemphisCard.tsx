@@ -68,11 +68,11 @@ export function MemphisCard({ chapter, entry, compact = false }: { chapter: Chap
     <a
       ref={boxRef}
       href={`#ch${chapter.id}`}
+      data-comp="course-card"
       className="group relative block rounded-[14px] border-2 border-ink bg-paper p-[11px] no-underline
-                 shadow-[0_3px_0_var(--color-stack1),0_5px_0_var(--color-stack2),7px_8px_0_var(--color-ink)]
-                 transition-transform duration-150 focus-visible:outline-none
-                 hover:-translate-y-[3px] hover:shadow-[0_3px_0_var(--color-stack1),0_5px_0_var(--color-stack2),10px_11px_0_var(--color-ink)]
-                 focus-visible:-translate-y-[3px] focus-visible:shadow-[0_3px_0_var(--color-stack1),0_5px_0_var(--color-stack2),10px_11px_0_var(--color-ink)]"
+                 shadow-hard transition-transform duration-150 focus-visible:outline-none
+                 hover:-translate-y-[3px] hover:shadow-hard-lift
+                 focus-visible:-translate-y-[3px] focus-visible:shadow-hard-lift"
       onMouseEnter={() => setLocked(true)}
       onMouseLeave={() => setLocked(false)}
       onFocus={() => setLocked(true)}
