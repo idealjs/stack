@@ -2,7 +2,7 @@
  * 卡头三件套＝靶子：▲目标 + ○预期结果(16:9 相框) + ●积木点列
  * 交互：hover/聚焦拿起（浮起+投影加深）并播放 GIF；desc ⇄ GIF 每 8000ms 翻转；
  *      hover/Tab 锁定；触屏与 prefers-reduced-motion 不翻转。 */
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 import type { Chapter } from '../lib/types'
 import { Ring, Tri } from './shapes'
 
@@ -33,7 +33,18 @@ export function EntryBadge({ n }: { n: 1 | 2 | 3 }) {
   )
 }
 
-export function MemphisCard({ chapter, entry, compact = false }: { chapter: Chapter; entry?: 1 | 2 | 3; compact?: boolean }) {
+export function MemphisCard({
+  chapter,
+  entry,
+  compact = false,
+  zoneText,
+}: {
+  chapter: Chapter
+  entry?: 1 | 2 | 3
+  compact?: boolean
+  /** 静置态相框文字（可含 <Mark> 荧光标记）：教程卡片的价值区用法示例 */
+  zoneText?: ReactNode
+}) {
   const [gifOn, setGifOn] = useState(false)
   const [locked, setLocked] = useState(false)
   const boxRef = useRef<HTMLAnchorElement>(null)
@@ -100,6 +111,9 @@ export function MemphisCard({ chapter, entry, compact = false }: { chapter: Chap
           <span className="px-3 text-center text-[11px] leading-snug text-ink/80 mix-blend-multiply">
             {chapter.target.goal}
           </span>
+        ) : zoneText ? (
+          /* 静置态（用法示例）：过程文字骑在相框里，价值区短语带荧光标记 */
+          <span className="px-3 text-center text-[11.5px] font-semibold leading-snug text-ink">{zoneText}</span>
         ) : (
           /* 静置态：章节 emoji 是相框的视觉主体（对齐设计稿解剖卡） */
           <span style={{ fontSize: compact ? '28px' : '40px' }}>{chapter.emoji}</span>

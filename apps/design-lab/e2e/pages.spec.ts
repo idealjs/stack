@@ -68,6 +68,21 @@ test.describe('CourseCard 规格契约', () => {
     recipes.forEach((r) => expect(r.split('rgb(17, 17, 17)').length - 1).toBe(1)) // 每卡只出一份阴影
   })
 
+  test('价值区标记用法卡：相框静置态过程文字带荧光 Mark', async ({ page }) => {
+    const m = await page.evaluate(() => {
+      const card = document.querySelector('a[href="#ch4"]')
+      const mark = card?.querySelector('mark')
+      if (!card || !mark) return null
+      const cs = getComputedStyle(mark)
+      return { bg: cs.backgroundColor, rot: cs.rotate, inZone: !!card.querySelector('.aspect-video mark'), txt: mark.textContent }
+    })
+    expect(m).not.toBeNull()
+    expect(m!.inZone).toBeTruthy() // 标记骑在相框内的过程文字上
+    expect(m!.bg).toBe('rgb(255, 217, 61)') // 荧光笔 mustard
+    expect(m!.rot).toContain('deg')
+    expect(m!.txt).toContain('咬合')
+  })
+
   test('16:9 相框：比例、3px 黑边、内阴影、章节撞色', async ({ page }) => {
     const zone = page.locator('a[href="#ch1"] .aspect-video').first()
     const s = await zone.evaluate((el) => {
