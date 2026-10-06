@@ -3471,6 +3471,22 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@stack/tutorial@workspace:apps/tutorial":
+  version: 0.0.0-use.local
+  resolution: "@stack/tutorial@workspace:apps/tutorial"
+  dependencies:
+    "@tailwindcss/vite": "npm:^4.1.0"
+    "@types/react": "npm:^18.3.12"
+    "@types/react-dom": "npm:^18.3.1"
+    "@vitejs/plugin-react": "npm:^4.3.4"
+    react: "npm:^18.3.1"
+    react-dom: "npm:^18.3.1"
+    tailwindcss: "npm:^4.1.0"
+    typescript: "npm:~5.6.2"
+    vite: "npm:^6.0.0"
+  languageName: unknown
+  linkType: soft
+
 "@svgr/babel-plugin-add-jsx-attribute@npm:8.0.0":
   version: 8.0.0
   resolution: "@svgr/babel-plugin-add-jsx-attribute@npm:8.0.0"
