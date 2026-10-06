@@ -140,13 +140,19 @@ test.describe('票券规格契约', () => {
     expect(s.headBg).not.toBe('rgba(0, 0, 0, 0)')
   })
 
-  test('打孔伪元素在位（完成票 ×2 孔）', async ({ page }) => {
-    const holes = await page.locator('.ticket-pk').first().evaluate((el) => {
-      const b = getComputedStyle(el, '::before')
-      const a = getComputedStyle(el, '::after')
-      return [b.content, a.content].filter((c) => c !== 'none').length
+  test('打孔差集在位（mask 两端 1/4 圆，完成票）', async ({ page }) => {
+    const mask = await page.locator('.ticket-pk').first().evaluate((el) => {
+      const cs = getComputedStyle(el)
+      return cs.maskImage || cs.webkitMaskImage || 'none'
     })
-    expect(holes).toBe(2)
+    expect(mask).toContain('radial-gradient')
+    expect(mask.split('radial-gradient').length - 1).toBe(2) // 上下各一孔
+    // 未开始票不带 mask
+    const plain = await page.evaluate(() => {
+      const t = [...document.querySelectorAll('div')].filter((d) => String(d.className).includes('w-[216px]') && !String(d.className).includes('ticket-pk'))[0]
+      return t ? getComputedStyle(t).maskImage : 'none'
+    })
+    expect(plain === 'none' || plain === '').toBeTruthy()
   })
 
   test('撕线：完成=虚线、未开始=实线', async ({ page }) => {

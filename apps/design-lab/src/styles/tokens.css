@@ -32,21 +32,17 @@
   filter: drop-shadow(0 1px 0 rgba(255, 255, 255, 0.9));
 }
 
-/* 票券打孔：⌀14 圆跨边，被 overflow-hidden 裁成半圆缺口（完成票专用） */
-.ticket-pk::before,
-.ticket-pk::after {
-  content: '';
-  position: absolute;
-  left: 160px;
-  width: 14px;
-  height: 14px;
-  border-radius: 50%;
-  background: var(--color-paper);
-  border: 2px solid var(--color-ink);
-}
-.ticket-pk::before {
-  top: -10px;
-}
-.ticket-pk::after {
-  bottom: -10px;
+/* 票券打孔：两端各以 1/4 圆做差集（完成票专用）。
+ * mask 硬停只做形状剪切（非色彩渐变）：孔真正穿透票体——露出页面底色，
+ * 描边与硬投影在孔处真实断开，无需伪元素盖色近似。 */
+.ticket-pk {
+  --hole-x: 172.75px; /* 撕线中心：216 − 右描边 2 − stub 42 + 撕线半宽 */
+  -webkit-mask-image:
+    radial-gradient(circle 7px at var(--hole-x) 0, transparent 6.5px, #000 7px),
+    radial-gradient(circle 7px at var(--hole-x) 100%, transparent 6.5px, #000 7px);
+  -webkit-mask-composite: source-in;
+  mask-image:
+    radial-gradient(circle 7px at var(--hole-x) 0, transparent 6.5px, #000 7px),
+    radial-gradient(circle 7px at var(--hole-x) 100%, transparent 6.5px, #000 7px);
+  mask-composite: intersect;
 }
