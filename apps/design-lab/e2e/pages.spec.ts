@@ -184,6 +184,25 @@ test.describe('散落形状摆放契约', () => {
   })
 })
 
+test.describe('价值区荧光标记契约', () => {
+  test.beforeEach(async ({ page }) => await page.goto('/symbols.html'))
+
+  test('荧光笔标记文字：mustard 底、无描边、微斜——是标记不是形状', async ({ page }) => {
+    const s = await page.evaluate(() => {
+      const m = document.querySelector('mark')
+      if (!m) return null
+      const cs = getComputedStyle(m)
+      const r = m.getBoundingClientRect()
+      return { bg: cs.backgroundColor, bw: cs.borderTopWidth, rot: cs.rotate, h: r.height }
+    })
+    expect(s).not.toBeNull()
+    expect(s!.bg).toBe('rgb(255, 217, 61)') // clash2a mustard——荧光笔
+    expect(s!.bw).toBe('0px') // 标记无描边：2px ink 是形状的规则，标记划在文字上
+    expect(s!.rot).toContain('deg') // 微斜（rotate 属性生效，手划手感）
+    expect(s!.h).toBeGreaterThan(14) // 骑在文字上，有字高
+  })
+})
+
 test.describe('票券规格契约', () => {
   test.beforeEach(async ({ page }) => await page.goto('/symbols.html'))
 

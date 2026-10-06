@@ -7,7 +7,7 @@ import { RouteLine } from '../../components/RouteLine'
 import { AssignBlock, Ticket } from '../../components/Ticket'
 import { EntryGuide } from '../../components/EntryGuide'
 import { Scatter } from '../../components/Scatter'
-import { Bar, Cross, Ring, Tremble, Tri, Wave } from '../../components/shapes'
+import { Cross, Ring, Tremble, Tri, Wave } from '../../components/shapes'
 
 /* 场景坐标（节点＝卡描边真实边缘）：卡1(40,110,250) 卡2(380,44,250,rot) 卡3(700,44,140) */
 const nodes = {
@@ -32,7 +32,6 @@ export function App() {
             <Cross size={20} key="cross1" />,
             <Cross size={18} key="cross2" />,
             <Wave size={44} key="wave" />,
-            <Bar size={30} key="bar" />,
             <Tremble size={20} key="tremble" />,
           ]}
         />

@@ -1,21 +1,22 @@
 import { Page, Section } from '../../lib/ui'
-import { Bar, BrickDot, Cross, Ring, Tremble, Tri, Wave } from '../../components/shapes'
+import { BrickDot, Cross, Mark, Ring, Tremble, Tri, Wave } from '../../components/shapes'
 import { CHAPTERS } from '../../lib/chapters'
 import { Ticket } from '../../components/Ticket'
+import type { ReactNode } from 'react'
 
 const SHAPES = [
   { el: <Tri size={28} />, n: '▲ 靶子', m: '目标，卡头打头', s: '靶子先行' },
   { el: <span className="flex"><BrickDot on /><BrickDot /></span>, n: '● 积木', m: '清单点列，实=已学', s: '积木清单' },
   { el: <Ring size={28} />, n: '○ 预期', m: '可核对的结果', s: '预期结果' },
   { el: <Wave size={36} />, n: '～ 代理区', m: '交给 agent', s: '每步先分类' },
-  { el: <Bar size={30} />, n: '▬ 价值区', m: '就地写过程', s: '每步先分类' },
+  { el: <Mark>过程</Mark>, n: '荧光标记 价值区', m: '划在文字上，不是散落图形', s: '每步先分类' },
   { el: <Tremble size={22} />, n: '⌇ 脱靶', m: '图形入口：追随图形进入阅读', s: '脱靶提醒' },
   { el: <Cross size={22} />, n: '＋ 指派', m: '位置/预期/场景', s: '指派学习' },
 ]
 
-const VOCAB: { p: string; rows: [string, string][] }[] = [
+const VOCAB: { p: string; rows: [ReactNode, string][] }[] = [
   { p: '靶子', rows: [['▲ 目标', '做什么'], ['○ 预期结果', '做成长什么样、怎么核对'], ['● 积木清单', '要用到的零件——只列用到的；说零件不说知识']] },
-  { p: '步骤分类', rows: [['～ 代理区', '无学习价值——交给 agent'], ['▬ 价值区', '有学习价值——就地写清']] },
+  { p: '步骤分类', rows: [['～ 代理区', '无学习价值——交给 agent'], [<Mark key="v">价值区</Mark>, '有学习价值——就地写清']] },
   { p: '指派学习', rows: [['＋ 三样（图形入口）', '教材只留三样，讲解交给 agent'], ['└ 位置', '知识体系中的坐标'], ['└ 预期', '实践结果应长什么样——当尺子'], ['└ 场景', '带回 agent 再做的练习——管巩固']] },
   { p: '脱靶提醒', rows: [['⌇ 图形标记', '不人为挖坑；跟在指派后'], ['└ 可能性 / 长相', '怎么脱靶＋脱靶什么样——撞上认出缺哪块']] },
   { p: '认知基础', rows: [['底座纹·真机验收章', 'env/库/运行环境——脚下的地，不是积木']] },

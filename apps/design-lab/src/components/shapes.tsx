@@ -1,5 +1,5 @@
 /** 七个语义形状——装饰即语义（取自 ai-era-tutorial 词汇表） */
-import type { CSSProperties } from 'react'
+import type { CSSProperties, ReactNode } from 'react'
 
 interface ShapeProps {
   size?: number
@@ -36,11 +36,14 @@ export const Wave = ({ size = 40, className, style }: ShapeProps) => (
   </svg>
 )
 
-/** ▬ 价值区：实心条，过程就地写清 */
-export const Bar = ({ size = 34, className, style }: ShapeProps) => (
-  <svg width={size} height={size * 0.58} viewBox="0 0 34 20" className={className} style={style} aria-hidden>
-    <rect x="2" y="6" width="30" height="9" fill="var(--color-clash3a)" stroke="var(--color-ink)" strokeWidth="2" />
-  </svg>
+/** 荧光标记 价值区：色块骑在文字背后——是标记不是形状，
+ * 无描边、微斜、两端比字宽（荧光笔划过的手感），过程就地写清 */
+export const Mark = ({ children, className }: { children: ReactNode; className?: string }) => (
+  <mark
+    className={`-rotate-1 rounded-[3px] bg-clash2a px-[4px] py-[1px] font-bold text-ink [box-decoration-break:clone] ${className ?? ''}`}
+  >
+    {children}
+  </mark>
 )
 
 /** ⌇ 脱靶：竖立颤抖——图形入口，读者追随图形进入阅读 */
