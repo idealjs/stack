@@ -19,6 +19,8 @@
   /* 统一硬投影——唯一投影配方，所有基础组件复用（rest / 拿起） */
   --shadow-hard: 5px 5px 0 var(--color-ink);
   --shadow-hard-lift: 8px 8px 0 var(--color-ink);
+  /* 同配方的 drop-shadow 形态：给挖空轮廓用（票券）——box-shadow 会被 mask 裁掉 */
+  --drop-shadow-hard: 5px 5px 0 var(--color-ink);
 
   /* 章节色别名 */
   --color-ch1: #ff6b6b;
@@ -29,17 +31,39 @@
   --color-ch6: #a78bfa;
 }
 
-/* 票券打孔：两端各以 1/4 圆做差集（完成票专用）。
- * mask 硬停只做形状剪切（非色彩渐变）：孔真正穿透票体——露出页面底色，
- * 描边与硬投影在孔处真实断开，无需伪元素盖色近似。 */
-.ticket-pk {
+/* 票券打孔（完成票专用），三件分工：
+ * 挖空 = 票体 mask 差集（两端 1/4 圆硬停剪切，孔穿透露出页面底色）；
+ * 阴影 = 外层 wrapper drop-shadow-hard——drop-shadow 跟随 alpha 轮廓，
+ *        孔挖到哪阴影咬到哪（box-shadow 会被 mask 的 border-box 裁切整体吃掉，不可用）；
+ * 孔缘 = .pk-arc 半圆环补 ink 边线（mask 只减形不补线），圆心骑撕线两端。 */
+.tk-pk {
   --hole-x: 172.75px; /* 撕线中心：216 − 右描边 2 − stub 42 + 撕线半宽 */
+}
+.ticket-pk {
   -webkit-mask-image:
-    radial-gradient(circle 7px at var(--hole-x) 0, transparent 6.5px, #000 7px),
-    radial-gradient(circle 7px at var(--hole-x) 100%, transparent 6.5px, #000 7px);
+    radial-gradient(circle 7px at var(--hole-x) 0, transparent 6px, #000 6.5px),
+    radial-gradient(circle 7px at var(--hole-x) 100%, transparent 6px, #000 6.5px);
   -webkit-mask-composite: source-in;
   mask-image:
-    radial-gradient(circle 7px at var(--hole-x) 0, transparent 6.5px, #000 7px),
-    radial-gradient(circle 7px at var(--hole-x) 100%, transparent 6.5px, #000 7px);
+    radial-gradient(circle 7px at var(--hole-x) 0, transparent 6px, #000 6.5px),
+    radial-gradient(circle 7px at var(--hole-x) 100%, transparent 6px, #000 6.5px);
   mask-composite: intersect;
+}
+/* 孔缘弧线：16px 圆环（描边带 r6–8），clip-path 只留票内一半，不进阴影轮廓 */
+.pk-arc {
+  position: absolute;
+  left: calc(var(--hole-x) - 8px);
+  width: 16px;
+  height: 16px;
+  border: 2px solid var(--color-ink);
+  border-radius: 9999px;
+  pointer-events: none;
+}
+.pk-arc-t {
+  top: -8px;
+  clip-path: inset(50% 0 0 0);
+}
+.pk-arc-b {
+  bottom: -8px;
+  clip-path: inset(0 0 50% 0);
 }

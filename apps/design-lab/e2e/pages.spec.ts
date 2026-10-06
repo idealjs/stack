@@ -52,18 +52,20 @@ test.describe('CourseCard 规格契约', () => {
     expect(s.shadow).toContain('rgb(17, 17, 17) 5px 5px 0px 0px')
   })
 
-  test('基础组件投影统一：同一 token 复用，不得各写各的', async ({ page }) => {
-    const { kinds, shadows } = await page.evaluate(() => {
+  test('基础组件投影统一：同一配方复用，不得各写各的', async ({ page }) => {
+    const { kinds, recipes } = await page.evaluate(() => {
       const els = [...document.querySelectorAll('[data-comp]')]
+      // 两种机制同一配方：box-shadow（常规卡）与 filter: drop-shadow（票券——跟随挖空轮廓）
+      const recipe = (cs: CSSStyleDeclaration) => (cs.filter !== 'none' ? cs.filter : cs.boxShadow)
       return {
         kinds: [...new Set(els.map((el) => el.dataset.comp))].sort(),
-        shadows: els.map((el) => getComputedStyle(el).boxShadow),
+        recipes: els.map((el) => recipe(getComputedStyle(el))),
       }
     })
     expect(kinds).toEqual(['assign', 'course-card', 'entry-card', 'ticket']) // 四类基础组件都有钩子
-    expect(shadows.length).toBeGreaterThanOrEqual(6)
-    expect(new Set(shadows).size).toBe(1) // 计算值完全一致＝样式复用
-    expect(shadows[0]).toContain('rgb(17, 17, 17) 5px 5px 0px 0px')
+    expect(recipes.length).toBeGreaterThanOrEqual(6)
+    recipes.forEach((r) => expect(r).toContain('rgb(17, 17, 17) 5px 5px')) // 唯一配方 --shadow-hard / --drop-shadow-hard
+    recipes.forEach((r) => expect(r.split('rgb(17, 17, 17)').length - 1).toBe(1)) // 每卡只出一份阴影
   })
 
   test('16:9 相框：比例、3px 黑边、内阴影、章节撞色', async ({ page }) => {
@@ -155,13 +157,40 @@ test.describe('票券规格契约', () => {
     expect(s.headBg).not.toBe('rgba(0, 0, 0, 0)')
   })
 
-  test('打孔差集在位（mask 两端 1/4 圆，完成票）', async ({ page }) => {
-    const mask = await page.locator('.ticket-pk').first().evaluate((el) => {
+  test('打孔三件套：mask 差集挖空 + 孔缘弧线 + 阴影跟随轮廓', async ({ page }) => {
+    const done = page.locator('.ticket-pk').first()
+    const mask = await done.evaluate((el) => {
       const cs = getComputedStyle(el)
       return cs.maskImage || cs.webkitMaskImage || 'none'
     })
     expect(mask).toContain('radial-gradient')
     expect(mask.split('radial-gradient').length - 1).toBe(2) // 上下各一孔
+    // 阴影在 wrapper 以 drop-shadow 生效——跟随挖空后的 alpha 轮廓（box-shadow 会被 mask 裁掉）
+    const f = await done.evaluate((el) => {
+      const w = el.parentElement as HTMLElement
+      return { filter: getComputedStyle(w).filter, innerShadow: getComputedStyle(el).boxShadow }
+    })
+    expect(f.filter).toBe('drop-shadow(rgb(17, 17, 17) 5px 5px 0px)')
+    expect(f.innerShadow).toBe('none')
+    // 孔缘弧线：2px ink 半圆环，clip 只留票内一半，圆心骑撕线两端（hole-x=172.75）
+    const arcs = await page.evaluate(() => {
+      const done = document.querySelector('.ticket-pk') as HTMLElement
+      const w = done.parentElement as HTMLElement
+      const wx = w.getBoundingClientRect().x
+      return [...w.querySelectorAll('.pk-arc')].map((a) => {
+        const cs = getComputedStyle(a)
+        const r = a.getBoundingClientRect()
+        return { clip: cs.clipPath, bw: cs.borderTopWidth, bc: cs.borderTopColor, cx: r.x + r.width / 2 - wx }
+      })
+    })
+    expect(arcs).toHaveLength(2)
+    arcs.forEach((a) => {
+      expect(a.bw).toBe('2px')
+      expect(a.bc).toBe('rgb(17, 17, 17)')
+      expect(Math.abs(a.cx - 172.75)).toBeLessThan(0.5)
+    })
+    expect(arcs[0].clip).toBe('inset(50% 0px 0px)')
+    expect(arcs[1].clip).toBe('inset(0px 0px 50%)')
     // 未开始票不带 mask
     const plain = await page.evaluate(() => {
       const t = [...document.querySelectorAll('div')].filter((d) => String(d.className).includes('w-[216px]') && !String(d.className).includes('ticket-pk'))[0]

@@ -1,13 +1,14 @@
 /** 票券 —— 只表达完成状态：完成＝沿撕线打孔（半圆缺口），未开始＝实线无孔。
- * 裁切式实现：头部色块无独立描边，由票体 overflow-hidden 裁出单一描边圆角。 */
+ * 外层 wrapper 出阴影（drop-shadow 跟随挖空后的轮廓，box-shadow 会被 mask 裁掉）；
+ * 内层票体裁切式：头部色块无独立描边，由票体 overflow-hidden 裁出单一描边圆角。 */
 import type { Chapter } from '../lib/types'
 
 export function Ticket({ chapter, done }: { chapter: Chapter; done: boolean }) {
   return (
-    <div
-      data-comp="ticket"
-      className={`relative flex w-[216px] items-stretch overflow-hidden rounded-xl border-2 border-ink bg-paper shadow-hard ${done ? 'ticket-pk' : ''}`}
-    >
+    <div data-comp="ticket" className={`w-fit drop-shadow-hard ${done ? 'tk-pk' : ''}`}>
+      <div
+        className={`relative flex w-[216px] items-stretch overflow-hidden rounded-xl border-2 border-ink bg-paper ${done ? 'ticket-pk' : ''}`}
+      >
       {/* 头部媒体块：章节色纯填充，无独立边框（由票体裁切） */}
       <div className="flex w-14 shrink-0 items-center justify-center text-[22px]" style={{ background: chapter.color }}>{chapter.emoji}</div>
       <div className="flex-1 py-2 pl-2.5 pr-2">
@@ -21,6 +22,14 @@ export function Ticket({ chapter, done }: { chapter: Chapter; done: boolean }) {
       >
         №{String(chapter.id).padStart(2, '0')}
       </div>
+      </div>
+      {/* 孔缘弧线：mask 只减形不补线，弧线补上挖空边缘的 ink 描边 */}
+      {done && (
+        <>
+          <i className="pk-arc pk-arc-t" aria-hidden />
+          <i className="pk-arc pk-arc-b" aria-hidden />
+        </>
+      )}
     </div>
   )
 }
