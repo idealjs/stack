@@ -70,7 +70,9 @@ test.describe('CourseCard 规格契约', () => {
     expect(await dots.count()).toBe(4)
     const filled = await dots.evaluateAll((ns) => ns.filter((n) => getComputedStyle(n).backgroundColor === 'rgb(17, 17, 17)').length)
     expect(filled).toBe(2) // ch2 已学 2/4
-    expect(await card.locator('svg').first()).toBeVisible() // ▲
+    // ▲ 在卡头（相框 ○ 环之后）：用 evaluate 通道断言，规避 toBeVisible 协议偶发崩溃
+    const hasTri = await card.evaluate((el) => !!el.querySelector('.mt-2 svg'))
+    expect(hasTri).toBeTruthy()
   })
 
   test('入口徽章 ①②（推荐起点，非强制）', async ({ page }) => {

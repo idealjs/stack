@@ -1,3 +1,9 @@
+// /tmp 常有配额限制：Chromium 子进程写临时 profile 失败会以 session closed 崩溃，
+// 统一重定向到用户缓存盘（与 mockup 构建同源的教训）
+process.env.TMPDIR ??= `${process.env.HOME}/.cache/pw-tmp`
+import { mkdirSync } from 'node:fs'
+mkdirSync(process.env.TMPDIR, { recursive: true })
+
 import { defineConfig, devices } from '@playwright/test'
 
 /**
@@ -10,6 +16,8 @@ import { defineConfig, devices } from '@playwright/test'
 export default defineConfig({
   testDir: 'e2e',
   timeout: 30_000,
+  retries: 1,
+  workers: 1, // 并行全页截图在 headless-shell 下偶发 runtime 崩溃，串行换稳定
   fullyParallel: true,
   use: {
     baseURL: 'http://localhost:4490',

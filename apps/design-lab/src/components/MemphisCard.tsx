@@ -96,10 +96,13 @@ export function MemphisCard({ chapter, entry, compact = false }: { chapter: Chap
               ▶ {chapter.target.expectation}
             </span>
           )
-        ) : (
+        ) : flip ? (
           <span className="px-3 text-center text-[11px] leading-snug text-ink/80 mix-blend-multiply">
             {chapter.target.goal}
           </span>
+        ) : (
+          /* 静置态：章节 emoji 是相框的视觉主体（对齐设计稿解剖卡） */
+          <span style={{ fontSize: compact ? '28px' : '40px' }}>{chapter.emoji}</span>
         )}
         <span className="absolute left-1.5 top-1 text-[9px] font-bold tracking-wide text-paper">
           预期结果{showGif ? ' · GIF' : ''}
@@ -110,7 +113,7 @@ export function MemphisCard({ chapter, entry, compact = false }: { chapter: Chap
       <div className="mt-2 flex items-center gap-2">
         <Tri size={14} />
         <b className="flex-1 text-[14px] text-[#2b1d10] [text-shadow:0_1px_1px_rgba(255,255,255,0.9)]">
-          {compact ? chapter.title : `${chapter.emoji} ${chapter.title}`}
+          {chapter.title}
         </b>
         {!compact && <BrickDots bricks={chapter.target.bricks} />}
       </div>
