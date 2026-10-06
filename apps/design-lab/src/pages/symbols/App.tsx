@@ -30,7 +30,7 @@ const LINES = [
 export function App() {
   return (
     <Page tag="<Symbols />" title="符号、形状 · 装饰即语义" desc="形状对内容下定义、散落于空白；线条形式承载关系含义；票券只表达完成状态。">
-      <Section label="语义形状 ×7" note="散落只在空白，密度 ≤ 8/屏">
+      <Section label="语义形状 ×7" note="散落＝卡片附近空当＋随机旋转/落点（Scatter 种子化），密度 ≤ 8/屏">
         <div className="grid grid-cols-4 gap-3.5 md:grid-cols-7">
           {SHAPES.map((s) => (
             <div key={s.n} className="text-center">

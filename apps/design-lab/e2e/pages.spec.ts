@@ -139,6 +139,44 @@ test.describe('RouteLine 规格契约', () => {
   })
 })
 
+test.describe('散落形状摆放契约', () => {
+  test.beforeEach(async ({ page }) => await page.goto('/shelf.html'))
+
+  test('卡片附近空当＋随机：不压卡、都在卡附近、不出容器、旋转各异', async ({ page }) => {
+    const r = await page.evaluate(() => {
+      const layer = document.querySelector('[data-scatter-layer]') as HTMLElement | null
+      if (!layer) return null
+      const host = layer.parentElement as HTMLElement
+      const hb = host.getBoundingClientRect()
+      const shapes = [...layer.querySelectorAll('[data-scatter]')] as HTMLElement[]
+      const comps = [...host.querySelectorAll('[data-comp]')].map((el) => el.getBoundingClientRect())
+      const hit = (a: DOMRect, b: DOMRect) => a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top
+      return {
+        n: shapes.length,
+        inHost: shapes.every((s) => {
+          const r = s.getBoundingClientRect()
+          return r.left >= hb.left - 1 && r.right <= hb.right + 1 && r.top >= hb.top - 1 && r.bottom <= hb.bottom + 1
+        }),
+        onComp: shapes.filter((s) => comps.some((c) => hit(s.getBoundingClientRect(), c))).length,
+        nearAll: shapes.every((s) => {
+          const r = s.getBoundingClientRect()
+          const cx = (r.left + r.right) / 2
+          const cy = (r.top + r.bottom) / 2
+          return comps.some((c) => cx >= c.left - 200 && cx <= c.right + 200 && cy >= c.top - 200 && cy <= c.bottom + 200)
+        }),
+        transforms: shapes.map((s) => s.style.transform),
+      }
+    })
+    expect(r).not.toBeNull()
+    expect(r!.n).toBeGreaterThanOrEqual(5)
+    expect(r!.inHost).toBeTruthy() // 不出场景容器
+    expect(r!.onComp).toBe(0) // 空当＝不压任何内容盒
+    expect(r!.nearAll).toBeTruthy() // 只散在卡片附近，不胡乱撒
+    expect(new Set(r!.transforms).size).toBe(r!.n) // 落点/旋转各不相同
+    r!.transforms.forEach((t) => expect(t).toMatch(/^translate\(-50%, -50%\) rotate\(-?\d+deg\)$/))
+  })
+})
+
 test.describe('票券规格契约', () => {
   test.beforeEach(async ({ page }) => await page.goto('/symbols.html'))
 
