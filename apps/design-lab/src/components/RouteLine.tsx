@@ -1,14 +1,15 @@
 /** RouteLine —— 关系线：线形即含义（实=先后 虚=相关 点=同族）
  * 拓扑：横平竖直 + R8 直角步进；并行不合并(4px)；站点 r6 半嵌卡边
- * （左贴描边、右骑硬投影外缘）；同口多线自动聚合胶囊（线止于胶囊边界）。 */
+ * （圆心骑左右描边，各半在卡上）；线层 z-10 置于卡之上，站点不被卡遮挡；
+ * 同口多线自动聚合胶囊（线止于胶囊边界）。 */
 import type { ChapterId, Edge } from '../lib/types'
 
 const STATION_COLORS = ['var(--color-clash2a)', 'var(--color-clash1b)', 'var(--color-clash3a)', 'var(--color-clash1a)']
 
 export interface LaneNode {
   id: ChapterId
-  borderLeft: number // 左描边 x（无影侧，入口贴这里）
-  right: number // 右侧黑影外缘 x（描边 + 7，出口从这里出发）
+  borderLeft: number // 左描边 x（入口圆心贴这里，点半嵌）
+  right: number // 右描边 x（出口圆心贴这里，点半嵌——不接阴影）
   y: number // 卡中线 y
 }
 
@@ -47,7 +48,7 @@ export function RouteLine({
       width={width}
       height={height}
       viewBox={`0 0 ${width} ${height}`}
-      className="pointer-events-none absolute left-0 top-0"
+      className="pointer-events-none absolute left-0 top-0 z-10"
       aria-hidden
     >
       {edges.map((e, i) => {
@@ -65,7 +66,7 @@ export function RouteLine({
         if (!a || !b) return null
         const ins = insByTo.get(e.to)!
         const capsule = ins.length > 1 && firstIn.has(e.to)
-        // 源站点骑出边卡黑影外缘；目标：单线=圆点贴描边，多线=胶囊（只画一次）
+        // 源/目标站点：圆心骑卡描边，各半在卡上；目标：单线=圆点，多线=胶囊（只画一次）
         return (
           <g key={`st-${e.from}-${e.to}`}>
             <circle cx={a.right} cy={a.y} r={6} fill={stationColor(si++)} stroke="var(--color-ink)" strokeWidth={2} />

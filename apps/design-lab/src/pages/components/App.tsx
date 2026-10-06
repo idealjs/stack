@@ -5,10 +5,11 @@ import { RouteLine } from '../../components/RouteLine'
 import { AssignBlock, Ticket } from '../../components/Ticket'
 import { EntryGuide } from '../../components/EntryGuide'
 
+/* 节点＝卡描边真实边缘：卡1(40,72,250) 卡2(380,0,250) 卡3(700,0,150) */
 const nodes = {
-  1: { id: 1, borderLeft: 40, right: 299, y: 180 },
-  2: { id: 2, borderLeft: 378, right: 639, y: 108 },
-  5: { id: 5, borderLeft: 699, right: 848, y: 108 },
+  1: { id: 1, borderLeft: 40, right: 290, y: 180 },
+  2: { id: 2, borderLeft: 380, right: 630, y: 108 },
+  5: { id: 5, borderLeft: 700, right: 850, y: 108 },
 } as const
 
 export function App() {

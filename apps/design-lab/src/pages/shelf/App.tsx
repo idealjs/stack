@@ -9,11 +9,11 @@ import { EntryGuide } from '../../components/EntryGuide'
 import { Scatter } from '../../components/Scatter'
 import { Bar, Cross, Ring, Tremble, Tri, Wave } from '../../components/shapes'
 
-/* 场景坐标（复刻已验收组合）：卡1(40,110,250) 卡2(380,44,250,rot) 卡3(700,44,140) */
+/* 场景坐标（节点＝卡描边真实边缘）：卡1(40,110,250) 卡2(380,44,250,rot) 卡3(700,44,140) */
 const nodes = {
-  1: { id: 1, borderLeft: 40, right: 299, y: 180 },
-  2: { id: 2, borderLeft: 378, right: 639, y: 108 },
-  5: { id: 5, borderLeft: 698, right: 848, y: 108 },
+  1: { id: 1, borderLeft: 40, right: 290, y: 180 },
+  2: { id: 2, borderLeft: 380, right: 630, y: 108 },
+  5: { id: 5, borderLeft: 700, right: 840, y: 108 },
 } as const
 
 export function App() {

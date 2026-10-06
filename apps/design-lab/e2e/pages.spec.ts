@@ -115,7 +115,7 @@ test.describe('RouteLine 规格契约', () => {
     expect(specs).toContain('4 2')
   })
 
-  test('站点 r6 半嵌：源骑卡右黑影外缘、目标贴左描边', async ({ page }) => {
+  test('站点 r6 半嵌：源/目标圆心都骑卡描边（各半在卡上），线层在卡之上', async ({ page }) => {
     const c1 = await page.locator('a[href="#ch1"]').first().boundingBox()
     const c2 = await page.locator('a[href="#ch2"]').first().boundingBox()
     const wrap = await page.locator('main div.relative').first().boundingBox()
@@ -126,10 +126,17 @@ test.describe('RouteLine 规格契约', () => {
     )
     expect(stations.length).toBeGreaterThanOrEqual(4)
 
-    const c1ShadowEdge = c1!.x - wrap!.x + c1!.width + 7 // 描边外 + 7px 黑影
+    const c1Right = c1!.x - wrap!.x + c1!.width // 卡右描边（不接阴影）
     const c2Border = c2!.x - wrap!.x
-    expect(stations.some((s) => Math.abs(s.cx - c1ShadowEdge) <= 3), `源站点应骑黑影外缘 x≈${c1ShadowEdge}`).toBeTruthy()
-    expect(stations.some((s) => Math.abs(s.cx - c2Border) <= 3), `目标站点应贴左描边 x≈${c2Border}`).toBeTruthy()
+    expect(stations.some((s) => Math.abs(s.cx - c1Right) <= 3), `源站点圆心应骑卡右描边 x≈${c1Right}`).toBeTruthy()
+    expect(stations.some((s) => Math.abs(s.cx - c2Border) <= 3), `目标站点圆心应骑左描边 x≈${c2Border}`).toBeTruthy()
+
+    // 线层必须置于卡之上——否则半嵌的站点被卡盖住，只剩卡外一小块
+    const z = await page.evaluate(() => {
+      const svg = document.querySelector('main div.relative > svg') as SVGElement | null
+      return svg ? getComputedStyle(svg).zIndex : 'missing'
+    })
+    expect(z).toBe('10')
   })
 
   test('实线端点落在水平端口（M x y H 起、H x 止）', async ({ page }) => {
