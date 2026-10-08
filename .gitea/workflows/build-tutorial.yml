@@ -14,7 +14,7 @@ on:
 env:
   # musl 构建托管在自家 release 资产（tag ci-node-v20.19.5-musl）——runner 同机房拉取快；
   # 原始来源 unofficial-builds（npmmirror 无 musl）
-  NODE_DIST: https://gitea.idealjs.com/attachments/07df24de-1408-4042-8db6-8a64848e2791
+  NODE_DIST: https://gitea.idealjs.com/attachments/5fb4af79-a964-4f7b-bdfe-9d0001901ed9
   YARN_NPM_REGISTRY_SERVER: https://registry.npmmirror.com
 
 jobs:
@@ -28,7 +28,10 @@ jobs:
           mkdir -p "$RUNNER_TEMP/node"
           tar -xJf /tmp/node.tar.xz -C "$RUNNER_TEMP/node" --strip-components=1
           echo "$RUNNER_TEMP/node/bin" >> "$GITHUB_PATH"
-          "$RUNNER_TEMP/node/bin/node" -v
+          # unofficial musl 构建仍动态依赖 libstdc++/libgcc——bundle 自带，指给它
+          echo "LD_LIBRARY_PATH=$RUNNER_TEMP/node/lib" >> "$GITHUB_ENV"
+          export LD_LIBRARY_PATH="$RUNNER_TEMP/node/lib"
+          node -v
 
       - uses: actions/checkout@v4
 
