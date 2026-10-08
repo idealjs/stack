@@ -1,0 +1,36 @@
+name: Build Tutorial
+
+# 主仓库 gitea.idealjs.com/idealjs/stack 的 CI：
+# 打包新教程站（apps/tutorial，Vite MPA，含设计系统四册页）
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build @stack/tutorial
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Enable corepack (yarn 4 via packageManager)
+        run: corepack enable
+
+      - name: Install dependencies
+        run: yarn install --immutable
+
+      - name: Build tutorial (Vite MPA 七页 + 设计系统四册)
+        run: yarn workspace @stack/tutorial build
+
+      - name: Upload dist artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: tutorial-dist
+          path: apps/tutorial/dist/
+          retention-days: 14
