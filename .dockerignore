@@ -6,3 +6,11 @@
 **/playwright-report
 apps/design-lab/e2e
 .zcode*
+.env
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions

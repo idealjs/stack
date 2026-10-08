@@ -1,10 +1,9 @@
 name: Build Tutorial
 
 # 主仓库 gitea.idealjs.com/idealjs/stack 的 CI：打包新教程站。
-# 构建环境全部封装在 apps/tutorial/Dockerfile（node24-alpine + yarn4 + npmmirror），
+# 构建环境全部封装在仓库根 Dockerfile（node24-bookworm-slim + yarn4 + npmmirror），
 # runner 用 buildah 无 daemon 执行——不依赖 runner 宿主的 node/docker，也不碰 github.com。
-#   源码：gitea API tarball（同机房）
-#   产物：滚动 release「ci-dist」资产（node 取自镜像挂载层，原生 fetch 上传）
+#   源码：gitea API tarball（同机房）；产物留在镜像 stack-tutorial:ci 内（/repo/apps/tutorial/dist）
 on:
   push:
     branches: [main]
@@ -24,7 +23,7 @@ jobs:
         run: |
           wget -q "$API/archive/$GITHUB_SHA.tar.gz" -O /tmp/src.tgz
           tar -xzf /tmp/src.tgz --strip-components=1
-          ls apps/tutorial/Dockerfile
+          ls Dockerfile
 
       - name: 装 buildah（runner 无 docker；buildah 无 daemon 即可构建）
         run: |
@@ -35,41 +34,20 @@ jobs:
 
       - name: buildah 登录阿里云镜像仓（基座为私有 idealjs/node）
         env:
-          ALIYUN_AUTH: ${{ secrets.ALIYUN_AUTH }}
+          ALIYUN_DOCKER_USERNAME: ${{ secrets.ALIYUN_DOCKER_USERNAME }}
+          ALIYUN_DOCKER_PASSWORD: ${{ secrets.ALIYUN_DOCKER_PASSWORD }}
         run: |
-          echo "$ALIYUN_AUTH" | buildah login --username "${ALIYUN_AUTH%%:*}" --password-stdin registry.cn-hangzhou.aliyuncs.com
+          printf '%s' "$ALIYUN_DOCKER_PASSWORD" | buildah login --username "$ALIYUN_DOCKER_USERNAME" --password-stdin registry.cn-hangzhou.aliyuncs.com
+          # authfile 按域名区分——构建走 VPC 端点，需单独 login（凭据相同）
+          printf '%s' "$ALIYUN_DOCKER_PASSWORD" | buildah login --username "$ALIYUN_DOCKER_USERNAME" --password-stdin registry-vpc.cn-hangzhou.aliyuncs.com
 
       - name: buildah 构建镜像（环境封装在 Dockerfile）
         run: |
-          buildah build --storage-driver=vfs -f apps/tutorial/Dockerfile -t stack-tutorial:ci .
+          # runner 与镜像仓同 region（杭州）——基座走 VPC 内网端点，快且不占公网带宽
+          buildah build --storage-driver=vfs --build-arg BASE_REGISTRY=registry-vpc.cn-hangzhou.aliyuncs.com -f Dockerfile -t stack-tutorial:ci .
 
-      - name: 取产物并上传 release（node 取自镜像挂载层）
-        env:
-          TOK: ${{ secrets.CI_TOKEN || github.token }}
+      - name: buildah 登出（清掉 runner 上 auth.json 里的凭据；长驻 runner 不留凭据）
+        if: always()
         run: |
-          CID=$(buildah from localhost/stack-tutorial:ci)
-          MNT=$(buildah mount "$CID")
-          ls "$MNT/repo/apps/tutorial/dist/index.html"
-          tar -czf /tmp/tutorial-dist.tar.gz -C "$MNT/repo/apps/tutorial/dist" .
-          export LD_LIBRARY_PATH="$MNT/usr/lib"
-          cat > /tmp/upload.mjs <<'JS'
-          const API = process.env.API
-          const H = { Authorization: `token ${process.env.TOK}` }
-          const j = async (u, opt) => { const r = await fetch(API + u, { ...opt, headers: { ...H, ...(opt?.headers || {}) } }); return { ok: r.ok, status: r.status, data: r.status === 204 ? null : await r.json().catch(() => null) } }
-          let rid
-          let r = await j('/releases/tags/ci-dist')
-          if (r.ok) rid = r.data.id
-          else {
-            r = await j('/releases', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ tag_name: 'ci-dist', name: 'CI 产物（滚动更新）', body: '每次构建的最新 dist。', draft: false, prerelease: true }) })
-            if (r.ok) rid = r.data.id
-          }
-          if (!rid) { console.log(`::warning::release 不可用（${r.status}）——构建已成功，产物留在 runner`); process.exit(0) }
-          for (const a of (await j(`/releases/${rid}/assets`)).data || []) await j(`/releases/${rid}/assets/${a.id}`, { method: 'DELETE' })
-          const fd = new FormData()
-          fd.append('attachment', new Blob([await (await import('node:fs/promises')).readFile('/tmp/tutorial-dist.tar.gz')]), 'tutorial-dist.tar.gz')
-          const up = await fetch(`${API}/releases/${rid}/assets?name=tutorial-dist.tar.gz`, { method: 'POST', headers: H, body: fd })
-          console.log(up.ok ? `产物下载：${(await up.json()).browser_download_url}` : `上传失败 ${up.status}`)
-          JS
-          "$MNT/usr/local/bin/node" /tmp/upload.mjs
-          buildah unmount "$CID" >/dev/null 2>&1 || true
-          buildah rm "$CID" >/dev/null 2>&1 || true
+          buildah logout registry.cn-hangzhou.aliyuncs.com || true
+          buildah logout registry-vpc.cn-hangzhou.aliyuncs.com || true
