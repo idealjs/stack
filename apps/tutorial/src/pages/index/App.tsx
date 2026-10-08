@@ -26,6 +26,7 @@ const GRID: { id: ChapterId; entry?: 1 | 2 | 3 }[] = [
 export function App() {
   return (
     <Page
+      active="index"
       title="全栈工程师教程 · 书架"
       desc="靶子先行：每章先给目标、预期结果、积木清单，步骤只写「产出什么＋核对什么」；过程有没有学习价值，每步先分类。"
     >
