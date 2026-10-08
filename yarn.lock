@@ -3459,6 +3459,7 @@ __metadata:
   resolution: "@stack/design-lab@workspace:apps/design-lab"
   dependencies:
     "@playwright/test": "npm:1.63.0"
+    "@stack/design-system": "workspace:*"
     "@tailwindcss/vite": "npm:^4.1.0"
     "@types/react": "npm:^18.3.12"
     "@types/react-dom": "npm:^18.3.1"
@@ -3471,10 +3472,17 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@stack/design-system@workspace:*, @stack/design-system@workspace:packages/design-system":
+  version: 0.0.0-use.local
+  resolution: "@stack/design-system@workspace:packages/design-system"
+  languageName: unknown
+  linkType: soft
+
 "@stack/tutorial@workspace:apps/tutorial":
   version: 0.0.0-use.local
   resolution: "@stack/tutorial@workspace:apps/tutorial"
   dependencies:
+    "@stack/design-system": "workspace:*"
     "@tailwindcss/vite": "npm:^4.1.0"
     "@types/react": "npm:^18.3.12"
     "@types/react-dom": "npm:^18.3.1"
