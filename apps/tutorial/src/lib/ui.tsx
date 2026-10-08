@@ -55,7 +55,7 @@ export function Page({
                 key={n.href}
                 href={n.href}
                 className={`rounded-lg px-2.5 py-1 text-[12.5px] font-bold no-underline transition-colors ${
-                  on ? (n.id ? 'text-ink' : 'bg-ink text-paper') : 'text-body hover:bg-black/5'
+                  on ? (n.id ? 'text-ink' : 'bg-ink text-paper') : 'text-body hover:bg-paper-deep'
                 }`}
                 style={on && n.id ? { background: CHAPTERS[n.id].color } : undefined}
               >
@@ -74,7 +74,7 @@ export function Page({
                 key={n.href}
                 href={n.href}
                 className={`rounded-lg px-2.5 py-1 text-[12.5px] font-bold no-underline transition-colors ${
-                  on ? 'bg-ink text-paper' : 'text-body hover:bg-black/5'
+                  on ? 'bg-ink text-paper' : 'text-body hover:bg-paper-deep'
                 }`}
               >
                 {n.label}

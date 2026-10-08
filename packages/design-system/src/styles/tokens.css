@@ -16,6 +16,7 @@
   /* 中性阶（纸的世界） */
   --color-ink: #111111;
   --color-paper: #fff9f0;
+  --color-paper-deep: #f2ead9; /* 纸按压色——hover 专用暖阶，不借 ink（黑色＝选中语义） */
   --color-mute: #8a7a5c;
   --color-body: #3d3d3d;
 
