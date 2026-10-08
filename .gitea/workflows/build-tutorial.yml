@@ -49,22 +49,26 @@ jobs:
         run: yarn workspace @stack/tutorial build
 
       - name: 产物上传（滚动 release 资产；权限不足仅告警不红）
+        env:
+          TOK: ${{ secrets.CI_TOKEN || github.token }}
         run: |
-          TOK="${{ secrets.CI_TOKEN || github.token }}"
-          J() { node -e "let d='';process.stdin.on('data',c=>d+=c).on('end',()=>{try{const o=JSON.parse(d);console.log(eval('o.'+process.argv[1])??'')}catch(e){console.log('')}})" "$1"; }
           tar -czf /tmp/tutorial-dist.tar.gz -C apps/tutorial/dist .
-          RID=$(curl -sf -H "Authorization: token $TOK" "$API/releases/tags/ci-dist" | J id)
-          if [ -z "$RID" ]; then
-            RID=$(curl -sf -X POST -H "Authorization: token $TOK" -H "Content-Type: application/json" "$API/releases" \
-              -d '{"tag_name":"ci-dist","name":"CI 产物（滚动更新）","body":"每次构建的最新 dist。","draft":false,"prerelease":true}' | J id)
-          fi
-          if [ -z "$RID" ]; then
-            echo "::warning::release 不可用（job token 无写权限）——构建已成功，产物留在 runner"
-            exit 0
-          fi
-          for AID in $(curl -s -H "Authorization: token $TOK" "$API/releases/$RID/assets" | J 'assets.map(a=>a.id).join(" ")'); do
-            curl -s -X DELETE -H "Authorization: token $TOK" "$API/releases/$RID/assets/$AID" >/dev/null
-          done
-          URL=$(curl -sf -X POST -H "Authorization: token $TOK" "$API/releases/$RID/assets?name=tutorial-dist.tar.gz" \
-            -F "attachment=@/tmp/tutorial-dist.tar.gz" | J browser_download_url)
-          echo "产物下载：${URL:-上传失败}"
+          cat > /tmp/upload.mjs <<'JS'
+          const API = process.env.API
+          const H = { Authorization: `token ${process.env.TOK}` }
+          const j = async (u, opt) => { const r = await fetch(API + u, { ...opt, headers: { ...H, ...(opt?.headers || {}) } }); return { ok: r.ok, status: r.status, data: r.status === 204 ? null : await r.json().catch(() => null) } }
+          let rid
+          let r = await j('/releases/tags/ci-dist')
+          if (r.ok) rid = r.data.id
+          else {
+            r = await j('/releases', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ tag_name: 'ci-dist', name: 'CI 产物（滚动更新）', body: '每次构建的最新 dist。', draft: false, prerelease: true }) })
+            if (r.ok) rid = r.data.id
+          }
+          if (!rid) { console.log(`::warning::release 不可用（${r.status}）——构建已成功，产物留在 runner`); process.exit(0) }
+          for (const a of (await j(`/releases/${rid}/assets`)).data || []) await j(`/releases/${rid}/assets/${a.id}`, { method: 'DELETE' })
+          const fd = new FormData()
+          fd.append('attachment', new Blob([await (await import('node:fs/promises')).readFile('/tmp/tutorial-dist.tar.gz')]), 'tutorial-dist.tar.gz')
+          const up = await fetch(`${API}/releases/${rid}/assets?name=tutorial-dist.tar.gz`, { method: 'POST', headers: H, body: fd })
+          console.log(up.ok ? `产物下载：${(await up.json()).browser_download_url}` : `上传失败 ${up.status}`)
+          JS
+          node /tmp/upload.mjs
