@@ -1,4 +1,5 @@
 /** 页面公共骨架 */
+import '@stack/design-system'
 import type { ReactNode } from 'react'
 
 export function Page({ tag, title, desc, children }: { tag: string; title: string; desc: string; children: ReactNode }) {

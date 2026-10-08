@@ -1,5 +1,6 @@
 /** 教程站页面骨架：站头导航跨页常驻（view-transition-name 共享元素，页间不闪烁）。
  * 选中项背景色＝该章色（与章头 title 横幅统一）；书架/设计册选中为 ink。 */
+import '@stack/design-system'
 import type { ReactNode } from 'react'
 import type { ChapterId } from '@stack/design-system'
 import { CHAPTERS } from './chapters'
