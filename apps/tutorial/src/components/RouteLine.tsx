@@ -16,14 +16,18 @@ export interface LaneNode {
   y: number // 卡中线 y
 }
 
-/** 水平出发 → R8 双弯直角步进 → 水平到达；同 y 时直线 */
+/* 水平出发 → 双弯直角步进 → 水平到达；同 y 时直线。
+ * 半径自适应：垂直空间 |dy| 或水平空间不足 2r 时收缩（如 hover 微浮 dy=3），
+ * 否则两段弧会交叠倒置，在贴卡处扭曲成折返。 */
 function stepPath(x0: number, y0: number, x1: number, y1: number, r = 8): string {
-  if (Math.abs(y1 - y0) < 1) return `M ${x0} ${y0} H ${x1}`
+  const dyAbs = Math.abs(y1 - y0)
+  if (dyAbs < 1) return `M ${x0} ${y0} H ${x1}`
+  const rr = Math.max(0.5, Math.min(r, dyAbs / 2, (x1 - x0) / 3))
   const down = y1 > y0
   const sweep1 = down ? 1 : 0
   const sweep2 = down ? 0 : 1
-  const cornerX = Math.max(x0 + r, x1 - 2 * r)
-  return `M ${x0} ${y0} H ${cornerX} A ${r} ${r} 0 0 ${sweep1} ${cornerX + r} ${y0 + (down ? r : -r)} V ${y1 - (down ? r : -r)} A ${r} ${r} 0 0 ${sweep2} ${cornerX + 2 * r} ${y1} H ${x1}`
+  const cornerX = Math.max(x0 + rr, x1 - 2 * rr)
+  return `M ${x0} ${y0} H ${cornerX} A ${rr} ${rr} 0 0 ${sweep1} ${cornerX + rr} ${y0 + (down ? rr : -rr)} V ${y1 - (down ? rr : -rr)} A ${rr} ${rr} 0 0 ${sweep2} ${cornerX + 2 * rr} ${y1} H ${x1}`
 }
 
 const HOVER_LIFT = -3 // 与 MemphisCard hover:-translate-y-[3px] 一致
