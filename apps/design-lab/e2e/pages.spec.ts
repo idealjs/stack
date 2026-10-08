@@ -114,7 +114,7 @@ test.describe('CourseCard 规格契约', () => {
 })
 
 test.describe('RouteLine 规格契约', () => {
-  test.beforeEach(async ({ page }) => await page.goto('/shelf.html'))
+  test.beforeEach(async ({ page }) => await page.goto('/components.html'))
 
   test('线形：实线先后 2.5px 无 dash；点线同族 0.1/6 圆帽', async ({ page }) => {
     const specs = await page.locator('svg path').evaluateAll((ns) =>
@@ -131,27 +131,29 @@ test.describe('RouteLine 规格契约', () => {
   })
 
   test('站点 r6 半嵌：源/目标圆心都骑卡描边（各半在卡上），线层在卡之上', async ({ page }) => {
-    const c1 = await page.locator('a[href="#ch1"]').first().boundingBox()
-    const c2 = await page.locator('a[href="#ch2"]').first().boundingBox()
-    const wrap = await page.locator('main div.relative').first().boundingBox()
-    expect(c1 && c2 && wrap).toBeTruthy()
-
-    const stations = await page.locator('svg circle').evaluateAll((ns) =>
-      ns.map((n) => ({ cx: +(n.getAttribute('cx') ?? 0), r: +(n.getAttribute('r') ?? 0) })).filter((s) => s.r === 6), // 排除散落 ○ 预期环
-    )
-    expect(stations.length).toBeGreaterThanOrEqual(4)
-
-    const c1Right = c1!.x - wrap!.x + c1!.width // 卡右描边（不接阴影）
-    const c2Border = c2!.x - wrap!.x
-    expect(stations.some((s) => Math.abs(s.cx - c1Right) <= 3), `源站点圆心应骑卡右描边 x≈${c1Right}`).toBeTruthy()
-    expect(stations.some((s) => Math.abs(s.cx - c2Border) <= 3), `目标站点圆心应骑左描边 x≈${c2Border}`).toBeTruthy()
-
-    // 线层必须置于卡之上——否则半嵌的站点被卡盖住，只剩卡外一小块
-    const z = await page.evaluate(() => {
-      const svg = document.querySelector('main div.relative > svg') as SVGElement | null
-      return svg ? getComputedStyle(svg).zIndex : 'missing'
+    const r = await page.evaluate(() => {
+      const svg = [...document.querySelectorAll('svg')].find((s) => s.getAttribute('width') === '1160')
+      if (!svg) return null
+      const wrap = svg.parentElement
+      const wb = wrap.getBoundingClientRect()
+      const c1 = wrap.querySelector('a[href="#ch1"]').getBoundingClientRect()
+      const c2 = wrap.querySelector('a[href="#ch2"]').getBoundingClientRect()
+      const stations = [...svg.querySelectorAll('circle')]
+        .map((n) => ({ cx: +(n.getAttribute('cx') ?? 0), r: +(n.getAttribute('r') ?? 0) }))
+        .filter((s) => s.r === 6) // 排除散落 ○ 预期环
+      return {
+        n: stations.length,
+        cxs: stations.map((s) => s.cx),
+        c1Right: c1.x - wb.x + c1.width, // 卡右描边（不接阴影）
+        c2Border: c2.x - wb.x,
+        z: getComputedStyle(svg).zIndex,
+      }
     })
-    expect(z).toBe('10')
+    expect(r).not.toBeNull()
+    expect(r!.n).toBeGreaterThanOrEqual(4)
+    expect(r!.cxs.some((cx) => Math.abs(cx - r!.c1Right) <= 3), `源站点圆心应骑卡右描边 x≈${r!.c1Right}`).toBeTruthy()
+    expect(r!.cxs.some((cx) => Math.abs(cx - r!.c2Border) <= 3), `目标站点圆心应骑左描边 x≈${r!.c2Border}`).toBeTruthy()
+    expect(r!.z).toBe('10') // 线层置于卡之上——否则半嵌站点被卡盖住
   })
 
   test('hover 卡片：线与站点跟随浮起（-3px 同步，直线变斜线）', async ({ page }) => {

@@ -1,9 +1,17 @@
 import { Page, Section } from '../../lib/ui'
-import { ASSIGNMENT, CHAPTERS, PROFILES } from '../../lib/chapters'
+import { ASSIGNMENT, CHAPTERS, EDGES, PROFILES } from '../../lib/chapters'
+import { RouteLine } from '@stack/design-system'
 import { MemphisCard } from '@stack/design-system'
 import { AssignBlock, Ticket } from '@stack/design-system'
 import { EntryGuide } from '@stack/design-system'
 import { Mark } from '@stack/design-system'
+
+/* RouteLine 演示坐标（节点＝卡描边真实边缘） */
+const nodes = {
+  1: { id: 1, borderLeft: 40, right: 290, y: 180 },
+  2: { id: 2, borderLeft: 380, right: 630, y: 108 },
+  5: { id: 5, borderLeft: 700, right: 840, y: 108 },
+} as const
 
 export function App() {
   return (
@@ -19,6 +27,15 @@ export function App() {
               zoneText={<>这一步过程就地写清：<Mark>环境与依赖如何咬合</Mark></>}
             />
           </div>
+        </div>
+      </Section>
+
+      <Section label="RouteLine" note="实=先后 虚=相关 点=同族；hover 卡片，线与站点自动跟随（组件自带）">
+        <div className="relative h-[600px] overflow-hidden rounded-2xl bg-paper">
+          <RouteLine edges={EDGES} nodes={nodes} width={1160} height={600} />
+          <div className="absolute left-[40px] top-[110px] w-[250px]"><MemphisCard chapter={CHAPTERS[1]} /></div>
+          <div className="absolute left-[380px] top-[44px] w-[250px] -rotate-1"><MemphisCard chapter={CHAPTERS[2]} /></div>
+          <div className="absolute left-[700px] top-[44px] w-[140px]"><MemphisCard chapter={CHAPTERS[5]} compact /></div>
         </div>
       </Section>
       <Section label="票券 ＆ 指派学习块" note="票=完成状态；块=位置/预期/场景＋脱靶标记">

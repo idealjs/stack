@@ -1,6 +1,5 @@
 /** 课程书架——教程首页：入口画像 → 六章卡片 → 关系与进度
  * 主线场景：hover 卡片时线与站点跟随浮起（状态提升到场景层） */
-import { useState } from 'react'
 import { Page, Section } from '../../lib/ui'
 import { MemphisCard, EntryGuide, RouteLine, Ticket } from '@stack/design-system'
 import type { ChapterId } from '@stack/design-system'
@@ -23,7 +22,6 @@ const GRID: { id: ChapterId; entry?: 1 | 2 | 3 }[] = [
 ]
 
 export function App() {
-  const [hovered, setHovered] = useState<ChapterId | null>(null)
   return (
     <Page
       active="index"
@@ -51,27 +49,14 @@ export function App() {
             nodes={nodes}
             width={1160}
             height={520}
-            hovered={hovered}
           />
-          <div
-            className="absolute left-[40px] top-[110px] w-[250px]"
-            onMouseEnter={() => setHovered(1)}
-            onMouseLeave={() => setHovered(null)}
-          >
+          <div className="absolute left-[40px] top-[110px] w-[250px]">
             <MemphisCard chapter={CHAPTERS[1]} href="/ch1.html" />
           </div>
-          <div
-            className="absolute left-[380px] top-[44px] w-[250px] -rotate-1"
-            onMouseEnter={() => setHovered(2)}
-            onMouseLeave={() => setHovered(null)}
-          >
+          <div className="absolute left-[380px] top-[44px] w-[250px] -rotate-1">
             <MemphisCard chapter={CHAPTERS[2]} href="/ch2.html" />
           </div>
-          <div
-            className="absolute left-[700px] top-[44px] w-[140px]"
-            onMouseEnter={() => setHovered(5)}
-            onMouseLeave={() => setHovered(null)}
-          >
+          <div className="absolute left-[700px] top-[44px] w-[140px]">
             <MemphisCard chapter={CHAPTERS[5]} compact href="/ch5.html" />
           </div>
           <div className="absolute left-[60px] top-[380px] flex gap-4">

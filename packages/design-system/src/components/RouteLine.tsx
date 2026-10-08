@@ -1,9 +1,10 @@
 /** RouteLine —— 关系线：线形即含义（实=先后 虚=相关 点=同族）
- * 卡片联动：hovered 节点随卡浮起 -3px——站点 translateY 平滑跟随，
- * 连线以 CSS d: path() 过渡重算（与卡片同样 150ms，不支持的浏览器瞬时跟随）
+ * 卡片联动（组件自带，消费方零接线）：自动监听场景内 a[data-comp="course-card"]
+ * 的 hover——该卡浮起时站点 translateY(-3) 平滑跟随、连线以 CSS d: path() 过渡重算（150ms）
  * 拓扑：横平竖直 + R8 直角步进；并行不合并(4px)；站点 r6 半嵌卡边
  * （圆心骑左右描边，各半在卡上）；线层 z-10 置于卡之上，站点不被卡遮挡；
  * 同口多线自动聚合胶囊（线止于胶囊边界）。 */
+import { useEffect, useRef, useState } from 'react'
 import type React from 'react'
 import type { ChapterId, Edge } from '../lib/types'
 
@@ -38,16 +39,40 @@ export function RouteLine({
   nodes,
   width,
   height,
-  hovered = null,
+  follow = true,
 }: {
   edges: Edge[]
   nodes: Partial<Record<ChapterId, LaneNode>>
   width: number
   height: number
-  /** 正在浮起的卡（章 id）——线与站点跟随 */
-  hovered?: ChapterId | null
+  /** 自动跟随场景内卡片的 hover 浮起（默认开；传 false 关闭） */
+  follow?: boolean
 }) {
   const stationColor = (i: number) => STATION_COLORS[i % STATION_COLORS.length]
+
+  // 联动状态：hover 中的章（由场景卡自动驱动，无需消费方传参）
+  const [hovered, setHovered] = useState<ChapterId | null>(null)
+  const svgRef = useRef<SVGSVGElement>(null)
+  useEffect(() => {
+    if (!follow) return
+    const host = svgRef.current?.parentElement
+    if (!host) return
+    const offs = [...host.querySelectorAll<HTMLElement>('a[data-comp="course-card"]')]
+      .map((card) => {
+        const m = card.getAttribute('href')?.match(/ch(\d)/)
+        if (!m) return () => {}
+        const id = +m[1] as ChapterId
+        const on = () => setHovered(id)
+        const off = () => setHovered(null)
+        card.addEventListener('mouseenter', on)
+        card.addEventListener('mouseleave', off)
+        return () => {
+          card.removeEventListener('mouseenter', on)
+          card.removeEventListener('mouseleave', off)
+        }
+      })
+    return () => offs.forEach((off) => off())
+  }, [follow])
   /** 节点跟随位移：hovered 卡 -3px，其余 0 */
   const dy = (id: ChapterId) => (id === hovered ? HOVER_LIFT : 0)
 
@@ -60,6 +85,7 @@ export function RouteLine({
   let si = 0
   return (
     <svg
+      ref={svgRef}
       width={width}
       height={height}
       viewBox={`0 0 ${width} ${height}`}
