@@ -1,5 +1,6 @@
 /** 教程站页面骨架：站头导航跨页常驻（view-transition-name 共享元素，页间不闪烁）。
- * 选中项背景色＝该章色（与章头 title 横幅统一）；书架/设计册选中为 ink。 */
+ * 选中语义：章节项＝该章色（与章头横幅统一）；书架/设计册＝纸按压色＋ink 内描边环。
+ * 黑色只属于文字与 logo——hover 与选中都不借黑。 */
 import '@stack/design-system'
 import type { ReactNode } from 'react'
 import type { ChapterId } from '@stack/design-system'
@@ -56,7 +57,7 @@ export function Page({
                 key={n.href}
                 href={n.href}
                 className={`rounded-lg px-2.5 py-1 text-[12.5px] font-bold no-underline transition-colors ${
-                  on ? (n.id ? 'text-ink' : 'bg-ink text-paper') : 'text-body hover:bg-paper-deep'
+                  on ? (n.id ? 'text-ink' : 'bg-paper-deep text-ink shadow-[inset_0_0_0_2px_var(--color-ink)]') : 'text-body hover:bg-paper-deep'
                 }`}
                 style={on && n.id ? { background: CHAPTERS[n.id].color } : undefined}
               >
@@ -75,7 +76,7 @@ export function Page({
                 key={n.href}
                 href={n.href}
                 className={`rounded-lg px-2.5 py-1 text-[12.5px] font-bold no-underline transition-colors ${
-                  on ? 'bg-ink text-paper' : 'text-body hover:bg-paper-deep'
+                  on ? 'bg-paper-deep text-ink shadow-[inset_0_0_0_2px_var(--color-ink)]' : 'text-body hover:bg-paper-deep'
                 }`}
               >
                 {n.label}
