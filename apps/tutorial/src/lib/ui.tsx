@@ -6,10 +6,11 @@ import { CHAPTERS } from './chapters'
 import '../styles/tokens.css'
 
 /** 设计系统四册（自 design-lab 迁入） */
-export type DesignKey = 'design-colors' | 'design-symbols' | 'design-components' | 'design-examples'
+export type DesignKey = 'design-colors' | 'design-typography' | 'design-symbols' | 'design-components' | 'design-examples'
 
 const DESIGN: { href: string; label: string; key: DesignKey }[] = [
   { href: '/design-colors.html', label: '颜色', key: 'design-colors' },
+  { href: '/design-typography.html', label: '字体', key: 'design-typography' },
   { href: '/design-symbols.html', label: '符号形状', key: 'design-symbols' },
   { href: '/design-components.html', label: '组件', key: 'design-components' },
   { href: '/design-examples.html', label: '样例', key: 'design-examples' },
