@@ -31,7 +31,7 @@ jobs:
           # unofficial musl 构建仍动态依赖 libstdc++/libgcc——bundle 自带，指给它
           echo "LD_LIBRARY_PATH=$RUNNER_TEMP/node/lib" >> "$GITHUB_ENV"
           export LD_LIBRARY_PATH="$RUNNER_TEMP/node/lib"
-          node -v
+          "$RUNNER_TEMP/node/bin/node" -v
 
       - uses: actions/checkout@v4
 
