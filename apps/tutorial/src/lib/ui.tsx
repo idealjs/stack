@@ -40,42 +40,48 @@ export function Page({
   return (
     <main className="mx-auto max-w-[1200px] px-6 py-8 text-content text-body">
       <header
-        className="mb-8 flex flex-wrap items-center gap-1.5 rounded-2xl border-2 border-ink bg-paper p-2.5 shadow-hard"
+        className="mb-8 rounded-2xl border-2 border-ink bg-paper p-2.5 shadow-hard"
         style={{ viewTransitionName: 'site-header' }}
       >
-        <a href="/index.html" className="mr-2 rounded-lg bg-ink px-2.5 py-1 font-mono text-[13px] font-bold text-paper no-underline">
-          stack·教程
-        </a>
-        {NAV.map((n) => {
-          const on = n.id ? n.id === active : active === 'index'
-          return (
-            <a
-              key={n.href}
-              href={n.href}
-              className={`rounded-lg px-2.5 py-1 text-[12.5px] font-bold no-underline transition-colors ${
-                on ? (n.id ? 'text-ink' : 'bg-ink text-paper') : 'text-body hover:bg-black/5'
-              }`}
-              style={on && n.id ? { background: CHAPTERS[n.id].color } : undefined}
-            >
-              {n.label}
-            </a>
-          )
-        })}
-        <span className="mx-1 h-4 w-[2px] rounded bg-ink/20" aria-hidden />
-        {DESIGN.map((n) => {
-          const on = n.key === active
-          return (
-            <a
-              key={n.href}
-              href={n.href}
-              className={`rounded-lg px-2.5 py-1 text-[12.5px] font-bold no-underline transition-colors ${
-                on ? 'bg-ink text-paper' : 'text-body hover:bg-black/5'
-              }`}
-            >
-              设计·{n.label}
-            </a>
-          )
-        })}
+        {/* 第一行：教程（书架 + 六章） */}
+        <div className="flex flex-wrap items-center gap-1.5">
+          <a href="/index.html" className="mr-2 rounded-lg bg-ink px-2.5 py-1 font-mono text-[13px] font-bold text-paper no-underline">
+            stack·教程
+          </a>
+          {NAV.map((n) => {
+            const on = n.id ? n.id === active : active === 'index'
+            return (
+              <a
+                key={n.href}
+                href={n.href}
+                className={`rounded-lg px-2.5 py-1 text-[12.5px] font-bold no-underline transition-colors ${
+                  on ? (n.id ? 'text-ink' : 'bg-ink text-paper') : 'text-body hover:bg-black/5'
+                }`}
+                style={on && n.id ? { background: CHAPTERS[n.id].color } : undefined}
+              >
+                {n.label}
+              </a>
+            )
+          })}
+        </div>
+        {/* 第二行：设计系统四册 */}
+        <div className="mt-2 flex flex-wrap items-center gap-1.5 border-t border-dashed border-ink/20 pt-2">
+          <span className="t-small-mute mr-1">设计系统</span>
+          {DESIGN.map((n) => {
+            const on = n.key === active
+            return (
+              <a
+                key={n.href}
+                href={n.href}
+                className={`rounded-lg px-2.5 py-1 text-[12.5px] font-bold no-underline transition-colors ${
+                  on ? 'bg-ink text-paper' : 'text-body hover:bg-black/5'
+                }`}
+              >
+                {n.label}
+              </a>
+            )
+          })}
+        </div>
       </header>
       {(title || desc) && (
         <div className="mb-7">
