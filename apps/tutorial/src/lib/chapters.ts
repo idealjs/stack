@@ -430,3 +430,15 @@ export const CONTENT: Record<ChapterId, ChapterContent> = {
     },
   },
 }
+
+/** 指派学习块示例数据（设计系统·组件/样例页演示用） */
+export const ASSIGNMENT: import('./types').Assignment = {
+  title: '指派学习 · HTTP 协议',
+  pos: 'Web 通信的地基，旁边是 DNS（找机器）与 TCP（铺线路）',
+  expect: '能向 agent 讲清一次请求的往返：URL → DNS → 连接 → 请求行/头/体 → 响应 → 渲染',
+  scenes: ['看 Network 面板复述一次页面加载', '用 curl 拿一个网页的原始响应'],
+  miss: {
+    how: '装了但没跑',
+    looks: '命令成功、页面空白——缺「真机验收」这块积木',
+  },
+}

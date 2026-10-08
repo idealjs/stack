@@ -1,9 +1,19 @@
 /** 教程站页面骨架：站头导航跨页常驻（view-transition-name 共享元素，页间不闪烁）。
- * 选中项背景色＝该章色（与章头 title 横幅统一）；书架选中为 ink。 */
+ * 选中项背景色＝该章色（与章头 title 横幅统一）；书架/设计册选中为 ink。 */
 import type { ReactNode } from 'react'
 import type { ChapterId } from './types'
 import { CHAPTERS } from './chapters'
 import '../styles/tokens.css'
+
+/** 设计系统四册（自 design-lab 迁入） */
+export type DesignKey = 'design-colors' | 'design-symbols' | 'design-components' | 'design-examples'
+
+const DESIGN: { href: string; label: string; key: DesignKey }[] = [
+  { href: '/design-colors.html', label: '颜色', key: 'design-colors' },
+  { href: '/design-symbols.html', label: '符号形状', key: 'design-symbols' },
+  { href: '/design-components.html', label: '组件', key: 'design-components' },
+  { href: '/design-examples.html', label: '样例', key: 'design-examples' },
+]
 
 const NAV: { href: string; label: string; id?: ChapterId }[] = [
   { href: '/index.html', label: '书架' },
@@ -23,8 +33,8 @@ export function Page({
   /** 章节页标题在章头横幅里，可省 */
   title?: string
   desc?: string
-  /** 站头高亮：章节 id 或书架 'index' */
-  active?: ChapterId | 'index'
+  /** 站头高亮：章节 id / 书架 / 设计系统册 */
+  active?: ChapterId | 'index' | DesignKey
   children: ReactNode
 }) {
   return (
@@ -48,6 +58,21 @@ export function Page({
               style={on && n.id ? { background: CHAPTERS[n.id].color } : undefined}
             >
               {n.label}
+            </a>
+          )
+        })}
+        <span className="mx-1 h-4 w-[2px] rounded bg-ink/20" aria-hidden />
+        {DESIGN.map((n) => {
+          const on = n.key === active
+          return (
+            <a
+              key={n.href}
+              href={n.href}
+              className={`rounded-lg px-2.5 py-1 text-[12.5px] font-bold no-underline transition-colors ${
+                on ? 'bg-ink text-paper' : 'text-body hover:bg-black/5'
+              }`}
+            >
+              设计·{n.label}
             </a>
           )
         })}
