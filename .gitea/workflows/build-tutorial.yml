@@ -29,6 +29,12 @@ jobs:
       - name: 装 buildah（runner 无 docker；buildah 无 daemon 即可构建）
         run: command -v buildah >/dev/null || apk add --no-cache buildah
 
+      - name: buildah 登录阿里云镜像仓（基座为私有 idealjs/node）
+        env:
+          ALIYUN_AUTH: ${{ secrets.ALIYUN_AUTH }}
+        run: |
+          echo "$ALIYUN_AUTH" | buildah login --username "${ALIYUN_AUTH%%:*}" --password-stdin registry.cn-hangzhou.aliyuncs.com
+
       - name: buildah 构建镜像（环境封装在 Dockerfile）
         run: |
           buildah build --storage-driver=vfs -f apps/tutorial/Dockerfile -t stack-tutorial:ci .
