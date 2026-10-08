@@ -16,12 +16,13 @@ export interface LaneNode {
   y: number // 卡中线 y
 }
 
-/* 水平出发 → 双弯直角步进 → 水平到达；同 y 时直线。
- * 半径自适应：垂直空间 |dy| 或水平空间不足 2r 时收缩（如 hover 微浮 dy=3），
- * 否则两段弧会交叠倒置，在贴卡处扭曲成折返。 */
+/* 水平出发 → 双弯直角步进 → 水平到达。
+ * 微高差（<8px，含 hover 微浮 3px）＝斜线直连：M L 结构恒定，
+ * 静置几何上是水平线，hover 时 CSS d 平滑插值成斜线（不折弯、不扭曲）。
+ * 正常步进半径自适应：垂直/水平空间不足 2r 时收缩，防两段弧交叠倒置。 */
 function stepPath(x0: number, y0: number, x1: number, y1: number, r = 8): string {
   const dyAbs = Math.abs(y1 - y0)
-  if (dyAbs < 1) return `M ${x0} ${y0} H ${x1}`
+  if (dyAbs < 8) return `M ${x0} ${y0} L ${x1} ${y1}`
   const rr = Math.max(0.5, Math.min(r, dyAbs / 2, (x1 - x0) / 3))
   const down = y1 > y0
   const sweep1 = down ? 1 : 0
