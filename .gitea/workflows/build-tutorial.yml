@@ -12,8 +12,9 @@ on:
   workflow_dispatch:
 
 env:
-  NODE_MIRROR: https://npmmirror.com/mirrors/node
-  NODE_VERSION: v20.18.1
+  # npmmirror 的 node 镜像只有 glibc 构建；Alpine(musl) 用 unofficial-builds 的 musl 版
+  NODE_DIST: https://unofficial-builds.nodejs.org/download/release
+  NODE_VERSION: v20.19.5
   YARN_NPM_REGISTRY_SERVER: https://registry.npmmirror.com
 
 jobs:
@@ -23,9 +24,9 @@ jobs:
     steps:
       - name: Install portable node (host 无 node，无 docker)
         run: |
-          wget -q "$NODE_MIRROR/$NODE_VERSION/node-$NODE_VERSION-linux-x64-musl.tar.gz" -O /tmp/node.tgz
+          wget -q "$NODE_DIST/$NODE_VERSION/node-$NODE_VERSION-linux-x64-musl.tar.xz" -O /tmp/node.tar.xz
           mkdir -p "$RUNNER_TEMP/node"
-          tar -xzf /tmp/node.tgz -C "$RUNNER_TEMP/node" --strip-components=1
+          tar -xJf /tmp/node.tar.xz -C "$RUNNER_TEMP/node" --strip-components=1
           echo "$RUNNER_TEMP/node/bin" >> "$GITHUB_PATH"
           "$RUNNER_TEMP/node/bin/node" -v
 
