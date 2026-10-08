@@ -27,7 +27,11 @@ jobs:
           ls apps/tutorial/Dockerfile
 
       - name: 装 buildah（runner 无 docker；buildah 无 daemon 即可构建）
-        run: command -v buildah >/dev/null || apk add --no-cache buildah
+        run: |
+          command -v buildah >/dev/null && exit 0
+          # 服务器在阿里云——apk 走阿里镜像源（dl-cdn 直连极慢）
+          sed -i 's#https://dl-cdn.alpinelinux.org#https://mirrors.aliyun.com#g' /etc/apk/repositories
+          apk add --no-cache buildah
 
       - name: buildah 登录阿里云镜像仓（基座为私有 idealjs/node）
         env:
