@@ -50,7 +50,7 @@ jobs:
 
       - name: 产物上传（滚动 release 资产；权限不足仅告警不红）
         run: |
-          TOK="${{ github.token }}"
+          TOK="${{ secrets.CI_TOKEN || github.token }}"
           J() { node -e "let d='';process.stdin.on('data',c=>d+=c).on('end',()=>{try{const o=JSON.parse(d);console.log(eval('o.'+process.argv[1])??'')}catch(e){console.log('')}})" "$1"; }
           tar -czf /tmp/tutorial-dist.tar.gz -C apps/tutorial/dist .
           RID=$(curl -sf -H "Authorization: token $TOK" "$API/releases/tags/ci-dist" | J id)
