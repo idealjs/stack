@@ -1,0 +1,8 @@
+# buildah/docker 构建上下文瘦身
+.git
+**/node_modules
+**/dist
+**/test-results
+**/playwright-report
+apps/design-lab/e2e
+.zcode*
