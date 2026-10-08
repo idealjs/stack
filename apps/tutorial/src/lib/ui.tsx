@@ -5,6 +5,7 @@ import '@stack/design-system'
 import type { ReactNode } from 'react'
 import type { ChapterId } from '@stack/design-system'
 import { CHAPTERS } from './chapters'
+import { MONTHS } from '../content/blogs'
 
 /** 设计系统四册（自 design-lab 迁入） */
 export type DesignKey = 'design-colors' | 'design-typography' | 'design-symbols' | 'design-components'
@@ -34,8 +35,8 @@ export function Page({
   /** 章节页标题在章头横幅里，可省 */
   title?: string
   desc?: string
-  /** 站头高亮：章节 id / 书架 / 设计系统册 */
-  active?: ChapterId | 'index' | DesignKey
+  /** 站头高亮：章节 id / 书架 / 设计系统册 / 博客月（blog-YYYY-MM） */
+  active?: ChapterId | 'index' | DesignKey | `blog-${string}`
   children: ReactNode
 }) {
   return (
@@ -79,6 +80,24 @@ export function Page({
                 }`}
               >
                 {n.label}
+              </a>
+            )
+          })}
+        </div>
+        {/* 第三行：博客（按月分类） */}
+        <div className="mt-2 flex flex-wrap items-center gap-1.5 border-t border-dashed border-ink/20 pt-2">
+          <span className="t-small-mute mr-1">博客</span>
+          {MONTHS.map((m) => {
+            const on = active === `blog-${m.key}`
+            return (
+              <a
+                key={m.key}
+                href={`/blog-${m.key}.html`}
+                className={`rounded-lg px-2.5 py-1 font-mono text-[12.5px] font-bold no-underline transition-colors ${
+                  on ? 'bg-paper-deep text-ink shadow-[inset_0_0_0_2px_var(--color-ink)]' : 'text-body hover:bg-paper-deep'
+                }`}
+              >
+                {m.key}
               </a>
             )
           })}
