@@ -40,6 +40,8 @@ jobs:
 
       - name: 安装依赖（corepack yarn4，registry 走 npmmirror）
         run: |
+          # 镜像自带的 yarn1 断链（指向未提取的 /opt/yarn-*），清掉让 corepack 接管
+          rm -f "$(dirname "$(command -v node)")/yarn" "$(dirname "$(command -v node)")/yarnpkg"
           corepack enable
           yarn install --immutable
 
