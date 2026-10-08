@@ -1,11 +1,10 @@
 name: Build Tutorial
 
-# 主仓库 gitea.idealjs.com/idealjs/stack 的 CI：
-# 打包新教程站（apps/tutorial，Vite MPA，含设计系统四册页）
-# 环境约束：runner 为 host 模式 Alpine——无 docker、无 node。
-# 方案：从自家 release 资产装便携 node（musl，提取自 node:24-alpine 镜像，
-# 镜像本体在阿里云 registry.cn-hangzhou.aliyuncs.com/idealjs/node:24.14.0-alpine）
-# 写入 GITHUB_PATH，之后 JS 动作（checkout/upload-artifact）与 yarn 全部可用。
+# 主仓库 gitea.idealjs.com/idealjs/stack 的 CI：打包新教程站。
+# 全 shell、零外部 action——runner 连 github.com 不稳（actions 下载常超时）：
+#   源码：gitea API tarball（同机房，不走 github）
+#   node：自有 release 资产（提取自 node:24.14.0-alpine，镜像在阿里云 idealjs/node）
+#   产物：滚动 release「ci-dist」资产（node 解析 JSON 上传）
 on:
   push:
     branches: [main]
@@ -13,41 +12,57 @@ on:
   workflow_dispatch:
 
 env:
-  # musl 构建托管在自家 release 资产（tag ci-node-v20.19.5-musl）——runner 同机房拉取快；
-  # 原始来源 unofficial-builds（npmmirror 无 musl）
   NODE_DIST: https://gitea.idealjs.com/attachments/edad7a7e-3b3d-4d1b-9551-1a978fdf95d1
   YARN_NPM_REGISTRY_SERVER: https://registry.npmmirror.com
+  API: https://gitea.idealjs.com/api/v1/repos/idealjs/stack
 
 jobs:
   build:
     name: Build @stack/tutorial
     runs-on: ubuntu-latest
     steps:
-      - name: Install portable node (host 无 node，无 docker)
+      - name: 拉源码（gitea tarball）
+        run: |
+          wget -q "$API/archive/$GITHUB_SHA.tar.gz" -O /tmp/src.tgz
+          tar -xzf /tmp/src.tgz --strip-components=1
+          ls apps/tutorial/package.json
+
+      - name: 装便携 node 24（musl bundle，自有资产）
         run: |
           wget -q "$NODE_DIST" -O /tmp/node.tar.xz
           mkdir -p "$RUNNER_TEMP/node"
           tar -xJf /tmp/node.tar.xz -C "$RUNNER_TEMP/node" --strip-components=1
           echo "$RUNNER_TEMP/node/bin" >> "$GITHUB_PATH"
-          # unofficial musl 构建仍动态依赖 libstdc++/libgcc——bundle 自带，指给它
+          # alpine node 动态依赖 libstdc++/libgcc——bundle 自带，指给它
           echo "LD_LIBRARY_PATH=$RUNNER_TEMP/node/lib" >> "$GITHUB_ENV"
           export LD_LIBRARY_PATH="$RUNNER_TEMP/node/lib"
           "$RUNNER_TEMP/node/bin/node" -v
 
-      - uses: actions/checkout@v4
+      - name: 安装依赖（corepack yarn4，registry 走 npmmirror）
+        run: |
+          corepack enable
+          yarn install --immutable
 
-      - name: Enable corepack (yarn 4 via packageManager)
-        run: corepack enable && yarn -v
-
-      - name: Install dependencies
-        run: yarn install --immutable
-
-      - name: Build tutorial (Vite MPA 七页 + 设计系统四册)
+      - name: 构建（Vite MPA：教程七页 + 博客 + 设计系统四册）
         run: yarn workspace @stack/tutorial build
 
-      - name: Upload dist artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: tutorial-dist
-          path: apps/tutorial/dist/
-          retention-days: 14
+      - name: 产物上传（滚动 release 资产；权限不足仅告警不红）
+        run: |
+          TOK="${{ github.token }}"
+          J() { node -e "let d='';process.stdin.on('data',c=>d+=c).on('end',()=>{try{const o=JSON.parse(d);console.log(eval('o.'+process.argv[1])??'')}catch(e){console.log('')}})" "$1"; }
+          tar -czf /tmp/tutorial-dist.tar.gz -C apps/tutorial/dist .
+          RID=$(curl -sf -H "Authorization: token $TOK" "$API/releases/tags/ci-dist" | J id)
+          if [ -z "$RID" ]; then
+            RID=$(curl -sf -X POST -H "Authorization: token $TOK" -H "Content-Type: application/json" "$API/releases" \
+              -d '{"tag_name":"ci-dist","name":"CI 产物（滚动更新）","body":"每次构建的最新 dist。","draft":false,"prerelease":true}' | J id)
+          fi
+          if [ -z "$RID" ]; then
+            echo "::warning::release 不可用（job token 无写权限）——构建已成功，产物留在 runner"
+            exit 0
+          fi
+          for AID in $(curl -s -H "Authorization: token $TOK" "$API/releases/$RID/assets" | J 'assets.map(a=>a.id).join(" ")'); do
+            curl -s -X DELETE -H "Authorization: token $TOK" "$API/releases/$RID/assets/$AID" >/dev/null
+          done
+          URL=$(curl -sf -X POST -H "Authorization: token $TOK" "$API/releases/$RID/assets?name=tutorial-dist.tar.gz" \
+            -F "attachment=@/tmp/tutorial-dist.tar.gz" | J browser_download_url)
+          echo "产物下载：${URL:-上传失败}"
