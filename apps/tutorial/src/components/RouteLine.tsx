@@ -1,7 +1,10 @@
 /** RouteLine —— 关系线：线形即含义（实=先后 虚=相关 点=同族）
+ * 卡片联动：hovered 节点随卡浮起 -3px——站点 translateY 平滑跟随，
+ * 连线以 CSS d: path() 过渡重算（与卡片同样 150ms，不支持的浏览器瞬时跟随）
  * 拓扑：横平竖直 + R8 直角步进；并行不合并(4px)；站点 r6 半嵌卡边
  * （圆心骑左右描边，各半在卡上）；线层 z-10 置于卡之上，站点不被卡遮挡；
  * 同口多线自动聚合胶囊（线止于胶囊边界）。 */
+import type React from 'react'
 import type { ChapterId, Edge } from '../lib/types'
 
 const STATION_COLORS = ['var(--color-clash2a)', 'var(--color-clash1b)', 'var(--color-clash3a)', 'var(--color-clash1a)']
@@ -23,18 +26,25 @@ function stepPath(x0: number, y0: number, x1: number, y1: number, r = 8): string
   return `M ${x0} ${y0} H ${cornerX} A ${r} ${r} 0 0 ${sweep1} ${cornerX + r} ${y0 + (down ? r : -r)} V ${y1 - (down ? r : -r)} A ${r} ${r} 0 0 ${sweep2} ${cornerX + 2 * r} ${y1} H ${x1}`
 }
 
+const HOVER_LIFT = -3 // 与 MemphisCard hover:-translate-y-[3px] 一致
+
 export function RouteLine({
   edges,
   nodes,
   width,
   height,
+  hovered = null,
 }: {
   edges: Edge[]
   nodes: Partial<Record<ChapterId, LaneNode>>
   width: number
   height: number
+  /** 正在浮起的卡（章 id）——线与站点跟随 */
+  hovered?: ChapterId | null
 }) {
   const stationColor = (i: number) => STATION_COLORS[i % STATION_COLORS.length]
+  /** 节点跟随位移：hovered 卡 -3px，其余 0 */
+  const dy = (id: ChapterId) => (id === hovered ? HOVER_LIFT : 0)
 
   const seqEdges = edges.filter((e) => e.kind === 'seq')
   const insByTo = new Map<ChapterId, Edge[]>()
@@ -55,10 +65,11 @@ export function RouteLine({
         const a = nodes[e.from]
         const b = nodes[e.to]
         if (!a || !b) return null
-        const d = stepPath(a.right, a.y, b.borderLeft, b.y)
-        if (e.kind === 'rel') return <path key={i} d={d} stroke="var(--color-ink)" strokeWidth={2} fill="none" strokeDasharray="4 2" />
-        if (e.kind === 'family') return <path key={i} d={d} stroke="var(--color-ink)" strokeWidth={2.4} fill="none" strokeDasharray="0.1 6" strokeLinecap="round" />
-        return <path key={i} d={d} stroke="var(--color-ink)" strokeWidth={2.5} fill="none" />
+        const d = stepPath(a.right, a.y + dy(e.from), b.borderLeft, b.y + dy(e.to))
+        const follow = { d: `path("${d}")`, transition: 'd 150ms ease' } as React.CSSProperties
+        if (e.kind === 'rel') return <path key={i} d={d} style={follow} stroke="var(--color-ink)" strokeWidth={2} fill="none" strokeDasharray="4 2" />
+        if (e.kind === 'family') return <path key={i} d={d} style={follow} stroke="var(--color-ink)" strokeWidth={2.4} fill="none" strokeDasharray="0.1 6" strokeLinecap="round" />
+        return <path key={i} d={d} style={follow} stroke="var(--color-ink)" strokeWidth={2.5} fill="none" />
       })}
       {seqEdges.map((e) => {
         const a = nodes[e.from]
@@ -69,12 +80,18 @@ export function RouteLine({
         // 源/目标站点：圆心骑卡描边，各半在卡上；目标：单线=圆点，多线=胶囊（只画一次）
         return (
           <g key={`st-${e.from}-${e.to}`}>
-            <circle cx={a.right} cy={a.y} r={6} fill={stationColor(si++)} stroke="var(--color-ink)" strokeWidth={2} />
-            {capsule ? (
-              <rect x={b.borderLeft - 3} y={b.y - 10} width={6} height={20} rx={3} fill="var(--color-clash1a)" stroke="var(--color-ink)" strokeWidth={2} />
-            ) : ins.length === 1 ? (
-              <circle cx={b.borderLeft} cy={b.y} r={6} fill={stationColor(si++)} stroke="var(--color-ink)" strokeWidth={2} />
-            ) : null}
+            <g style={{ transform: `translateY(${dy(e.from)}px)`, transition: 'transform 150ms ease' }}>
+              <circle cx={a.right} cy={a.y} r={6} fill={stationColor(si++)} stroke="var(--color-ink)" strokeWidth={2} />
+            </g>
+            {(capsule || ins.length === 1) && (
+              <g style={{ transform: `translateY(${dy(e.to)}px)`, transition: 'transform 150ms ease' }}>
+                {capsule ? (
+                  <rect x={b.borderLeft - 3} y={b.y - 10} width={6} height={20} rx={3} fill="var(--color-clash1a)" stroke="var(--color-ink)" strokeWidth={2} />
+                ) : (
+                  <circle cx={b.borderLeft} cy={b.y} r={6} fill={stationColor(si++)} stroke="var(--color-ink)" strokeWidth={2} />
+                )}
+              </g>
+            )}
           </g>
         )
       })}
