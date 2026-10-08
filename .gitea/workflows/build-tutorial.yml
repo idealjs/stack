@@ -2,23 +2,37 @@ name: Build Tutorial
 
 # 主仓库 gitea.idealjs.com/idealjs/stack 的 CI：
 # 打包新教程站（apps/tutorial，Vite MPA，含设计系统四册页）
-# 注：runner 默认容器（Alpine）无 node，JS 动作跑不起来——job 固定 node 容器
+# 环境约束：runner 为 host 模式 Alpine——无 docker、无 node。
+# 方案：先以 shell 装便携 node（musl/npmmirror）写入 GITHUB_PATH，
+# 之后 JS 动作（checkout/upload-artifact）与 yarn 全部可用。
 on:
   push:
     branches: [main]
   pull_request:
   workflow_dispatch:
 
+env:
+  NODE_MIRROR: https://npmmirror.com/mirrors/node
+  NODE_VERSION: v20.18.1
+  YARN_NPM_REGISTRY_SERVER: https://registry.npmmirror.com
+
 jobs:
   build:
     name: Build @stack/tutorial
     runs-on: ubuntu-latest
-    container: node:20-alpine
     steps:
+      - name: Install portable node (host 无 node，无 docker)
+        run: |
+          wget -q "$NODE_MIRROR/$NODE_VERSION/node-$NODE_VERSION-linux-x64-musl.tar.gz" -O /tmp/node.tgz
+          mkdir -p "$RUNNER_TEMP/node"
+          tar -xzf /tmp/node.tgz -C "$RUNNER_TEMP/node" --strip-components=1
+          echo "$RUNNER_TEMP/node/bin" >> "$GITHUB_PATH"
+          "$RUNNER_TEMP/node/bin/node" -v
+
       - uses: actions/checkout@v4
 
       - name: Enable corepack (yarn 4 via packageManager)
-        run: corepack enable
+        run: corepack enable && yarn -v
 
       - name: Install dependencies
         run: yarn install --immutable
