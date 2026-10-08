@@ -1,5 +1,5 @@
 /** 教程内容数据——大纲见 OUTLINE.md，词汇与结构对齐 ai-era-tutorial skill */
-import type { Assignment, Chapter, ChapterId, Edge, Profile } from './types'
+import type { Assignment, Chapter, ChapterId, Edge, Profile } from '@stack/design-system'
 
 export const CHAPTERS: Record<ChapterId, Chapter> = {
   1: {
@@ -432,7 +432,7 @@ export const CONTENT: Record<ChapterId, ChapterContent> = {
 }
 
 /** 指派学习块示例数据（设计系统·组件/样例页演示用） */
-export const ASSIGNMENT: import('./types').Assignment = {
+export const ASSIGNMENT: import('@stack/design-system').Assignment = {
   title: '指派学习 · HTTP 协议',
   pos: 'Web 通信的地基，旁边是 DNS（找机器）与 TCP（铺线路）',
   expect: '能向 agent 讲清一次请求的往返：URL → DNS → 连接 → 请求行/头/体 → 响应 → 渲染',

@@ -1,4 +1,7 @@
 @import 'tailwindcss';
+/* 显式声明包内组件源码为扫描源——经 node_modules 符号链接解析时，
+ * 自动内容检测不会覆盖 workspace 包，工具类会静默丢失 */
+@source '../';
 
 /* ===== 设计系统 tokens（孟菲斯 × 拟物卡）===== */
 @theme {
@@ -66,4 +69,56 @@
 .pk-arc-b {
   bottom: -8px;
   clip-path: inset(0 0 50% 0);
+}
+
+/* ===== MPA 跨文档 View Transitions：页面切换交叉淡入，不闪白 =====
+ * 同名 view-transition-name 的元素（site-header 站头、ch-<id> 相框↔章头）
+ * 在导航时做共享元素变形；其余内容默认交叉淡入。 */
+@view-transition {
+  navigation: auto;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation-duration: 0.01ms;
+  }
+}
+
+/* ===== 字体系统 =====
+ * 基准＝浏览器默认 16px＝正文字号（content，不另设基准）。
+ * 向上：t3 → t2 → t1 三级标题；再向上是大字。
+ * 小字两态：t-small-mute 边缘可忽略（弱化灰）/ t-small-strong 缩小但加强（加粗收字距）。
+ * 大字两态：t1 大而强（页面主标题）/ t-display 大而弱（幽灵背景字，可被忽略）。 */
+@theme {
+  --text-content: 1rem;
+  --text-content--line-height: 1.75;
+  --text-t3: 1.125rem;
+  --text-t3--line-height: 1.5;
+  --text-t2: 1.375rem;
+  --text-t2--line-height: 1.45;
+  --text-t1: 1.75rem;
+  --text-t1--line-height: 1.3;
+  --text-small: 0.75rem;
+  --text-small--line-height: 1.65;
+}
+
+.t-small-mute {
+  font-size: var(--text-small);
+  line-height: var(--text-small--line-height);
+  color: var(--color-mute);
+}
+.t-small-strong {
+  font-size: var(--text-small);
+  line-height: 1.5;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--color-ink);
+}
+.t-display {
+  font-size: 4rem;
+  line-height: 1;
+  font-weight: 800;
+  color: color-mix(in srgb, var(--color-ink) 10%, transparent);
 }

@@ -154,6 +154,27 @@ test.describe('RouteLine 规格契约', () => {
     expect(z).toBe('10')
   })
 
+  test('hover 卡片：线与站点跟随浮起（-3px 同步，直线变斜线）', async ({ page }) => {
+    const get = () =>
+      page.evaluate(() => {
+        const svg = [...document.querySelectorAll('svg')].find((s) => s.getAttribute('width') === '1160')
+        return {
+          stations: [...svg.querySelectorAll('g[style]')].map((g) => (g as HTMLElement).style.transform),
+          d25: [...svg.querySelectorAll('path')].map((el) => el.getAttribute('d') || '').find((d) => d.startsWith('M 630')),
+          cardTranslate: getComputedStyle(document.querySelector('a[data-comp="course-card"][href="#ch2"]')).translate,
+        }
+      })
+    const before = await get()
+    await page.locator('div.absolute.left-\\[380px\\]').hover()
+    await page.waitForTimeout(250)
+    const after = await get()
+    expect(before.d25).toBe('M 630 108 L 700 108') // 静置：几何水平（L 结构可平滑插值）
+    expect(after.d25).toBe('M 630 105 L 700 108') // hover 卡2：源端随站点抬升，直线变斜线
+    expect(before.stations.every((t) => t === 'translateY(0px)')).toBeTruthy()
+    expect(after.stations.filter((t) => t === 'translateY(-3px)').length).toBe(2) // 源+目标站点跟随
+    expect(after.cardTranslate).toBe('0px -3px') // 卡片本体同步浮起
+  })
+
   test('实线端点落在水平端口（M x y H 起、H x 止）', async ({ page }) => {
     const d = await page.locator('svg path[stroke-width="2.5"]').first().getAttribute('d')
     expect(d).toMatch(/^M [\d.]+ [\d.]+ H/)

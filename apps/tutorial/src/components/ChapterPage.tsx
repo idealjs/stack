@@ -6,10 +6,8 @@
 import type { CSSProperties } from 'react'
 import { Page, Section } from '../lib/ui'
 import { CHAPTERS, CONTENT } from '../lib/chapters'
-import type { ChapterId } from '../lib/types'
-import { AssignBlock } from './Ticket'
-import { BrickDots } from './MemphisCard'
-import { Mark, Ring, Tri, Wave } from './shapes'
+import type { ChapterId } from '@stack/design-system'
+import { AssignBlock, BrickDots, Mark, Ring, Tri, Wave } from '@stack/design-system'
 
 const ALL: ChapterId[] = [1, 2, 3, 4, 5, 6]
 

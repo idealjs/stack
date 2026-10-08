@@ -2,12 +2,9 @@
  * 主线场景：hover 卡片时线与站点跟随浮起（状态提升到场景层） */
 import { useState } from 'react'
 import { Page, Section } from '../../lib/ui'
-import { CHAPTERS } from '../../lib/chapters'
-import { MemphisCard } from '../../components/MemphisCard'
-import { EntryGuide } from '../../components/EntryGuide'
-import { RouteLine } from '../../components/RouteLine'
-import { Ticket } from '../../components/Ticket'
-import type { ChapterId } from '../../lib/types'
+import { MemphisCard, EntryGuide, RouteLine, Ticket } from '@stack/design-system'
+import type { ChapterId } from '@stack/design-system'
+import { CHAPTERS, PROFILES } from '../../lib/chapters'
 
 /* 场景坐标（节点＝卡描边真实边缘）：卡1(40,110,250) 卡2(380,44,250,rot) 卡5(700,44,140) */
 const nodes = {
@@ -34,12 +31,12 @@ export function App() {
       desc="靶子先行：每章先给目标、预期结果、积木清单，步骤只写「产出什么＋核对什么」；过程有没有学习价值，每步先分类。"
     >
       <Section label="入口画像" note="推荐不是强制——无锁">
-        <EntryGuide />
+        <EntryGuide chapters={CHAPTERS} profiles={PROFILES} linkChapter />
       </Section>
       <Section label="六章" note="卡片是入口；点相框进入章节">
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {GRID.map(({ id, entry }) => (
-            <MemphisCard key={id} chapter={CHAPTERS[id]} entry={entry} />
+            <MemphisCard key={id} chapter={CHAPTERS[id]} entry={entry} href={`/ch${id}.html`} morph />
           ))}
         </div>
       </Section>
@@ -61,21 +58,21 @@ export function App() {
             onMouseEnter={() => setHovered(1)}
             onMouseLeave={() => setHovered(null)}
           >
-            <MemphisCard chapter={CHAPTERS[1]} />
+            <MemphisCard chapter={CHAPTERS[1]} href="/ch1.html" />
           </div>
           <div
             className="absolute left-[380px] top-[44px] w-[250px] -rotate-1"
             onMouseEnter={() => setHovered(2)}
             onMouseLeave={() => setHovered(null)}
           >
-            <MemphisCard chapter={CHAPTERS[2]} />
+            <MemphisCard chapter={CHAPTERS[2]} href="/ch2.html" />
           </div>
           <div
             className="absolute left-[700px] top-[44px] w-[140px]"
             onMouseEnter={() => setHovered(5)}
             onMouseLeave={() => setHovered(null)}
           >
-            <MemphisCard chapter={CHAPTERS[5]} compact />
+            <MemphisCard chapter={CHAPTERS[5]} compact href="/ch5.html" />
           </div>
           <div className="absolute left-[60px] top-[380px] flex gap-4">
             <Ticket chapter={CHAPTERS[1]} done />

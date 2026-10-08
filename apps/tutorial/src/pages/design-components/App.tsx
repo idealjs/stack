@@ -1,9 +1,9 @@
 import { Page, Section } from '../../lib/ui'
-import { ASSIGNMENT, CHAPTERS } from '../../lib/chapters'
-import { MemphisCard } from '../../components/MemphisCard'
-import { AssignBlock, Ticket } from '../../components/Ticket'
-import { EntryGuide } from '../../components/EntryGuide'
-import { Mark } from '../../components/shapes'
+import { ASSIGNMENT, CHAPTERS, PROFILES } from '../../lib/chapters'
+import { MemphisCard } from '@stack/design-system'
+import { AssignBlock, Ticket } from '@stack/design-system'
+import { EntryGuide } from '@stack/design-system'
+import { Mark } from '@stack/design-system'
 
 export function App() {
   return (
@@ -29,7 +29,7 @@ export function App() {
         </div>
       </Section>
       <Section label="入口梳理" note="推荐不是强制——无锁">
-        <EntryGuide />
+        <EntryGuide chapters={CHAPTERS} profiles={PROFILES} />
       </Section>
     </Page>
   )

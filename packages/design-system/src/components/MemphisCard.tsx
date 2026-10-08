@@ -38,12 +38,18 @@ export function MemphisCard({
   entry,
   compact = false,
   zoneText,
+  href,
+  morph = false,
 }: {
   chapter: Chapter
   entry?: 1 | 2 | 3
   compact?: boolean
   /** 静置态相框文字（可含 <Mark> 荧光标记）：教程卡片的价值区用法示例 */
   zoneText?: ReactNode
+  /** 卡片跳转目标：缺省锚点 #ch<id>（单页演示）；整页跳转传 /ch<id>.html */
+  href?: string
+  /** 挂 view-transition-name（跨文档共享元素变形）。同页同章多卡时勿开（重名失效） */
+  morph?: boolean
 }) {
   const [gifOn, setGifOn] = useState(false)
   const [locked, setLocked] = useState(false)
@@ -78,7 +84,7 @@ export function MemphisCard({
   return (
     <a
       ref={boxRef}
-      href={`/ch${chapter.id}.html`}
+      href={href ?? `#ch${chapter.id}`}
       data-comp="course-card"
       className="group relative block rounded-[14px] border-2 border-ink bg-paper p-[11px] no-underline
                  shadow-hard transition-transform duration-150 focus-visible:outline-none
@@ -97,7 +103,7 @@ export function MemphisCard({
         style={{
           background: chapter.color,
           boxShadow: 'inset 0 3px 8px rgba(26,26,26,0.30), inset 0 -1px 0 rgba(255,255,255,0.55)',
-          viewTransitionName: `ch-${chapter.id}`,
+          ...(morph ? { viewTransitionName: `ch-${chapter.id}` } : {}),
         }}
       >
         {showGif ? (

@@ -1,4 +1,4 @@
-import type { Assignment, Chapter, ChapterId, Edge, Profile } from './types'
+import type { Assignment, Chapter, ChapterId, Edge, Profile } from '@stack/design-system'
 
 export const CHAPTERS: Record<ChapterId, Chapter> = {
   1: {

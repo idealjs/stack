@@ -1,13 +1,9 @@
 /** 组合场景＝大部分组件拿出来的真实使用，不做解释性标注：
  * 入口画像 → 课程卡与关系线 → 进度票券 → 指派块；形状散落于卡片附近空当。 */
 import { Page } from '../../lib/ui'
-import { ASSIGNMENT, CHAPTERS, EDGES } from '../../lib/chapters'
-import { MemphisCard } from '../../components/MemphisCard'
-import { RouteLine } from '../../components/RouteLine'
-import { AssignBlock, Ticket } from '../../components/Ticket'
-import { EntryGuide } from '../../components/EntryGuide'
-import { Scatter } from '../../components/Scatter'
-import { Cross, Ring, Tremble, Tri, Wave } from '../../components/shapes'
+import { ASSIGNMENT, CHAPTERS, EDGES, PROFILES } from '../../lib/chapters'
+import { AssignBlock, EntryGuide, MemphisCard, RouteLine, Scatter, Ticket } from '@stack/design-system'
+import { Cross, Ring, Tremble, Tri, Wave } from '@stack/design-system'
 
 /* 场景坐标（节点＝卡描边真实边缘）：卡1(40,110,250) 卡2(380,44,250,rot) 卡3(700,44,140) */
 const nodes = {
@@ -19,7 +15,7 @@ const nodes = {
 export function App() {
   return (
     <Page active="design-examples" title="样例 · 组合场景" desc="大部分组件同台真实使用：入口画像 → 课程卡与关系线 → 进度票券 → 指派块；形状散落于卡片附近空当。">
-      <EntryGuide />
+      <EntryGuide chapters={CHAPTERS} profiles={PROFILES} />
       <div className="relative mt-8 h-[600px] overflow-hidden rounded-2xl bg-paper">
         <Scatter
           shapes={[
