@@ -2,7 +2,6 @@ const PAGES = [
   { href: '/colors.html', name: '01 颜色', desc: '撞色对 · 中性阶 · 章节色 · 反例' },
   { href: '/symbols.html', name: '02 符号形状', desc: '语义形状 · 词汇表 · 线形 · 票券' },
   { href: '/components.html', name: '03 组件', desc: 'CourseCard · RouteLine · 票券 · 指派块 · 入口' },
-  { href: '/shelf.html', name: '04 样例', desc: '组合场景——实现验收对照图' },
 ]
 
 export function App() {

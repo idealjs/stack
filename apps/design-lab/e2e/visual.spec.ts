@@ -9,7 +9,6 @@ const CASES: [name: string, path: string][] = [
   ['colors', '/colors.html'],
   ['symbols', '/symbols.html'],
   ['components', '/components.html'],
-  ['shelf', '/shelf.html'],
 ]
 
 for (const [name, path] of CASES) {
