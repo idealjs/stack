@@ -2,6 +2,7 @@ name: Build Tutorial
 
 # 主仓库 gitea.idealjs.com/idealjs/stack 的 CI：
 # 打包新教程站（apps/tutorial，Vite MPA，含设计系统四册页）
+# 注：runner 默认容器（Alpine）无 node，JS 动作跑不起来——job 固定 node 容器
 on:
   push:
     branches: [main]
@@ -12,12 +13,9 @@ jobs:
   build:
     name: Build @stack/tutorial
     runs-on: ubuntu-latest
+    container: node:20-alpine
     steps:
       - uses: actions/checkout@v4
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
 
       - name: Enable corepack (yarn 4 via packageManager)
         run: corepack enable
