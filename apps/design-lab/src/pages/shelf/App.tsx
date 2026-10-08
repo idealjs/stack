@@ -60,7 +60,7 @@ export function App() {
         >
           <MemphisCard chapter={CHAPTERS[5]} compact />
         </div>
-        <div className="absolute left-[860px] top-[320px]"><AssignBlock {...ASSIGNMENT} /></div>
+        <div className="absolute left-[820px] top-[320px]"><AssignBlock {...ASSIGNMENT} /></div>
         <div className="absolute left-[60px] top-[440px] flex gap-4">
           <Ticket chapter={CHAPTERS[2]} done />
           <Ticket chapter={CHAPTERS[5]} done={false} />

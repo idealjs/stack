@@ -18,8 +18,8 @@ function Chip({ c, n, h }: { c: string; n: string; h: string }) {
   return (
     <div>
       <div className="h-12 rounded-[10px] border-2 border-ink" style={{ background: c }} />
-      <div className="mt-1 whitespace-nowrap text-[10.5px] font-bold">{n}</div>
-      <div className="whitespace-nowrap font-mono text-[9px] text-[#6b6b6b]">{h}</div>
+      <div className="mt-1 whitespace-nowrap text-small font-bold">{n}</div>
+      <div className="whitespace-nowrap font-mono t-small-mute">{h}</div>
     </div>
   )
 }
@@ -59,7 +59,7 @@ function DoDont({ bad, children, text }: { bad?: boolean; children: React.ReactN
         {bad ? '✗' : '✓'}
       </span>
       {children}
-      <p className="m-0 flex-1 text-[11.5px] leading-snug text-body">{text}</p>
+      <p className="m-0 flex-1 text-small leading-snug text-body">{text}</p>
     </div>
   )
 }
@@ -76,7 +76,7 @@ export function App() {
                 <div className="h-11 w-[88px]" style={{ background: p.b }} />
               </div>
               <div className="mt-1.5 text-[11px] font-bold">{p.name}</div>
-              <div className="text-[10px] text-[#555]">{p.use}</div>
+              <div className="text-small text-[#555]">{p.use}</div>
             </div>
           ))}
         </div>
@@ -95,7 +95,7 @@ export function App() {
                 <span className="flex h-[18px] w-[18px] shrink-0 translate-y-[2px] items-center justify-center rounded-full border-2 border-ink bg-ink text-[10px] font-extrabold text-paper">{i + 1}</span>
                 <b className="text-[13px]">{r.name}</b>
               </div>
-              <p className="m-0 mt-1.5 mb-2 max-w-[760px] text-[11.5px] leading-relaxed text-body">{r.why}</p>
+              <p className="m-0 mt-1.5 mb-2 max-w-[760px] text-content leading-relaxed text-body">{r.why}</p>
               <div className="grid grid-cols-2 gap-3">
                 <DoDont bad text={r.badCap}>{r.badDemo}</DoDont>
                 <DoDont text={r.goodCap}>{r.goodDemo}</DoDont>

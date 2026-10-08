@@ -23,22 +23,22 @@ export function EntryGuide({
             >
               {p.icon}
             </span>
-            <b className="text-[13px]">{p.name}</b>
+            <b className="text-t3">{p.name}</b>
           </div>
           <div className="mt-2 flex flex-wrap items-center gap-1.5">
             {p.path.map((id, i) => (
               <span key={id} className="flex items-center gap-1.5">
-                {i > 0 && <span className="text-[10px] text-mute">→</span>}
+                {i > 0 && <span className="text-small text-mute">→</span>}
                 {linkChapter ? (
                   <a
                     href={`/ch${id}.html`}
-                    className={`rounded-full border-[1.5px] border-ink px-2.5 py-0.5 text-[10.5px] no-underline ${id === p.entry ? 'bg-clash2a font-extrabold' : 'bg-white'}`}
+                    className={`rounded-full border-[1.5px] border-ink px-2.5 py-0.5 text-small no-underline ${id === p.entry ? 'bg-clash2a font-extrabold' : 'bg-white'}`}
                   >
                     {id === p.entry && ['①', '②', '③'][profiles.indexOf(p)]} {chapters[id].title}
                   </a>
                 ) : (
                   <span
-                    className={`rounded-full border-[1.5px] border-ink px-2.5 py-0.5 text-[10.5px] ${id === p.entry ? 'bg-clash2a font-extrabold' : 'bg-white'}`}
+                    className={`rounded-full border-[1.5px] border-ink px-2.5 py-0.5 text-small ${id === p.entry ? 'bg-clash2a font-extrabold' : 'bg-white'}`}
                   >
                     {id === p.entry && ['①', '②', '③'][profiles.indexOf(p)]} {chapters[id].title}
                   </span>
@@ -46,7 +46,7 @@ export function EntryGuide({
               </span>
             ))}
           </div>
-          <p className="m-0 mt-2 text-[10px] leading-relaxed text-mute">{p.note}</p>
+          <p className="m-0 mt-2 t-small-mute leading-relaxed">{p.note}</p>
         </div>
       ))}
     </div>

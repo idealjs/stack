@@ -74,8 +74,8 @@ export function MissMark({ how, looks }: { how: string; looks: string }) {
     <div className="flex items-start gap-3">
       <Tremble size={22} className="mt-0.5 shrink-0" />
       <div>
-        <b className="text-[13px]">脱靶 · {how}</b>
-        <p className="m-0 mt-0.5 text-[12px] leading-relaxed text-body">{looks}</p>
+        <b className="text-content font-bold">脱靶 · {how}</b>
+        <p className="m-0 mt-0.5 text-small leading-relaxed text-body">{looks}</p>
       </div>
     </div>
   )

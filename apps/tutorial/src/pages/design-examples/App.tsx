@@ -31,7 +31,7 @@ export function App() {
         <div className="absolute left-[40px] top-[110px] w-[250px]"><MemphisCard chapter={CHAPTERS[1]} entry={1} /></div>
         <div className="absolute left-[380px] top-[44px] w-[250px] -rotate-1"><MemphisCard chapter={CHAPTERS[2]} entry={2} /></div>
         <div className="absolute left-[700px] top-[44px] w-[140px]"><MemphisCard chapter={CHAPTERS[5]} compact /></div>
-        <div className="absolute left-[860px] top-[320px]"><AssignBlock {...ASSIGNMENT} /></div>
+        <div className="absolute left-[820px] top-[320px]"><AssignBlock {...ASSIGNMENT} /></div>
         <div className="absolute left-[60px] top-[440px] flex gap-4">
           <Ticket chapter={CHAPTERS[2]} done />
           <Ticket chapter={CHAPTERS[5]} done={false} />

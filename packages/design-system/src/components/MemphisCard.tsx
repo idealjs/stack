@@ -110,22 +110,22 @@ export function MemphisCard({
           chapter.gifUrl ? (
             <img src={chapter.gifUrl} alt={chapter.target.expectation} className="h-full w-full object-cover" />
           ) : (
-            <span className="px-3 text-center text-[11px] font-bold leading-snug text-paper">
+            <span className="px-3 text-center text-small font-bold leading-snug text-paper">
               ▶ {chapter.target.expectation}
             </span>
           )
         ) : flip ? (
-          <span className="px-3 text-center text-[11px] leading-snug text-ink/80 mix-blend-multiply">
+          <span className="px-3 text-center text-small leading-snug text-ink/80 mix-blend-multiply">
             {chapter.target.goal}
           </span>
         ) : zoneText ? (
           /* 静置态（用法示例）：过程文字骑在相框里，价值区短语带荧光标记 */
-          <span className="px-3 text-center text-[11.5px] font-semibold leading-snug text-ink">{zoneText}</span>
+          <span className="px-3 text-center text-small font-semibold leading-snug text-ink">{zoneText}</span>
         ) : (
           /* 静置态：章节 emoji 是相框的视觉主体（对齐设计稿解剖卡） */
           <span style={{ fontSize: compact ? '28px' : '40px' }}>{chapter.emoji}</span>
         )}
-        <span className="absolute left-1.5 top-1 text-[9px] font-bold tracking-wide text-paper">
+        <span className="absolute left-1.5 top-1 text-small font-bold tracking-wide text-paper">
           预期结果{showGif ? ' · GIF' : ''}
         </span>
         <Ring size={16} className="absolute bottom-1.5 right-1.5" />
@@ -133,7 +133,7 @@ export function MemphisCard({
       {/* 卡头：▲ 目标 + 标题 + ● 积木点列 */}
       <div className="mt-2 flex items-center gap-2">
         <Tri size={14} />
-        <b className="flex-1 text-[14px] text-[#2b1d10] [text-shadow:0_1px_1px_rgba(255,255,255,0.9)]">
+        <b className="flex-1 text-t3 text-[#2b1d10] [text-shadow:0_1px_1px_rgba(255,255,255,0.9)]">
           {chapter.title}
         </b>
         {!compact && <BrickDots bricks={chapter.target.bricks} />}

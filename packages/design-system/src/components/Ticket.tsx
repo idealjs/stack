@@ -12,13 +12,13 @@ export function Ticket({ chapter, done }: { chapter: Chapter; done: boolean }) {
       {/* 头部媒体块：章节色纯填充，无独立边框（由票体裁切） */}
       <div className="flex w-14 shrink-0 items-center justify-center text-[22px]" style={{ background: chapter.color }}>{chapter.emoji}</div>
       <div className="flex-1 py-2 pl-2.5 pr-2">
-        <b className="text-[12.5px]">{chapter.title}</b>
-        <div className="mt-0.5 font-mono text-[8.5px] text-mute">
+        <b className="text-content font-bold">{chapter.title}</b>
+        <div className="mt-0.5 font-mono t-small-mute">
           No. {String(chapter.id).padStart(3, '0')} · {done ? '已完成（打孔）' : '未开始（无孔）'}
         </div>
       </div>
       <div
-        className={`flex w-[42px] items-center justify-center font-mono text-[9.5px] text-mute ${done ? 'border-l-[1.5px] border-dashed border-ink' : 'border-l-[1.5px] border-solid border-ink'}`}
+        className={`flex w-[42px] items-center justify-center font-mono text-small text-mute ${done ? 'border-l-[1.5px] border-dashed border-ink' : 'border-l-[1.5px] border-solid border-ink'}`}
       >
         №{String(chapter.id).padStart(2, '0')}
       </div>
@@ -49,15 +49,15 @@ export function AssignBlock({
   miss: { how: string; looks: string }
 }) {
   return (
-    <div data-comp="assign" className="w-[260px] rounded-xl border-2 border-ink bg-paper p-3 shadow-hard">
+    <div data-comp="assign" className="w-[320px] rounded-xl border-2 border-ink bg-paper p-4 shadow-hard">
       <div className="flex items-center gap-2">
         <svg width="16" height="16" viewBox="0 0 18 18" aria-hidden>
           <path d="M9 1 v16 M1 9 h16" stroke="var(--color-clash2b)" strokeWidth="3.5" strokeLinecap="round" />
           <path d="M9 1 v16 M1 9 h16" stroke="var(--color-ink)" strokeWidth="1.2" />
         </svg>
-        <b className="text-[13px]">{title}</b>
+        <b className="text-t3">{title}</b>
       </div>
-      <div className="mt-1.5 space-y-0.5 text-[11px] leading-relaxed text-body">
+      <div className="mt-2 space-y-1 text-content leading-relaxed text-body">
         <div>
           <b>位置</b>：{pos}
         </div>
@@ -74,8 +74,8 @@ export function AssignBlock({
             <path d="M 12 32 L 8 27 L 16 22 L 8 17 L 16 12 L 12 7 L 14 2" fill="none" stroke="var(--color-clash1a)" strokeWidth="3" strokeLinejoin="round" strokeLinecap="round" />
           </svg>
           <div>
-            <b className="text-[11.5px]">脱靶 · {miss.how}</b>
-            <p className="m-0 mt-0.5 text-[10.5px] leading-relaxed text-body">{miss.looks}</p>
+            <b className="t-small-strong">脱靶 · {miss.how}</b>
+            <p className="m-0 mt-0.5 text-small leading-relaxed text-body">{miss.looks}</p>
           </div>
         </div>
       </div>

@@ -37,14 +37,14 @@ export function App() {
             <div key={s.n} className="text-center">
               <div className="mx-auto flex h-[46px] w-[46px] items-center justify-center rounded-xl border-2 border-ink bg-white">{s.el}</div>
               <div className="mt-1.5 text-[11px] font-bold">{s.n}</div>
-              <div className="text-[9.5px] leading-tight text-[#6b6b6b]">{s.m}</div>
-              <div className="mt-0.5 text-[9px] text-[#8a8a8a]">{s.s}</div>
+              <div className="t-small-mute leading-tight">{s.m}</div>
+              <div className="mt-0.5 t-small-mute">{s.s}</div>
             </div>
           ))}
         </div>
       </Section>
       <Section label="词汇表 · 父子层级" note="与 ai-era-tutorial 词汇表对齐">
-        <table className="w-full border-collapse text-[11.5px] text-body">
+        <table className="w-full border-collapse text-small text-body">
           <thead>
             <tr className="border-b-2 border-[#d5d5d3] text-left text-ink">
               <th className="w-24 py-1 pr-2">父词</th>
@@ -77,7 +77,7 @@ export function App() {
                 </>}
               </svg>
               <div className="mt-1 text-[13px] font-extrabold">{l.n}</div>
-              <div className="text-[11px] text-[#555]">{l.m}</div>
+              <div className="text-small text-[#555]">{l.m}</div>
             </div>
           ))}
           <div className="rounded-xl border-2 border-ink bg-white p-3">
@@ -85,7 +85,7 @@ export function App() {
               <path d="M12 22 q10 -22 20 0 t20 0 t20 0 t20 0 t20 0 t20 0 t20 0 t20 0 t20 0" stroke="var(--color-clash3b)" strokeWidth="3" fill="none" strokeLinecap="round" />
             </svg>
             <div className="mt-1 text-[13px] font-extrabold">波浪带 ＝ 代理交接</div>
-            <div className="text-[11px] text-[#555]">agent 边界 · 区域标记，不连线</div>
+            <div className="text-small text-[#555]">agent 边界 · 区域标记，不连线</div>
           </div>
         </div>
       </Section>
@@ -93,7 +93,7 @@ export function App() {
         <div className="flex flex-wrap items-start gap-6">
           <Ticket chapter={CHAPTERS[1]} done />
           <Ticket chapter={CHAPTERS[5]} done={false} />
-          <p className="m-0 max-w-[280px] flex-1 text-[11.5px] leading-relaxed text-body">
+          <p className="m-0 max-w-[280px] flex-1 text-content leading-relaxed text-body">
             <b>完成＝沿撕线打双孔</b>（半圆缺口）；未开始撕线为实线、无孔。头部色块无独立描边，由票体 overflow-hidden 裁出单一描边圆角。票号＝章程序号。
           </p>
         </div>
