@@ -24,7 +24,7 @@ export function ChapterPage({ id }: { id: ChapterId }) {
         className="relative flex items-center gap-4 overflow-hidden rounded-2xl border-2 border-ink p-5 shadow-hard"
         style={{ background: ch.color, viewTransitionName: `ch-${id}` } as CSSProperties}
       >
-        <span className="t-display pointer-events-none absolute -right-2 -top-3 select-none" aria-hidden>
+        <span className="t-display pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 select-none" aria-hidden>
           0{id}
         </span>
         <span className="text-[44px] leading-none">{ch.emoji}</span>
