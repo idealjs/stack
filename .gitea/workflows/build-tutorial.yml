@@ -19,7 +19,6 @@ env:
 jobs:
   build:
     name: Build @stack/tutorial (kaniko)
-    runs-on: ci
     steps:
       - name: 拉源码（actions/checkout）
         uses: actions/checkout@v4
