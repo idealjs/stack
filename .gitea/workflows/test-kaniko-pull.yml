@@ -1,0 +1,29 @@
+name: Test Kaniko Pull
+
+on:
+  workflow_dispatch:
+
+jobs:
+  pull:
+    name: kaniko pull 私有镜像验证
+    runs-on: ci
+    steps:
+      - name: 写阿里云认证（与 build-tutorial 完全同款）
+        env:
+          ALIYUN_DOCKER_USERNAME: ${{ secrets.ALIYUN_DOCKER_USERNAME }}
+          ALIYUN_DOCKER_PASSWORD: ${{ secrets.ALIYUN_DOCKER_PASSWORD }}
+        run: |
+          mkdir -p /kaniko/.docker
+          AUTH=$(printf '%s:%s' "$ALIYUN_DOCKER_USERNAME" "$ALIYUN_DOCKER_PASSWORD" | base64 | tr -d '\n')
+          printf '{"auths":{"registry.cn-hangzhou.aliyuncs.com":{"auth":"%s"}}}' "$AUTH" > /kaniko/.docker/config.json
+
+      - name: kaniko 拉取 idealjs/oonlyu:20260627145712（只拉不推）
+        run: |
+          printf 'FROM registry.cn-hangzhou.aliyuncs.com/idealjs/oonlyu:20260627145712\n' > /tmp/Dockerfile
+          /kaniko/executor --force \
+            --dockerfile=/tmp/Dockerfile --context=/tmp \
+            --no-push
+
+      - name: 清理
+        if: always()
+        run: rm -f /kaniko/.docker/config.json /tmp/Dockerfile
