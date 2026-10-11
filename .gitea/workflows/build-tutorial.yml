@@ -29,6 +29,8 @@ jobs:
             "$AUTH" "$AUTH" > /kaniko/.docker/config.json
 
       - name: 构建并推阿里云（公网 + VPC 双端点）
+        env:
+          DOCKER_CONFIG: /kaniko/.docker
         run: |
           /kaniko/executor --force \
             --dockerfile=Dockerfile --context=. \
