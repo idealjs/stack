@@ -1,11 +1,5 @@
 name: Build Tutorial
 
-# 主仓库 gitea.idealjs.com/idealjs/stack 的 CI：构建校验新教程站。
-# runner 由 standalone gitea-runner 提供；runs-on: ci 的任务跑在 ci-job 镜像
-# （debian + wget/ca-certs + node24 + kaniko）的独立容器内，与 runner 隔离、无特权。
-# 构建用镜像内自带的 /kaniko/executor（无 daemon、无特权）；
-# 私有基座认证经 /kaniko/.docker/config.json（双 secret 生成 base64）。
-#   源码：actions/checkout（JS action,镜像内含 node24 运行时）
 on:
   push:
     branches: [main]
@@ -19,24 +13,10 @@ env:
 jobs:
   build:
     name: Build @stack/tutorial (kaniko)
+    runs-on: ci
     steps:
       - name: 拉源码（actions/checkout）
         uses: actions/checkout@v4
-
-      - name: sock 探测（临时诊断步骤）
-        run: |
-          export DEBIAN_FRONTEND=noninteractive
-          apt-get update -qq && apt-get install -y -qq curl > /dev/null
-          echo "=== daemon version ==="
-          curl -s --unix-socket /var/run/docker.sock http://localhost/v1.43/version || echo "version 探测失败"
-          echo
-          echo "=== 可见的容器列表 ==="
-          curl -s --unix-socket /var/run/docker.sock http://localhost/v1.43/containers/json?all=1 | head -c 600
-          echo
-          echo "=== 尝试挂载宿主根(特权探测,期望被拒) ==="
-          curl -s --unix-socket /var/run/docker.sock -X POST "http://localhost/v1.43/containers/create?name=priv-probe" -H "Content-Type: application/json" -d '{"Image":"debian:bookworm-slim","HostConfig":{"Binds":["/:/host:rw"]}}' | head -c 300
-          echo
-          curl -s --unix-socket /var/run/docker.sock -X DELETE "http://localhost/v1.43/containers/priv-probe?force=1" > /dev/null 2>&1 || true
 
       - name: 写私有仓认证
         env:
@@ -45,7 +25,7 @@ jobs:
         run: |
           mkdir -p /kaniko/.docker
           printf '{"auths":{"registry.cn-hangzhou.aliyuncs.com":{"auth":"%s"}}}' \
-            "$(printf '%s:%s' "$ALIYUN_DOCKER_USERNAME" "$ALIYUN_DOCKER_PASSWORD" | base64 -w0)" \
+            "$(printf '%s:%s' "$ALIYUN_DOCKER_USERNAME" "$ALIYUN_DOCKER_PASSWORD" | base64 | tr -d '\n')" \
             > /kaniko/.docker/config.json
 
       - name: 构建（无特权，产物出 /tmp/tutorial.tar）
@@ -53,3 +33,8 @@ jobs:
           /kaniko/executor --force \
             --dockerfile=Dockerfile --context=. \
             --no-push --tar-path=/tmp/tutorial.tar
+
+      - name: 清理（对称删认证与产物）
+        if: always()
+        run: |
+          rm -f /kaniko/.docker/config.json /tmp/tutorial.tar
