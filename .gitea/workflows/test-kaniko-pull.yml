@@ -42,6 +42,30 @@ jobs:
           })();
           '
 
+      - name: 环境诊断（代理变量 + kaniko 版本）
+        run: |
+          echo "proxy 相关环境变量："
+          node -e 'Object.entries(process.env).filter(([k])=>/proxy/i.test(k)).forEach(([k,v])=>console.log(k+"="+v))'
+          echo "（上面无输出 = 没有配置代理）"
+          /kaniko/executor --version
+
+      - name: 端到端直测（node 换 token 并真实访问 oonlyu）
+        env:
+          ALIYUN_DOCKER_USERNAME: ${{ secrets.ALIYUN_DOCKER_USERNAME }}
+          ALIYUN_DOCKER_PASSWORD: ${{ secrets.ALIYUN_DOCKER_PASSWORD }}
+        run: |
+          node -e '
+          const auth = Buffer.from(process.env.ALIYUN_DOCKER_USERNAME + ":" + process.env.ALIYUN_DOCKER_PASSWORD).toString("base64");
+          (async () => {
+            const r = await fetch("https://dockerauth.cn-hangzhou.aliyuncs.com/auth?service=registry.aliyuncs.com:cn-hangzhou:26842&scope=repository:idealjs/oonlyu:pull,push", { headers: { Authorization: "Basic " + auth } });
+            const body = await r.json();
+            const token = body.token || body.access_token || "";
+            console.log("换 token HTTP", r.status, "token 长度:", token.length);
+            const t2 = await fetch("https://registry.cn-hangzhou.aliyuncs.com/v2/idealjs/oonlyu/tags/list", { headers: { Authorization: "Bearer " + token } });
+            console.log("用该 token 访问 tags/list HTTP", t2.status, t2.status === 200 ? "（token 真实有效）" : "（token 无权限）");
+          })();
+          '
+
       - name: 写阿里云认证（与 build-tutorial 完全同款）
         env:
           ALIYUN_DOCKER_USERNAME: ${{ secrets.ALIYUN_DOCKER_USERNAME }}
