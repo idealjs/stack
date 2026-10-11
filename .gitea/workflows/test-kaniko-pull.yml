@@ -8,6 +8,40 @@ jobs:
     name: kaniko pull 私有镜像验证
     runs-on: ci
     steps:
+      - name: 凭据诊断（只输出长度与哈希前缀，不泄露内容）
+        env:
+          ALIYUN_DOCKER_USERNAME: ${{ secrets.ALIYUN_DOCKER_USERNAME }}
+          ALIYUN_DOCKER_PASSWORD: ${{ secrets.ALIYUN_DOCKER_PASSWORD }}
+        run: |
+          node -e '
+          const u = process.env.ALIYUN_DOCKER_USERNAME || "";
+          const p = process.env.ALIYUN_DOCKER_PASSWORD || "";
+          const h = s => require("crypto").createHash("sha256").update(s).digest("hex").slice(0, 12);
+          console.log("username len:", u.length, "sha256:", h(u));
+          console.log("password len:", p.length, "sha256:", h(p));
+          console.log("user 含换行:", /[\r\n]/.test(u), " pass 含换行:", /[\r\n]/.test(p));
+          console.log("user 有首尾空白:", u !== u.trim(), " pass 有首尾空白:", p !== p.trim());
+          '
+
+      - name: token 服务直测（node 与 kaniko 同一认证入口，分别验 node/oonlyu 两个仓）
+        env:
+          ALIYUN_DOCKER_USERNAME: ${{ secrets.ALIYUN_DOCKER_USERNAME }}
+          ALIYUN_DOCKER_PASSWORD: ${{ secrets.ALIYUN_DOCKER_PASSWORD }}
+        run: |
+          node -e '
+          const auth = Buffer.from(process.env.ALIYUN_DOCKER_USERNAME + ":" + process.env.ALIYUN_DOCKER_PASSWORD).toString("base64");
+          (async () => {
+            for (const repo of ["idealjs/node", "idealjs/oonlyu"]) {
+              const url = "https://dockerauth.cn-hangzhou.aliyuncs.com/auth?service=registry.aliyuncs.com:cn-hangzhou:26842&scope=repository:" + repo + ":pull";
+              try {
+                const r = await fetch(url, { headers: { Authorization: "Basic " + auth } });
+                const t = await r.text();
+                console.log(repo, "换 token HTTP", r.status, "拿到 token:", t.includes("\"token\""));
+              } catch (e) { console.log(repo, "请求异常:", e.message); }
+            }
+          })();
+          '
+
       - name: 写阿里云认证（与 build-tutorial 完全同款）
         env:
           ALIYUN_DOCKER_USERNAME: ${{ secrets.ALIYUN_DOCKER_USERNAME }}
