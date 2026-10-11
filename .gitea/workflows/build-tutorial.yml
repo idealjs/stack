@@ -18,23 +18,26 @@ jobs:
       - name: 拉源码（actions/checkout）
         uses: actions/checkout@v4
 
-      - name: 写私有仓认证
+      - name: 写阿里云认证（公网 + VPC 双端点）
         env:
           ALIYUN_DOCKER_USERNAME: ${{ secrets.ALIYUN_DOCKER_USERNAME }}
           ALIYUN_DOCKER_PASSWORD: ${{ secrets.ALIYUN_DOCKER_PASSWORD }}
         run: |
           mkdir -p /kaniko/.docker
-          printf '{"auths":{"registry.cn-hangzhou.aliyuncs.com":{"auth":"%s"}}}' \
-            "$(printf '%s:%s' "$ALIYUN_DOCKER_USERNAME" "$ALIYUN_DOCKER_PASSWORD" | base64 | tr -d '\n')" \
-            > /kaniko/.docker/config.json
+          AUTH=$(printf '%s:%s' "$ALIYUN_DOCKER_USERNAME" "$ALIYUN_DOCKER_PASSWORD" | base64 | tr -d '\n')
+          printf '{"auths":{"registry.cn-hangzhou.aliyuncs.com":{"auth":"%s"},"registry-vpc.cn-hangzhou.aliyuncs.com":{"auth":"%s"}}}' \
+            "$AUTH" "$AUTH" > /kaniko/.docker/config.json
 
-      - name: 构建（无特权，产物出 /tmp/tutorial.tar）
+      - name: 构建并推阿里云（公网 + VPC 双端点）
         run: |
           /kaniko/executor --force \
             --dockerfile=Dockerfile --context=. \
-            --no-push --tar-path=/tmp/tutorial.tar
+            --destination=registry.cn-hangzhou.aliyuncs.com/idealjs/stack:${{ github.sha }} \
+            --destination=registry-vpc.cn-hangzhou.aliyuncs.com/idealjs/stack:${{ github.sha }} \
+            --destination=registry.cn-hangzhou.aliyuncs.com/idealjs/stack:latest \
+            --destination=registry-vpc.cn-hangzhou.aliyuncs.com/idealjs/stack:latest
 
       - name: 清理（对称删认证与产物）
         if: always()
         run: |
-          rm -f /kaniko/.docker/config.json /tmp/tutorial.tar
+          rm -f /kaniko/.docker/config.json
