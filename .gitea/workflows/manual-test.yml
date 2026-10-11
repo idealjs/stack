@@ -1,0 +1,12 @@
+name: Manual Test
+on:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 环境信息
+        run: |
+          uname -a
+          cat /etc/os-release | head -2
