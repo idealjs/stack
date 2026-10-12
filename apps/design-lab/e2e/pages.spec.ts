@@ -1,4 +1,6 @@
 import { expect, test } from '@playwright/test'
+import type { Page } from '@playwright/test'
+import type { TicketProps } from '../../../packages/design-system/src/components/Ticket'
 
 /**
  * 设计系统结构契约断言——规格级防回归。
@@ -6,6 +8,21 @@ import { expect, test } from '@playwright/test'
  */
 
 const PAGES = ['index', 'colors', 'symbols', 'components', 'shelf'] as const
+
+async function mountTicket(page: Page, props: TicketProps = {}) {
+  await page.goto('/components.html')
+  const preview = page.getByTestId('ticket-preview')
+  await preview.getByLabel('孔位', { exact: true }).fill(String(props.holePosition ?? '50%'))
+  await preview.getByLabel('孔径').fill(String(props.holeSize ?? 12))
+  await preview.getByLabel('打孔', { exact: true }).setChecked(props.punched ?? true)
+  await preview.getByLabel('hover 动效', { exact: true }).setChecked(props.hover ?? true)
+  await preview.getByTestId('ticket-preview-canvas').evaluate((el) => { (el as HTMLElement).style.backgroundColor = 'rgb(78,205,196)' })
+  const ticket = preview.locator('[data-comp="ticket"]')
+  await ticket.scrollIntoViewIfNeeded()
+  await page.mouse.move(0, 0)
+  await expect.poll(() => ticket.evaluate((el) => getComputedStyle(el).filter)).toBe('drop-shadow(rgb(17, 17, 17) 5px 5px 0px)')
+  return ticket
+}
 
 test.describe('全局画布', () => {
   for (const p of PAGES) {
@@ -55,16 +72,19 @@ test.describe('CourseCard 规格契约', () => {
   test('基础组件投影统一：同一配方复用，不得各写各的', async ({ page }) => {
     const { kinds, recipes } = await page.evaluate(() => {
       const els = [...document.querySelectorAll('[data-comp]')]
-      // 两种机制同一配方：box-shadow（常规卡）与 filter: drop-shadow（票券——跟随挖空轮廓）
-      const recipe = (cs: CSSStyleDeclaration) => (cs.filter !== 'none' ? cs.filter : cs.boxShadow)
+      // 常规卡 box-shadow 与票券 drop-shadow 使用相同的 ink 色与 (5,5) 偏移。
+      const recipe = (el: Element) => {
+        const cs = getComputedStyle(el)
+        return cs.filter !== 'none' ? cs.filter : cs.boxShadow
+      }
       return {
         kinds: [...new Set(els.map((el) => el.dataset.comp))].sort(),
-        recipes: els.map((el) => recipe(getComputedStyle(el))),
+        recipes: els.map(recipe),
       }
     })
     expect(kinds).toEqual(['assign', 'course-card', 'entry-card', 'ticket']) // 四类基础组件都有钩子
     expect(recipes.length).toBeGreaterThanOrEqual(6)
-    recipes.forEach((r) => expect(r).toContain('rgb(17, 17, 17) 5px 5px')) // 唯一配方 --shadow-hard / --drop-shadow-hard
+    recipes.forEach((r) => expect(r).toContain('rgb(17, 17, 17) 5px 5px'))
     recipes.forEach((r) => expect(r.split('rgb(17, 17, 17)').length - 1).toBe(1)) // 每卡只出一份阴影
   })
 
@@ -221,7 +241,7 @@ test.describe('票券规格契约', () => {
     expect(s.headBg).not.toBe('rgba(0, 0, 0, 0)')
   })
 
-  test('打孔三件套：mask 差集挖空 + 孔缘弧线 + 阴影跟随轮廓', async ({ page }) => {
+  test('票面 mask 打孔，外层 drop-shadow 跟随轮廓，孔缘对齐撕线', async ({ page }) => {
     const done = page.locator('.ticket-pk').first()
     const mask = await done.evaluate((el) => {
       const cs = getComputedStyle(el)
@@ -229,47 +249,180 @@ test.describe('票券规格契约', () => {
     })
     expect(mask).toContain('radial-gradient')
     expect(mask.split('radial-gradient').length - 1).toBe(2) // 上下各一孔
-    // 阴影在 wrapper 以 drop-shadow 生效——跟随挖空后的 alpha 轮廓（box-shadow 会被 mask 裁掉）
+    // 阴影直接由外层滤镜生成，票面是唯一的打孔层。
     const f = await done.evaluate((el) => {
       const w = el.parentElement as HTMLElement
-      return { filter: getComputedStyle(w).filter, innerShadow: getComputedStyle(el).boxShadow }
+      return {
+        filter: getComputedStyle(w).filter, wrapperMask: getComputedStyle(w).maskImage,
+        pseudoContent: getComputedStyle(w, '::before').content,
+        innerShadow: getComputedStyle(el).boxShadow,
+      }
     })
     expect(f.filter).toBe('drop-shadow(rgb(17, 17, 17) 5px 5px 0px)')
+    expect(f.wrapperMask).toBe('none')
+    expect(f.pseudoContent).toBe('none')
     expect(f.innerShadow).toBe('none')
-    // 孔缘弧线：2px ink 半圆环，clip 只留票内一半，圆心骑撕线两端（hole-x=172.75）
+    // 孔缘弧线：圆心骑撕线两端，不依赖旧票宽的固定坐标。
     const arcs = await page.evaluate(() => {
       const done = document.querySelector('.ticket-pk') as HTMLElement
       const w = done.parentElement as HTMLElement
-      const wx = w.getBoundingClientRect().x
+      const stub = w.querySelector('.ticket-stub') as HTMLElement
+      const tearX = stub.getBoundingClientRect().x + parseFloat(getComputedStyle(stub).borderLeftWidth) / 2
       return [...w.querySelectorAll('.pk-arc')].map((a) => {
         const cs = getComputedStyle(a)
         const r = a.getBoundingClientRect()
-        return { clip: cs.clipPath, bw: cs.borderTopWidth, bc: cs.borderTopColor, cx: r.x + r.width / 2 - wx }
+        return { clip: cs.clipPath, bw: cs.borderTopWidth, bc: cs.borderTopColor, dx: r.x + r.width / 2 - tearX }
       })
     })
     expect(arcs).toHaveLength(2)
     arcs.forEach((a) => {
       expect(a.bw).toBe('2px')
       expect(a.bc).toBe('rgb(17, 17, 17)')
-      expect(Math.abs(a.cx - 172.75)).toBeLessThan(0.5)
+      expect(Math.abs(a.dx)).toBeLessThan(0.5)
     })
     expect(arcs[0].clip).toBe('inset(50% 0px 0px)')
     expect(arcs[1].clip).toBe('inset(0px 0px 50%)')
     // 未开始票不带 mask
     const plain = await page.evaluate(() => {
-      const t = [...document.querySelectorAll('div')].filter((d) => String(d.className).includes('w-[216px]') && !String(d.className).includes('ticket-pk'))[0]
-      return t ? getComputedStyle(t).maskImage : 'none'
+      const t = document.querySelector('[data-comp="ticket"]:not(.tk-pk)')!
+      return [getComputedStyle(t.querySelector('.ticket-face')!).maskImage, getComputedStyle(t, '::before').maskImage]
     })
-    expect(plain === 'none' || plain === '').toBeTruthy()
+    expect(plain).toEqual(['none', 'none'])
   })
 
   test('撕线：完成=虚线、未开始=实线', async ({ page }) => {
     const styles = await page.evaluate(() =>
-      [...document.querySelectorAll('div')]
-        .filter((el) => String(el.className).includes('w-[216px]'))
-        .map((el) => getComputedStyle(el.lastElementChild as HTMLElement).borderLeftStyle),
+      [...document.querySelectorAll('[data-comp="ticket"] .ticket-stub')]
+        .map((el) => getComputedStyle(el).borderLeftStyle),
     )
     expect(styles).toContain('dashed')
     expect(styles).toContain('solid')
+  })
+
+  for (const width of [1280, 375]) {
+    test(`真实像素：票面打孔驱动阴影缺口，阴影孔随投影偏移（${width}px）`, async ({ page }) => {
+      await page.setViewportSize({ width, height: 900 })
+      const ticket = page.locator('[data-comp="ticket"].tk-pk').first()
+      if (width === 375) {
+        await ticket.locator('b').evaluate((el) => { el.textContent = 'ChapterWithAnUnbrokenLongTitle' })
+      }
+      await ticket.scrollIntoViewIfNeeded()
+
+      for (const background of [[78, 205, 196], [167, 139, 250]]) {
+        await ticket.evaluate((el, rgb) => {
+          const section = el.closest('section')!
+          section.style.backgroundColor = `rgb(${rgb.join(',')})`
+          section.style.paddingBottom = '10px'
+        }, background)
+        const geometry = await ticket.evaluate((el) => {
+          const rect = el.getBoundingClientRect()
+          const stub = el.querySelector('.ticket-stub')!
+          const tearX = stub.getBoundingClientRect().x + parseFloat(getComputedStyle(stub).borderLeftWidth) / 2
+          return { x: rect.x, y: rect.y, width: rect.width, height: rect.height, tearX }
+        })
+        const clip = {
+          x: Math.floor(geometry.x), y: Math.floor(geometry.y),
+          width: Math.ceil(geometry.width) + 10, height: Math.ceil(geometry.height) + 10,
+        }
+        const png = await page.screenshot({ clip })
+        const points = [
+          [geometry.tearX, geometry.y + 3],
+          [geometry.tearX + 5, geometry.y + geometry.height + 3],
+          [geometry.tearX - 4, geometry.y + geometry.height + 3],
+        ].map(([x, y]) => [Math.floor(x - clip.x), Math.floor(y - clip.y)])
+        const readPixels = async (png: Buffer) => page.evaluate(async ({ base64, points }) => {
+          const img = new Image()
+          img.src = `data:image/png;base64,${base64}`
+          await img.decode()
+          const canvas = document.createElement('canvas')
+          canvas.width = img.width
+          canvas.height = img.height
+          const ctx = canvas.getContext('2d')!
+          ctx.drawImage(img, 0, 0)
+          return points.map(([x, y]) => [...ctx.getImageData(x, y, 1, 1).data])
+        }, { base64: png.toString('base64'), points })
+        const pixels = await readPixels(png)
+        expect(pixels.slice(0, 2)).toEqual(Array.from({ length: 2 }, () => [...background, 255]))
+        expect(pixels[2]).toEqual([17, 17, 17, 255]) // 缺口随阴影偏移，旁边保留硬阴影
+
+        // 只关闭票面 mask，阴影缺口就应消失；不能靠阴影层自己的孔通过测试。
+        const face = ticket.locator('.ticket-face')
+        await face.evaluate((el) => { (el as HTMLElement).style.maskImage = 'none' })
+        const unpunched = await readPixels(await page.screenshot({ clip }))
+        expect(unpunched[1]).toEqual([17, 17, 17, 255])
+        await face.evaluate((el) => { (el as HTMLElement).style.removeProperty('mask-image') })
+      }
+    })
+  }
+
+  for (const config of [
+    { position: 64, size: 12, expectedX: (_width: number) => 64 },
+    { position: '50%', size: 20, expectedX: (width: number) => width / 2 },
+    { position: 'calc(100% - 40px)', size: 16, expectedX: (width: number) => width - 40 },
+  ]) {
+    test(`独立 Ticket props：孔位 ${config.position}，孔径 ${config.size}px`, async ({ page }) => {
+      const ticket = await mountTicket(page, { holePosition: config.position, holeSize: config.size })
+      const geometry = await ticket.evaluate((el) => {
+        const rect = el.getBoundingClientRect()
+        const arcs = [...el.querySelectorAll('.pk-arc')].map((arc) => {
+          const r = arc.getBoundingClientRect()
+          return { x: r.x + r.width / 2 - rect.x, width: r.width }
+        })
+        return { x: rect.x, y: rect.y, width: rect.width, height: rect.height, arcs }
+      })
+      const holeX = config.expectedX(geometry.width)
+      expect(geometry.arcs).toHaveLength(2)
+      for (const arc of geometry.arcs) {
+        expect(arc.x).toBeCloseTo(holeX, 1)
+        expect(arc.width).toBe(config.size + 4) // 孔径＋两侧 2px 描边
+      }
+      const clip = { x: geometry.x, y: geometry.y, width: geometry.width + 10, height: geometry.height + 10 }
+      const png = await page.screenshot({ clip })
+      const pixels = await page.evaluate(async ({ base64, points }) => {
+        const img = new Image()
+        img.src = `data:image/png;base64,${base64}`
+        await img.decode()
+        const canvas = document.createElement('canvas')
+        canvas.width = img.width
+        canvas.height = img.height
+        const ctx = canvas.getContext('2d')!
+        ctx.drawImage(img, 0, 0)
+        return points.map(([x, y]) => [...ctx.getImageData(Math.floor(x), Math.floor(y), 1, 1).data])
+      }, {
+        base64: png.toString('base64'),
+        points: [[holeX + config.size / 2 - 3, 2], [holeX + config.size / 2 + 3, 3], [holeX + 5, geometry.height + 3]],
+      })
+      expect(pixels).toEqual([[78, 205, 196, 255], [255, 249, 240, 255], [78, 205, 196, 255]])
+    })
+  }
+
+  test('punched=false 或孔径为 0 时不打孔', async ({ page }) => {
+    for (const props of [{ punched: false }, { holeSize: 0 }]) {
+      const ticket = await mountTicket(page, props)
+      await expect(ticket.locator('.pk-arc')).toHaveCount(0)
+      expect(await ticket.locator('.ticket-face').evaluate((el) => getComputedStyle(el).maskImage)).toBe('none')
+    }
+  })
+
+  for (const punched of [true, false]) {
+    test(`默认 hover：浮起 3px，阴影 5→8px，再回到静置状态（打孔=${punched}）`, async ({ page }) => {
+      const ticket = await mountTicket(page, { punched })
+      const initial = (await ticket.boundingBox())!
+      await ticket.hover()
+      await expect.poll(() => ticket.evaluate((el) => getComputedStyle(el).filter)).toBe('drop-shadow(rgb(17, 17, 17) 8px 8px 0px)')
+      expect((await ticket.boundingBox())!.y).toBeCloseTo(initial.y - 3, 1)
+      await page.mouse.move(0, 0)
+      await expect.poll(() => ticket.evaluate((el) => getComputedStyle(el).filter)).toBe('drop-shadow(rgb(17, 17, 17) 5px 5px 0px)')
+      expect((await ticket.boundingBox())!.y).toBeCloseTo(initial.y, 1)
+    })
+  }
+
+  test('hover=false 关闭拿起动效', async ({ page }) => {
+    const ticket = await mountTicket(page, { hover: false })
+    const initial = (await ticket.boundingBox())!
+    await ticket.hover()
+    await page.waitForTimeout(200)
+    expect(await ticket.evaluate((el) => getComputedStyle(el).filter)).toBe('drop-shadow(rgb(17, 17, 17) 5px 5px 0px)')
+    expect((await ticket.boundingBox())!.y).toBe(initial.y)
   })
 })

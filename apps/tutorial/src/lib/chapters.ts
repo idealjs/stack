@@ -1,5 +1,5 @@
 /** 教程内容数据——大纲见 OUTLINE.md，词汇与结构对齐 ai-era-tutorial skill */
-import type { Assignment, Chapter, ChapterId, Edge, Profile } from '@stack/design-system'
+import type { Assignment, Chapter, ChapterId, Profile } from '@stack/design-system'
 
 export const CHAPTERS: Record<ChapterId, Chapter> = {
   1: {
@@ -93,14 +93,6 @@ export const CHAPTERS: Record<ChapterId, Chapter> = {
     },
   },
 }
-
-/** 关系边：seq 实线先后 / rel 虚线相关 / family 点线同族 */
-export const EDGES: Edge[] = [
-  { from: 1, to: 2, kind: 'seq' },
-  { from: 2, to: 5, kind: 'seq' },
-  { from: 2, to: 5, kind: 'family' },
-  { from: 4, to: 5, kind: 'rel' },
-]
 
 export const PROFILES: Profile[] = [
   {
@@ -428,17 +420,5 @@ export const CONTENT: Record<ChapterId, ChapterContent> = {
         looks: '代码能跑、讲不出为什么这样写——识别力没长，缺的正是本章',
       },
     },
-  },
-}
-
-/** 指派学习块示例数据（设计系统·组件/样例页演示用） */
-export const ASSIGNMENT: import('@stack/design-system').Assignment = {
-  title: '指派学习 · HTTP 协议',
-  pos: 'Web 通信的地基，旁边是 DNS（找机器）与 TCP（铺线路）',
-  expect: '能向 agent 讲清一次请求的往返：URL → DNS → 连接 → 请求行/头/体 → 响应 → 渲染',
-  scenes: ['看 Network 面板复述一次页面加载', '用 curl 拿一个网页的原始响应'],
-  miss: {
-    how: '装了但没跑',
-    looks: '命令成功、页面空白——缺「真机验收」这块积木',
   },
 }

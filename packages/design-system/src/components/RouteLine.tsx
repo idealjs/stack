@@ -3,11 +3,14 @@
  * 的 hover——该卡浮起时站点 translateY(-3) 平滑跟随、连线以 CSS d: path() 过渡重算（150ms）
  * 拓扑：横平竖直 + R8 直角步进；并行不合并(4px)；站点 r6 半嵌卡边
  * （圆心骑左右描边，各半在卡上）；线层 z-10 置于卡之上，站点不被卡遮挡；
- * 同口多线自动聚合胶囊（线止于胶囊边界）。 */
-import { useEffect, useRef, useState } from 'react'
+ * 同口多线自动聚合胶囊（线止于胶囊边界）。
+ * 针脚来源：置于 RoutableScene 内由 RoutableCard 自动注册（实测，客户端水合后生效）；
+ * nodes prop 可作为 SSG 静态回退——传入后服务端渲染即画出线条（数值与卡片定位一致，
+ * 水合后实测值与之相同则无感切换）。两者同时给出时 nodes 优先。 */
+import { useContext, useEffect, useRef, useState } from 'react'
 import type React from 'react'
 import type { ChapterId, Edge } from '../lib/types'
-
+import { PinsContext } from './RoutableCard'
 const STATION_COLORS = ['var(--color-clash2a)', 'var(--color-clash1b)', 'var(--color-clash3a)', 'var(--color-clash1a)']
 
 export interface LaneNode {
@@ -42,12 +45,16 @@ export function RouteLine({
   follow = true,
 }: {
   edges: Edge[]
-  nodes: Partial<Record<ChapterId, LaneNode>>
+  /** SSG 静态回退针脚：服务端渲染即出线；水合后由 RoutableCard 实测接管 */
+  nodes?: Partial<Record<ChapterId, LaneNode>>
   width: number
   height: number
   /** 自动跟随场景内卡片的 hover 浮起（默认开；传 false 关闭） */
   follow?: boolean
 }) {
+  const scene = useContext(PinsContext)
+  // 场景实测针脚为底，nodes prop 显式传入时优先
+  const resolved: Partial<Record<ChapterId, LaneNode>> = { ...scene, ...nodes }
   const stationColor = (i: number) => STATION_COLORS[i % STATION_COLORS.length]
 
   // 联动状态：hover 中的章（由场景卡自动驱动，无需消费方传参）
@@ -93,8 +100,8 @@ export function RouteLine({
       aria-hidden
     >
       {edges.map((e, i) => {
-        const a = nodes[e.from]
-        const b = nodes[e.to]
+        const a = resolved[e.from]
+        const b = resolved[e.to]
         if (!a || !b) return null
         const d = stepPath(a.right, a.y + dy(e.from), b.borderLeft, b.y + dy(e.to))
         const follow = { d: `path("${d}")`, transition: 'd 150ms ease' } as React.CSSProperties
@@ -103,8 +110,8 @@ export function RouteLine({
         return <path key={i} d={d} style={follow} stroke="var(--color-ink)" strokeWidth={2.5} fill="none" />
       })}
       {seqEdges.map((e) => {
-        const a = nodes[e.from]
-        const b = nodes[e.to]
+        const a = resolved[e.from]
+        const b = resolved[e.to]
         if (!a || !b) return null
         const ins = insByTo.get(e.to)!
         const capsule = ins.length > 1 && firstIn.has(e.to)

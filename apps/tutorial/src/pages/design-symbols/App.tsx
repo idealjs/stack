@@ -1,7 +1,7 @@
 import { Page, Section } from '../../lib/ui'
 import { BrickDot, Cross, Mark, Ring, Tremble, Tri, Wave } from '@stack/design-system'
 import { CHAPTERS } from '../../lib/chapters'
-import { Ticket } from '@stack/design-system'
+import { ChapterTicket } from '@stack/design-system'
 import type { ReactNode } from 'react'
 
 const SHAPES = [
@@ -22,15 +22,9 @@ const VOCAB: { p: string; rows: [ReactNode, string][] }[] = [
   { p: '认知基础', rows: [['底座纹·真机验收章', 'env/库/运行环境——脚下的地，不是积木']] },
 ]
 
-const LINES = [
-  { d: 'M 8 34 H 60 A 8 8 0 0 0 68 26 V 18 A 8 8 0 0 1 76 10 H 180', w: 2.5, dash: '', cap: 'butt' as const, st: true, n: '实线 ＝ 先后', m: '推荐顺序 · 主线，唯一带站点' },
-  { d: 'M 8 23 H 180', w: 2, dash: '4 2', cap: 'butt' as const, st: false, n: '虚线 ＝ 相关', m: '内容互参 · 无顺序，无站点' },
-  { d: 'M 8 23 H 180', w: 2.4, dash: '0.1 6', cap: 'round' as const, st: false, n: '点线 ＝ 同族', m: '同一积木家族（教一块带一族）' },
-]
-
 export function App() {
   return (
-    <Page active="design-symbols" title="符号、形状 · 装饰即语义" desc="形状对内容下定义、散落于空白；线条形式承载关系含义；票券只表达完成状态。">
+    <Page active="design-symbols" title="符号、形状 · 装饰即语义" desc="形状对内容下定义、散落于空白；票券只表达完成状态。">
       <Section label="语义形状 ×7" note="散落＝卡片附近空当＋随机旋转/落点（Scatter 种子化），密度 ≤ 8/屏">
         <div className="grid grid-cols-4 gap-3.5 md:grid-cols-7">
           {SHAPES.map((s) => (
@@ -65,34 +59,10 @@ export function App() {
           </tbody>
         </table>
       </Section>
-      <Section label="线条形式 ×4" note="形式即含义；横平竖直＋R8 全形式通用">
-        <div className="grid grid-cols-2 gap-3">
-          {LINES.map((l) => (
-            <div key={l.n} className="rounded-xl border-2 border-ink bg-white p-3">
-              <svg width="188" height="44" viewBox="0 0 188 44">
-                <path d={l.d} stroke="var(--color-ink)" strokeWidth={l.w} fill="none" strokeDasharray={l.dash} strokeLinecap={l.cap || 'butt'} />
-                {l.st && <>
-                  <circle cx="8" cy="34" r="5.5" fill="var(--color-clash2a)" stroke="var(--color-ink)" strokeWidth="2" />
-                  <circle cx="181" cy="10" r="5.5" fill="var(--color-clash1b)" stroke="var(--color-ink)" strokeWidth="2" />
-                </>}
-              </svg>
-              <div className="mt-1 text-[13px] font-extrabold">{l.n}</div>
-              <div className="text-small text-[#555]">{l.m}</div>
-            </div>
-          ))}
-          <div className="rounded-xl border-2 border-ink bg-white p-3">
-            <svg width="188" height="44" viewBox="0 0 188 44">
-              <path d="M12 22 q10 -22 20 0 t20 0 t20 0 t20 0 t20 0 t20 0 t20 0 t20 0 t20 0" stroke="var(--color-clash3b)" strokeWidth="3" fill="none" strokeLinecap="round" />
-            </svg>
-            <div className="mt-1 text-[13px] font-extrabold">波浪带 ＝ 代理交接</div>
-            <div className="text-small text-[#555]">agent 边界 · 区域标记，不连线</div>
-          </div>
-        </div>
-      </Section>
       <Section label="票券" note="状态的载体——完成即打孔（裁切式实现）">
         <div className="flex flex-wrap items-start gap-6">
-          <Ticket chapter={CHAPTERS[1]} done />
-          <Ticket chapter={CHAPTERS[5]} done={false} />
+          <ChapterTicket chapter={CHAPTERS[1]} done />
+          <ChapterTicket chapter={CHAPTERS[5]} done={false} />
           <p className="m-0 max-w-[280px] flex-1 text-content leading-relaxed text-body">
             <b>完成＝沿撕线打双孔</b>（半圆缺口）；未开始撕线为实线、无孔。头部色块无独立描边，由票体 overflow-hidden 裁出单一描边圆角。票号＝章程序号。
           </p>

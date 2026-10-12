@@ -133,7 +133,7 @@ function Markdown({ raw }: { raw: string }) {
 }
 
 /* ── 文章卡片（日期页预览） ── */
-function BlogCard({ post }: { post: (typeof POSTS)[number] }) {
+export function BlogCard({ post }: { post: (typeof POSTS)[number] }) {
   const quote =
     post.raw
       .split('\n')
@@ -205,7 +205,7 @@ export function BlogPostPage({ slug }: { slug: string }) {
           ← 返回 {monthOf(slug)}
         </a>
         <a href="/index.html" className="rounded-xl border-2 border-ink bg-ink px-4 py-2 text-small font-bold text-paper no-underline">
-          返回书架
+          返回首页
         </a>
       </div>
     </Page>

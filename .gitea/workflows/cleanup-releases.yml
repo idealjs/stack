@@ -1,0 +1,30 @@
+name: Cleanup Releases
+
+on:
+  workflow_dispatch:
+
+jobs:
+  clean:
+    name: 删除全部 release
+    runs-on: ci
+    steps:
+      - name: 列出并逐个删除（CI_TOKEN）
+        env:
+          CI_TOKEN: ${{ secrets.CI_TOKEN }}
+          API: https://gitea.idealjs.com/api/v1/repos/idealjs/stack
+        run: |
+          node -e '
+          const api = process.env.API, token = process.env.CI_TOKEN;
+          const h = { Authorization: "token " + token };
+          (async () => {
+            const r = await fetch(api + "/releases?limit=50", { headers: h });
+            const list = await r.json();
+            console.log("当前共", list.length, "个 release");
+            for (const rel of list) {
+              const d = await fetch(api + "/releases/" + rel.id, { method: "DELETE", headers: h });
+              console.log("删除 id=" + rel.id + " tag=" + rel.tag_name + ": HTTP " + d.status);
+            }
+            const after = await fetch(api + "/releases?limit=50");
+            console.log("删除后剩余:", (await after.json()).length);
+          })();
+          '

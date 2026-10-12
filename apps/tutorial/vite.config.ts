@@ -8,6 +8,10 @@ import tailwindcss from '@tailwindcss/vite'
 const pages = readdirSync(__dirname).filter((f) => f.endsWith('.html'))
 
 export default defineConfig({
+  // 端口域名隧道（<port>.code.idealjs.com）访问用；只放行自有域名，不放开 true 防 DNS rebinding
+  preview: {
+    allowedHosts: ['.code.idealjs.com'],
+  },
   plugins: [react(), tailwindcss()],
   build: {
     rollupOptions: {

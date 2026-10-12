@@ -1,84 +1,59 @@
-/** 票券 —— 只表达完成状态：完成＝沿撕线打孔（半圆缺口），未开始＝实线无孔。
- * 外层 wrapper 出阴影（drop-shadow 跟随挖空后的轮廓，box-shadow 会被 mask 裁掉）；
- * 内层票体裁切式：头部色块无独立描边，由票体 overflow-hidden 裁出单一描边圆角。 */
-import type { Chapter } from '../lib/types'
+/** 通用票券：票面 mask 打孔，外层 drop-shadow 跟随轮廓生成阴影。 */
+import type { CSSProperties, HTMLAttributes } from 'react'
 
-export function Ticket({ chapter, done }: { chapter: Chapter; done: boolean }) {
+export interface TicketProps extends HTMLAttributes<HTMLDivElement> {
+  /** 是否打上下双孔，默认 true；孔径为 0 时不打孔 */
+  punched?: boolean
+  /** 上下孔圆心的横坐标：number 为距左侧的 px，string 支持百分比与 calc()；默认在票根处 */
+  holePosition?: number | string
+  /** 孔径，单位 px，默认 12；孔缘描边同步调整 */
+  holeSize?: number
+  /** hover 浮起 3px，阴影偏移 5px→8px，默认 true */
+  hover?: boolean
+  /** 票面尺寸与内容布局 */
+  className?: string
+  /** 外层布局类名；style 与其他 div 属性也传给外层 */
+  wrapperClassName?: string
+  'data-comp'?: string
+}
+
+export function Ticket({
+  children,
+  punched = true,
+  holePosition,
+  holeSize = 12,
+  hover = true,
+  className = '',
+  wrapperClassName = '',
+  style,
+  'data-comp': component = 'ticket',
+  ...props
+}: TicketProps) {
+  const hasHoles = punched && holeSize > 0
+  const ticketStyle: CSSProperties & { '--hole-x'?: string; '--hole-radius': string } = {
+    ...style,
+    '--hole-radius': `${Math.max(0, holeSize) / 2}px`,
+  }
+  if (holePosition !== undefined) {
+    ticketStyle['--hole-x'] = typeof holePosition === 'number' ? `${holePosition}px` : holePosition
+  }
+
   return (
-    <div data-comp="ticket" className={`w-fit drop-shadow-hard ${done ? 'tk-pk' : ''}`}>
-      <div
-        className={`relative flex w-[216px] items-stretch overflow-hidden rounded-xl border-2 border-ink bg-paper ${done ? 'ticket-pk' : ''}`}
-      >
-      {/* 头部媒体块：章节色纯填充，无独立边框（由票体裁切） */}
-      <div className="flex w-14 shrink-0 items-center justify-center text-[22px]" style={{ background: chapter.color }}>{chapter.emoji}</div>
-      <div className="flex-1 py-2 pl-2.5 pr-2">
-        <b className="text-content font-bold">{chapter.title}</b>
-        <div className="mt-0.5 font-mono t-small-mute">
-          No. {String(chapter.id).padStart(3, '0')} · {done ? '已完成（打孔）' : '未开始（无孔）'}
-        </div>
+    <div
+      {...props}
+      data-comp={component}
+      className={`ticket-shell w-fit rounded-xl ${hasHoles ? 'tk-pk' : ''} ${hover ? 'ticket-lift' : ''} ${wrapperClassName}`}
+      style={ticketStyle}
+    >
+      <div className={`ticket-face relative overflow-hidden rounded-xl border-2 border-ink bg-paper ${hasHoles ? 'ticket-pk' : ''} ${className}`}>
+        {children}
       </div>
-      <div
-        className={`flex w-[42px] items-center justify-center font-mono text-small text-mute ${done ? 'border-l-[1.5px] border-dashed border-ink' : 'border-l-[1.5px] border-solid border-ink'}`}
-      >
-        №{String(chapter.id).padStart(2, '0')}
-      </div>
-      </div>
-      {/* 孔缘弧线：mask 只减形不补线，弧线补上挖空边缘的 ink 描边 */}
-      {done && (
+      {hasHoles && (
         <>
           <i className="pk-arc pk-arc-t" aria-hidden />
           <i className="pk-arc pk-arc-b" aria-hidden />
         </>
       )}
-    </div>
-  )
-}
-
-/** 指派学习块 —— 普通内容块（非票据）：＋ 位置/预期/场景三样 + 脱靶标记 */
-export function AssignBlock({
-  title,
-  pos,
-  expect,
-  scenes,
-  miss,
-}: {
-  title: string
-  pos: string
-  expect: string
-  scenes: string[]
-  miss: { how: string; looks: string }
-}) {
-  return (
-    <div data-comp="assign" className="w-[320px] rounded-xl border-2 border-ink bg-paper p-4 shadow-hard">
-      <div className="flex items-center gap-2">
-        <svg width="16" height="16" viewBox="0 0 18 18" aria-hidden>
-          <path d="M9 1 v16 M1 9 h16" stroke="var(--color-clash2b)" strokeWidth="3.5" strokeLinecap="round" />
-          <path d="M9 1 v16 M1 9 h16" stroke="var(--color-ink)" strokeWidth="1.2" />
-        </svg>
-        <b className="text-t3">{title}</b>
-      </div>
-      <div className="mt-2 space-y-1 text-content leading-relaxed text-body">
-        <div>
-          <b>位置</b>：{pos}
-        </div>
-        <div>
-          <b>预期</b>：{expect}
-        </div>
-        <div>
-          <b>场景</b>：{scenes.join(' / ')}
-        </div>
-      </div>
-      <div className="mt-2 border-t border-dashed border-ink/20 pt-2">
-        <div className="flex items-start gap-2.5">
-          <svg width="20" height="28" viewBox="0 0 24 34" className="mt-0.5 shrink-0" aria-hidden>
-            <path d="M 12 32 L 8 27 L 16 22 L 8 17 L 16 12 L 12 7 L 14 2" fill="none" stroke="var(--color-clash1a)" strokeWidth="3" strokeLinejoin="round" strokeLinecap="round" />
-          </svg>
-          <div>
-            <b className="t-small-strong">脱靶 · {miss.how}</b>
-            <p className="m-0 mt-0.5 text-small leading-relaxed text-body">{miss.looks}</p>
-          </div>
-        </div>
-      </div>
     </div>
   )
 }

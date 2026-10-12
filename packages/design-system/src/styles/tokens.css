@@ -23,8 +23,9 @@
   /* 统一硬投影——唯一投影配方，所有基础组件复用（rest / 拿起） */
   --shadow-hard: 5px 5px 0 var(--color-ink);
   --shadow-hard-lift: 8px 8px 0 var(--color-ink);
-  /* 同配方的 drop-shadow 形态：给挖空轮廓用（票券）——box-shadow 会被 mask 裁掉 */
+  /* 同配方的 drop-shadow 形态，供透明图形复用 */
   --drop-shadow-hard: 5px 5px 0 var(--color-ink);
+  --drop-shadow-hard-lift: 8px 8px 0 var(--color-ink);
 
   /* 章节色别名 */
   --color-ch1: #ff6b6b;
@@ -35,40 +36,71 @@
   --color-ch6: #a78bfa;
 }
 
-/* 票券打孔（完成票专用），三件分工：
- * 挖空 = 票体 mask 差集（两端 1/4 圆硬停剪切，孔穿透露出页面底色）；
- * 阴影 = 外层 wrapper drop-shadow-hard——drop-shadow 跟随 alpha 轮廓，
- *        孔挖到哪阴影咬到哪（box-shadow 会被 mask 的 border-box 裁切整体吃掉，不可用）；
- * 孔缘 = .pk-arc 半圆环补 ink 边线（mask 只减形不补线），圆心骑撕线两端。 */
-.tk-pk {
-  --hole-x: 172.75px; /* 撕线中心：216 − 右描边 2 − stub 42 + 撕线半宽 */
+/* 票面先 mask 打孔，外层 drop-shadow 根据挖空后的轮廓生成硬阴影。
+ * 孔位由票根宽度推导；阴影连同孔洞一起偏移，无独立阴影图层。 */
+.ticket-shell {
+  --ticket-border: 2px;
+  --ticket-stub-width: 38px;
+  --ticket-perforation-width: 1.5px;
+  --hole-radius: 6px;
+  --hole-x: calc(100% - var(--ticket-border) - var(--ticket-stub-width) + var(--ticket-perforation-width) / 2);
+  position: relative; /* 仅供孔缘定位 */
+  filter: drop-shadow(var(--drop-shadow-hard));
+}
+.ticket-title {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.ticket-stub {
+  width: var(--ticket-stub-width);
+  border-left-width: var(--ticket-perforation-width);
+  border-left-color: var(--color-ink);
+}
+.ticket-perforation {
+  position: absolute;
+  inset: calc(0px - var(--ticket-border)); /* 扩展到票面 border-box，与 mask 使用同一坐标系 */
+  pointer-events: none;
+}
+.ticket-perforation::before {
+  content: '';
+  position: absolute;
+  inset-block: 0;
+  left: calc(var(--hole-x) - var(--ticket-perforation-width) / 2);
+  border-left: var(--ticket-perforation-width) dashed var(--color-ink);
+}
+.ticket-lift {
+  transition: transform 150ms, filter 150ms;
+}
+.ticket-lift:hover {
+  filter: drop-shadow(var(--drop-shadow-hard-lift));
+  transform: translateY(-3px);
 }
 .ticket-pk {
   -webkit-mask-image:
-    radial-gradient(circle 7px at var(--hole-x) 0, transparent 6px, #000 6.5px),
-    radial-gradient(circle 7px at var(--hole-x) 100%, transparent 6px, #000 6.5px);
+    radial-gradient(circle calc(var(--hole-radius) + 1px) at var(--hole-x) 0, transparent var(--hole-radius), #000 calc(var(--hole-radius) + 0.5px)),
+    radial-gradient(circle calc(var(--hole-radius) + 1px) at var(--hole-x) 100%, transparent var(--hole-radius), #000 calc(var(--hole-radius) + 0.5px));
   -webkit-mask-composite: source-in;
   mask-image:
-    radial-gradient(circle 7px at var(--hole-x) 0, transparent 6px, #000 6.5px),
-    radial-gradient(circle 7px at var(--hole-x) 100%, transparent 6px, #000 6.5px);
+    radial-gradient(circle calc(var(--hole-radius) + 1px) at var(--hole-x) 0, transparent var(--hole-radius), #000 calc(var(--hole-radius) + 0.5px)),
+    radial-gradient(circle calc(var(--hole-radius) + 1px) at var(--hole-x) 100%, transparent var(--hole-radius), #000 calc(var(--hole-radius) + 0.5px));
   mask-composite: intersect;
 }
-/* 孔缘弧线：16px 圆环（描边带 r6–8），clip-path 只留票内一半，不进阴影轮廓 */
+/* 孔缘尺寸由孔径与描边推导，只保留票内一半，随票面一起投影 */
 .pk-arc {
   position: absolute;
-  left: calc(var(--hole-x) - 8px);
-  width: 16px;
-  height: 16px;
-  border: 2px solid var(--color-ink);
+  left: calc(var(--hole-x) - var(--hole-radius) - var(--ticket-border));
+  width: calc((var(--hole-radius) + var(--ticket-border)) * 2);
+  height: calc((var(--hole-radius) + var(--ticket-border)) * 2);
+  border: var(--ticket-border) solid var(--color-ink);
   border-radius: 9999px;
   pointer-events: none;
 }
 .pk-arc-t {
-  top: -8px;
+  top: calc(0px - var(--hole-radius) - var(--ticket-border));
   clip-path: inset(50% 0 0 0);
 }
 .pk-arc-b {
-  bottom: -8px;
+  bottom: calc(0px - var(--hole-radius) - var(--ticket-border));
   clip-path: inset(0 0 50% 0);
 }
 

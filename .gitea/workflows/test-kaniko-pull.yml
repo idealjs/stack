@@ -47,7 +47,7 @@ jobs:
           echo "proxy 相关环境变量："
           node -e 'Object.entries(process.env).filter(([k])=>/proxy/i.test(k)).forEach(([k,v])=>console.log(k+"="+v))'
           echo "（上面无输出 = 没有配置代理）"
-          /kaniko/executor --version
+          /kaniko/executor version
 
       - name: 端到端直测（node 换 token 并真实访问 oonlyu）
         env:

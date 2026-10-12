@@ -40,6 +40,7 @@ export function MemphisCard({
   zoneText,
   href,
   morph = false,
+  corner,
 }: {
   chapter: Chapter
   entry?: 1 | 2 | 3
@@ -50,6 +51,8 @@ export function MemphisCard({
   href?: string
   /** 挂 view-transition-name（跨文档共享元素变形）。同页同章多卡时勿开（重名失效） */
   morph?: boolean
+  /** 右上角插槽（随卡片 hover 浮起）：RoutableCard 的卡片号徽章由此进入 */
+  corner?: ReactNode
 }) {
   const [gifOn, setGifOn] = useState(false)
   const [locked, setLocked] = useState(false)
@@ -97,6 +100,7 @@ export function MemphisCard({
       aria-label={`${chapter.title}：${chapter.target.goal}`}
     >
       {entry && <EntryBadge n={entry} />}
+      {corner}
       {/* ○ 预期结果：16:9 相框（章节撞色只进这里） */}
       <div
         className="relative flex aspect-video items-center justify-center overflow-hidden rounded-lg border-[3px] border-ink"

@@ -123,7 +123,7 @@ export function ChapterPage({ id }: { id: ChapterId }) {
             href="/index.html"
             className="rounded-xl border-2 border-ink bg-ink px-4 py-2 text-[12.5px] font-bold text-paper no-underline"
           >
-            返回书架
+            返回首页
           </a>
           {next ? (
             <a

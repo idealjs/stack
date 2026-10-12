@@ -2,7 +2,8 @@ import { Page, Section } from '../../lib/ui'
 import { ASSIGNMENT, CHAPTERS, EDGES, PROFILES } from '../../lib/chapters'
 import { RouteLine } from '@stack/design-system'
 import { MemphisCard } from '@stack/design-system'
-import { AssignBlock, Ticket } from '@stack/design-system'
+import { AssignBlock, ChapterTicket } from '@stack/design-system'
+import { TicketPreview } from '../../components/TicketPreview'
 import { EntryGuide } from '@stack/design-system'
 import { Mark } from '@stack/design-system'
 
@@ -44,10 +45,13 @@ export function App() {
       </Section>
       <Section label="票券 ＆ 指派学习块" note="票=完成状态；块=位置/预期/场景＋脱靶标记">
         <div className="flex flex-wrap items-start gap-8">
-          <Ticket chapter={CHAPTERS[1]} done />
-          <Ticket chapter={CHAPTERS[5]} done={false} />
+          <ChapterTicket chapter={CHAPTERS[1]} done />
+          <ChapterTicket chapter={CHAPTERS[5]} done={false} />
           <AssignBlock {...ASSIGNMENT} />
         </div>
+      </Section>
+      <Section label="Ticket · 可配置票券" note="孔位支持 px、百分比与 calc()；孔径单位 px；hover 浮起 3px，阴影 5→8px">
+        <TicketPreview />
       </Section>
       <Section label="入口梳理" note="推荐不是强制——无锁">
         <EntryGuide chapters={CHAPTERS} profiles={PROFILES} />

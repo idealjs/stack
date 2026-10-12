@@ -1,4 +1,8 @@
-import { createRoot } from 'react-dom/client'
+import { mount } from '../../mount'
 import { ChapterPage } from '../../components/ChapterPage'
 
-createRoot(document.getElementById('root')!).render(<ChapterPage id={1} />)
+const page = <ChapterPage id={1} />
+
+export default page
+
+if (typeof document !== 'undefined') mount(page)

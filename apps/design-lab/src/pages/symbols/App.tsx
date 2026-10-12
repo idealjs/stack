@@ -1,7 +1,7 @@
 import { Page, Section } from '../../lib/ui'
 import { BrickDot, Cross, Mark, Ring, Tremble, Tri, Wave } from '@stack/design-system'
 import { CHAPTERS } from '../../lib/chapters'
-import { Ticket } from '@stack/design-system'
+import { ChapterTicket } from '@stack/design-system'
 import type { ReactNode } from 'react'
 
 const SHAPES = [
@@ -91,8 +91,8 @@ export function App() {
       </Section>
       <Section label="票券" note="状态的载体——完成即打孔（裁切式实现）">
         <div className="flex flex-wrap items-start gap-6">
-          <Ticket chapter={CHAPTERS[1]} done />
-          <Ticket chapter={CHAPTERS[5]} done={false} />
+          <ChapterTicket chapter={CHAPTERS[1]} done />
+          <ChapterTicket chapter={CHAPTERS[5]} done={false} />
           <p className="m-0 max-w-[280px] flex-1 text-content leading-relaxed text-body">
             <b>完成＝沿撕线打双孔</b>（半圆缺口）；未开始撕线为实线、无孔。头部色块无独立描边，由票体 overflow-hidden 裁出单一描边圆角。票号＝章程序号。
           </p>

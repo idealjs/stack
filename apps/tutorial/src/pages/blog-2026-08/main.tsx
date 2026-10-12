@@ -1,4 +1,8 @@
-import { createRoot } from 'react-dom/client'
+import { mount } from '../../mount'
 import { BlogDatePage } from '../../components/BlogPages'
 
-createRoot(document.getElementById('root')!).render(<BlogDatePage dateKey="2026-08" />)
+const page = <BlogDatePage dateKey="2026-08" />
+
+export default page
+
+if (typeof document !== 'undefined') mount(page)
