@@ -1,4 +1,4 @@
-/** idealjs stack 首页：三段文案，各带一个入口按钮（学习 / 博客 / 敬请期待）。 */
+/** idealjs stack 首页：教程、博客与浏览器练习场入口。 */
 import { Page } from '../../lib/ui'
 import { Button } from '@stack/design-system'
 import { MONTHS } from '../../content/blogs'
@@ -22,10 +22,10 @@ export function App() {
           )}
         </div>
         <p className="mb-0 mt-7 text-content">
-          未来，我们还将推出在线 Agent 编辑器，让你在浏览器中与 AI 一起编写、运行和改进代码。
+          在浏览器练习场中，通过 WebContainer 运行工程，与 Agent 一起编写、运行和改进代码。
         </p>
         <div className="mt-2.5">
-          <Button disabled>Agent 编辑器 · 敬请期待</Button>
+          <Button tone="clash2b" href="/practice.html">打开在线练习场</Button>
         </div>
       </div>
     </Page>

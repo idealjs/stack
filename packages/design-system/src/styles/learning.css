@@ -97,6 +97,7 @@
 .learning-note-paper h3 { margin-bottom: 12px; }
 .learning-note-pin { position: absolute; left: calc(50% - 6px); top: 10px; width: 12px; height: 12px; border: 2px solid var(--color-ink); border-radius: 50%; background: var(--color-paper); }
 .learning-note-fold { position: absolute; right: 0; bottom: 0; width: 30px; height: 30px; border-top: 2px solid var(--color-ink); border-left: 2px solid var(--color-ink); background: var(--color-paper-deep); }
+.learning-note[data-size='compact'] .learning-note-paper { min-height: 0; padding: 30px 20px 28px; }
 
 /* 04 / 可标记的书签 */
 .learning-bookmark-shell { width: fit-content; max-width: 100%; filter: drop-shadow(var(--drop-shadow-hard)); }
@@ -219,6 +220,18 @@
 .learning-brick dt { font-weight: 800; }
 .learning-brick dd { margin: 2px 0 10px; color: var(--color-body); }
 .learning-brick dd:last-child { margin-bottom: 0; }
+.learning-toolbox[data-variant='overview'] .learning-toolbox-tray { align-items: start; gap: 22px 16px; padding: 24px 16px 18px; }
+.learning-toolbox[data-variant='overview'] .learning-brick summary { padding: 10px 12px 12px; }
+.learning-toolbox[data-variant='overview'] .learning-brick summary b { padding-right: 20px; }
+.learning-toolbox[data-variant='overview'] .learning-eyebrow { color: var(--color-body); font-size: 10px; letter-spacing: 0; }
+.learning-brick-summary { display: block; margin-top: 4px; color: var(--color-body); font-size: 12px; line-height: 1.5; }
+@media (min-width: 360px) {
+  .learning-toolbox[data-variant='overview'] .learning-toolbox-tray { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .learning-toolbox[data-variant='overview'] .learning-brick[open] { grid-column: 1 / -1; }
+}
+@media (min-width: 1024px) {
+  .learning-toolbox[data-variant='overview'] .learning-toolbox-tray { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
 
 /* 11 / 交付装箱单 */
 .learning-manifest { padding: 20px; border: 2px solid var(--color-ink); border-radius: 3px; background: var(--color-paper); box-shadow: var(--shadow-hard); }
@@ -245,6 +258,7 @@
 .learning-comparison-page h4 { width: fit-content; max-width: 100%; margin: -2px 0 18px -2px; padding: 6px 12px; border: 2px solid var(--color-ink); border-radius: 0 0 5px 5px; background: var(--color-clash1a); font-size: 11px; font-weight: 800; }
 .learning-comparison-page:nth-child(2) h4 { background: var(--color-clash1b); }
 .learning-comparison-link { grid-column: 2; grid-row: 1; align-self: center; display: flex; align-items: center; justify-content: center; width: 30px; height: 30px; border: 2px solid var(--color-ink); border-radius: 50%; background: var(--color-paper); font-size: 17px; }
+.learning-comparison-link[data-connector='or'] { transform: none; font-size: 12px; font-weight: 800; }
 
 /* 同一份标本供两个组件页复用。 */
 .learning-gallery { --learning-accent: var(--color-clash2a); }
@@ -277,6 +291,7 @@
   .learning-comparison-page:first-child { grid-column: 1; grid-row: 1; }
   .learning-comparison-page:nth-child(2) { grid-column: 1; grid-row: 3; }
   .learning-comparison-link { grid-column: 1; grid-row: 2; justify-self: center; transform: rotate(90deg); }
+  .learning-comparison-link[data-connector='or'] { transform: none; }
 }
 @media (max-width: 620px) {
   .learning-gallery-grid { grid-template-columns: minmax(0, 1fr); gap: 30px; }
@@ -285,6 +300,7 @@
   .learning-comparison-page:first-child { grid-column: 1; grid-row: 1; }
   .learning-comparison-page:nth-child(2) { grid-column: 1; grid-row: 3; }
   .learning-comparison-link { grid-column: 1; grid-row: 2; justify-self: center; transform: rotate(90deg); }
+  .learning-comparison-link[data-connector='or'] { transform: none; }
 }
 @media (prefers-reduced-motion: reduce) {
   .learning-action, .learning-bookmark { transition: none; }

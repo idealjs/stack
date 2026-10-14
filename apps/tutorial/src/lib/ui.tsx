@@ -77,6 +77,7 @@ export function Page({
   subtitle,
   desc,
   active,
+  navigation = 'all',
   children,
 }: {
   /** 章节页标题在章头横幅里，可省 */
@@ -86,6 +87,8 @@ export function Page({
   desc?: string
   /** 站头高亮：章节 id / 首页 / 开始学习（learn）/ 分块着陆页（blog、design、practice）/ 设计系统册 / 博客月（blog-YYYY-MM） */
   active?: ChapterId | 'index' | 'learn' | 'blog' | 'design' | 'practice' | DesignKey | `blog-${string}`
+  /** 概览页只展开当前分块；顶层入口始终可见。 */
+  navigation?: 'all' | 'section'
   children: ReactNode
 }) {
   // 语义 active → 导航 key：learn 页归入 tutorial 分块（高亮分块与行首，不选中任何条目）
@@ -103,7 +106,9 @@ export function Page({
       <SiteNavbar
         brand={{ key: 'index', label: 'idealjs stack', href: '/index.html' }}
         sections={NAV_SECTIONS}
-        rows={NAV_ROWS}
+        rows={navigation === 'section'
+          ? NAV_ROWS.filter((row) => row.sectionKey === activeKey || row.items.some((item) => item.key === activeKey))
+          : NAV_ROWS}
         active={activeKey}
         viewTransitionName="site-header"
       />
@@ -142,9 +147,9 @@ export function Page({
   )
 }
 
-export function Section({ label, note, children }: { label: string; note?: string; children: ReactNode }) {
+export function Section({ label, note, id, className = '', children }: { label: string; note?: string; id?: string; className?: string; children: ReactNode }) {
   return (
-    <section className="mb-8">
+    <section id={id} className={`mb-8 ${className}`}>
       <h2 className="mb-2.5 flex flex-wrap items-baseline gap-2">
         <span className="t-small-strong">{label}</span>
         {note && <i className="t-small-mute not-italic">{note}</i>}

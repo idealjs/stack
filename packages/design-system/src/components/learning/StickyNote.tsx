@@ -6,12 +6,13 @@ export interface StickyNoteProps {
   title: string
   children: ReactNode
   tone?: LearningTone
+  size?: 'default' | 'compact'
   className?: string
 }
 
-export function StickyNote({ title, children, tone = 'yellow', className = '' }: StickyNoteProps) {
+export function StickyNote({ title, children, tone = 'yellow', size = 'default', className = '' }: StickyNoteProps) {
   return (
-    <aside data-comp="sticky-note" className={`learning-object learning-note ${className}`} style={toneStyle(tone)}>
+    <aside data-comp="sticky-note" data-size={size} className={`learning-object learning-note ${className}`} style={toneStyle(tone)}>
       <div className="learning-note-paper">
         <span className="learning-note-pin" aria-hidden="true" />
         <h3>{title}</h3>

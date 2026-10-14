@@ -6,24 +6,26 @@ export interface ComparisonSide {
 }
 
 export interface ComparisonBoardProps {
-  title: string
+  title?: string
   left: ComparisonSide
   right: ComparisonSide
   caption?: string
+  /** 对照用双向箭头，互斥的路线选择用“或”。 */
+  connector?: 'compare' | 'or'
   className?: string
 }
 
-export function ComparisonBoard({ title, left, right, caption, className = '' }: ComparisonBoardProps) {
+export function ComparisonBoard({ title, left, right, caption, connector = 'compare', className = '' }: ComparisonBoardProps) {
   return (
     <section data-comp="comparison-board" className={`learning-object learning-comparison ${className}`}>
-      <h3>{title}</h3>
+      {title && <h3>{title}</h3>}
       <div className="learning-comparison-pages">
         {[left, right].map((side, index) => (
           <section key={index} className="learning-comparison-page">
             <h4>{side.label}</h4><div className="learning-prose">{side.content}</div>
           </section>
         ))}
-        <span className="learning-comparison-link" aria-hidden="true">↔</span>
+        <span className="learning-comparison-link" data-connector={connector} aria-hidden="true">{connector === 'or' ? '或' : '↔'}</span>
       </div>
       {caption && <p className="learning-description">{caption}</p>}
     </section>

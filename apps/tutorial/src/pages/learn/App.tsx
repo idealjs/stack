@@ -1,83 +1,64 @@
-/** 教程首页——首屏到第二屏回答读者的五个问题（OUTLINE-v2.md §1）：
- * 做什么（终点先行）→ 用什么（积木清单）→ 在哪练（两条路线）→ 要多久（时间便签）→ 凭什么（数据控制）。
- *
- * 组件组合：ExperimentFrame（成品预览）＋ BrickToolbox（积木三句话）＋
- * ComparisonBoard（环境两条路线对照）＋ StickyNote（时间便签）＋ Scatter（形状点缀，种子化）。
- *
- * 个人中心（后期上线）预留的接缝：
- * - 英雄区 CTA 的「个人中心」用 disabled Button 占位（虚线占位·不动不起），上线后替换为链接（进度/任务/Key 管理）；
- * - 积木清单的 learned 字段目前恒为 false，后期由个人中心的学习进度驱动。 */
+/** 课程概览：成品 → 时间与主线 → 技术积木 → 练习环境。 */
 import { Page, Section } from '../../lib/ui'
-import { Button, BrickToolbox, ComparisonBoard, ExperimentFrame, Mark, Scatter, StickyNote } from '@stack/design-system'
-import { BrickDot, Cross, Ring, Tremble, Tri, Wave } from '@stack/design-system'
+import { Button, BrickToolbox, ComparisonBoard, ExperimentFrame, Mark, StickyNote } from '@stack/design-system'
 import type { ToolboxBrick } from '@stack/design-system'
-import { TodoMock } from './components/TodoMock'
+import { TodoPreview } from './components/TodoPreview'
+import './learn.css'
 
-/** 积木清单——从全局靶子倒推，只列用到的；三句话口径见 ai-era-tutorial skill。
- * learned 后期由个人中心进度驱动，此处先恒为待学。 */
 const BRICKS: readonly ToolboxBrick[] = [
   {
-    id: 'html',
-    name: 'HTML 骨架与标签',
-    what: '浏览器页面的结构语言：三件套骨架，加标题、列表、按钮这些零件标签。',
-    why: '第 3 章起你写的每层界面都由它撑起——todolist 的骨架就是一张列表。',
-    family: '标签一族（语义/表单/媒体）——要「结构」找标签，要「行为」找 JS。',
+    id: 'html', name: 'HTML', stage: '基础页面', summary: '搭出输入框、列表和按钮。',
+    what: '描述网页结构的标记语言。标签告诉浏览器哪些是标题、表单和列表。',
+    why: '为待办应用搭出结构，让每一项数据都有展示的位置。',
+    family: '语义标签与表单元素。样式交给 CSS，交互交给 JavaScript。',
   },
   {
-    id: 'dom',
-    name: 'DOM 操作',
-    what: '浏览器把页面开放给 JS 的操作口：查到元素、改它、增删它。',
-    why: '第 3 章你靠它亲手把数组重画成界面——这是理解框架「替你做了什么」的前提。',
-    family: '界面操作一族（原生 DOM / 框架虚拟 DOM）——框架只改变「谁来操作」，口子本身不变。',
+    id: 'css', name: 'CSS', stage: '基础页面', summary: '控制布局、颜色和完成样式。',
+    what: '描述页面外观的样式语言，通过选择器匹配需要设置样式的元素。',
+    why: '排列待办条目，为已完成的任务显示删除线，并适配不同屏幕。',
+    family: '选择器、Flexbox、Grid；Tailwind CSS 是组织样式的另一种方式。',
   },
   {
-    id: 'js',
-    name: 'JS（变量/数组/事件）',
-    what: '页面的行为语言：数据住在变量里、待办清单是数组、用户动作是事件。',
-    why: 'todolist 的增删全靠它——「数据控制」的起点。',
-    family: '编程语言一族（JS/TS）——TS 只是把「说清楚」变成硬约束。',
+    id: 'js', name: 'JavaScript', stage: '基础交互', summary: '响应操作，修改待办数据。',
+    what: '处理数据与交互的编程语言。DOM 是 JavaScript 读取和修改页面的接口。',
+    why: '用数组存放待办，响应添加、删除和勾选，再把变化呈现在页面上。',
+    family: '变量、数组、事件与 DOM 操作。这些基础也会用于 React 版本。',
   },
   {
-    id: 'css',
-    name: 'CSS（内联/文件/选择器）',
-    what: '界面的样式语言：内联与样式文件两种形式，选择器决定命中谁。',
-    why: '第 3 章给 todolist 穿衣服，并讲清两种形式的工程分界。',
-    family: '样式组织一族（原生 CSS / Tailwind / CSS-in-JS）——第 4 章的 Tailwind 是同一问题的另一种答案。',
+    id: 'react', name: 'React', stage: '组件与数据流', summary: '用组件和状态组织界面。',
+    what: '构建用户界面的库。组件描述界面，state 保存状态，props 把数据和回调传给子组件。',
+    why: '把待办拆成输入区、列表和条目。更新状态后，由 React 更新对应界面。',
+    family: '组件、state、props 与状态提升；共享的数据由共同的父组件管理。',
   },
   {
-    id: 'react',
-    name: 'React 组件与 state',
-    what: '把界面拆成零件；数据一变，界面自动跟着变。',
-    why: '第 4 章用它重写第 3 章的 todolist——手动重绘消失，数据控制升级成声明。',
-    family: '前端框架一族（React/Vue/Svelte）——学的是「声明式」这个共性，换框架不难。',
+    id: 'ts', name: 'TypeScript', stage: '类型检查', summary: '明确每条待办的数据结构。',
+    what: '为 JavaScript 增加类型检查的语言，在运行前发现部分代码错误。',
+    why: '写清待办的 id、文字和完成状态，检查字段名或数据类型是否用错。',
+    family: '接口、联合类型与类型推断；类型检查与运行时的数据校验各有职责。',
   },
   {
-    id: 'props',
-    name: 'props（父子数据流）',
-    what: '父组件把数据递给子组件的通道：数据向下、事件向上。',
-    why: '待办拆成输入条/清单/条目之后，「数据住谁家」靠它回答。',
-    family: '组件通信一族（props/上下文/状态库）——先精通 props，再谈别的。',
+    id: 'tailwind', name: 'Tailwind CSS', stage: '样式组织', summary: '用工具类组合界面样式。',
+    what: '提供 CSS 工具类的样式框架，把常用样式组合在元素的 class 中。',
+    why: '用另一种方式实现同一个待办界面，对比工具类和样式文件的取舍。',
+    family: '原生 CSS、工具类与组件样式；都需要理解布局和 CSS 的基础规则。',
   },
   {
-    id: 'ts',
-    name: 'TypeScript 类型',
-    what: '给数据定型的语言：Todo 长什么样写清楚，拼错字段编译期就报错。',
-    why: '第 4 章给待办数据定型——agent 给的代码里这类错误从此瞒不过你。',
-    family: '类型系统一族（TS/JSDoc）——JS 的超集，可以渐进采用。',
+    id: 'vite', name: 'Vite', stage: '运行与构建', summary: '运行工程，生成部署产物。',
+    what: '提供开发服务器和构建能力的工具。开发时预览修改，构建时生成发布文件。',
+    why: '跑起待办工程，并看懂源码怎样变成可部署的 HTML、CSS 和 JavaScript。',
+    family: 'Node.js、npm、开发服务器与构建产物；区分开发环境和发布环境。',
   },
   {
-    id: 'tailwind',
-    name: 'TailwindCSS 工具类',
-    what: '把样式写成 class 名的工具类方案。',
-    why: '第 4 章用它复刻第 3 章的样式——同一个问题的工程化答案。',
-    family: '样式方案一族（原子类/语义类/CSS-in-JS）——取舍在于「写在哪、怎么复用」。',
+    id: 'api', name: 'HTTP / API', stage: '前后端连接', summary: '让浏览器与服务端交换数据。',
+    what: 'HTTP 是请求与响应的通信协议，API 约定应用如何读取和修改数据。',
+    why: '把添加、删除和勾选待办变成服务端请求，并处理返回结果。',
+    family: '请求方法、JSON、状态码与服务端校验。',
   },
   {
-    id: 'vite',
-    name: 'Vite 开发服务器与构建',
-    what: '本地秒开的热更新服务器，加上把源码打包成可部署产物的构建器。',
-    why: '第 2 章起你天天用它跑工程；第 4 章解剖它的产物。',
-    family: '构建工具一族（Vite/webpack/esbuild）——它是工程的地基，属于认知基础。',
+    id: 'database', name: 'SQLite / Prisma', stage: '数据保存', summary: '保存待办，刷新后仍能读取。',
+    what: 'SQLite 是数据库；Prisma 帮助代码按约定的数据结构读写数据库。',
+    why: '让服务端保存待办数据，浏览器重新打开时通过 API 读取。',
+    family: '数据模型、数据库迁移与持久化；界面状态和长期保存的数据需要配合。',
   },
 ]
 
@@ -85,123 +66,88 @@ export function App() {
   return (
     <Page
       active="learn"
+      navigation="section"
       title="全栈教程"
-      desc="从第一个网页到行业标配框架——同一支 todolist，逐层重写。终点先行：先看清楚要做出什么，再出发。"
+      desc="从第一个网页到前后端协作，用同一个待办应用串起整个过程。"
     >
-      {/* 1.1 做什么：终点先行 */}
-      <Section label="终点先行" note="学完这门教程，你将亲手做出并看懂右边这个东西">
-        <div className="relative">
-          {/* 形状点缀：散在内容盒附近的空当里，种子固定、基线可测 */}
-          <Scatter
-            seed={11}
-            shapes={[
-              <Tri size={20} />,
-              <Ring size={18} />,
-              <Wave size={28} />,
-              <span className="flex gap-1">
-                <BrickDot on />
-                <BrickDot />
-              </span>,
-              <Cross size={16} />,
-              <Tremble size={20} />,
-            ]}
-          />
-          <div className="relative grid items-start gap-8 lg:grid-cols-[minmax(0,1fr)_360px]">
-            <div data-comp="hero-copy" className="min-w-0">
-              <p className="m-0 text-content leading-relaxed text-body">
-                <b className="text-ink">目标</b>：做出一个你自己天天会用的<b className="text-ink">单人版 todolist</b>
-                ——你负责指挥 agent 与逐条核对，长出识别力。
-              </p>
-              <p className="mb-0 mt-3 text-content leading-relaxed text-body">
-                <b className="text-ink">预期结果</b>：待办可增删、可勾选完成，界面即时跟随数据变化；
-                同一份功能经历五次重写（HTML → JS → CSS → React → React + TS + Tailwind），
-                你能对照任意两个版本，指出这一层替你做了什么。
-              </p>
-              <div className="mt-5 flex flex-wrap items-center gap-3">
-                <Button tone="clash1b" href="/practice.html">
-                  直接开练 · 去练习场
-                </Button>
-                <Button href="#bricks">先看用什么</Button>
-                {/* 个人中心：后期上线后替换为链接（进度/任务/Key 管理），此前保持虚线占位 */}
-                <Button disabled>个人中心 · 敬请期待</Button>
-              </div>
-            </div>
-            <ExperimentFrame
-              title="单人版 TodoList"
-              address="localhost:5173"
-              status="running"
-              caption="终点示意 · 静态预览"
-              className="w-full max-w-[360px] justify-self-start lg:justify-self-end"
-            >
-              <TodoMock />
-            </ExperimentFrame>
-          </div>
+      <section className="learn-hero" aria-labelledby="learn-goal">
+        <div className="learn-hero-copy">
+          <h2 id="learn-goal">做一个自己的待办清单</h2>
+          <p>
+            学完做出一个<b>单人版 TodoList</b>：添加、删除、勾选完成，界面随数据更新；
+            接上 API 和数据库后，刷新页面，待办仍然保留。
+          </p>
+          <p className="learn-hero-meta">
+            主线：<a href="#data-control">数据控制</a><span aria-hidden="true"> · </span>通读约 60–90 分钟
+          </p>
         </div>
+        <ExperimentFrame title="你的待办应用" address={null} status="demo" caption="刷新后重置" className="learn-preview">
+          <TodoPreview />
+        </ExperimentFrame>
+        <div className="learn-hero-actions">
+          <Button tone="clash1b" href="/ch1.html">从第一个网页开始 <span aria-hidden="true">→</span></Button>
+          <Button href="/practice.html">打开练习场</Button>
+          <p>你提出需求，Agent 协助实现；再对照结果，理解代码为什么这样工作。</p>
+        </div>
+      </section>
+
+      <div className="learn-overview">
+        <section id="data-control" className="learn-core" aria-labelledby="learn-core-title">
+          <h2 id="learn-core-title">全栈的核心：<Mark>数据控制</Mark></h2>
+          <p>数据由谁管理、怎样变化、如何保存，又怎样呈现在界面上？这是贯穿教程的主线。</p>
+          <ol className="learn-data-flow" aria-label="一次勾选操作的数据流">
+            <li><b>用户操作</b><span>勾选一条待办</span></li>
+            <li><b>更新数据</b><span>修改完成状态</span></li>
+            <li><b>更新界面</b><span>显示勾选和删除线</span></li>
+            <li><b>保存数据</b><span>通过 API 写入数据库</span></li>
+          </ol>
+          <p className="learn-core-note">前端让数据可见、可操作；后端校验并保存数据。先理解这条流向，再逐步加入框架和工具。</p>
+        </section>
+        <StickyNote title="要多久" tone="teal" size="compact">
+          <dl className="learn-time-list">
+            <div><dt>通读主线</dt><dd>60–90 分钟</dd></div>
+            <div><dt>边读边练</dt><dd>4–6 小时</dd></div>
+            <div><dt>本地环境搭建</dt><dd>30–60 分钟</dd></div>
+          </dl>
+          <p className="learn-time-note">时间为预估。跟练不含本地搭建，建议分 2–3 次完成；通读不含拓展阅读。</p>
+        </StickyNote>
+      </div>
+
+      <Section id="bricks" className="learn-section" label="用哪些技术" note="先学页面与交互，再组织工程，最后连接并保存数据。">
+        <BrickToolbox title="项目里的技术积木" variant="overview" bricks={BRICKS} />
+        <p className="learn-section-note">先看每块积木的用途，需要时展开详情。我们逐步完善同一个应用，再用 React、TypeScript 和 Tailwind CSS 改写它。</p>
       </Section>
 
-      {/* 1.2 用什么：积木清单 */}
-      <Section label="用什么" note="从终点倒推的积木清单，只列用到的；点开看每块的三句话" >
-        <div id="bricks" className="scroll-mt-40">
-          <BrickToolbox title="积木清单" bricks={BRICKS} />
-        </div>
-      </Section>
-
-      {/* 1.3 在哪练：两条环境路线 */}
-      <Section label="在哪练" note="两条路线任选其一，产物完全一致，随时可切换">
+      <Section id="environments" className="learn-section" label="在哪里练习" note="浏览器或本地，按你的使用习惯选择。">
         <ComparisonBoard
-          title="环境 · 两条路线"
-          caption="选顺手的就好，别在选路上花时间。两条路线的差别与搭建细节，见「环境处理和搭建」。"
+          connector="or"
           left={{
-            label: '线上 playground · 立刻开始',
+            label: '浏览器练习 · 推荐起步',
             content: (
               <>
-                <p className="m-0 text-small leading-relaxed text-body">
-                  本站自带：浏览器里跑<b className="text-ink">真实工程</b>（WebContainer），陪练 agent
-                  已就位——填一个 API key 就能动工，零安装。
-                </p>
-                <p className="mb-0 mt-3">
-                  <Button tone="clash2b" href="/practice.html">
-                    去练习场
-                  </Button>
-                </p>
+                <dl className="learn-environment-list">
+                  <div><dt>运行项目</dt><dd>本站的 WebContainer 在浏览器里运行工程，无需本地安装开发工具。</dd></div>
+                  <div><dt>协助实现</dt><dd>Agent Playground 根据你的要求修改代码、执行命令，你通过预览检查结果。</dd></div>
+                </dl>
+                <p className="learn-environment-note">使用 Agent 前配置模型 API Key；项目环境会自动启动。</p>
+                <Button tone="clash1b" href="/practice.html">打开浏览器练习场</Button>
               </>
             ),
           }}
           right={{
-            label: '本地工程 · 贴近真实',
+            label: '本地开发 · 使用自己的工具',
             content: (
               <>
-                <p className="m-0 text-small leading-relaxed text-body">
-                  你自己的机器＋你自己的 agent：node、编辑器、dev server
-                  一样不少。「环境处理和搭建」会带你搭起来，并把这些脚下的地逐一露出来。
-                </p>
-                <p className="mb-0 mt-3 t-small-mute">该章排期实现中——先把练习场跑起来不亏。</p>
+                <dl className="learn-environment-list">
+                  <div><dt>运行项目</dt><dd>在自己的电脑上准备 Node.js、编辑器和终端，运行开发服务器。</dd></div>
+                  <div><dt>协助实现</dt><dd>使用你熟悉的 Agent 修改项目，并在本地浏览器里检查页面和数据变化。</dd></div>
+                </dl>
+                <p className="learn-environment-note">首次搭建预留 30–60 分钟，从「快速开始」查看环境准备。</p>
+                <Button href="/ch1.html">查看本地环境准备</Button>
               </>
             ),
           }}
         />
-      </Section>
-
-      {/* 1.4 要多久：时间便签 */}
-      <Section label="要多久" note="预估——按「通读 / 跟练 / 分几次」给数，卡住就问你的 agent">
-        <StickyNote title="时间投入便签" tone="teal" className="max-w-[520px]">
-          <ul className="m-0 flex list-none flex-col gap-1 p-0 text-small leading-relaxed text-body">
-            <li>纯通读：约 <b className="text-ink">1–1.5 小时</b>；</li>
-            <li>边读边跟练：约 <b className="text-ink">4–6 小时</b>，分 2–3 次为宜；</li>
-            <li>环境搭建：一次性 <b className="text-ink">30 分钟–1 小时</b>。</li>
-          </ul>
-        </StickyNote>
-      </Section>
-
-      {/* 1.5 凭什么：全栈的核心——数据控制 */}
-      <Section label="凭什么 · 全栈的核心" note="这条线贯穿全部章节，学完回头看，每一层都在做同一件事">
-        <p className="m-0 max-w-[72ch] text-content leading-relaxed text-body">
-          界面是数据的影子。全栈要做的事只有一件：
-          <Mark>让数据听你的，让界面跟着数据走</Mark>
-          ——谁拥有数据、数据怎么变、变化怎么走到屏幕上。这支 todolist 会陪你把这条路走一遍：
-          先用 JS <b className="text-ink">亲手</b>重画（第 3 章），再交给 React <b className="text-ink">声明</b>（第 4 章），
-          再用 TS 给数据<b className="text-ink">定型</b>，最后回答数据<b className="text-ink">住在哪里</b>。
-        </p>
       </Section>
     </Page>
   )
