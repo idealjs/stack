@@ -1,5 +1,5 @@
 /** ShadowCard —— 阴影卡三部曲（票券效果的重推导；标本卡，内容留空）
- * 普通卡使用 shadow-hard；票券复用 Ticket 的票面 mask 与外层 drop-shadow。
+ * 普通卡使用 shadow-hard；票券复用 Ticket 的票面 mask 与内层包裹 drop-shadow。
  * 撕线在票面内，孔缘挂 wrapper，圆心与票面外缘使用同一坐标系。 */
 import type { ReactNode } from 'react'
 import { Ticket } from './Ticket'

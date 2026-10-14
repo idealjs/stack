@@ -1,5 +1,5 @@
 /** 入口梳理 —— 读者画像推荐路径：是推荐不是强制（无锁）。
- * 章节数据与画像由宿主注入（design-lab 演示数据 / tutorial 真实数据）。 */
+ * 章节数据与画像由宿主注入（真实教程数据）。 */
 import type { Chapter, ChapterId, Profile } from '../lib/types'
 
 export function EntryGuide({

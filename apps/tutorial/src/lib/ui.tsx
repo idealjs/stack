@@ -1,5 +1,5 @@
 /** 教程站页面骨架：站头导航跨页常驻（view-transition-name 共享元素，页间不闪烁）。
- * 站头为 design-system 的 SiteNavbar 组件（四行：品牌＋分块 / 全栈教程 / 博客 / 设计系统），
+ * 站头为 design-system 的 SiteNavbar 组件（五行：品牌＋分块 / 全栈教程 / 博客 / 设计系统 / 在线练习），
  * 本文件只负责把语义化的 active 翻译成导航 key，高亮细节由组件内部推导。 */
 import '@stack/design-system'
 import type { ReactNode } from 'react'
@@ -8,7 +8,7 @@ import { SiteNavbar } from '@stack/design-system'
 import { CHAPTERS } from './chapters'
 import { MONTHS } from '../content/blogs'
 
-/** 设计系统四册（自 design-lab 迁入） */
+/** 设计系统四册 */
 export type DesignKey = 'design-colors' | 'design-typography' | 'design-symbols' | 'design-components'
 
 const DESIGN: { href: string; label: string; key: DesignKey }[] = [
@@ -22,6 +22,7 @@ const NAV_SECTIONS: NavSectionLink[] = [
   { key: 'tutorial', label: '全栈教程', href: '/learn.html' },
   { key: 'blog', label: '博客', href: '/blog.html' },
   { key: 'design', label: '设计系统', href: '/design.html' },
+  { key: 'practice', label: '在线练习', href: '/practice.html' },
 ]
 
 const CHAPTER_ITEMS: NavItemLink[] = ([1, 2, 3, 4, 5, 6] as ChapterId[]).map((id) => ({
@@ -44,6 +45,13 @@ const NAV_ROWS: NavRowGroup[] = [
     label: '设计系统',
     href: '/design.html',
     items: DESIGN.map((n) => ({ key: n.key, label: n.label, href: n.href })),
+  },
+  {
+    sectionKey: 'practice',
+    label: '在线练习',
+    href: '/practice.html',
+    // v1 单任务直入练习场；任务库落地后由任务表生成（/practice.html?task=<id>）
+    items: [{ key: 'practice-starter', label: 'react-starter', href: '/practice.html', mono: true }],
   },
 ]
 
@@ -76,8 +84,8 @@ export function Page({
   /** 首页标语等补充标题 */
   subtitle?: string
   desc?: string
-  /** 站头高亮：章节 id / 首页 / 开始学习（learn）/ 分块着陆页（blog、design）/ 设计系统册 / 博客月（blog-YYYY-MM） */
-  active?: ChapterId | 'index' | 'learn' | 'blog' | 'design' | DesignKey | `blog-${string}`
+  /** 站头高亮：章节 id / 首页 / 开始学习（learn）/ 分块着陆页（blog、design、practice）/ 设计系统册 / 博客月（blog-YYYY-MM） */
+  active?: ChapterId | 'index' | 'learn' | 'blog' | 'design' | 'practice' | DesignKey | `blog-${string}`
   children: ReactNode
 }) {
   // 语义 active → 导航 key：learn 页归入 tutorial 分块（高亮分块与行首，不选中任何条目）

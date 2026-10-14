@@ -1,13 +1,16 @@
 import { Page, Section } from '../../lib/ui'
-import { CHAPTERS, PROFILES } from '../../lib/chapters'
+import { CHAPTERS, CONTENT, PROFILES } from '../../lib/chapters'
 import { RouteLine } from '@stack/design-system'
 import { MemphisCard } from '@stack/design-system'
-import { ChapterTicket, Ticket } from '@stack/design-system'
+import { ChapterTicket } from '@stack/design-system'
+import { AssignBlock } from '@stack/design-system'
 import { ShadowCard } from '@stack/design-system'
 import { EntryGuide } from '@stack/design-system'
 import { Mark } from '@stack/design-system'
 import { Button } from '@stack/design-system'
 import { RoutableScene, RoutableCard } from '@stack/design-system'
+import { LearningKitGallery } from '@stack/design-system/examples/learning-kit'
+import { TicketPreview } from './TicketPreview'
 
 /* RouteLine 演示坐标：SSG 静态回退针脚（与下方 plain 卡定位一致；水合后实测接管） */
 const nodes = {
@@ -25,7 +28,10 @@ const LINES = [
 
 export function App() {
   return (
-    <Page active="design-components" title="组件 · 入口载体与状态" desc="CourseCard（入口）· RouteLine（关系线与线条形式）· 票券（状态）· 指派块＋脱靶标记（任务与警示）· Button（行动）· 入口画像。">
+    <Page active="design-components" title="组件 · 入口载体与学习工作台" desc="纸张、文具与学习工作台：12 种拟物学习组件，加上课程卡、关系线、票券与行动按钮。">
+      <Section label="拟物学习组件" note="点击、勾选、翻面和展开，试试纸张与文具的交互。">
+        <LearningKitGallery />
+      </Section>
       <Section label="CourseCard" note="卡头三件套＝靶子；hover 拿起播放 GIF，8000ms 翻转；末张＝价值区标记用法">
         <div className="flex flex-wrap items-start gap-8">
           <div className="w-[280px]"><MemphisCard chapter={CHAPTERS[1]} entry={1} /></div>
@@ -98,14 +104,15 @@ export function App() {
           </div>
         </div>
       </Section>
-      <Section label="票券" note="票面打孔，阴影跟随轮廓生成；hover 浮起 3px，阴影 5→8px；自定义示例：孔位 50%，孔径 20px">
+      <Section label="票券 ＆ 指派学习块" note="票=完成状态；块=位置/预期/场景＋脱靶标记">
         <div className="flex flex-wrap items-start gap-8">
           <ChapterTicket chapter={CHAPTERS[1]} done />
           <ChapterTicket chapter={CHAPTERS[5]} done={false} />
-          <Ticket holePosition="50%" holeSize={20} className="flex h-[80px] w-[240px] items-center justify-center font-bold">
-            自定义票券
-          </Ticket>
+          {CONTENT[1].assign && <AssignBlock {...CONTENT[1].assign} />}
         </div>
+      </Section>
+      <Section label="Ticket · 可配置票券" note="孔位支持 px、百分比与 calc()；孔径单位 px；hover 浮起 3px，阴影 5→8px">
+        <TicketPreview />
       </Section>
       <Section label="Button" note="tone＝clash 六色实底；有 href＝链接，无 href＝动作按钮；hover 上层浮起 3px、下层硬阴影 5px→8px 位移；disabled＝虚线占位，不动不起">
         <div className="flex flex-wrap gap-3">

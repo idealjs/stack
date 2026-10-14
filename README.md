@@ -3,7 +3,7 @@
 # 路线图
 - [x] 调整结构，更改 [顶部导航栏](#顶部导航栏)
 - [ ] 入门教程补充一些视频，便于跟随操作
-- [ ] 在线教程增加在线预览能力（如 stackblitz 沙盒）
+- [x] 在线教程增加在线预览能力（WebContainer 沙盒，见 [在线练习](#在线练习)）
 - [ ] 升级框架
 
 # 顶部导航栏
@@ -11,6 +11,7 @@
 1. 全栈教程（在线教程）
 2. 工具使用（本地工具）
 3. 博客
+4. 在线练习（WebContainer 练习场 + 陪练 agent）
 
 ## 在线教程
 
@@ -56,6 +57,21 @@
 相比于入门教程，专业教程不再重视结果的反馈，而是原理性的解释。
 
 相关的结果，仅提供一些沙盒程序进行展示。（stackblitz）
+
+## 在线练习
+
+即导航栏中的 **在线练习**。
+
+浏览器里的 Node.js 练习场：一个 vite + react 模板工程跑在 WebContainer 中，读者指挥陪练 agent 改代码完成学习任务。agent 的模型接入由读者自填 key（默认 DeepSeek，兼容任意 OpenAI 兼容端点），key 仅保存在读者浏览器 localStorage。
+
+**部署要求**：WebContainer 依赖 SharedArrayBuffer，页面必须处于跨域隔离状态（`crossOriginIsolated`），服务端需为站点响应加两个头：
+
+```
+Cross-Origin-Opener-Policy: same-origin
+Cross-Origin-Embedder-Policy: require-corp
+```
+
+本地 `yarn dev` / `yarn preview` 已由 vite 配置（apps/tutorial/vite.config.ts）带上同名头；生产环境的反向代理（nginx 等）需做同样配置，否则练习页会提示启动失败。
 
 ## 反馈方式
 

@@ -36,8 +36,11 @@
   --color-ch6: #a78bfa;
 }
 
-/* 票面先 mask 打孔，外层 drop-shadow 根据挖空后的轮廓生成硬阴影。
- * 孔位由票根宽度推导；阴影连同孔洞一起偏移，无独立阴影图层。 */
+/* 票面先 mask 打孔；阴影由内层包裹 .ticket-shadow 的 drop-shadow 按挖空后的轮廓生成，
+ * 孔位由票根宽度推导；阴影连同孔洞一起偏移，无独立阴影图层。
+ * filter 不能放到 .ticket-face 上：同元素上 mask 在 filter 之后应用，会把孔位处的
+ * 阴影一起裁掉、偏移缺口消失；也不能留在 .ticket-shell 上——孔缘描边 .pk-arc 是 shell
+ * 的直接子元素，跟着投影后 hover 偏移变化时影子会脱开弧根、落进透明孔口读成悬浮横线。 */
 .ticket-shell {
   --ticket-border: 2px;
   --ticket-stub-width: 38px;
@@ -45,6 +48,8 @@
   --hole-radius: 6px;
   --hole-x: calc(100% - var(--ticket-border) - var(--ticket-stub-width) + var(--ticket-perforation-width) / 2);
   position: relative; /* 仅供孔缘定位 */
+}
+.ticket-shadow {
   filter: drop-shadow(var(--drop-shadow-hard));
 }
 .ticket-title {
@@ -69,11 +74,16 @@
   border-left: var(--ticket-perforation-width) dashed var(--color-ink);
 }
 .ticket-lift {
-  transition: transform 150ms, filter 150ms;
+  transition: transform 150ms;
+}
+.ticket-lift .ticket-shadow {
+  transition: filter 150ms;
 }
 .ticket-lift:hover {
-  filter: drop-shadow(var(--drop-shadow-hard-lift));
   transform: translateY(-3px);
+}
+.ticket-lift:hover .ticket-shadow {
+  filter: drop-shadow(var(--drop-shadow-hard-lift));
 }
 .ticket-pk {
   -webkit-mask-image:
@@ -85,7 +95,7 @@
     radial-gradient(circle calc(var(--hole-radius) + 1px) at var(--hole-x) 100%, transparent var(--hole-radius), #000 calc(var(--hole-radius) + 0.5px));
   mask-composite: intersect;
 }
-/* 孔缘尺寸由孔径与描边推导，只保留票内一半，随票面一起投影 */
+/* 孔缘尺寸由孔径与描边推导，只保留票内一半；留在 .ticket-shadow 包裹之外，不参与投影 */
 .pk-arc {
   position: absolute;
   left: calc(var(--hole-x) - var(--hole-radius) - var(--ticket-border));

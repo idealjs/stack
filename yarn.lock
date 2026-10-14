@@ -3454,24 +3454,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@stack/design-lab@workspace:apps/design-lab":
-  version: 0.0.0-use.local
-  resolution: "@stack/design-lab@workspace:apps/design-lab"
-  dependencies:
-    "@playwright/test": "npm:1.63.0"
-    "@stack/design-system": "workspace:*"
-    "@tailwindcss/vite": "npm:^4.1.0"
-    "@types/react": "npm:^18.3.12"
-    "@types/react-dom": "npm:^18.3.1"
-    "@vitejs/plugin-react": "npm:^4.3.4"
-    react: "npm:^18.3.1"
-    react-dom: "npm:^18.3.1"
-    tailwindcss: "npm:^4.1.0"
-    typescript: "npm:~5.6.2"
-    vite: "npm:^6.0.0"
-  languageName: unknown
-  linkType: soft
-
 "@stack/design-system@workspace:*, @stack/design-system@workspace:packages/design-system":
   version: 0.0.0-use.local
   resolution: "@stack/design-system@workspace:packages/design-system"
@@ -3482,11 +3464,15 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@stack/tutorial@workspace:apps/tutorial"
   dependencies:
+    "@playwright/test": "npm:1.63.0"
     "@stack/design-system": "workspace:*"
     "@tailwindcss/vite": "npm:^4.1.0"
     "@types/react": "npm:^18.3.12"
     "@types/react-dom": "npm:^18.3.1"
     "@vitejs/plugin-react": "npm:^4.3.4"
+    "@webcontainer/api": "npm:^1.6.4"
+    "@xterm/addon-fit": "npm:^0.11.0"
+    "@xterm/xterm": "npm:^6.0.0"
     react: "npm:^18.3.1"
     react-dom: "npm:^18.3.1"
     tailwindcss: "npm:^4.1.0"
@@ -4495,6 +4481,27 @@ __metadata:
     "@webassemblyjs/ast": "npm:1.14.1"
     "@xtuc/long": "npm:4.2.2"
   checksum: 10/cef09aad2fcd291bfcf9efdae2ea1e961a1ba0f925d1d9dcdd8c746d32fbaf431b6d26a0241699c0e39f82139018aa720b4ceb84ac6f4c78f13072747480db69
+  languageName: node
+  linkType: hard
+
+"@webcontainer/api@npm:^1.6.4":
+  version: 1.6.4
+  resolution: "@webcontainer/api@npm:1.6.4"
+  checksum: 10/dc5366edba062d318b7fb767484638ada330b65d0eb16d23cfee2b8684e0ef48ffd32024f662d799fa6e8baf667d4db3921248fe4e4ab6116447585417cac029
+  languageName: node
+  linkType: hard
+
+"@xterm/addon-fit@npm:^0.11.0":
+  version: 0.11.0
+  resolution: "@xterm/addon-fit@npm:0.11.0"
+  checksum: 10/daeb1cc2be794e0ee3b0f6b1cbec0ba70ac7c65f14093b405a2dfbf93bf267cd3f81490a72bb71364044ff7fd68ff0e8e124977dd812ff9914ad864c6a610c0b
+  languageName: node
+  linkType: hard
+
+"@xterm/xterm@npm:^6.0.0":
+  version: 6.0.0
+  resolution: "@xterm/xterm@npm:6.0.0"
+  checksum: 10/2e9aef4770ce4778f4823f261491ade3863fa2141ff4607785a4c22cb6948bb0897e21581536ab1a3327a7ee59467e3549c09b61278b07a558f03ff14ba45bc4
   languageName: node
   linkType: hard
 

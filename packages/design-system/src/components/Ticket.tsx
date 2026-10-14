@@ -1,4 +1,4 @@
-/** 通用票券：票面 mask 打孔，外层 drop-shadow 跟随轮廓生成阴影。 */
+/** 通用票券：票面 mask 打孔，内层包裹 drop-shadow 跟随轮廓生成阴影；孔缘描边不参与投影。 */
 import type { CSSProperties, HTMLAttributes } from 'react'
 
 export interface TicketProps extends HTMLAttributes<HTMLDivElement> {
@@ -45,8 +45,10 @@ export function Ticket({
       className={`ticket-shell w-fit rounded-xl ${hasHoles ? 'tk-pk' : ''} ${hover ? 'ticket-lift' : ''} ${wrapperClassName}`}
       style={ticketStyle}
     >
-      <div className={`ticket-face relative overflow-hidden rounded-xl border-2 border-ink bg-paper ${hasHoles ? 'ticket-pk' : ''} ${className}`}>
-        {children}
+      <div className="ticket-shadow">
+        <div className={`ticket-face relative overflow-hidden rounded-xl border-2 border-ink bg-paper ${hasHoles ? 'ticket-pk' : ''} ${className}`}>
+          {children}
+        </div>
       </div>
       {hasHoles && (
         <>
