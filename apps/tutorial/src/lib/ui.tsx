@@ -8,14 +8,15 @@ import { SiteNavbar } from '@stack/design-system'
 import { CHAPTERS } from './chapters'
 import { MONTHS } from '../content/blogs'
 
-/** 设计系统四册 */
-export type DesignKey = 'design-colors' | 'design-typography' | 'design-symbols' | 'design-components'
+/** 设计系统五册 */
+export type DesignKey = 'design-colors' | 'design-typography' | 'design-symbols' | 'design-components' | 'design-shadow'
 
 const DESIGN: { href: string; label: string; key: DesignKey }[] = [
   { href: '/design-colors.html', label: '颜色', key: 'design-colors' },
   { href: '/design-typography.html', label: '字体', key: 'design-typography' },
   { href: '/design-symbols.html', label: '符号形状', key: 'design-symbols' },
   { href: '/design-components.html', label: '组件', key: 'design-components' },
+  { href: '/design-shadow.html', label: '阴影', key: 'design-shadow' },
 ]
 
 const NAV_SECTIONS: NavSectionLink[] = [

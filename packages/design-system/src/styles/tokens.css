@@ -85,6 +85,38 @@
 .ticket-lift:hover .ticket-shadow {
   filter: drop-shadow(var(--drop-shadow-hard-lift));
 }
+/* ===== hoverable-shadow —— hover 拿起动效层（叠加用，不自带阴影）=====
+ * 只规定「拿起」这件事：浮起 3px ＋ 阴影按同元素上的基础类换 lift 档；
+ * 静置态长什么样它不管，完全由同元素的基础类（shadow-hard / drop-shadow-hard
+ * 或组件自写的配方）决定——所以它永远以第二个类叠加：
+ *   矩形盒   class="shadow-hard hoverable-shadow"      → hover 阴影 5→8（box-shadow）
+ *   异形轮廓 class="drop-shadow-hard hoverable-shadow" → hover 滤镜换 lift（filter）
+ *   都不叠   class="hoverable-shadow"                  → 只浮起，阴影不换档
+ * 浮起用 translate 属性而非 transform：translate 与 transform 是两个独立属性，
+ * 与既有 transform 动效（RouteLine 跟随、翻面、盖印）可组合、互不覆盖。
+ * 注意别与 Button 等自带的 hover:* 工具类重复叠加——拿起动效只写一处。 */
+.hoverable-shadow {
+  transition: translate 150ms, box-shadow 150ms, filter 150ms;
+}
+.hoverable-shadow:hover {
+  translate: 0 -3px;
+}
+.hoverable-shadow.shadow-hard:hover {
+  box-shadow: var(--shadow-hard-lift);
+}
+.hoverable-shadow.drop-shadow-hard:hover {
+  filter: drop-shadow(var(--drop-shadow-hard-lift));
+}
+@media (prefers-reduced-motion: reduce) {
+  .hoverable-shadow,
+  .hoverable-shadow.shadow-hard,
+  .hoverable-shadow.drop-shadow-hard {
+    transition: none;
+  }
+  .hoverable-shadow:hover {
+    translate: none;
+  }
+}
 .ticket-pk {
   -webkit-mask-image:
     radial-gradient(circle calc(var(--hole-radius) + 1px) at var(--hole-x) 0, transparent var(--hole-radius), #000 calc(var(--hole-radius) + 0.5px)),
