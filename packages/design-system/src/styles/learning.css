@@ -274,6 +274,8 @@
 .learning-manifest-status { flex: 0 0 auto; padding-top: 2px; font-size: 10px; color: var(--color-mute); }
 .learning-manifest-status[data-ready='true'] { color: #17675f; }
 .learning-manifest footer { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; margin-top: 16px; font-size: 10px; font-weight: 700; }
+/* 行内盖印：印章按行高紧凑化（投影同步收小），章位仍右缘对齐 */
+.learning-manifest-stamp { padding: 2px 8px; font-size: 10px; box-shadow: 2px 2px 0 var(--color-ink); }
 .learning-manifest footer > span { color: var(--color-mute); font-weight: 400; }
 
 /* 12 / 双纸页对照 */

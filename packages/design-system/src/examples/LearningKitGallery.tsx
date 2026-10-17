@@ -148,17 +148,12 @@ export function LearningKitGallery() {
               ]}
             />
           </Sample>
-          <Sample name="DeliveryManifest + Stamp" title="装箱单／交付清单 × 验收印章" note="按实际产物列出交付状态；全部就绪后，把验收印章盖在装箱单右上角，核对入口一眼可辨。">
-            <div className="relative">
-              <DeliveryManifest title="这一章，你带走了什么？" reference="CHAPTER 01 / 装箱单" items={[
-                { id: 'html', label: 'index.html', detail: '有标题与一句话的页面', ready: true },
-                { id: 'server', label: 'server.js', detail: '返回静态文件的服务', ready: true },
-                { id: 'evidence', label: '运行记录', detail: 'localhost 页面与 200 响应', ready: true },
-              ]} />
-              <div className="absolute -top-3 right-6">
-                <Stamp />
-              </div>
-            </div>
+          <Sample name="DeliveryManifest + Stamp" title="装箱单／交付清单 × 验收印章" note="按实际产物列出交付状态；状态列以验收印章盖印——备齐盖实章、待交付盖虚线章，逐项一眼可辨。">
+            <DeliveryManifest title="这一章，你带走了什么？" reference="CHAPTER 01 / 装箱单" stamp items={[
+              { id: 'html', label: 'index.html', detail: '有标题与一句话的页面', ready: true },
+              { id: 'server', label: 'server.js', detail: '返回静态文件的服务', ready: true },
+              { id: 'evidence', label: '运行记录', detail: 'localhost 页面与 200 响应', ready: true },
+            ]} />
           </Sample>
         </div>
       </section>

@@ -6,14 +6,18 @@ export interface DeliveryItem {
   ready?: boolean
 }
 
+import { Stamp } from './Stamp'
+
 export interface DeliveryManifestProps {
   title: string
   reference?: string
   items: readonly DeliveryItem[]
+  /** 状态列用验收印章盖印（备齐=实章、待交付=虚线章）；缺省保持纯文本 */
+  stamp?: boolean
   className?: string
 }
 
-export function DeliveryManifest({ title, reference = 'DELIVERY', items, className = '' }: DeliveryManifestProps) {
+export function DeliveryManifest({ title, reference = 'DELIVERY', items, stamp = false, className = '' }: DeliveryManifestProps) {
   const ready = items.filter((item) => item.ready).length
   return (
     <section data-comp="delivery-manifest" className={`learning-object learning-manifest ${className}`}>
@@ -25,7 +29,13 @@ export function DeliveryManifest({ title, reference = 'DELIVERY', items, classNa
           <li key={item.id}>
             <span className="learning-manifest-index">{String(index + 1).padStart(2, '0')}</span>
             <div>{item.href ? <a href={item.href}>{item.label}</a> : <b>{item.label}</b>}{item.detail && <small>{item.detail}</small>}</div>
-            <span className="learning-manifest-status" data-ready={!!item.ready}>{item.ready ? '✓ 已备齐' : '○ 待交付'}</span>
+            {stamp ? (
+              <Stamp status={item.ready ? 'done' : 'pending'} className="learning-manifest-stamp">
+                {item.ready ? '已备齐' : '待交付'}
+              </Stamp>
+            ) : (
+              <span className="learning-manifest-status" data-ready={!!item.ready}>{item.ready ? '✓ 已备齐' : '○ 待交付'}</span>
+            )}
           </li>
         ))}
       </ol>
