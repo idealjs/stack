@@ -6,7 +6,14 @@
  * - 命中分块 key，或该分块行内任一条目 key＝分块与行首一起高亮
  *   （纸按压色＋ink 内描边环，选中不借黑）。
  * - 命中条目＝条目高亮：自带 color 用该色实底（章节语义），否则同内描边环。
- * - 行首标签未选中时 hover 浮出纸按压色（与条目同一语言）。 */
+ * - 行首标签未选中时 hover 浮出纸按压色（与条目同一语言）。
+ *
+ * 移动端（<lg）导航收进左侧滑出 sidebar——纯 CSS 开关，零 JS：
+ * daisyUI drawer 的同款思路，checkbox 前置 + 后续兄弟经 peer-checked（编译后即
+ * `.peer:checked ~ *`）驱动；关闭走遮罩 label 与抽屉内 × label（点击切换 checkbox）。
+ * 桌面（≥lg）新增 DOM 全部 display:none，像素零变化。checkbox 用 sr-only：
+ * 保持可聚焦（Tab→Space 可开合），但不挡任何点击。纯 CSS 天然限制：无 Esc 关闭、
+ * 开合不写 aria-expanded（无 JS 可改），故开关联用 aria-label 表意。 */
 import type { ReactNode } from 'react'
 
 export interface NavSectionLink {
@@ -68,14 +75,22 @@ export function SiteNavbar({
     active === row.sectionKey || row.items.some((i) => i.key === active)
   return (
     <header
-      className="mb-8 rounded-2xl border-2 border-ink bg-paper p-2.5 shadow-hard"
+      className="relative mb-8 rounded-2xl border-2 border-ink bg-paper p-2.5 shadow-hard"
       style={viewTransitionName ? { viewTransitionName } : undefined}
     >
-      {/* 第一行：品牌（站内最大标题，t2）＋ 分块 */}
+      {/* 纯 CSS 抽屉开关（daisyUI drawer 同款）：checkbox 前置，后续兄弟经 peer-checked 驱动；sr-only 保聚焦不挡点击 */}
+      <input
+        id="site-nav-toggle"
+        type="checkbox"
+        aria-label="打开或收起导航菜单"
+        className="peer sr-only"
+      />
+
+      {/* 第一行：品牌（站内最大标题，t2）＋ 分块（桌面）；移动端右侧换汉堡开关 */}
       <div className="flex flex-wrap items-center gap-1.5">
         <a
           href={brand.href}
-          className={`mr-2 rounded-lg border-2 px-2.5 py-0.5 font-mono text-t2 font-extrabold leading-snug no-underline transition-colors ${
+          className={`mr-2 max-lg:mr-auto rounded-lg border-2 px-2.5 py-0.5 font-mono text-t2 font-extrabold leading-snug no-underline transition-colors ${
             active === brand.key
               ? 'border-ink bg-clash1b text-ink'
               : 'border-ink bg-paper text-ink hover:bg-paper-deep'
@@ -90,41 +105,100 @@ export function SiteNavbar({
             <a
               key={s.key}
               href={s.href}
-              className={`rounded-lg px-2.5 py-1 text-content font-bold no-underline transition-colors ${on ? SELECTED : IDLE}`}
+              className={`max-lg:hidden rounded-lg px-2.5 py-1 text-content font-bold no-underline transition-colors ${on ? SELECTED : IDLE}`}
             >
               {s.label}
             </a>
           )
         })}
-      </div>
-      {/* 第二行起：行首（t3）与条目（content）分列两栏，条目换行不伸进行首列 */}
-      {rows.map((row) => (
-        <div
-          key={row.sectionKey}
-          className="mt-2 grid grid-cols-[88px_minmax(0,1fr)] items-center gap-x-1.5 border-t border-dashed border-ink/20 pt-2"
+        <label
+          htmlFor="site-nav-toggle"
+          aria-label="打开导航菜单"
+          className="hidden max-lg:grid max-lg:size-10 max-lg:cursor-pointer max-lg:place-items-center max-lg:rounded-lg max-lg:border-2 max-lg:border-ink max-lg:bg-paper max-lg:shadow-[3px_3px_0_var(--color-ink)] max-lg:transition-colors max-lg:hover:bg-paper-deep"
         >
-          <RowLabel on={rowOn(row)} href={row.href}>
-            {row.label}
-          </RowLabel>
-          <div className="flex min-w-0 flex-wrap items-center gap-1.5">
-            {row.items.map((item) => {
-              const on = item.key === active
-              return (
-                <a
-                  key={item.key}
-                  href={item.href}
-                  className={`rounded-lg px-2.5 py-0.5 text-content font-bold leading-snug no-underline transition-colors ${
-                    on ? (item.color ? 'text-ink' : SELECTED) : IDLE
-                  } ${item.mono ? 'font-mono' : ''}`}
-                  style={on && item.color ? { background: item.color } : undefined}
-                >
-                  {item.label}
-                </a>
-              )
-            })}
-          </div>
+          <span aria-hidden="true" className="flex flex-col gap-[5px]">
+            <i className="block h-[3px] w-5 rounded-sm bg-ink" />
+            <i className="block h-[3px] w-5 rounded-sm bg-ink" />
+            <i className="block h-[3px] w-5 rounded-sm bg-ink" />
+          </span>
+        </label>
+      </div>
+
+      {/* 内容区：桌面=常规两行流；移动端=左侧滑出 sidebar（checkbox 勾选时平移归位）。
+          分块链在抽屉里有一份移动端专属副本（桌面分块留在顶栏），高亮逻辑同源 */}
+      <div className="max-lg:fixed max-lg:inset-y-0 max-lg:left-0 max-lg:z-50 max-lg:w-72 max-lg:overflow-y-auto max-lg:rounded-none max-lg:border-r-2 max-lg:border-ink max-lg:bg-paper max-lg:p-3 max-lg:shadow-[8px_0_0_0_var(--color-ink)] max-lg:invisible max-lg:-translate-x-full max-lg:transition-[transform,visibility] max-lg:duration-200 max-lg:peer-checked:visible max-lg:peer-checked:translate-x-0">
+        {/* 抽屉顶：品牌复述＋关闭开关（遮罩会盖住顶栏，汉堡够不着，必须在抽屉内给关闭）；桌面隐藏 */}
+        <div className="lg:hidden max-lg:mb-3 max-lg:flex max-lg:items-center max-lg:justify-between">
+          <a
+            href={brand.href}
+            className={`max-lg:rounded-lg max-lg:border-2 max-lg:px-2 max-lg:py-0.5 max-lg:font-mono max-lg:text-t3 max-lg:font-extrabold max-lg:no-underline ${
+              active === brand.key
+                ? 'max-lg:border-ink max-lg:bg-clash1b max-lg:text-ink'
+                : 'max-lg:border-ink max-lg:bg-paper max-lg:text-ink'
+            }`}
+          >
+            {brand.label}
+          </a>
+          <label
+            htmlFor="site-nav-toggle"
+            aria-label="收起导航菜单"
+            className="max-lg:grid max-lg:size-8 max-lg:cursor-pointer max-lg:place-items-center max-lg:rounded-lg max-lg:border-2 max-lg:border-ink max-lg:text-lg max-lg:font-extrabold max-lg:leading-none max-lg:text-ink max-lg:hover:bg-paper-deep"
+          >
+            <span aria-hidden="true">×</span>
+          </label>
         </div>
-      ))}
+        {/* 分块（移动端）：纵向大链接，行首样式同源 */}
+        <nav aria-label="分块" className="max-lg:mb-2 max-lg:flex max-lg:flex-col max-lg:gap-1 max-lg:border-b max-lg:border-dashed max-lg:border-ink/20 max-lg:pb-3 lg:hidden">
+          {sections.map((s) => {
+            const row = rows.find((r) => r.sectionKey === s.key)
+            const on = active === s.key || (row ? rowOn(row) : false)
+            return (
+              <a
+                key={s.key}
+                href={s.href}
+                className={`no-underline transition-colors ${on ? SELECTED : 'text-body hover:bg-paper-deep'} rounded-lg px-2 py-1 text-content font-bold`}
+              >
+                {s.label}
+              </a>
+            )
+          })}
+        </nav>
+        {/* 第二行起：行首（t3）与条目（content）分列两栏，条目换行不伸进行首列；抽屉内降为单列 */}
+        {rows.map((row) => (
+          <div
+            key={row.sectionKey}
+            className="mt-2 grid grid-cols-[88px_minmax(0,1fr)] items-center gap-x-1.5 border-t border-dashed border-ink/20 pt-2 max-lg:grid-cols-1 max-lg:items-start"
+          >
+            <RowLabel on={rowOn(row)} href={row.href}>
+              {row.label}
+            </RowLabel>
+            <div className="flex min-w-0 flex-wrap items-center gap-1.5">
+              {row.items.map((item) => {
+                const on = item.key === active
+                return (
+                  <a
+                    key={item.key}
+                    href={item.href}
+                    className={`rounded-lg px-2.5 py-0.5 text-content font-bold leading-snug no-underline transition-colors ${
+                      on ? (item.color ? 'text-ink' : SELECTED) : IDLE
+                    } ${item.mono ? 'font-mono' : ''}`}
+                    style={on && item.color ? { background: item.color } : undefined}
+                  >
+                    {item.label}
+                  </a>
+                )
+              })}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* 遮罩：点击关闭（label 切回 checkbox）；hidden 打底，桌面零 DOM 影响 */}
+      <label
+        htmlFor="site-nav-toggle"
+        aria-label="关闭导航菜单"
+        className="hidden max-lg:fixed max-lg:inset-0 max-lg:z-40 max-lg:block max-lg:cursor-pointer max-lg:bg-ink/40 max-lg:invisible max-lg:transition-[visibility] max-lg:peer-checked:visible"
+      />
     </header>
   )
 }
