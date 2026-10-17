@@ -13,7 +13,7 @@ export function AssignBlock({
   miss: { how: string; looks: string }
 }) {
   return (
-    <div data-comp="assign" className="w-[320px] rounded-xl border-2 border-ink bg-paper p-4 shadow-hard">
+    <div data-comp="assign" className="w-[320px] rounded-xl border-2 border-ink bg-paper p-4 shadow-ink">
       <div className="flex items-center gap-2">
         <svg width="16" height="16" viewBox="0 0 18 18" aria-hidden>
           <path d="M9 1 v16 M1 9 h16" stroke="var(--color-clash2b)" strokeWidth="3.5" strokeLinecap="round" />

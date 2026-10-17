@@ -35,3 +35,4 @@ design-refs/mockup/single*/
 
 # playwright 本地产物（误在仓库根运行时产生）
 /test-results
+*.tsbuildinfo

@@ -47,7 +47,7 @@ function Markdown({ raw }: { raw: string }) {
       out.push(
         <pre
           key={key++}
-          className="overflow-x-auto rounded-xl border-2 border-ink bg-ink p-4 font-mono text-small leading-relaxed text-paper shadow-hard"
+          className="overflow-x-auto rounded-xl border-2 border-ink bg-ink p-4 font-mono text-small leading-relaxed text-paper shadow-ink"
         >
           {buf.join('\n')}
         </pre>,
@@ -143,7 +143,7 @@ export function BlogCard({ post }: { post: (typeof POSTS)[number] }) {
   return (
     <a
       href={`/blog-${post.slug}.html`}
-      className="block w-[420px] rounded-2xl border-2 border-ink bg-paper p-5 no-underline shadow-hard transition-transform duration-150 hover:-translate-y-[3px] hover:shadow-hard-lift"
+      className="block w-[420px] rounded-2xl border-2 border-ink bg-paper p-5 no-underline shadow-ink transition-transform duration-150 hover:-translate-y-[3px] hover:shadow-ink-lift"
     >
       <div className="flex items-center gap-2.5">
         <span className="rounded-full bg-clash3b/15 px-2.5 py-0.5 font-mono t-small-strong">{post.date}</span>
@@ -183,7 +183,7 @@ export function BlogPostPage({ slug }: { slug: string }) {
   const post = POSTS.find((p) => p.slug === slug)!
   return (
     <Page active={`blog-${monthOf(slug)}`}>
-      <div className="relative overflow-hidden rounded-2xl border-2 border-ink bg-paper p-5 shadow-hard">
+      <div className="relative overflow-hidden rounded-2xl border-2 border-ink bg-paper p-5 shadow-ink">
         <span className="t-display pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 select-none" aria-hidden>
           {post.date.slice(2, 4)}
         </span>
@@ -200,7 +200,7 @@ export function BlogPostPage({ slug }: { slug: string }) {
       <div className="mt-10 flex items-center justify-between">
         <a
           href={`/blog-${monthOf(slug)}.html`}
-          className="rounded-xl border-2 border-ink bg-paper px-4 py-2 text-small font-bold text-ink no-underline shadow-hard"
+          className="rounded-xl border-2 border-ink bg-paper px-4 py-2 text-small font-bold text-ink no-underline shadow-ink"
         >
           ← 返回 {monthOf(slug)}
         </a>

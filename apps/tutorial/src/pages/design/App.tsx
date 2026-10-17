@@ -6,7 +6,7 @@ const BOOKS = [
   { key: 'design-typography', label: '字体', desc: '展示、正文、等宽的字阶与排版层级。' },
   { key: 'design-symbols', label: '符号形状', desc: '线条的形式规格：实线、虚线、点线与形状记号。' },
   { key: 'design-components', label: '组件', desc: 'CourseCard、票券、Button、SiteNavbar 等组件的实际组合。' },
-  { key: 'design-shadow', label: '阴影', desc: 'shadow-hard、drop-shadow-hard 与 hoverable-shadow：两种影、一个动效层，及其组合与拆法。' },
+  { key: 'design-shadow', label: '阴影', desc: 'shadow-ink、shadow-contour 与 hoverable-shadow：两种影、一个动效层，及其组合与拆法。' },
 ]
 
 export function App() {
@@ -22,7 +22,7 @@ export function App() {
             <a
               key={b.key}
               href={`/${b.key}.html`}
-              className="block w-[280px] rounded-2xl border-2 border-ink bg-paper p-5 no-underline shadow-hard transition-transform duration-150 hover:-translate-y-[3px] hover:shadow-hard-lift"
+              className="block w-[280px] rounded-2xl border-2 border-ink bg-paper p-5 no-underline shadow-ink transition-transform duration-150 hover:-translate-y-[3px] hover:shadow-ink-lift"
             >
               <span className="text-t3 font-extrabold text-ink">{b.label}</span>
               <span className="mt-2 block text-small leading-relaxed text-body">{b.desc}</span>

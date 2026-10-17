@@ -46,7 +46,7 @@
   border: 2px solid var(--color-ink);
   border-radius: 12px;
   background: var(--color-paper-deep);
-  box-shadow: var(--shadow-hard);
+  box-shadow: var(--shadow-ink);
 }
 .learning-clipboard-clip {
   position: absolute;
@@ -126,7 +126,7 @@
  * 翻面只切换可见性、不改盒子尺寸，翻面瞬间高度零抖动；
  * 隐藏面 visibility:hidden——不参与绘制，同时从可达树与 Tab 焦点链整体摘除，
  * 但仍以自然高度参与行高计算（等高的来源）。 */
-.learning-flashcard { padding: 18px; border: 2px solid var(--color-ink); border-radius: 10px; background: var(--color-paper); box-shadow: var(--shadow-hard); }
+.learning-flashcard { padding: 18px; border: 2px solid var(--color-ink); border-radius: 10px; background: var(--color-paper); box-shadow: var(--shadow-ink); }
 .learning-flashcard-top { display: flex; justify-content: space-between; gap: 8px; padding-bottom: 12px; border-bottom: 2px solid var(--learning-accent); font-size: 10px; font-weight: 800; letter-spacing: .04em; }
 /* 短的一面在等高盒内垂直居中：延续原 min-height 盒 align-items:center 的既有语言，
  * 两面各自居中、视觉重心稳定；顶对齐会让短面贴住标题栏、下方留大片空白。 */
@@ -140,7 +140,7 @@
 @keyframes learning-card-turn { from { transform: rotateY(-25deg); opacity: .35; } to { transform: rotateY(0); opacity: 1; } }
 
 /* 06 / 实验预览窗 */
-.learning-experiment { overflow: hidden; border: 2px solid var(--color-ink); border-radius: 10px; background: var(--color-paper); box-shadow: var(--shadow-hard); }
+.learning-experiment { overflow: hidden; border: 2px solid var(--color-ink); border-radius: 10px; background: var(--color-paper); box-shadow: var(--shadow-ink); }
 .learning-experiment header { display: flex; align-items: center; gap: 12px; min-height: 44px; padding: 8px 14px; border-bottom: 2px solid var(--color-ink); background: var(--color-clash1b); }
 .learning-experiment header h3 { font-size: 12px; }
 .learning-window-dots { display: flex; gap: 4px; flex: 0 0 auto; }
@@ -173,7 +173,7 @@
 .learning-receipt-end { margin-top: 12px; border-top: 1px dashed var(--color-ink); padding-top: 10px; text-align: center; font-family: monospace; font-size: 9px; letter-spacing: .06em; }
 
 /* 08 / 任务信封与信纸 */
-.learning-envelope { border: 2px solid var(--color-ink); border-radius: 6px; background: var(--color-paper); box-shadow: var(--shadow-hard); }
+.learning-envelope { border: 2px solid var(--color-ink); border-radius: 6px; background: var(--color-paper); box-shadow: var(--shadow-ink); }
 .learning-envelope summary { position: relative; display: block; padding: 100px 22px 20px; cursor: pointer; }
 .learning-envelope-seam { position: absolute; top: 0; left: 0; width: 100%; height: 82px; pointer-events: none; }
 .learning-envelope summary > b { display: block; margin-top: 6px; font-size: 17px; }
@@ -197,7 +197,7 @@
   border-radius: 6px;
   background: var(--color-clash1b);
   color: var(--color-ink);
-  box-shadow: var(--shadow-hard);
+  box-shadow: var(--shadow-ink);
   font-family: inherit;
   font-size: 12px;
   font-weight: 800;
@@ -212,7 +212,7 @@
 @keyframes learning-stamp-in { from { scale: 1.12; opacity: 0; } to { scale: 1; opacity: 1; } }
 
 /* 10 / 积木工具盒 */
-.learning-toolbox { border: 2px solid var(--color-ink); border-radius: 10px; background: var(--color-paper-deep); box-shadow: var(--shadow-hard); }
+.learning-toolbox { border: 2px solid var(--color-ink); border-radius: 10px; background: var(--color-paper-deep); box-shadow: var(--shadow-ink); }
 .learning-toolbox header { display: flex; align-items: center; gap: 10px; padding: 12px 14px; border-bottom: 2px solid var(--color-ink); background: var(--color-clash2b); border-radius: 8px 8px 0 0; }
 .learning-toolbox header > span { font-size: 8px; letter-spacing: 2px; white-space: nowrap; }
 .learning-toolbox header h3 { flex: 1; font-size: 14px; }
@@ -270,7 +270,7 @@
 }
 
 /* 11 / 交付装箱单 */
-.learning-manifest { padding: 20px; border: 2px solid var(--color-ink); border-radius: 3px; background: var(--color-paper); box-shadow: var(--shadow-hard); }
+.learning-manifest { padding: 20px; border: 2px solid var(--color-ink); border-radius: 3px; background: var(--color-paper); box-shadow: var(--shadow-ink); }
 .learning-manifest header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
 .learning-manifest-number { min-width: 36px; padding: 4px 8px; border: 2px solid var(--color-ink); background: var(--color-clash1a); font-family: monospace; font-size: 18px; font-weight: 800; }
 .learning-manifest-heading { display: flex; justify-content: space-between; margin-top: 18px; padding: 8px 0; border-top: 2px solid var(--color-ink); border-bottom: 1px solid var(--color-ink); font-size: 9px; font-weight: 800; letter-spacing: .04em; }
@@ -290,7 +290,7 @@
 /* 12 / 双纸页对照 */
 .learning-comparison > h3 { margin-bottom: 14px; }
 .learning-comparison-pages { display: grid; grid-template-columns: minmax(0, 1fr) 30px minmax(0, 1fr); gap: 10px; align-items: stretch; }
-.learning-comparison-page { min-width: 0; padding: 0 18px 20px; border: 2px solid var(--color-ink); border-radius: 4px; background: var(--color-paper); box-shadow: var(--shadow-hard); }
+.learning-comparison-page { min-width: 0; padding: 0 18px 20px; border: 2px solid var(--color-ink); border-radius: 4px; background: var(--color-paper); box-shadow: var(--shadow-ink); }
 .learning-comparison-page:first-child { grid-column: 1; grid-row: 1; }
 .learning-comparison-page:nth-child(2) { grid-column: 3; grid-row: 1; }
 .learning-comparison-page h4 { width: fit-content; max-width: 100%; margin: -2px 0 18px -2px; padding: 6px 12px; border: 2px solid var(--color-ink); border-radius: 0 0 5px 5px; background: var(--color-clash1a); font-size: 11px; font-weight: 800; }
@@ -355,7 +355,7 @@
   border: 2px solid var(--color-ink);
   border-radius: 10px;
   background: var(--color-paper-deep);
-  box-shadow: var(--shadow-hard);
+  box-shadow: var(--shadow-ink);
 }
 .learning-flow > h3 { margin-bottom: 18px; }
 .learning-flow-line { display: flex; flex-direction: column; gap: 36px; margin: 0; padding: 0; list-style: none; }

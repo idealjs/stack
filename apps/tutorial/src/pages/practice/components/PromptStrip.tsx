@@ -60,7 +60,7 @@ export function PromptStrip({
   return (
     <div
       data-testid={testId}
-      className={`rounded-lg border-2 border-ink bg-clash2a px-2.5 py-2 ${flat ? '' : 'shadow-hard'}`}
+      className={`rounded-lg border-2 border-ink bg-clash2a px-2.5 py-2 ${flat ? '' : 'shadow-ink'}`}
     >
       {title && <p className="t-small-strong m-0">{title}</p>}
       <p className={`text-[12.5px] leading-5 text-ink ${title ? 'mt-1 mb-0' : 'm-0'}`}>{text}</p>

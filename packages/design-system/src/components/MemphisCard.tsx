@@ -90,9 +90,9 @@ export function MemphisCard({
       href={href ?? `#ch${chapter.id}`}
       data-comp="course-card"
       className="group relative block rounded-[14px] border-2 border-ink bg-paper p-[11px] no-underline
-                 shadow-hard transition-transform duration-150 focus-visible:outline-none
-                 hover:-translate-y-[3px] hover:shadow-hard-lift
-                 focus-visible:-translate-y-[3px] focus-visible:shadow-hard-lift"
+                 shadow-ink transition-transform duration-150 focus-visible:outline-none
+                 hover:-translate-y-[3px] hover:shadow-ink-lift
+                 focus-visible:-translate-y-[3px] focus-visible:shadow-ink-lift"
       onMouseEnter={() => setLocked(true)}
       onMouseLeave={() => setLocked(false)}
       onFocus={() => setLocked(true)}

@@ -1,5 +1,5 @@
 /** ShadowButton —— 孟菲斯按压按钮：按压三部曲是本组件存在的意义。
- * 规格与 .learning-action 同源，投影比卡片（shadow-hard 5px）小一号，是按钮的体量：
+ * 规格与 .learning-action 同源，投影比卡片（shadow-ink 5px）小一号，是按钮的体量：
  * - 静置：paper / tone 实底＋ink 2px 描边＋硬投影 3px 3px；
  * - hover：浮起 2px，投影跟涨到 5px（阴影随位移，同 Button 的跟随规格）；
  * - active 按压：朝阴影方向压进 translate(2px,2px)，投影收到 1px。

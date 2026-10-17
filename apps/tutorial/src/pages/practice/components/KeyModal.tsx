@@ -25,7 +25,7 @@ export function KeyModal({
       role="presentation"
     >
       <form
-        className="w-full max-w-md rounded-2xl border-2 border-ink bg-paper p-5 shadow-hard"
+        className="w-full max-w-md rounded-2xl border-2 border-ink bg-paper p-5 shadow-ink"
         onClick={(e) => e.stopPropagation()}
         onSubmit={(e) => {
           e.preventDefault()

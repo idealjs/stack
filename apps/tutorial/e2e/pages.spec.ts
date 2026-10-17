@@ -65,7 +65,7 @@ test.describe('CourseCard 规格契约', () => {
     })
     expect(s.bw).toBe('2px')
     expect(s.bc).toBe('rgb(17, 17, 17)')
-    // 唯一配方 --shadow-hard：恰好一层 ink 硬投影（tw 变体层均为透明占位），无纸叠多层
+    // 唯一配方 --shadow-ink：恰好一层 ink 硬投影（tw 变体层均为透明占位），无纸叠多层
     expect(s.shadow.split('rgb(17, 17, 17)').length - 1).toBe(1)
     expect(s.shadow).toContain('rgb(17, 17, 17) 5px 5px 0px 0px')
   })
@@ -500,7 +500,7 @@ test.describe('ShadowCard · 四部曲契约', () => {
         return {
           ticket: !!face,
           // 普通卡＝tailwind hover 变体；票券＝.ticket-lift
-          hover: el.className.includes('shadow-hard-lift') || el.classList.contains('ticket-lift'),
+          hover: el.className.includes('shadow-ink-lift') || el.classList.contains('ticket-lift'),
           punched: !!face && getComputedStyle(face).maskImage.includes('radial-gradient'),
         }
       }),

@@ -90,7 +90,7 @@ export function SiteNavbar({
     active === row.sectionKey || row.items.some((i) => i.key === active)
   return (
     <header
-      className="relative max-lg:z-50 mb-8 rounded-2xl border-2 border-ink bg-paper p-2.5 shadow-hard"
+      className="relative max-lg:z-50 mb-8 rounded-2xl border-2 border-ink bg-paper p-2.5 shadow-ink"
       style={viewTransitionName ? { viewTransitionName } : undefined}
     >
       {/* 纯 CSS 抽屉开关（daisyUI drawer 同款）：checkbox 前置，后续兄弟经 peer-checked 驱动；sr-only 保聚焦不挡点击 */}

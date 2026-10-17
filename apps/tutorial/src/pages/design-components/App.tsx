@@ -91,7 +91,7 @@ export function App() {
           <div>
             <ShadowCard className="h-[80px]" />
             <div className="mt-1 text-[13px] font-extrabold">1 · 基础 shadow-card</div>
-            <div className="text-small text-[#555]">border-ink＋paper＋shadow-hard，内容空</div>
+            <div className="text-small text-[#555]">border-ink＋paper＋shadow-ink，内容空</div>
           </div>
           <div>
             <ShadowCard hover className="h-[80px]" />

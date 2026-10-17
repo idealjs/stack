@@ -30,7 +30,7 @@ export function App() {
       <Section label="字阶总览" note="所见即 token——示例直接用 tokens.css 的字体系统">
         <div className="space-y-3">
           {SCALE.map((s) => (
-            <div key={s.n} className="flex flex-wrap items-baseline gap-x-5 gap-y-2 rounded-xl border-2 border-ink bg-paper p-3.5 shadow-hard">
+            <div key={s.n} className="flex flex-wrap items-baseline gap-x-5 gap-y-2 rounded-xl border-2 border-ink bg-paper p-3.5 shadow-ink">
               <div className="w-[150px] shrink-0">
                 <div className="t-small-strong">{s.n}</div>
                 <div className="t-small-mute font-mono">{s.token}</div>
@@ -46,7 +46,7 @@ export function App() {
       <Section label="规则" note="为什么这样设计">
         <div className="space-y-3">
           {RULES.map((r, i) => (
-            <div key={r.n} className="rounded-xl border-2 border-ink bg-paper p-4 shadow-hard">
+            <div key={r.n} className="rounded-xl border-2 border-ink bg-paper p-4 shadow-ink">
               <div className="flex items-baseline gap-2">
                 <span className="flex h-[18px] w-[18px] shrink-0 translate-y-[2px] items-center justify-center rounded-full border-2 border-ink bg-ink text-[10px] font-extrabold text-paper">{i + 1}</span>
                 <b className="text-t3">{r.n}</b>

@@ -1,5 +1,5 @@
 /** Button —— 孟菲斯按钮：hover 时上层浮起 3px（-translate-y）、
- * 下层硬阴影 5px→8px 跟随位移（shadow-hard→shadow-hard-lift），两层反向分开。
+ * 下层硬阴影 5px→8px 跟随位移（shadow-ink→shadow-ink-lift），两层反向分开。
  * tone＝clash 色板实底＋ink 描边＋ink 文字；有 href 渲染链接（a），
  * 无 href 渲染动作按钮（button）；disabled＝虚线描边占位（敬请期待），不动不起。
  * 与 MemphisCard 的 -3px 拿起规格一致；box-shadow 一并过渡，阴影位移平滑。 */
@@ -15,7 +15,7 @@ const TONE_BG = {
 } as const
 
 const BASE =
-  'inline-block cursor-pointer rounded-xl border-2 border-ink px-4 py-2 text-small font-bold text-ink no-underline shadow-hard transition-[transform,box-shadow] duration-150 hover:-translate-y-[3px] hover:shadow-hard-lift'
+  'inline-block cursor-pointer rounded-xl border-2 border-ink px-4 py-2 text-small font-bold text-ink no-underline shadow-ink transition-[transform,box-shadow] duration-150 hover:-translate-y-[3px] hover:shadow-ink-lift'
 
 export function Button({
   tone = 'clash1a',

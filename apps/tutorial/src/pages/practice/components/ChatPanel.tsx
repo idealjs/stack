@@ -52,7 +52,7 @@ export function ChatPanel({
 
   return (
     <div
-      className={`flex h-full min-h-0 flex-col rounded-xl border-2 border-ink bg-paper ${flat ? '' : 'shadow-hard'}`}
+      className={`flex h-full min-h-0 flex-col rounded-xl border-2 border-ink bg-paper ${flat ? '' : 'shadow-ink'}`}
     >
       {/* 头部：模型 + key 配置入口 */}
       <div className="flex items-center gap-2 border-b border-dashed border-ink/20 px-3 py-2">

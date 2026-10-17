@@ -52,7 +52,7 @@ export function CoachSticky({ taskLabel, children }: { taskLabel: string; childr
         id={COACH_STICKY_PANEL_ID}
         aria-label="陪练 agent 对话"
         tabIndex={-1}
-        className={`absolute right-0 bottom-[calc(100%+8px)] h-[min(540px,calc(100dvh_-_120px))] w-[min(420px,calc(100vw-24px))] origin-bottom-right rounded-b-lg rounded-tl-lg border-2 border-ink bg-clash2a p-2 shadow-hard transition-[opacity,transform,visibility] duration-200 outline-none motion-reduce:transition-none ${
+        className={`absolute right-0 bottom-[calc(100%+8px)] h-[min(540px,calc(100dvh_-_120px))] w-[min(420px,calc(100vw-24px))] origin-bottom-right rounded-b-lg rounded-tl-lg border-2 border-ink bg-clash2a p-2 shadow-ink transition-[opacity,transform,visibility] duration-200 outline-none motion-reduce:transition-none ${
           open
             ? 'visible translate-y-0 scale-100 opacity-100'
             : 'invisible pointer-events-none translate-y-2 scale-[0.97] opacity-0'

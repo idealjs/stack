@@ -21,7 +21,7 @@ export function ChapterPage({ id }: { id: ChapterId }) {
     <Page active={id}>
       {/* 章头：与书架相框共享 view-transition-name —— 点卡片进来时相框飞进来变成章头 */}
       <div
-        className="relative flex items-center gap-4 overflow-hidden rounded-2xl border-2 border-ink p-5 shadow-hard"
+        className="relative flex items-center gap-4 overflow-hidden rounded-2xl border-2 border-ink p-5 shadow-ink"
         style={{ background: ch.color, viewTransitionName: `ch-${id}` } as CSSProperties}
       >
         <span className="t-display pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 select-none" aria-hidden>
@@ -47,7 +47,7 @@ export function ChapterPage({ id }: { id: ChapterId }) {
         <Section label="步骤" note="每步先分类：这一步的过程里有没有学习价值">
           <ol className="m-0 list-none space-y-3 p-0">
             {c.steps.map((s, i) => (
-              <li key={s.title} className="rounded-xl border-2 border-ink bg-paper p-4 shadow-hard">
+              <li key={s.title} className="rounded-xl border-2 border-ink bg-paper p-4 shadow-ink">
                 <div className="flex flex-wrap items-center gap-2.5">
                   <span className="flex h-6 w-6 items-center justify-center rounded-full border-2 border-ink bg-white text-[12px] font-extrabold">
                     {i + 1}
@@ -76,7 +76,7 @@ export function ChapterPage({ id }: { id: ChapterId }) {
         <Section label="积木清单" note="从靶子倒推、每块三句话、教一块带一族">
           <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
             {c.bricks.map((b) => (
-              <div key={b.name} className="rounded-xl border-2 border-ink bg-paper p-3.5 shadow-hard">
+              <div key={b.name} className="rounded-xl border-2 border-ink bg-paper p-3.5 shadow-ink">
                 <div className="flex items-center gap-2">
                   <Tri size={13} />
                   <b className="text-t3">{b.name}</b>
@@ -112,7 +112,7 @@ export function ChapterPage({ id }: { id: ChapterId }) {
           {prev ? (
             <a
               href={`/ch${prev}.html`}
-              className="rounded-xl border-2 border-ink bg-paper px-4 py-2 text-[12.5px] font-bold text-ink no-underline shadow-hard"
+              className="rounded-xl border-2 border-ink bg-paper px-4 py-2 text-[12.5px] font-bold text-ink no-underline shadow-ink"
             >
               ← 第 {prev} 章 · {CHAPTERS[prev].title}
             </a>
@@ -128,7 +128,7 @@ export function ChapterPage({ id }: { id: ChapterId }) {
           {next ? (
             <a
               href={`/ch${next}.html`}
-              className="rounded-xl border-2 border-ink bg-paper px-4 py-2 text-[12.5px] font-bold text-ink no-underline shadow-hard"
+              className="rounded-xl border-2 border-ink bg-paper px-4 py-2 text-[12.5px] font-bold text-ink no-underline shadow-ink"
             >
               第 {next} 章 · {CHAPTERS[next].title} →
             </a>

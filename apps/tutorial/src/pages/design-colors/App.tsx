@@ -40,7 +40,7 @@ const RULES = [
     badCap: '无描边的鲜艳漂浮刺眼',
     goodCap: '一切鲜艳以 2px ink 描边为界',
     badDemo: <div className="h-10 w-40 rounded-lg bg-clash2a" />,
-    goodDemo: <div className="h-10 w-40 rounded-lg border-2 border-ink bg-clash2a shadow-hard" />,
+    goodDemo: <div className="h-10 w-40 rounded-lg border-2 border-ink bg-clash2a shadow-ink" />,
   },
   {
     name: '大底纸色，鲜艳只进局部',
