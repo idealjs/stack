@@ -8,6 +8,7 @@ import { ShadowCard } from '@stack/design-system'
 import { EntryGuide } from '@stack/design-system'
 import { Mark } from '@stack/design-system'
 import { Button } from '@stack/design-system'
+import { ShadowButton } from '@stack/design-system'
 import { RoutableScene, RoutableCard } from '@stack/design-system'
 import { LearningKitGallery } from '@stack/design-system/examples/learning-kit'
 import { TicketPreview } from './TicketPreview'
@@ -127,6 +128,16 @@ export function App() {
           <Button>动作按钮 · 无 href</Button>
           <Button disabled>占位 · 敬请期待</Button>
         </div>
+      </Section>
+      <Section label="ShadowButton · 按压三部曲" note="静置投影 3px → hover 浮 2px、投影涨到 5px → 按下压进 translate(2px,2px)、投影收 1px（同 learning-action 按压语言，比卡片 5px 小一号）；有 href＝链接 a、无 href＝动作按钮；站头导航与汉堡/× 同源换装">
+        <div className="flex flex-wrap items-center gap-4">
+          <ShadowButton>默认 · paper</ShadowButton>
+          <ShadowButton href="/learn.html">链接 · href 渲染 a</ShadowButton>
+          <ShadowButton tone="clash1b">tone · clash1b</ShadowButton>
+          <ShadowButton size="sm">紧凑 · sm</ShadowButton>
+          <ShadowButton disabled>占位 · 虚线</ShadowButton>
+        </div>
+        <div className="mt-3 text-small text-[#555]">试着按下：鼠标按住不松，按钮朝阴影方向压进、投影收到 1px。</div>
       </Section>
       <Section label="入口梳理" note="推荐不是强制——无锁">
         <EntryGuide chapters={CHAPTERS} profiles={PROFILES} />
