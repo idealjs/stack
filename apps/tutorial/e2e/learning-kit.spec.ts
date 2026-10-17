@@ -56,14 +56,28 @@ test.describe('拟物学习组件', () => {
     await expect(practice).toBeFocused()
   })
 
-  test('知识卡翻面后可返回问题，书签可用键盘标记与取消', async ({ page }) => {
+  test('知识卡翻面后可返回问题，两面等高零抖动，书签可用键盘标记与取消', async ({ page }) => {
     const card = page.locator('[data-comp="flash-card"]')
-    await expect(card).toContainText('分别由谁决定')
-    await expect(card).not.toContainText('由父组件传入')
+    const question = card.locator('.learning-flashcard-face').nth(0)
+    const answer = card.locator('.learning-flashcard-face').nth(1)
+    // 两面常驻 DOM；隐藏面 visibility:hidden——不可见、可达树与焦点链整体摘除
+    await expect(question).toBeVisible()
+    await expect(question).toContainText('分别由谁决定')
+    await expect(answer).toBeHidden()
+    expect(await card.ariaSnapshot()).not.toContain('从数据的来源判断')
+    const hiddenSubtree = await answer.evaluate((face) =>
+      [face, ...face.querySelectorAll('*')].every((el) => getComputedStyle(el).visibility === 'hidden'))
+    expect(hiddenSubtree).toBe(true) // 面内若有可聚焦元素也一并失效，不会残留可聚焦残留
+    // 等高契约：翻面只切换可见面，容器 boundingBox 高度分毫不变（零抖动）
+    const heightBefore = (await card.boundingBox())!.height
     await card.getByRole('button', { name: '翻面看答案' }).click()
-    await expect(card).toContainText('由父组件传入')
+    await expect(answer).toBeVisible()
+    await expect(question).toBeHidden()
+    expect(await card.ariaSnapshot()).not.toContain('分别由谁决定')
+    expect((await card.boundingBox())!.height).toBe(heightBefore)
     await card.getByRole('button', { name: '返回问题' }).click()
-    await expect(card).toContainText('分别由谁决定')
+    await expect(question).toBeVisible()
+    expect((await card.boundingBox())!.height).toBe(heightBefore)
     const bookmark = page.getByRole('button', { name: '这一节，待复习' })
     await bookmark.focus()
     await bookmark.press('Space')
@@ -107,7 +121,7 @@ test.describe('拟物学习组件', () => {
     const first = await pages.nth(0).boundingBox()
     const second = await pages.nth(1).boundingBox()
     expect(second!.y).toBeGreaterThan(first!.y + first!.height)
-    const animation = await page.locator('.learning-flashcard-face').evaluate((element) => getComputedStyle(element).animationName)
+    const animation = await page.locator('.learning-flashcard-face[data-active="true"]').evaluate((element) => getComputedStyle(element).animationName)
     expect(animation).toBe('none')
   })
 })

@@ -121,11 +121,20 @@
 .learning-bookmark b { font-size: 16px; }
 .learning-bookmark > span:last-child { font-size: 11px; }
 
-/* 05 / 显式翻面的知识卡，无定时自动翻转 */
+/* 05 / 显式翻面的知识卡，无定时自动翻转。
+ * 等高：两面临进同一个 grid 单元格（grid-area: 1/1），行高自动取两面的最大自然高度，
+ * 翻面只切换可见性、不改盒子尺寸，翻面瞬间高度零抖动；
+ * 隐藏面 visibility:hidden——不参与绘制，同时从可达树与 Tab 焦点链整体摘除，
+ * 但仍以自然高度参与行高计算（等高的来源）。 */
 .learning-flashcard { padding: 18px; border: 2px solid var(--color-ink); border-radius: 10px; background: var(--color-paper); box-shadow: var(--shadow-hard); }
 .learning-flashcard-top { display: flex; justify-content: space-between; gap: 8px; padding-bottom: 12px; border-bottom: 2px solid var(--learning-accent); font-size: 10px; font-weight: 800; letter-spacing: .04em; }
-.learning-flashcard-content { display: flex; align-items: center; min-height: 138px; padding: 20px 0; perspective: 800px; }
-.learning-flashcard-face { width: 100%; animation: learning-card-turn 220ms ease-out; }
+/* 短的一面在等高盒内垂直居中：延续原 min-height 盒 align-items:center 的既有语言，
+ * 两面各自居中、视觉重心稳定；顶对齐会让短面贴住标题栏、下方留大片空白。 */
+.learning-flashcard-content { display: grid; align-items: center; min-height: 138px; padding: 20px 0; perspective: 800px; }
+.learning-flashcard-face { grid-area: 1 / 1; min-width: 0; }
+.learning-flashcard-face:not([data-active='true']) { visibility: hidden; }
+/* 入场动画挂在 data-active 上：面由隐转显时选择器新命中，rotateY 随翻面重放（key 重挂载的老办法不再适用） */
+.learning-flashcard-face[data-active='true'] { animation: learning-card-turn 220ms ease-out; }
 .learning-flashcard-face h3 { margin-bottom: 8px; }
 .learning-flashcard[data-flipped='true'] { background: color-mix(in srgb, var(--learning-accent) 14%, var(--color-paper)); }
 @keyframes learning-card-turn { from { transform: rotateY(-25deg); opacity: .35; } to { transform: rotateY(0); opacity: 1; } }
@@ -331,7 +340,8 @@
 }
 @media (prefers-reduced-motion: reduce) {
   .learning-action, .learning-bookmark { transition: none; }
-  .learning-flashcard-face, .learning-envelope-letter, .learning-stamp { animation: none; }
+  /* 知识卡的入场动画已上移到 [data-active='true'] 选择器，这里以同选择器置 none 靠后覆盖 */
+  .learning-flashcard-face[data-active='true'], .learning-envelope-letter, .learning-stamp { animation: none; }
 }
 
 /* 13 / 数据流水线板：工位卡沿读向排列，圆牌箭头缝在卡片间隙里。
