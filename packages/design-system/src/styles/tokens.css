@@ -101,7 +101,6 @@
  * 注意别与 Button 等自带的 hover:* 工具类重复叠加——拿起动效只写一处。 */
 .hoverable-shadow {
   position: relative;
-  transition: translate 150ms, box-shadow 150ms, filter 150ms;
 }
 /* 宿主触发（首选）：命中区不动，浮起的是内部元素 */
 .hover-host:hover .hoverable-shadow {
@@ -123,26 +122,13 @@
 .hoverable-shadow.drop-shadow-ink:hover {
   filter: drop-shadow(var(--drop-shadow-ink-lift));
 }
-.hoverable-shadow:hover {
-  translate: 0 -3px;
-}
 .hoverable-shadow.shadow-ink:hover {
   box-shadow: var(--shadow-ink-lift);
 }
 .hoverable-shadow.drop-shadow-ink:hover {
   filter: drop-shadow(var(--drop-shadow-ink-lift));
 }
-@media (prefers-reduced-motion: reduce) {
-  /* 只停过渡（瞬移到拿起终态），不抹终态——translate:none 会把浮起本身也杀掉 */
-  .hoverable-shadow,
-  .hoverable-shadow.shadow-ink,
-  .hoverable-shadow.drop-shadow-ink,
-  .hover-host:hover .hoverable-shadow,
-  .hover-host:hover .hoverable-shadow.shadow-ink,
-  .hover-host:hover .hoverable-shadow.drop-shadow-ink {
-    transition: none;
-  }
-}
+
 .ticket-pk {
   -webkit-mask-image:
     radial-gradient(circle calc(var(--hole-radius) + 1px) at var(--hole-x) 0, transparent var(--hole-radius), #000 calc(var(--hole-radius) + 0.5px)),
