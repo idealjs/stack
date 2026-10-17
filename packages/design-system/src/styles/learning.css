@@ -73,7 +73,7 @@
 .learning-clipboard-footer { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; min-height: 48px; margin-top: 8px; padding-top: 12px; border-top: 2px solid var(--color-ink); font-size: 11px; font-weight: 700; }
 
 /* 02 / 文件夹：标签与当前纸面相连 */
-.learning-folder { filter: drop-shadow(var(--drop-shadow-hard)); }
+.learning-folder { filter: drop-shadow(var(--drop-shadow-ink)); }
 .learning-folder-tabs { position: relative; z-index: 1; display: flex; gap: 4px; padding: 0 10px; }
 .learning-folder-tabs button {
   flex: 1; min-width: 0; min-height: 44px; margin-bottom: -2px; padding: 9px 8px;
@@ -88,7 +88,7 @@
 .learning-folder-paper [role='tabpanel']:focus-visible { outline-offset: 6px; }
 
 /* 03 / 便签：剪角后的轮廓由 drop-shadow 投影 */
-.learning-note { filter: drop-shadow(var(--drop-shadow-hard)); }
+.learning-note { filter: drop-shadow(var(--drop-shadow-ink)); }
 .learning-note-paper {
   position: relative; min-height: 216px; padding: 34px 24px 40px;
   border: 2px solid var(--color-ink); background: var(--learning-accent);
@@ -100,7 +100,7 @@
 .learning-note[data-size='compact'] .learning-note-paper { min-height: 0; padding: 30px 20px 28px; }
 
 /* 04 / 可标记的书签 */
-.learning-bookmark-shell { width: fit-content; max-width: 100%; filter: drop-shadow(var(--drop-shadow-hard)); }
+.learning-bookmark-shell { width: fit-content; max-width: 100%; filter: drop-shadow(var(--drop-shadow-ink)); }
 .learning-bookmark {
   position: relative; display: flex; flex-direction: column; align-items: center; gap: 15px;
   width: 166px; min-height: 190px; padding: 18px 12px 42px;
@@ -155,7 +155,7 @@
 .learning-run-status[data-status='idle'] i { background: var(--color-paper-deep); }
 
 /* 07 / 连续打印纸与可折叠的回执 */
-.learning-receipt-shell { filter: drop-shadow(var(--drop-shadow-hard)); }
+.learning-receipt-shell { filter: drop-shadow(var(--drop-shadow-ink)); }
 .learning-receipt {
   position: relative; padding: 20px 24px 28px 34px; border: 2px solid var(--color-ink); background: var(--color-paper);
   clip-path: polygon(0 0, 100% 0, 100% calc(100% - 8px), 95% 100%, 90% calc(100% - 8px), 85% 100%, 80% calc(100% - 8px), 75% 100%, 70% calc(100% - 8px), 65% 100%, 60% calc(100% - 8px), 55% 100%, 50% calc(100% - 8px), 45% 100%, 40% calc(100% - 8px), 35% 100%, 30% calc(100% - 8px), 25% 100%, 20% calc(100% - 8px), 15% 100%, 10% calc(100% - 8px), 5% 100%, 0 calc(100% - 8px));

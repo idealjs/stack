@@ -1,7 +1,7 @@
 import { Page, Section } from '../../lib/ui'
 import { ChapterTicket, Stamp, Tri, Ring, Wave, Cross, BrickDot } from '@stack/design-system'
 import { CHAPTERS } from '../../lib/chapters'
-import type { CSSProperties, ReactNode } from 'react'
+import type { ReactNode } from 'react'
 
 /* 撕角 22px 的裁形（StickyNote 折角的同款语言，尺寸与折角方块对齐）。
  * 本页标本零新增 CSS：全部由既有 token 生成的工具类拼出。 */
@@ -9,15 +9,15 @@ const CLIP_TAG = '[clip-path:polygon(0_0,100%_0,100%_calc(100%_-_22px),calc(100%
 /* 尖底书签的裁形（Bookmark 尖底的简化版） */
 const TAG_CLIP = '[clip-path:polygon(0_0,100%_0,100%_100%,50%_calc(100%_-_14px),0_100%)]'
 
-/** 撕角便签：同层轮廓影——形状注册进 --shape-clip，影（::before 副本）与形共用同一变量 */
+/** 撕角便签：clip-path 裁形的元素会自成堆叠上下文——轮廓影必须由外层承担
+ * （filter 先画影、clip 后裁形的机制顺序），className（drop-shadow-ink 等）落在外壳上 */
 function TornNote({ className = '' }: { className?: string }) {
   return (
-    <div
-      className={`relative isolate border-2 border-ink bg-clash2a px-5 py-4 text-small font-bold text-ink shadow-contour [clip-path:var(--shape-clip)] ${className}`}
-      style={{ '--shape-clip': CLIP_TAG } as CSSProperties}
-    >
-      撕角便签
-      <i aria-hidden className="absolute right-0 bottom-0 h-[22px] w-[22px] border-t-2 border-l-2 border-ink bg-paper-deep" />
+    <div className={className}>
+      <div className={`relative border-2 border-ink bg-clash2a px-5 py-4 text-small font-bold text-ink ${CLIP_TAG}`}>
+        撕角便签
+        <i aria-hidden className="absolute right-0 bottom-0 h-[22px] w-[22px] border-t-2 border-l-2 border-ink bg-paper-deep" />
+      </div>
     </div>
   )
 }
@@ -66,10 +66,10 @@ export function App() {
     <Page
       active="design-shadow"
       title="阴影 · 硬投影与拿起"
-      desc="一份投影配方的两个形态：矩形盒 shadow-ink、异形轮廓 shadow-contour（与 shadow-ink 同层摆放）；拿起动效 hoverable-shadow 只叠不换底。"
+      desc="一份投影配方的两个形态：矩形盒 shadow-ink、异形轮廓 drop-shadow-ink；拿起动效 hoverable-shadow 只叠不换底。"
     >
       {/* ① 基础单个应用：两种影各自的单发用法 */}
-      <Section label="基础单个应用" note="shadow-ink 管矩形盒、shadow-contour 管异形轮廓——一个元素一次只用一份影">
+      <Section label="基础单个应用" note="shadow-ink 管矩形盒、drop-shadow-ink 管异形轮廓——一个元素一次只用一份影">
         <div className="mb-6">
           <b className="text-[13px]">shadow-ink · 矩形盒影</b>
           <p className="m-0 mt-1 mb-3 max-w-[760px] text-content leading-relaxed text-body">
@@ -100,24 +100,23 @@ export function App() {
         </div>
 
         <div>
-          <b className="text-[13px]">shadow-contour · 跟随轮廓的投影（同层）</b>
+          <b className="text-[13px]">drop-shadow-ink · 跟随轮廓的投影</b>
           <p className="m-0 mt-1 mb-3 max-w-[760px] text-content leading-relaxed text-body">
-            影随轮廓走，不认盒框，且与 shadow-ink 同层摆放：形状注册进 --shape-clip，影（::before 复刻的错位墨块）与形共用同一变量——换类名不改结构。
+            filter 形态同值（5px 5px 0 ink）——影子跟轮廓走，不认盒框。clip-path 会自成堆叠上下文、把影裁掉，
+            所以形状在内层、影在外壳，两层缺一不可（这是 clip-path 的机制成本；矩形和圆角盒不受影响，直接用 shadow-ink）。
           </p>
           <div className="flex flex-wrap items-start gap-8">
-            <Specimen title="撕角便签 · 同层" note="--shape-clip 注册一次，影与形共用">
-              <TornNote className="w-fit" />
+            <Specimen title="撕角便签 · 裸工具类" note="外壳拿 filter，内层拿 clip-path">
+              <TornNote className="drop-shadow-ink w-fit" />
             </Specimen>
             <Specimen title="组件同款 · Ticket" note="影在 .ticket-shadow 外壳——撕线孔洞也跟着投影">
               <ChapterTicket chapter={CHAPTERS[1]} done />
             </Specimen>
           </div>
-          <pre className="learning-demo-code mt-4 max-w-[620px]">{`{/* 形状注册进 --shape-clip：影（::before 副本）与形共用同一变量 */}
-<div
-  className="shadow-contour … [clip-path:var(--shape-clip)]"
-  style={{ '--shape-clip': 'polygon(…)' }}
->
-  撕角便签
+          <pre className="learning-demo-code mt-4 max-w-[620px]">{`{/* 外壳拿影，内层拿形：filter 先画影、clip-path 后裁形，
+    同元素叠会连影一起裁掉（见反例拆法） */}
+<div className="drop-shadow-ink w-fit">
+  <div className="… [clip-path:polygon(…)]">撕角便签</div>
 </div>`}</pre>
         </div>
       </Section>
@@ -129,7 +128,7 @@ export function App() {
       >
         <p className="m-0 mb-3 max-w-[760px] text-content leading-relaxed text-body">
           组合规则一条：<b>动效层认名字，不认顺序</b>——同元素叠了 shadow-ink 就换盒影档，叠了
-          shadow-contour 就让背后的轮廓副本错位 5→8，一个都不叠就只浮起。类名先后不影响行为，但建议基础类在前、动效层在后，读作「一张什么影的卡＋会拿起」。
+          drop-shadow-ink 就换滤镜档，一个都不叠就只浮起。类名先后不影响行为，但建议基础类在前、动效层在后，读作「一张什么影的卡＋会拿起」。
         </p>
         <div className="flex flex-wrap items-start gap-8">
           <Specimen title="shadow-ink ＋ hoverable-shadow" note="矩形拿起：Button / MemphisCard 的既有拿起规格">
@@ -138,10 +137,10 @@ export function App() {
               <p className="m-0 t-small-mute">hover：浮 3px，影 5→8</p>
             </div>
           </Specimen>
-          <Specimen title="shadow-contour ＋ hoverable-shadow" note="异形拿起：背后的轮廓副本错位 5→8">
-            <TornNote className="hoverable-shadow w-fit cursor-pointer" />
+          <Specimen title="drop-shadow-ink ＋ hoverable-shadow" note="异形拿起：外层随 hover 换 lift 滤镜（8px）">
+            <TornNote className="drop-shadow-ink hoverable-shadow w-fit cursor-pointer" />
           </Specimen>
-          <Specimen title="hoverable-shadow 单独用" note="换档只认 shadow-ink / shadow-contour 两个名字，自写影不换">
+          <Specimen title="hoverable-shadow 单独用" note="换档只认 shadow-ink / drop-shadow-ink 两个名字，自写影不换">
             <div className="shadow-[3px_3px_0_var(--color-ink)] hoverable-shadow w-[190px] cursor-pointer rounded-xl border-2 border-ink bg-paper px-4 py-5">
               <b className="text-small">自写小档</b>
               <p className="m-0 t-small-mute">hover：只浮起，影不换</p>
@@ -150,11 +149,8 @@ export function App() {
         </div>
         <pre className="learning-demo-code mt-4 max-w-[620px]">{`<div className="shadow-ink hoverable-shadow …">矩形拿起</div>
 
-<div
-  className="shadow-contour hoverable-shadow … [clip-path:var(--shape-clip)]"
-  style={{ '--shape-clip': 'polygon(…)' }}
->
-  异形拿起
+<div className="drop-shadow-ink hoverable-shadow">
+  <div className="… [clip-path:…]">异形拿起</div>
 </div>
 
 {/* 自写影只浮不换：动效层只服务两个既有名字 */}
@@ -213,20 +209,14 @@ export function App() {
               <div>色块</div>
             </div>
           </Particle>
-          <Particle title="shadow-contour · 尖底书签">
-            <div
-              className="shadow-contour w-fit [clip-path:var(--shape-clip)] bg-clash1b px-4 pb-6 pt-3 text-[12px] font-extrabold text-ink"
-              style={{ '--shape-clip': TAG_CLIP } as CSSProperties}
-            >
-              标记
+          <Particle title="drop-shadow-ink · 尖底书签">
+            <div className="drop-shadow-ink w-fit">
+              <div className={`px-4 pb-6 pt-3 text-[12px] font-extrabold text-ink bg-clash1b ${TAG_CLIP}`}>标记</div>
             </div>
           </Particle>
           <Particle title="＋hoverable · 书签拿起">
-            <div
-              className="shadow-contour hoverable-shadow w-fit cursor-pointer [clip-path:var(--shape-clip)] bg-clash1b px-4 pb-6 pt-3 text-[12px] font-extrabold text-ink"
-              style={{ '--shape-clip': TAG_CLIP } as CSSProperties}
-            >
-              标记
+            <div className="drop-shadow-ink hoverable-shadow w-fit cursor-pointer">
+              <div className={`px-4 pb-6 pt-3 text-[12px] font-extrabold text-ink bg-clash1b ${TAG_CLIP}`}>标记</div>
             </div>
           </Particle>
           <Particle title="shadow-ink · 印章（rotate）">
@@ -269,9 +259,9 @@ export function App() {
               </tr>
               <tr className="border-b border-[#ececea]">
                 <td className="py-1.5 pr-2 align-top font-extrabold text-ink">
-                  shadow-contour
+                  drop-shadow-ink
                   <br />
-                  <span className="t-small-mute font-normal">::before 轮廓副本</span>
+                  <span className="t-small-mute font-normal">filter</span>
                 </td>
                 <td className="py-1.5 pr-2 align-top">Ticket · ChapterTicket · StickyNote · Bookmark · FolderTabs · OutputReceipt</td>
                 <td className="py-1.5 pr-2 align-top">
@@ -304,13 +294,13 @@ export function App() {
             </p>
             <div className="grid grid-cols-2 gap-4">
               <DoDont bad text="影没了：clip 把 filter 的成果一起剪走">
-                <div className={`relative drop-shadow-hard border-2 border-ink bg-clash2a px-5 py-4 text-small font-bold text-ink ${CLIP_TAG}`}>
+                <div className={`relative drop-shadow-ink border-2 border-ink bg-clash2a px-5 py-4 text-small font-bold text-ink ${CLIP_TAG}`}>
                   影去哪了
                   <i aria-hidden className="absolute right-0 bottom-0 h-[22px] w-[22px] border-t-2 border-l-2 border-ink bg-paper-deep" />
                 </div>
               </DoDont>
-              <DoDont text="同层：shadow-contour 复刻轮廓（或拆两层）">
-                <TornNote className="w-fit" />
+              <DoDont text="拆两层：外壳 filter，内层 clip-path">
+                <TornNote className="drop-shadow-ink w-fit" />
               </DoDont>
             </div>
           </div>
@@ -323,11 +313,11 @@ export function App() {
             <div className="grid grid-cols-2 gap-4">
               <DoDont bad text="双影：外壳盒影＋内层轮廓影">
                 <div className="shadow-ink w-fit">
-                  <TornNote className="w-fit" />
+                  <TornNote className="drop-shadow-ink" />
                 </div>
               </DoDont>
               <DoDont text="只留一份：异形影归内层 wrapper">
-                <TornNote className="w-fit" />
+                <TornNote className="drop-shadow-ink w-fit" />
               </DoDont>
             </div>
           </div>

@@ -24,8 +24,8 @@
   --shadow-ink: 5px 5px 0 var(--color-ink);
   --shadow-ink-lift: 8px 8px 0 var(--color-ink);
   /* 同配方的 drop-shadow 形态，供透明图形复用 */
-  --drop-shadow-hard: 5px 5px 0 var(--color-ink);
-  --drop-shadow-hard-lift: 8px 8px 0 var(--color-ink);
+  --drop-shadow-ink: 5px 5px 0 var(--color-ink);
+  --drop-shadow-ink-lift: 8px 8px 0 var(--color-ink);
 
   /* 章节色别名 */
   --color-ch1: #ff6b6b;
@@ -50,7 +50,7 @@
   position: relative; /* 仅供孔缘定位 */
 }
 .ticket-shadow {
-  filter: drop-shadow(var(--drop-shadow-hard));
+  filter: drop-shadow(var(--drop-shadow-ink));
 }
 .ticket-title {
   min-width: 0;
@@ -83,35 +83,14 @@
   transform: translateY(-3px);
 }
 .ticket-lift:hover .ticket-shadow {
-  filter: drop-shadow(var(--drop-shadow-hard-lift));
+  filter: drop-shadow(var(--drop-shadow-ink-lift));
 }
-/* ===== shadow-contour —— 同层轮廓影（异形元素的 shadow-hard 等价物）=====
- * 影随轮廓，且与 shadow-ink 同层摆放：直接放在形状元素上，不套外壳。
- * 机制：形状注册进 --shape-clip（元素自身 clip-path: var(--shape-clip) 裁形），
- * ::before 用同一变量复刻轮廓、错位 5px 垫在背后（isolate 使 -1 层只落到元素身后）。
- * 换类名不改结构：矩形换 shadow-ink、异形换 shadow-contour，DOM 一个字不动。
- * 自带 --shape-clip 缺省 none：矩形上也能用（退化为一份错位墨块）。 */
-.shadow-contour {
-  position: relative;
-  isolation: isolate;
-}
-.shadow-contour::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  background: var(--color-ink);
-  clip-path: var(--shape-clip);
-  translate: 5px 5px;
-  transition: translate 150ms;
-}
-
 /* ===== hoverable-shadow —— hover 拿起动效层（叠加用，不自带阴影）=====
  * 只规定「拿起」这件事：浮起 3px ＋ 阴影按同元素上的基础类换 lift 档；
- * 静置态长什么样它不管，完全由同元素的基础类（shadow-ink / shadow-contour
+ * 静置态长什么样它不管，完全由同元素的基础类（shadow-ink / drop-shadow-ink
  * 或组件自写的配方）决定——所以它永远以第二个类叠加：
  *   矩形盒   class="shadow-ink hoverable-shadow"     → hover 阴影 5→8（box-shadow）
- *   异形轮廓 class="shadow-contour hoverable-shadow" → hover 背后的轮廓副本错位 5→8
+ *   异形轮廓 class="drop-shadow-ink hoverable-shadow" → hover 滤镜换 lift（filter）
  *   都不叠   class="hoverable-shadow"                 → 只浮起，阴影不换档
  * 浮起用 translate 属性而非 transform：translate 与 transform 是两个独立属性，
  * 与既有 transform 动效（RouteLine 跟随、翻面、盖印）可组合、互不覆盖。
@@ -125,17 +104,13 @@
 .hoverable-shadow.shadow-ink:hover {
   box-shadow: var(--shadow-ink-lift);
 }
-.hoverable-shadow.drop-shadow-hard:hover {
-  filter: drop-shadow(var(--drop-shadow-hard-lift));
-}
-.hoverable-shadow.shadow-contour:hover::before {
-  translate: 8px 8px;
+.hoverable-shadow.drop-shadow-ink:hover {
+  filter: drop-shadow(var(--drop-shadow-ink-lift));
 }
 @media (prefers-reduced-motion: reduce) {
   .hoverable-shadow,
   .hoverable-shadow.shadow-ink,
-  .hoverable-shadow.drop-shadow-hard,
-  .shadow-contour::before {
+  .hoverable-shadow.drop-shadow-ink {
     transition: none;
   }
   .hoverable-shadow:hover {
