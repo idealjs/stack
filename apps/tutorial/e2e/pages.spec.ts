@@ -428,3 +428,54 @@ test.describe('票券规格契约', () => {
     expect((await ticket.boundingBox())!.y).toBe(initial.y)
   })
 })
+
+test.describe('ShadowButton 按压契约', () => {
+  test.beforeEach(async ({ page }) => await page.goto('/design-components.html'))
+
+  test('多态渲染：有 href=a、无 href=button[type=button]、disabled=虚线占位', async ({ page }) => {
+    // 站头抽屉里也有一份同源 a 形态（桌面隐藏），标本断言一律 :visible 圈定
+    const buttons = page.locator('[data-comp="shadow-button"]:visible')
+    await expect(buttons.first()).toBeVisible()
+    // 三种形态齐备（标本：默认按钮/链接/占位；站头抽屉内还有同源的 a 形态）
+    const tags = await buttons.evaluateAll((ns) => ns.map((n) => n.tagName))
+    expect(tags).toEqual(expect.arrayContaining(['BUTTON', 'A', 'SPAN']))
+    await expect(page.locator('a[data-comp="shadow-button"]:visible').first()).toHaveAttribute('href', /\/(learn|design-components)\.html/)
+    await expect(page.locator('button[data-comp="shadow-button"]').first()).toHaveAttribute('type', 'button')
+    // 占位：aria-disabled＋虚线描边，不带硬投影（不动不起）
+    const placeholder = page.locator('span[data-comp="shadow-button"]')
+    const s = await placeholder.evaluate((el) => {
+      const cs = getComputedStyle(el)
+      return { aria: el.getAttribute('aria-disabled'), style: cs.borderTopStyle, shadow: cs.boxShadow }
+    })
+    expect(s.aria).toBe('true')
+    expect(s.style).toBe('dashed')
+    expect(s.shadow).toBe('none')
+  })
+
+  test('按压三部曲：静置 3px → hover 浮 2px/投影 5px → 按住 translate(2px,2px)/投影收 1px', async ({ page }) => {
+    const btn = page.locator('button[data-comp="shadow-button"]:visible').first()
+    await btn.scrollIntoViewIfNeeded()
+    await page.mouse.move(0, 0)
+    const state = () =>
+      btn.evaluate((el) => {
+        const cs = getComputedStyle(el)
+        return { shadow: cs.boxShadow, translate: cs.translate }
+      })
+    // 静置：硬投影 3px 3px，零位移（无 translate 工具类命中时 computed 为 none）
+    expect((await state()).shadow).toContain('rgb(17, 17, 17) 3px 3px 0px 0px')
+    expect((await state()).translate).toBe('none')
+    // hover：浮起 2px，投影跟涨到 5px
+    await btn.hover()
+    await expect.poll(async () => (await state()).shadow).toContain('rgb(17, 17, 17) 5px 5px 0px 0px')
+    expect((await state()).translate).toBe('0px -2px')
+    // 按住不松（鼠标已在按钮上）：朝阴影方向压进 translate(2px,2px)，投影收 1px
+    await page.mouse.down()
+    await expect.poll(async () => (await state()).shadow).toContain('rgb(17, 17, 17) 1px 1px 0px 0px')
+    expect((await state()).translate).toBe('2px 2px')
+    // 松开并移出：回到静置三部曲起点
+    await page.mouse.up()
+    await page.mouse.move(0, 0)
+    await expect.poll(async () => (await state()).shadow).toContain('rgb(17, 17, 17) 3px 3px 0px 0px')
+    expect((await state()).translate).toBe('none')
+  })
+})
