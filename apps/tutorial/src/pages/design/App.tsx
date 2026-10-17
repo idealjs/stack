@@ -22,7 +22,7 @@ export function App() {
             <a
               key={b.key}
               href={`/${b.key}.html`}
-              className="block w-[280px] rounded-2xl border-2 border-ink bg-paper p-5 no-underline shadow-ink transition-transform duration-150 hover:-translate-y-[3px] hover:shadow-ink-lift"
+              className="block w-[280px] rounded-2xl border-2 border-ink bg-paper p-5 no-underline shadow-ink transition-transform duration-150 hover:-translate-y-[3px]"
             >
               <span className="text-t3 font-extrabold text-ink">{b.label}</span>
               <span className="mt-2 block text-small leading-relaxed text-body">{b.desc}</span>

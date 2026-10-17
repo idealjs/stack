@@ -33,7 +33,7 @@ export function ShadowCard({
     <div
       data-comp="shadow-card"
       className={`relative w-fit rounded-xl shadow-ink
-        ${hover ? 'transition-[transform,box-shadow] duration-150 hover:-translate-y-[3px] hover:shadow-ink-lift' : ''}`}
+        ${hover ? 'transition-[transform,box-shadow] duration-150 hover:-translate-y-[3px]' : ''}`}
     >
       {/* 票体：纯视觉卡（描边＋底色），尺寸类由 className 进入 */}
       <div className={`relative w-[200px] rounded-xl border-2 border-ink bg-paper ${className}`}>{children}</div>

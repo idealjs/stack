@@ -143,7 +143,7 @@ export function BlogCard({ post }: { post: (typeof POSTS)[number] }) {
   return (
     <a
       href={`/blog-${post.slug}.html`}
-      className="block w-[420px] rounded-2xl border-2 border-ink bg-paper p-5 no-underline shadow-ink transition-transform duration-150 hover:-translate-y-[3px] hover:shadow-ink-lift"
+      className="block w-[420px] rounded-2xl border-2 border-ink bg-paper p-5 no-underline shadow-ink transition-transform duration-150 hover:-translate-y-[3px]"
     >
       <div className="flex items-center gap-2.5">
         <span className="rounded-full bg-clash3b/15 px-2.5 py-0.5 font-mono t-small-strong">{post.date}</span>

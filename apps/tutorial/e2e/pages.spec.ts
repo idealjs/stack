@@ -406,16 +406,15 @@ test.describe('票券规格契约', () => {
   })
 
   for (const punched of [true, false]) {
-    test(`默认 hover：浮起 3px，阴影 5→8px，再回到静置状态（打孔=${punched}）`, async ({ page }) => {
+    test(`默认 hover：浮起 3px（影不动画，恒 5px），再回到静置状态（打孔=${punched}）`, async ({ page }) => {
       const ticket = await mountTicket(page, { punched })
       const initial = (await ticket.boundingBox())!
       await ticket.hover()
-      // 阴影过渡在内层包裹上，位移（transform）仍在外层 shell
-      await expect.poll(() => ticket.locator('.ticket-shadow').evaluate((el) => getComputedStyle(el).filter)).toBe('drop-shadow(rgb(17, 17, 17) 8px 8px 0px)')
-      expect((await ticket.boundingBox())!.y).toBeCloseTo(initial.y - 3, 1)
+      // 拿起只位移：影不参与动画，恒为静置档 5px；y 用 poll 等过渡走完
+      expect(await ticket.locator('.ticket-shadow').evaluate((el) => getComputedStyle(el).filter)).toBe('drop-shadow(rgb(17, 17, 17) 5px 5px 0px)')
+      await expect.poll(async () => (await ticket.boundingBox())!.y).toBeCloseTo(initial.y - 3, 1)
       await page.mouse.move(0, 0)
-      await expect.poll(() => ticket.locator('.ticket-shadow').evaluate((el) => getComputedStyle(el).filter)).toBe('drop-shadow(rgb(17, 17, 17) 5px 5px 0px)')
-      expect((await ticket.boundingBox())!.y).toBeCloseTo(initial.y, 1)
+      await expect.poll(async () => (await ticket.boundingBox())!.y).toBeCloseTo(initial.y, 1)
     })
   }
 
@@ -452,7 +451,7 @@ test.describe('ShadowButton 按压契约', () => {
     expect(s.shadow).toBe('none')
   })
 
-  test('按压三部曲：静置 3px → hover 浮 2px/投影 5px → 按住 translate(2px,2px)/投影收 1px', async ({ page }) => {
+  test('按压两态：静置影 3px 恒定 → hover 浮 2px → 按住 translate(2px,2px)', async ({ page }) => {
     const btn = page.locator('button[data-comp="shadow-button"]:visible').first()
     await btn.scrollIntoViewIfNeeded()
     await page.mouse.move(0, 0)
@@ -461,18 +460,18 @@ test.describe('ShadowButton 按压契约', () => {
         const cs = getComputedStyle(el)
         return { shadow: cs.boxShadow, translate: cs.translate }
       })
-    // 静置：硬投影 3px 3px，零位移（无 translate 工具类命中时 computed 为 none）
+    // 影恒定：静置/hover/按住全程 3px 3px（影不参与动画，拿起的只是位移）
     expect((await state()).shadow).toContain('rgb(17, 17, 17) 3px 3px 0px 0px')
     expect((await state()).translate).toBe('none')
-    // hover：浮起 2px，投影跟涨到 5px
+    // hover：浮起 2px
     await btn.hover()
-    await expect.poll(async () => (await state()).shadow).toContain('rgb(17, 17, 17) 5px 5px 0px 0px')
-    expect((await state()).translate).toBe('0px -2px')
-    // 按住不松（鼠标已在按钮上）：朝阴影方向压进 translate(2px,2px)，投影收 1px
+    await expect.poll(async () => (await state()).translate).toBe('0px -2px')
+    expect((await state()).shadow).toContain('rgb(17, 17, 17) 3px 3px 0px 0px')
+    // 按住不松（鼠标已在按钮上）：朝阴影方向压进 translate(2px,2px)
     await page.mouse.down()
-    await expect.poll(async () => (await state()).shadow).toContain('rgb(17, 17, 17) 1px 1px 0px 0px')
-    expect((await state()).translate).toBe('2px 2px')
-    // 松开并移出：回到静置三部曲起点
+    await expect.poll(async () => (await state()).translate).toBe('2px 2px')
+    expect((await state()).shadow).toContain('rgb(17, 17, 17) 3px 3px 0px 0px')
+    // 松开并移出：回到静置
     await page.mouse.up()
     await page.mouse.move(0, 0)
     await expect.poll(async () => (await state()).shadow).toContain('rgb(17, 17, 17) 3px 3px 0px 0px')
@@ -500,7 +499,7 @@ test.describe('ShadowCard · 四部曲契约', () => {
         return {
           ticket: !!face,
           // 普通卡＝tailwind hover 变体；票券＝.ticket-lift
-          hover: el.className.includes('shadow-ink-lift') || el.classList.contains('ticket-lift'),
+          hover: el.className.includes('hover:-translate-y-[3px]') || el.classList.contains('ticket-lift'),
           punched: !!face && getComputedStyle(face).maskImage.includes('radial-gradient'),
         }
       }),
@@ -513,7 +512,7 @@ test.describe('ShadowCard · 四部曲契约', () => {
     ])
   })
 
-  test('第 4 张（打孔＋hover）：阴影 5→8px 跟随打孔轮廓，浮起 3px，离开复原', async ({ page }) => {
+  test('第 4 张（打孔＋hover）：浮起 3px（影不动画，恒 5px），离开复原', async ({ page }) => {
     const card = specimens(page).nth(3)
     await card.scrollIntoViewIfNeeded()
     await page.mouse.move(0, 0)
@@ -522,13 +521,12 @@ test.describe('ShadowCard · 四部曲契约', () => {
     expect(await card.locator('.ticket-face').evaluate((el) => getComputedStyle(el).maskImage)).toContain('radial-gradient') // 真打孔
     const initial = (await card.boundingBox())!
     await card.hover()
-    // 与 Ticket hover 契约同款：filter 过渡在内层包裹，位移（transform）在外层 shell
-    await expect.poll(() => shadow.evaluate((el) => getComputedStyle(el).filter)).toBe('drop-shadow(rgb(17, 17, 17) 8px 8px 0px)')
-    expect((await card.boundingBox())!.y).toBeCloseTo(initial.y - 3, 1)
+    // 拿起只位移：影不参与动画，恒为静置档 5px；y 用 poll 等过渡走完
+    await expect.poll(async () => (await card.boundingBox())!.y).toBeCloseTo(initial.y - 3, 1)
+    expect(await shadow.evaluate((el) => getComputedStyle(el).filter)).toBe('drop-shadow(rgb(17, 17, 17) 5px 5px 0px)')
     await page.mouse.move(0, 0)
-    await expect.poll(() => shadow.evaluate((el) => getComputedStyle(el).filter)).toBe('drop-shadow(rgb(17, 17, 17) 5px 5px 0px)')
-    expect((await card.boundingBox())!.y).toBeCloseTo(initial.y, 1)
-
+    await expect.poll(async () => (await card.boundingBox())!.y).toBeCloseTo(initial.y, 1)
+    expect(await shadow.evaluate((el) => getComputedStyle(el).filter)).toBe('drop-shadow(rgb(17, 17, 17) 5px 5px 0px)')
   })
 })
 
@@ -541,7 +539,8 @@ test.describe('阴影册 · hover-host 触发模型', () => {
 
     await host.hover()
     await expect(inner).toHaveCSS('translate', '0px -3px')
-    await expect(inner).toHaveCSS('box-shadow', /rgb\(17, 17, 17\) 8px 8px 0px 0px/)
+    // 拿起只位移：影不参与动画，静置档 5px 恒定
+    await expect(inner).toHaveCSS('box-shadow', /rgb\(17, 17, 17\) 5px 5px 0px 0px/)
 
     // 光标移到宿主角落（元素浮起后已远离光标）：状态保持＝无边界震荡
     const hostBox = await host.boundingBox()

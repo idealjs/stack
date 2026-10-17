@@ -82,9 +82,7 @@
 .ticket-lift:hover {
   transform: translateY(-3px);
 }
-.ticket-lift:hover .ticket-shadow {
-  filter: drop-shadow(var(--drop-shadow-ink-lift));
-}
+
 /* ===== hoverable-shadow —— hover 拿起动效层（叠加用，不自带阴影）=====
  * 只规定「拿起」这件事：浮起 3px ＋ 阴影按同元素上的基础类换 lift 档；
  * 静置态长什么样它不管，完全由同元素的基础类（shadow-ink / drop-shadow-ink
@@ -101,27 +99,16 @@
  * 注意别与 Button 等自带的 hover:* 工具类重复叠加——拿起动效只写一处。 */
 .hoverable-shadow {
   position: relative;
-  transition: translate 150ms, box-shadow 150ms, filter 150ms;
+  transition: translate 150ms;
 }
-/* 宿主触发（首选）：命中区不动，浮起的是内部元素 */
+/* 宿主触发（首选）：命中区不动，浮起的是内部元素。
+ * 拿起只位移——影子不参与动画（影值生长的对向运动读作闪烁）；浮起本身拉开影距 */
 .hover-host:hover .hoverable-shadow {
   translate: 0 -3px;
-}
-.hover-host:hover .hoverable-shadow.shadow-ink {
-  box-shadow: var(--shadow-ink-lift);
-}
-.hover-host:hover .hoverable-shadow.drop-shadow-ink {
-  filter: drop-shadow(var(--drop-shadow-ink-lift));
 }
 /* 自身触发（无宿主时的退化路径）*/
 .hoverable-shadow:hover {
   translate: 0 -3px;
-}
-.hoverable-shadow.shadow-ink:hover {
-  box-shadow: var(--shadow-ink-lift);
-}
-.hoverable-shadow.drop-shadow-ink:hover {
-  filter: drop-shadow(var(--drop-shadow-ink-lift));
 }
 /* 命中裙边：hover 浮起会让光标脱离元素边缘、造成进入/离开来回震荡（抖动）——
  * 透明裙边把 hover 区域外扩 8px，浮起后光标仍在区内，状态稳定 */
@@ -129,15 +116,6 @@
   content: '';
   position: absolute;
   inset: -8px;
-}
-.hoverable-shadow:hover {
-  translate: 0 -3px;
-}
-.hoverable-shadow.shadow-ink:hover {
-  box-shadow: var(--shadow-ink-lift);
-}
-.hoverable-shadow.drop-shadow-ink:hover {
-  filter: drop-shadow(var(--drop-shadow-ink-lift));
 }
 @media (prefers-reduced-motion: reduce) {
   /* 只停过渡（瞬移到拿起终态），不抹终态——translate:none 会把浮起本身也杀掉 */
