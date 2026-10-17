@@ -1,11 +1,13 @@
 import { Page, Section } from '../../lib/ui'
-import { ChapterTicket, Stamp } from '@stack/design-system'
+import { ChapterTicket, Stamp, Tri, Ring, Wave, Cross, BrickDot } from '@stack/design-system'
 import { CHAPTERS } from '../../lib/chapters'
 import type { ReactNode } from 'react'
 
 /* 撕角 22px 的裁形（StickyNote 折角的同款语言，尺寸与折角方块对齐）。
  * 本页标本零新增 CSS：全部由既有 token 生成的工具类拼出。 */
 const CLIP_TAG = '[clip-path:polygon(0_0,100%_0,100%_calc(100%_-_22px),calc(100%_-_22px)_100%,0_100%)]'
+/* 尖底书签的裁形（Bookmark 尖底的简化版） */
+const TAG_CLIP = '[clip-path:polygon(0_0,100%_0,100%_100%,50%_calc(100%_-_14px),0_100%)]'
 
 /** 撕角便签：裁形归内层、影归外壳——className（drop-shadow-hard 等）落在外壳上 */
 function TornNote({ className = '' }: { className?: string }) {
@@ -48,6 +50,16 @@ function Specimen({ title, note, children }: { title: string; note: string; chil
   )
 }
 
+/** 粒子墙的单格：实物居中＋一行小注 */
+function Particle({ title, children }: { title: string; children: ReactNode }) {
+  return (
+    <div className="flex min-w-0 flex-col items-center gap-2">
+      <div className="flex h-[120px] items-center justify-center">{children}</div>
+      <div className="text-center text-[12px] font-bold leading-snug text-ink">{title}</div>
+    </div>
+  )
+}
+
 export function App() {
   return (
     <Page
@@ -55,54 +67,62 @@ export function App() {
       title="阴影 · 硬投影与拿起"
       desc="一份投影配方的两个形态：矩形盒 shadow-hard、异形轮廓 drop-shadow-hard；拿起动效 hoverable-shadow 只叠不换底。"
     >
-      <Section label="shadow-hard · 矩形盒的投影" note="唯一配方 --shadow-hard: 5px 5px 0 ink；拿起档 --shadow-hard-lift: 8px 8px 0 ink">
-        <div className="flex flex-wrap items-start gap-8">
-          <Specimen title="shadow-hard" note="静置档：全站唯一盒影配方，实底纸卡与按钮用">
-            <div className="w-[190px] rounded-xl border-2 border-ink bg-paper px-4 py-5 shadow-hard">
-              <b className="text-small">纸卡 · 静置</b>
-              <p className="m-0 t-small-mute">box-shadow 跟盒框走</p>
-            </div>
-          </Specimen>
-          <Specimen title="shadow-hard-lift" note="拿起档 8px：静置不用，hover 拿起时才换入">
-            <div className="w-[190px] rounded-xl border-2 border-ink bg-paper px-4 py-5 shadow-hard-lift">
-              <b className="text-small">纸卡 · 拿起档</b>
-              <p className="m-0 t-small-mute">只作为 hover 终态出现</p>
-            </div>
-          </Specimen>
-          <Specimen title="组件同款 · Stamp" note="矩形章也压 shadow-hard，rotate(-2°) 不换配方">
-            <div className="flex h-[96px] items-center">
-              <Stamp>已核对</Stamp>
-            </div>
-          </Specimen>
-        </div>
-        <pre className="learning-demo-code mt-4 max-w-[560px]">{`<div className="rounded-xl border-2 border-ink bg-paper shadow-hard">
+      {/* ① 基础单个应用：两种影各自的单发用法 */}
+      <Section label="基础单个应用" note="shadow-hard 管矩形盒、drop-shadow-hard 管异形轮廓——一个元素一次只用一份影">
+        <div className="mb-6">
+          <b className="text-[13px]">shadow-hard · 矩形盒影</b>
+          <p className="m-0 mt-1 mb-3 max-w-[760px] text-content leading-relaxed text-body">
+            唯一配方 --shadow-hard: 5px 5px 0 ink；拿起档 --shadow-hard-lift: 8px 8px 0 ink——静置不用，hover 拿起时才换入。
+          </p>
+          <div className="flex flex-wrap items-start gap-8">
+            <Specimen title="shadow-hard" note="静置档：实底纸卡与按钮用">
+              <div className="w-[190px] rounded-xl border-2 border-ink bg-paper px-4 py-5 shadow-hard">
+                <b className="text-small">纸卡 · 静置</b>
+                <p className="m-0 t-small-mute">box-shadow 跟盒框走</p>
+              </div>
+            </Specimen>
+            <Specimen title="shadow-hard-lift" note="拿起档：只作为 hover 终态出现">
+              <div className="w-[190px] rounded-xl border-2 border-ink bg-paper px-4 py-5 shadow-hard-lift">
+                <b className="text-small">纸卡 · 拿起档</b>
+                <p className="m-0 t-small-mute">经 hoverable-shadow 换入</p>
+              </div>
+            </Specimen>
+            <Specimen title="组件同款 · Stamp" note="矩形章也压 shadow-hard，rotate(-2°) 不换配方">
+              <div className="flex h-[96px] items-center">
+                <Stamp>已核对</Stamp>
+              </div>
+            </Specimen>
+          </div>
+          <pre className="learning-demo-code mt-4 max-w-[560px]">{`<div className="rounded-xl border-2 border-ink bg-paper shadow-hard">
   静置纸卡
-</div>
-
-{/* 拿起档只在 hover 终态出现——通常经 hoverable-shadow 换入，
-    静置元素直接写 shadow-hard-lift 是罕见特例 */}
-<div className="… shadow-hard-lift">…</div>`}</pre>
-      </Section>
-
-      <Section label="drop-shadow-hard · 跟随轮廓的投影" note="filter 形态同值（5px 5px 0 ink）——影子跟轮廓走，不认盒框">
-        <div className="flex flex-wrap items-start gap-8">
-          <Specimen title="撕角便签 · 裸工具类" note="外壳拿 filter，内层拿 clip-path——两层缺一不可">
-            <TornNote className="drop-shadow-hard w-fit" />
-          </Specimen>
-          <Specimen title="组件同款 · Ticket" note="影在 .ticket-shadow 外壳——同一份配方，撕线孔洞也跟着投影">
-            <ChapterTicket chapter={CHAPTERS[1]} done />
-          </Specimen>
+</div>`}</pre>
         </div>
-        <pre className="learning-demo-code mt-4 max-w-[620px]">{`{/* 外壳拿影，内层拿形：filter 先画影、clip-path 后裁形，
-    同元素叠会连影一起裁掉（见反例一） */}
+
+        <div>
+          <b className="text-[13px]">drop-shadow-hard · 跟随轮廓的投影</b>
+          <p className="m-0 mt-1 mb-3 max-w-[760px] text-content leading-relaxed text-body">
+            filter 形态同值（5px 5px 0 ink）——影子跟轮廓走，不认盒框。裁形归内层、影归外壳，两层缺一不可。
+          </p>
+          <div className="flex flex-wrap items-start gap-8">
+            <Specimen title="撕角便签 · 裸工具类" note="外壳拿 filter，内层拿 clip-path">
+              <TornNote className="drop-shadow-hard w-fit" />
+            </Specimen>
+            <Specimen title="组件同款 · Ticket" note="影在 .ticket-shadow 外壳——撕线孔洞也跟着投影">
+              <ChapterTicket chapter={CHAPTERS[1]} done />
+            </Specimen>
+          </div>
+          <pre className="learning-demo-code mt-4 max-w-[620px]">{`{/* 外壳拿影，内层拿形：filter 先画影、clip-path 后裁形，
+    同元素叠会连影一起裁掉（见反例拆法） */}
 <div className="drop-shadow-hard w-fit">
   <div className="… [clip-path:polygon(…)]">撕角便签</div>
 </div>`}</pre>
+        </div>
       </Section>
 
+      {/* ② 复合应用：hoverable-shadow 叠在基础影上 */}
       <Section
-        label="hoverable-shadow · 拿起动效层"
-        note="叠加用、不自带影：浮 3px＋按同元素的基础类换 lift 档；translate 属性动效，与 transform 互不打架"
+        label="复合应用"
+        note="hoverable-shadow 叠上去：动效层认名字不认顺序，浮 3px＋按同元素的基础类换 lift 档；translate 属性动效，与 transform 互不打架"
       >
         <p className="m-0 mb-3 max-w-[760px] text-content leading-relaxed text-body">
           组合规则一条：<b>动效层认名字，不认顺序</b>——同元素叠了 shadow-hard 就换盒影档，叠了
@@ -139,7 +159,130 @@ export function App() {
         </p>
       </Section>
 
-      <Section label="反例与拆法" note="两份影、被裁掉的影——都是层级放错，不是配方错">
+      {/* ③ 丰富样式组合粒子：三种 classname 撒进形状与真实组件 */}
+      <Section
+        label="丰富样式组合粒子"
+        note="把三种 classname 撒进形状与组件里——全部可 hover，感受矩形影/轮廓影与拿起动效的组合差异；末表为现有组件的归位一览"
+      >
+        <div className="grid grid-cols-[repeat(auto-fill,minmax(150px,1fr))] gap-x-4 gap-y-8">
+          <Particle title="shadow-hard · 纸卡">
+            <div className="w-[120px] rounded-xl border-2 border-ink bg-paper px-3 py-3 shadow-hard">
+              <div className="flex items-center gap-1.5">
+                <BrickDot on />
+                <BrickDot />
+                <Cross size={12} />
+              </div>
+              <p className="m-0 mt-1.5 text-[12px] font-bold text-ink">纸卡</p>
+            </div>
+          </Particle>
+          <Particle title="＋hoverable · 拿起">
+            <div className="shadow-hard hoverable-shadow w-[120px] cursor-pointer rounded-xl border-2 border-ink bg-paper px-3 py-3">
+              <div className="flex items-center gap-1.5">
+                <BrickDot on />
+                <BrickDot />
+                <Cross size={12} />
+              </div>
+              <p className="m-0 mt-1.5 text-[12px] font-bold text-ink">纸卡</p>
+            </div>
+          </Particle>
+          <Particle title="shadow-hard · 圆牌">
+            <div className="flex size-20 items-center justify-center rounded-full border-2 border-ink bg-clash2a shadow-hard">
+              <Ring size={30} />
+            </div>
+          </Particle>
+          <Particle title="＋hoverable · 圆牌拿起">
+            <div className="shadow-hard hoverable-shadow flex size-20 cursor-pointer items-center justify-center rounded-full border-2 border-ink bg-clash2a">
+              <Tri size={26} />
+            </div>
+          </Particle>
+          <Particle title="drop-shadow · 色块">
+            <div className="-rotate-2 rounded-lg border-2 border-ink bg-clash1a px-3 py-2 text-[12px] font-extrabold text-ink drop-shadow-hard">
+              <Wave size={22} />
+              <div>色块</div>
+            </div>
+          </Particle>
+          <Particle title="＋hoverable · 色块拿起">
+            <div className="drop-shadow-hard hoverable-shadow rotate-2 cursor-pointer rounded-lg border-2 border-ink bg-clash3a px-3 py-2 text-[12px] font-extrabold text-ink">
+              <Wave size={22} />
+              <div>色块</div>
+            </div>
+          </Particle>
+          <Particle title="drop-shadow · 尖底书签">
+            <div className="drop-shadow-hard w-fit">
+              <div className={`px-4 pb-6 pt-3 text-[12px] font-extrabold text-ink bg-clash1b ${TAG_CLIP}`}>标记</div>
+            </div>
+          </Particle>
+          <Particle title="＋hoverable · 书签拿起">
+            <div className="drop-shadow-hard hoverable-shadow w-fit cursor-pointer">
+              <div className={`px-4 pb-6 pt-3 text-[12px] font-extrabold text-ink bg-clash1b ${TAG_CLIP}`}>标记</div>
+            </div>
+          </Particle>
+          <Particle title="shadow-hard · 印章（rotate）">
+            <Stamp>已核对</Stamp>
+          </Particle>
+          <Particle title="drop-shadow 系 · 票券（组件）">
+            <ChapterTicket chapter={CHAPTERS[1]} done hover />
+          </Particle>
+        </div>
+
+        {/* 现有组件归位一览（选影的参照表） */}
+        <div className="mt-10">
+          <b className="text-[13px]">现有组件归位一览</b>
+          <p className="m-0 mt-1 mb-3 max-w-[760px] text-content leading-relaxed text-body">
+            矩形盒影是默认，异形才动 filter——新组件按此选影。
+          </p>
+          <table className="w-full border-collapse text-small text-body">
+            <thead>
+              <tr className="border-b-2 border-[#d5d5d3] text-left text-ink">
+                <th className="w-40 py-1 pr-2">影系</th>
+                <th className="w-[400px] py-1 pr-2">组件</th>
+                <th className="py-1 pr-2">说明</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr className="border-b border-[#ececea]">
+                <td className="py-1.5 pr-2 align-top font-extrabold text-ink">
+                  shadow-hard
+                  <br />
+                  <span className="t-small-mute font-normal">box-shadow</span>
+                </td>
+                <td className="py-1.5 pr-2 align-top">
+                  Button · MemphisCard · RoutableCard · ShadowCard · ShadowButton · Stamp · ClipboardChecklist · FlashCard · ExperimentFrame ·
+                  TaskEnvelope · DeliveryManifest · ComparisonBoard · BrickToolbox
+                </td>
+                <td className="py-1.5 pr-2 align-top">
+                  实底矩形盒。Button / MemphisCard / RoutableCard / ShadowCard / ShadowButton 自写 hover 拿起（-3px＋5→8，与 hoverable-shadow
+                  同规格）；Stamp rotate(-2°) 静置盖章、无动效。
+                </td>
+              </tr>
+              <tr className="border-b border-[#ececea]">
+                <td className="py-1.5 pr-2 align-top font-extrabold text-ink">
+                  drop-shadow-hard
+                  <br />
+                  <span className="t-small-mute font-normal">filter</span>
+                </td>
+                <td className="py-1.5 pr-2 align-top">Ticket · ChapterTicket · StickyNote · Bookmark · FolderTabs · OutputReceipt</td>
+                <td className="py-1.5 pr-2 align-top">
+                  异形轮廓（打孔票、撕角、尖底书签、索引标签、回执）。影都在外壳层（.ticket-shadow / .learning-note /
+                  .learning-bookmark-shell 等），形状在内层；Ticket hover 连外壳 translate 一起换 lift 档。
+                </td>
+              </tr>
+              <tr>
+                <td className="py-1.5 pr-2 align-top font-extrabold text-ink">
+                  自写小档
+                  <br />
+                  <span className="t-small-mute font-normal">3px → 5px</span>
+                </td>
+                <td className="py-1.5 pr-2 align-top">learning-action（各标本动作按钮）· 工位卡（DataFlowBoard）· 积木（BrickToolbox）</td>
+                <td className="py-1.5 pr-2 align-top">学习工作台的按压语言（hover -2px），比主档低一级；未接 hoverable-shadow。</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </Section>
+
+      {/* ④ 反例拆法对比 */}
+      <Section label="反例拆法对比" note="两份影、被裁掉的影——都是层级放错，不是配方错">
         <div className="space-y-6">
           <div>
             <b className="text-[13px]">反例一 · filter 与 clip-path 同元素——影子被一起裁掉</b>
@@ -177,56 +320,6 @@ export function App() {
             </div>
           </div>
         </div>
-      </Section>
-
-      <Section label="现有组件归位一览" note="矩形盒影是默认，异形才动 filter——新组件按此选影">
-        <table className="w-full border-collapse text-small text-body">
-          <thead>
-            <tr className="border-b-2 border-[#d5d5d3] text-left text-ink">
-              <th className="w-40 py-1 pr-2">影系</th>
-              <th className="w-[400px] py-1 pr-2">组件</th>
-              <th className="py-1 pr-2">说明</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr className="border-b border-[#ececea]">
-              <td className="py-1.5 pr-2 align-top font-extrabold text-ink">
-                shadow-hard
-                <br />
-                <span className="t-small-mute font-normal">box-shadow</span>
-              </td>
-              <td className="py-1.5 pr-2 align-top">
-                Button · MemphisCard · RoutableCard · ShadowCard · Stamp · ClipboardChecklist · FlashCard · ExperimentFrame · TaskEnvelope ·
-                DeliveryManifest · ComparisonBoard · BrickToolbox
-              </td>
-              <td className="py-1.5 pr-2 align-top">
-                实底矩形盒。Button / MemphisCard / RoutableCard / ShadowCard 自写 hover 拿起（-3px＋5→8，与 hoverable-shadow
-                同规格）；Stamp rotate(-2°) 静置盖章、无动效。
-              </td>
-            </tr>
-            <tr className="border-b border-[#ececea]">
-              <td className="py-1.5 pr-2 align-top font-extrabold text-ink">
-                drop-shadow-hard
-                <br />
-                <span className="t-small-mute font-normal">filter</span>
-              </td>
-              <td className="py-1.5 pr-2 align-top">Ticket · ChapterTicket · StickyNote · Bookmark · FolderTabs · OutputReceipt</td>
-              <td className="py-1.5 pr-2 align-top">
-                异形轮廓（打孔票、撕角、尖底书签、索引标签、回执）。影都在外壳层（.ticket-shadow / .learning-note /
-                .learning-bookmark-shell 等），形状在内层；Ticket hover 连外壳 translate 一起换 lift 档。
-              </td>
-            </tr>
-            <tr>
-              <td className="py-1.5 pr-2 align-top font-extrabold text-ink">
-                自写小档
-                <br />
-                <span className="t-small-mute font-normal">3px → 5px</span>
-              </td>
-              <td className="py-1.5 pr-2 align-top">learning-action（各标本动作按钮）· 工位卡（DataFlowBoard）· 积木（BrickToolbox）</td>
-              <td className="py-1.5 pr-2 align-top">学习工作台的按压语言（hover -2px），比主档低一级；未接 hoverable-shadow。</td>
-            </tr>
-          </tbody>
-        </table>
       </Section>
     </Page>
   )
