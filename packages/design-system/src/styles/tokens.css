@@ -123,13 +123,6 @@
 .hoverable-shadow.drop-shadow-ink:hover {
   filter: drop-shadow(var(--drop-shadow-ink-lift));
 }
-/* 命中裙边：hover 浮起会让光标脱离元素边缘、造成进入/离开来回震荡（抖动）——
- * 透明裙边把 hover 区域外扩 8px，浮起后光标仍在区内，状态稳定 */
-.hoverable-shadow::after {
-  content: '';
-  position: absolute;
-  inset: -8px;
-}
 .hoverable-shadow:hover {
   translate: 0 -3px;
 }
