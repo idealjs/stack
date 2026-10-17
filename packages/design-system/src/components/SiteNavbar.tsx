@@ -132,7 +132,7 @@ export function SiteNavbar({
 
       {/* 内容区：桌面=常规两行流；移动端=左侧滑出 sidebar（checkbox 勾选时平移归位）。
           分块链在抽屉里有一份移动端专属副本（桌面分块留在顶栏），高亮逻辑同源 */}
-      <div id="site-nav-drawer" className="max-lg:fixed max-lg:inset-y-0 max-lg:left-0 max-lg:z-50 max-lg:w-72 max-lg:overflow-y-auto max-lg:rounded-none max-lg:border-r-2 max-lg:border-ink max-lg:bg-paper max-lg:p-3 max-lg:shadow-[8px_0_0_0_var(--color-ink)] max-lg:invisible max-lg:-translate-x-full max-lg:transition-[transform,visibility] max-lg:duration-200 max-lg:peer-checked:visible max-lg:peer-checked:translate-x-0">
+      <div id="site-nav-drawer" className="max-lg:fixed max-lg:inset-y-0 max-lg:left-0 max-lg:z-50 max-lg:w-72 max-lg:overflow-y-auto max-lg:rounded-none max-lg:border-r-2 max-lg:border-ink max-lg:bg-paper max-lg:p-3 max-lg:shadow-[8px_0_0_0_var(--color-ink)] max-lg:invisible max-lg:-translate-x-full max-lg:transition-[transform,visibility] max-lg:duration-300 max-lg:ease-[cubic-bezier(0.32,0.72,0,1)] max-lg:motion-reduce:transition-none max-lg:peer-checked:visible max-lg:peer-checked:translate-x-0">
         {/* 抽屉顶：品牌复述＋关闭开关（遮罩会盖住顶栏，汉堡够不着，必须在抽屉内给关闭）；桌面隐藏 */}
         <div className="lg:hidden max-lg:mb-3 max-lg:flex max-lg:items-center max-lg:justify-between">
           <a
@@ -205,7 +205,7 @@ export function SiteNavbar({
       <label
         htmlFor="site-nav-toggle"
         aria-hidden="true"
-        className="hidden max-lg:fixed max-lg:inset-0 max-lg:z-40 max-lg:block max-lg:cursor-pointer max-lg:bg-ink/40 max-lg:invisible max-lg:transition-[visibility] max-lg:peer-checked:visible"
+        className="hidden max-lg:fixed max-lg:inset-0 max-lg:z-40 max-lg:block max-lg:cursor-pointer max-lg:bg-ink/40 max-lg:invisible max-lg:opacity-0 max-lg:transition-[visibility,opacity] max-lg:duration-300 max-lg:ease-[cubic-bezier(0.32,0.72,0,1)] max-lg:motion-reduce:transition-none max-lg:peer-checked:visible max-lg:peer-checked:opacity-100"
       />
     </header>
   )
