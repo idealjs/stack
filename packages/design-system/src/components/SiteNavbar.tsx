@@ -12,8 +12,9 @@
  * daisyUI drawer 的同款思路，checkbox 前置 + 后续兄弟经 peer-checked（编译后即
  * `.peer:checked ~ *`）驱动；关闭走遮罩 label 与抽屉内 × label（点击切换 checkbox）。
  * 桌面（≥lg）新增 DOM 全部 display:none，像素零变化。checkbox 用 sr-only：
- * 保持可聚焦（Tab→Space 可开合），但不挡任何点击。纯 CSS 天然限制：无 Esc 关闭、
- * 开合不写 aria-expanded（无 JS 可改），故开关联用 aria-label 表意。
+ * 保持可聚焦（Tab→Space 可开合），但不挡任何点击。纯 CSS 天然限制：无 Esc 关闭。
+ * aria-expanded 用「对称触发器」补上：开/关两个 label 各自带反相的 aria-expanded，
+ * CSS 保证任一时刻只有一个在可达树里（visibility:hidden 摘树），SR 读到的状态恒正确。
  * 层级：header 自带 view-transition-name＝自带堆叠上下文，抽屉的 z-50 会被困在里面，
  * 页面后文 z≥1 的定位元素（夹板纸夹、CoachSticky 等）会反盖抽屉——移动端把 header
  * 整体抬到 z-50，让遮罩/抽屉的层级在页面之上重新成立。 */
@@ -90,7 +91,7 @@ export function SiteNavbar({
       />
 
       {/* 第一行：品牌（站内最大标题，t2）＋ 分块（桌面）；移动端右侧换汉堡开关 */}
-      <div className="flex flex-wrap items-center gap-1.5">
+      <div className="flex flex-wrap items-center gap-1.5 max-lg:peer-checked:[&>label]:invisible">
         <a
           href={brand.href}
           className={`mr-2 max-lg:mr-auto rounded-lg border-2 px-2.5 py-0.5 font-mono text-t2 font-extrabold leading-snug no-underline transition-colors ${
@@ -117,6 +118,8 @@ export function SiteNavbar({
         <label
           htmlFor="site-nav-toggle"
           aria-label="打开导航菜单"
+          aria-expanded="false"
+          aria-controls="site-nav-drawer"
           className="hidden max-lg:grid max-lg:size-10 max-lg:cursor-pointer max-lg:place-items-center max-lg:rounded-lg max-lg:border-2 max-lg:border-ink max-lg:bg-paper max-lg:shadow-[3px_3px_0_var(--color-ink)] max-lg:transition-colors max-lg:hover:bg-paper-deep"
         >
           <span aria-hidden="true" className="flex flex-col gap-[5px]">
@@ -129,7 +132,7 @@ export function SiteNavbar({
 
       {/* 内容区：桌面=常规两行流；移动端=左侧滑出 sidebar（checkbox 勾选时平移归位）。
           分块链在抽屉里有一份移动端专属副本（桌面分块留在顶栏），高亮逻辑同源 */}
-      <div className="max-lg:fixed max-lg:inset-y-0 max-lg:left-0 max-lg:z-50 max-lg:w-72 max-lg:overflow-y-auto max-lg:rounded-none max-lg:border-r-2 max-lg:border-ink max-lg:bg-paper max-lg:p-3 max-lg:shadow-[8px_0_0_0_var(--color-ink)] max-lg:invisible max-lg:-translate-x-full max-lg:transition-[transform,visibility] max-lg:duration-200 max-lg:peer-checked:visible max-lg:peer-checked:translate-x-0">
+      <div id="site-nav-drawer" className="max-lg:fixed max-lg:inset-y-0 max-lg:left-0 max-lg:z-50 max-lg:w-72 max-lg:overflow-y-auto max-lg:rounded-none max-lg:border-r-2 max-lg:border-ink max-lg:bg-paper max-lg:p-3 max-lg:shadow-[8px_0_0_0_var(--color-ink)] max-lg:invisible max-lg:-translate-x-full max-lg:transition-[transform,visibility] max-lg:duration-200 max-lg:peer-checked:visible max-lg:peer-checked:translate-x-0">
         {/* 抽屉顶：品牌复述＋关闭开关（遮罩会盖住顶栏，汉堡够不着，必须在抽屉内给关闭）；桌面隐藏 */}
         <div className="lg:hidden max-lg:mb-3 max-lg:flex max-lg:items-center max-lg:justify-between">
           <a
@@ -145,6 +148,8 @@ export function SiteNavbar({
           <label
             htmlFor="site-nav-toggle"
             aria-label="收起导航菜单"
+            aria-expanded="true"
+            aria-controls="site-nav-drawer"
             className="max-lg:grid max-lg:size-8 max-lg:cursor-pointer max-lg:place-items-center max-lg:rounded-lg max-lg:border-2 max-lg:border-ink max-lg:text-lg max-lg:font-extrabold max-lg:leading-none max-lg:text-ink max-lg:hover:bg-paper-deep"
           >
             <span aria-hidden="true">×</span>
@@ -199,7 +204,7 @@ export function SiteNavbar({
       {/* 遮罩：点击关闭（label 切回 checkbox）；hidden 打底，桌面零 DOM 影响 */}
       <label
         htmlFor="site-nav-toggle"
-        aria-label="关闭导航菜单"
+        aria-hidden="true"
         className="hidden max-lg:fixed max-lg:inset-0 max-lg:z-40 max-lg:block max-lg:cursor-pointer max-lg:bg-ink/40 max-lg:invisible max-lg:transition-[visibility] max-lg:peer-checked:visible"
       />
     </header>

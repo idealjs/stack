@@ -47,6 +47,29 @@ test.describe('教程首页', () => {
     await expect(header.getByRole('link', { name: '重建中', exact: true })).toBeVisible()
   })
 
+  test('移动端导航抽屉：对称触发器的 aria-expanded 随纯 CSS 开合翻转', async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 })
+    await page.goto('/learn.html')
+    const open = page.locator('label[aria-label="打开导航菜单"]')
+    const close = page.locator('label[aria-label="收起导航菜单"]')
+    const drawer = page.locator('#site-nav-drawer')
+    // 关闭态：汉堡在可达树并报折叠；对称的关闭触发器与抽屉都被 visibility 摘出可达树
+    await expect(open).toBeVisible()
+    await expect(open).toHaveAttribute('aria-expanded', 'false')
+    await expect(close).toBeHidden()
+    await expect(drawer).toBeHidden()
+    await open.click()
+    // 展开态：抽屉可见，汉堡让位（invisible＝摘出可达树），关闭触发器报展开
+    await expect(drawer).toBeVisible()
+    await expect(open).toBeHidden()
+    await expect(close).toBeVisible()
+    await expect(close).toHaveAttribute('aria-expanded', 'true')
+    await close.click()
+    await expect(drawer).toBeHidden()
+    await expect(open).toBeVisible()
+    await expect(open).toHaveAttribute('aria-expanded', 'false')
+  })
+
   test('技术用途直接可读，键盘能展开详情并使用实际学习入口', async ({ page }) => {
     const toolbox = page.locator('[data-comp="brick-toolbox"]')
     await expect(toolbox).toContainText('搭出输入框、列表和按钮。')
