@@ -1,8 +1,8 @@
-/** ShadowButton —— 孟菲斯按压按钮：浮起与按压，影不参与动画。
+/** ShadowButton —— 孟菲斯按压按钮：按压三部曲是本组件存在的意义。
  * 规格与 .learning-action 同源，投影比卡片（shadow-ink 5px）小一号，是按钮的体量：
  * - 静置：paper / tone 实底＋ink 2px 描边＋硬投影 3px 3px；
- * - hover：整体浮起 2px（影随元素刚体移动，不生长——影值动画读作闪烁）；
- * - active 按压：朝阴影方向压进 translate(2px,2px)，影距随之收窄。
+ * - hover：浮起 2px，投影跟涨到 5px（阴影随位移，同 Button 的跟随规格）；
+ * - active 按压：朝阴影方向压进 translate(2px,2px)，投影收到 1px。
  * 有 href 渲染链接（a），无 href 渲染动作按钮（button）；disabled＝虚线描边占位，不动不起。
  * 类配方 shadowButtonClasses 一并导出：站头汉堡/× 是 <label htmlFor>（纯 CSS 抽屉开关），
  * 换不成 a/button，外部元素与组件共用同一份配方，数字只写这一处，避免两份漂移。 */
@@ -24,21 +24,22 @@ const TONE_BG: Record<ShadowButtonTone, string> = {
 /** 结构段：描边/按压底色语言/focus 环（clash3b outline，对齐 learning 组件）。
  * 不含 display 与投影——display 由渲染形态自定（组件 inline-flex、label 方寸自定）。 */
 export const SHADOW_BUTTON_BASE =
-  'cursor-pointer items-center justify-center border-2 border-ink text-ink no-underline transition-[transform,background-color] duration-150 focus-visible:outline-[3px] focus-visible:outline-clash3b focus-visible:outline-offset-2'
+  'cursor-pointer items-center justify-center border-2 border-ink text-ink no-underline transition-[transform,box-shadow,background-color] duration-150 focus-visible:outline-[3px] focus-visible:outline-clash3b focus-visible:outline-offset-2'
 
 /** 静置段：硬投影 3px 3px */
 export const SHADOW_BUTTON_REST = 'shadow-[3px_3px_0_var(--color-ink)]'
 
 /** hover 段：浮起 2px，投影 3→5 */
-export const SHADOW_BUTTON_HOVER = 'hover:-translate-y-[2px]'
+export const SHADOW_BUTTON_HOVER = 'hover:-translate-y-[2px] hover:shadow-[5px_5px_0_var(--color-ink)]'
 
 /** active 段：压进 translate(2px,2px)，投影收到 1px */
-export const SHADOW_BUTTON_ACTIVE = 'active:translate-x-[2px] active:translate-y-[2px]'
+export const SHADOW_BUTTON_ACTIVE = 'active:translate-x-[2px] active:translate-y-[2px] active:shadow-[1px_1px_0_var(--color-ink)]'
 
-/** 高亮段（导航选中语义）：纸按压底＋ink 内描边环；环挂在投影里随位移全程不动 */
+/** 高亮段（导航选中语义）：纸按压底＋ink 内描边环；内环随三部曲全程挂在投影里，
+ * 与按压位移叠加不打架（外影照常 3→5→1，环不动） */
 const RING_REST = 'bg-paper-deep shadow-[inset_0_0_0_2px_var(--color-ink),3px_3px_0_var(--color-ink)]'
-const RING_HOVER = 'hover:-translate-y-[2px] hover:shadow-[inset_0_0_0_2px_var(--color-ink)]'
-const RING_ACTIVE = 'active:translate-x-[2px] active:translate-y-[2px] active:shadow-[inset_0_0_0_2px_var(--color-ink)]'
+const RING_HOVER = 'hover:-translate-y-[2px] hover:shadow-[inset_0_0_0_2px_var(--color-ink),5px_5px_0_var(--color-ink)]'
+const RING_ACTIVE = 'active:translate-x-[2px] active:translate-y-[2px] active:shadow-[inset_0_0_0_2px_var(--color-ink),1px_1px_0_var(--color-ink)]'
 
 const SIZE = {
   /** 标本/CTA 体量（对齐 Button） */

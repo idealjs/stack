@@ -134,7 +134,7 @@ export function RoutableCard({
         <a
           href={href ?? `#ch${no}`}
           data-comp="course-card"
-          className="relative block rounded-xl border-2 border-ink bg-white p-3 no-underline shadow-ink transition-transform duration-150 hover:-translate-y-[3px]"
+          className="relative block rounded-xl border-2 border-ink bg-white p-3 no-underline shadow-ink transition-transform duration-150 hover:-translate-y-[3px] hover:shadow-ink-lift"
         >
           <span className="block text-[13px] font-extrabold text-ink">{title ?? `卡片 ${no}`}</span>
           {children}

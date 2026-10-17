@@ -74,7 +74,7 @@ export function App() {
         <div className="mb-6">
           <b className="text-[13px]">shadow-ink · 矩形盒影</b>
           <p className="m-0 mt-1 mb-3 max-w-[760px] text-content leading-relaxed text-body">
-            唯一配方 --shadow-ink: 5px 5px 0 ink；深影档 --shadow-ink-lift: 8px 8px 0 ink——按需手动使用，hover 不换档。
+            唯一配方 --shadow-ink: 5px 5px 0 ink；拿起档 --shadow-ink-lift: 8px 8px 0 ink——静置不用，hover 拿起时才换入。
           </p>
           <div className="flex flex-wrap items-start gap-8">
             <Specimen title="shadow-ink" note="静置档：实底纸卡与按钮用">
@@ -83,7 +83,7 @@ export function App() {
                 <p className="m-0 t-small-mute">box-shadow 跟盒框走</p>
               </div>
             </Specimen>
-            <Specimen title="shadow-ink-lift" note="深影档：需要强调的静态场景手动使用">
+            <Specimen title="shadow-ink-lift" note="拿起档：只作为 hover 终态出现">
               <div className="w-[190px] rounded-xl border-2 border-ink bg-paper px-4 py-5 shadow-ink-lift">
                 <b className="text-small">纸卡 · 拿起档</b>
                 <p className="m-0 t-small-mute">经 hoverable-shadow 换入</p>
@@ -125,25 +125,25 @@ export function App() {
       {/* ② 复合应用：hoverable-shadow 叠在基础影上 */}
       <Section
         label="复合应用"
-        note="hoverable-shadow 叠上去：只负责浮起 3px——影不参与动画，没有数值生长，也就没有闪烁；translate 属性动效，与 transform 互不打架"
+        note="hoverable-shadow 叠上去：动效层认名字不认顺序，浮 3px＋按同元素的基础类换 lift 档；translate 属性动效，与 transform 互不打架"
       >
         <p className="m-0 mb-3 max-w-[760px] text-content leading-relaxed text-body">
           组合规则一条：<b>动效层认名字，不认顺序</b>——同元素叠了 shadow-ink 就换盒影档，叠了
           drop-shadow-ink 就换滤镜档，一个都不叠就只浮起。类名先后不影响行为，但建议基础类在前、动效层在后，读作「一张什么影的卡＋会拿起」。
         </p>
         <div className="flex flex-wrap items-start gap-8">
-          <Specimen title="shadow-ink ＋ hoverable-shadow" note="矩形拿起：Button / MemphisCard 的既有浮起规格">
+          <Specimen title="shadow-ink ＋ hoverable-shadow" note="矩形拿起：Button / MemphisCard 的既有拿起规格">
             <div className="hover-host w-fit">
               <div className="shadow-ink hoverable-shadow w-[190px] cursor-pointer rounded-xl border-2 border-ink bg-paper px-4 py-5">
                 <b className="text-small">矩形拿起</b>
-                <p className="m-0 t-small-mute">hover：浮 3px（影不动）</p>
+                <p className="m-0 t-small-mute">hover：浮 3px，影 5→8</p>
               </div>
             </div>
           </Specimen>
-          <Specimen title="drop-shadow-ink ＋ hoverable-shadow" note="异形拿起：外壳整体浮 3px（影不动）">
+          <Specimen title="drop-shadow-ink ＋ hoverable-shadow" note="异形拿起：外层随 hover 换 lift 滤镜（8px）">
             <div className="hover-host w-fit"><TornNote className="drop-shadow-ink hoverable-shadow w-fit cursor-pointer" /></div>
           </Specimen>
-          <Specimen title="hoverable-shadow 单独用" note="任何影上叠加都只浮起——影从不参与动画">
+          <Specimen title="hoverable-shadow 单独用" note="换档只认 shadow-ink / drop-shadow-ink 两个名字，自写影不换">
             <div className="hover-host w-fit">
               <div className="shadow-[3px_3px_0_var(--color-ink)] hoverable-shadow w-[190px] cursor-pointer rounded-xl border-2 border-ink bg-paper px-4 py-5">
                 <b className="text-small">自写小档</b>
@@ -158,7 +158,7 @@ export function App() {
   <div className="… [clip-path:…]">异形拿起</div>
 </div>
 
-{/* 所有影都只浮起——影从不参与动画 */}
+{/* 自写影只浮不换：动效层只服务两个既有名字 */}
 <div className="shadow-[3px_3px_0_var(--color-ink)] hoverable-shadow …">…</div>`}</pre>
         <p className="m-0 mt-3 max-w-[760px] text-small leading-relaxed text-body">
           注意：Button 等组件内部已自写 hover 拿起（transition＋hover:* 工具类），不要再叠
@@ -169,7 +169,7 @@ export function App() {
       {/* ③ 丰富样式组合粒子：三种 classname 撒进形状与真实组件 */}
       <Section
         label="丰富样式组合粒子"
-        note="把三种 classname 撒进形状与组件里——全部可 hover，拿起只有浮起、没有影值动画；末表为现有组件的归位一览"
+        note="把三种 classname 撒进形状与组件里——全部可 hover，感受矩形影/轮廓影与拿起动效的组合差异；末表为现有组件的归位一览"
       >
         <div className="grid grid-cols-[repeat(auto-fill,minmax(150px,1fr))] gap-x-4 gap-y-8">
           <Particle title="shadow-ink · 纸卡">
@@ -258,7 +258,8 @@ export function App() {
                   TaskEnvelope · DeliveryManifest · ComparisonBoard · BrickToolbox
                 </td>
                 <td className="py-1.5 pr-2 align-top">
-                  实底矩形盒。Button / MemphisCard / RoutableCard / ShadowCard / ShadowButton 自写 hover 拿起（-3px 浮起，影不生长）；Stamp rotate(-2°) 静置盖章、无动效。
+                  实底矩形盒。Button / MemphisCard / RoutableCard / ShadowCard / ShadowButton 自写 hover 拿起（-3px＋5→8，与 hoverable-shadow
+                  同规格）；Stamp rotate(-2°) 静置盖章、无动效。
                 </td>
               </tr>
               <tr className="border-b border-[#ececea]">
@@ -270,7 +271,7 @@ export function App() {
                 <td className="py-1.5 pr-2 align-top">Ticket · ChapterTicket · StickyNote · Bookmark · FolderTabs · OutputReceipt</td>
                 <td className="py-1.5 pr-2 align-top">
                   异形轮廓（打孔票、撕角、尖底书签、索引标签、回执）。影都在外壳层（.ticket-shadow / .learning-note /
-                  .learning-bookmark-shell 等），形状在内层；Ticket hover 外壳整体浮 3px（影随刚体移动，不换档）。
+                  .learning-bookmark-shell 等），形状在内层；Ticket hover 连外壳 translate 一起换 lift 档。
                 </td>
               </tr>
               <tr>

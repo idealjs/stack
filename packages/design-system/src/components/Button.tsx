@@ -15,7 +15,7 @@ const TONE_BG = {
 } as const
 
 const BASE =
-  'inline-block cursor-pointer rounded-xl border-2 border-ink px-4 py-2 text-small font-bold text-ink no-underline shadow-ink transition-[transform,box-shadow] duration-150 hover:-translate-y-[3px]'
+  'inline-block cursor-pointer rounded-xl border-2 border-ink px-4 py-2 text-small font-bold text-ink no-underline shadow-ink transition-[transform,box-shadow] duration-150 hover:-translate-y-[3px] hover:shadow-ink-lift'
 
 export function Button({
   tone = 'clash1a',

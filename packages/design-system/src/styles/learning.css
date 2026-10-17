@@ -36,8 +36,8 @@
   box-shadow: 3px 3px 0 var(--color-ink);
   transition: transform 150ms, box-shadow 150ms;
 }
-.learning-action:hover { transform: translateY(-2px); }
-.learning-action:active { transform: translate(2px, 2px); }
+.learning-action:hover { transform: translateY(-2px); box-shadow: 5px 5px 0 var(--color-ink); }
+.learning-action:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--color-ink); }
 
 /* 01 / 夹板与逐项核对 */
 .learning-clipboard {
@@ -369,7 +369,7 @@
 }
 /* 起点工位：虚线框＝等用户输入，与后续实线工位区分 */
 .learning-flow-step[data-input='true'] { border-style: dashed; }
-.learning-flow-step:hover { transform: translateY(-2px); }
+.learning-flow-step:hover { transform: translateY(-2px); box-shadow: 5px 5px 0 var(--color-ink); }
 .learning-flow-badge {
   position: absolute; top: -13px; left: 12px;
   padding: 0 7px; border: 2px solid var(--color-ink); border-radius: 4px;
