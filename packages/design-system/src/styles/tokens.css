@@ -96,7 +96,15 @@
  * 与既有 transform 动效（RouteLine 跟随、翻面、盖印）可组合、互不覆盖。
  * 注意别与 Button 等自带的 hover:* 工具类重复叠加——拿起动效只写一处。 */
 .hoverable-shadow {
+  position: relative;
   transition: translate 150ms, box-shadow 150ms, filter 150ms;
+}
+/* 命中裙边：hover 浮起会让光标脱离元素边缘、造成进入/离开来回震荡（抖动）——
+ * 透明裙边把 hover 区域外扩 8px，浮起后光标仍在区内，状态稳定 */
+.hoverable-shadow::after {
+  content: '';
+  position: absolute;
+  inset: -8px;
 }
 .hoverable-shadow:hover {
   translate: 0 -3px;
