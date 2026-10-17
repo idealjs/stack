@@ -1,4 +1,4 @@
-/** 设计系统着陆页——四册入口 */
+/** 设计系统着陆页——五册入口 */
 import { Page, Section } from '../../lib/ui'
 
 const BOOKS = [
@@ -6,6 +6,7 @@ const BOOKS = [
   { key: 'design-typography', label: '字体', desc: '展示、正文、等宽的字阶与排版层级。' },
   { key: 'design-symbols', label: '符号形状', desc: '线条的形式规格：实线、虚线、点线与形状记号。' },
   { key: 'design-components', label: '组件', desc: 'CourseCard、票券、Button、SiteNavbar 等组件的实际组合。' },
+  { key: 'design-shadow', label: '阴影', desc: 'shadow-hard、drop-shadow-hard 与 hoverable-shadow：两种影、一个动效层，及其组合与拆法。' },
 ]
 
 export function App() {
@@ -15,7 +16,7 @@ export function App() {
       title="设计系统"
       desc="孟菲斯 × 拟物卡的四个切面；组件与 tokens 唯一定义于 @stack/design-system。"
     >
-      <Section label="四册" note="点卡片进入对应册">
+      <Section label="五册" note="点卡片进入对应册">
         <div className="flex flex-wrap gap-6">
           {BOOKS.map((b) => (
             <a

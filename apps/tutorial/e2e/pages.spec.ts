@@ -477,6 +477,8 @@ test.describe('ShadowButton 按压契约', () => {
     await page.mouse.move(0, 0)
     await expect.poll(async () => (await state()).shadow).toContain('rgb(17, 17, 17) 3px 3px 0px 0px')
     expect((await state()).translate).toBe('none')
+  })
+})
 
 test.describe('ShadowCard · 四部曲契约', () => {
   test.beforeEach(async ({ page }) => await page.goto('/design-components.html'))
