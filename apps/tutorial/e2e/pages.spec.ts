@@ -531,3 +531,25 @@ test.describe('ShadowCard · 四部曲契约', () => {
 
   })
 })
+
+test.describe('阴影册 · hover-host 触发模型', () => {
+  test('宿主承接 hover：命中区不动，位移作用于内部元素（防边界震荡）', async ({ page }) => {
+    await page.goto('/design-shadow.html')
+    const host = page.locator('.hover-host').first()
+    const inner = host.locator('.hoverable-shadow')
+    await expect(inner).toHaveCSS('translate', 'none')
+
+    await host.hover()
+    await expect(inner).toHaveCSS('translate', '0px -3px')
+    await expect(inner).toHaveCSS('box-shadow', /rgb\(17, 17, 17\) 8px 8px 0px 0px/)
+
+    // 光标移到宿主角落（元素浮起后已远离光标）：状态保持＝无边界震荡
+    const hostBox = await host.boundingBox()
+    await page.mouse.move(hostBox.x + 2, hostBox.y + 2)
+    await expect(inner).toHaveCSS('translate', '0px -3px')
+
+    // 出宿主：复位
+    await page.mouse.move(hostBox.x - 40, hostBox.y - 40)
+    await expect(inner).toHaveCSS('translate', 'none')
+  })
+})

@@ -55,7 +55,8 @@ function Specimen({ title, note, children }: { title: string; note: string; chil
 function Particle({ title, children }: { title: string; children: ReactNode }) {
   return (
     <div className="flex min-w-0 flex-col items-center gap-2">
-      <div className="flex h-[120px] items-center justify-center">{children}</div>
+      {/* 格子＝命中宿主：hover 挂在不动的格子上，内部的浮起不会甩飞光标 */}
+      <div className="hover-host flex h-[120px] items-center justify-center">{children}</div>
       <div className="text-center text-[12px] font-bold leading-snug text-ink">{title}</div>
     </div>
   )
@@ -132,18 +133,22 @@ export function App() {
         </p>
         <div className="flex flex-wrap items-start gap-8">
           <Specimen title="shadow-ink ＋ hoverable-shadow" note="矩形拿起：Button / MemphisCard 的既有拿起规格">
-            <div className="shadow-ink hoverable-shadow w-[190px] cursor-pointer rounded-xl border-2 border-ink bg-paper px-4 py-5">
-              <b className="text-small">矩形拿起</b>
-              <p className="m-0 t-small-mute">hover：浮 3px，影 5→8</p>
+            <div className="hover-host w-fit">
+              <div className="shadow-ink hoverable-shadow w-[190px] cursor-pointer rounded-xl border-2 border-ink bg-paper px-4 py-5">
+                <b className="text-small">矩形拿起</b>
+                <p className="m-0 t-small-mute">hover：浮 3px，影 5→8</p>
+              </div>
             </div>
           </Specimen>
           <Specimen title="drop-shadow-ink ＋ hoverable-shadow" note="异形拿起：外层随 hover 换 lift 滤镜（8px）">
-            <TornNote className="drop-shadow-ink hoverable-shadow w-fit cursor-pointer" />
+            <div className="hover-host w-fit"><TornNote className="drop-shadow-ink hoverable-shadow w-fit cursor-pointer" /></div>
           </Specimen>
           <Specimen title="hoverable-shadow 单独用" note="换档只认 shadow-ink / drop-shadow-ink 两个名字，自写影不换">
-            <div className="shadow-[3px_3px_0_var(--color-ink)] hoverable-shadow w-[190px] cursor-pointer rounded-xl border-2 border-ink bg-paper px-4 py-5">
-              <b className="text-small">自写小档</b>
-              <p className="m-0 t-small-mute">hover：只浮起，影不换</p>
+            <div className="hover-host w-fit">
+              <div className="shadow-[3px_3px_0_var(--color-ink)] hoverable-shadow w-[190px] cursor-pointer rounded-xl border-2 border-ink bg-paper px-4 py-5">
+                <b className="text-small">自写小档</b>
+                <p className="m-0 t-small-mute">hover：只浮起，影不换</p>
+              </div>
             </div>
           </Specimen>
         </div>
