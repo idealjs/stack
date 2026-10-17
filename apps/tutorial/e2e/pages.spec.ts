@@ -428,3 +428,54 @@ test.describe('票券规格契约', () => {
     expect((await ticket.boundingBox())!.y).toBe(initial.y)
   })
 })
+
+test.describe('ShadowCard · 四部曲契约', () => {
+  test.beforeEach(async ({ page }) => await page.goto('/design-components.html'))
+
+  /* 三部曲标本区第四张＝打孔＋hover 的组合；ShadowCard 的 ticket 分支复用 Ticket 机制，
+   * 阴影同样挂在 .ticket-shadow 的 filter 上（契约与上方「票券规格契约」同源）。 */
+  const specimens = (page: Page) =>
+    page
+      .locator('section')
+      .filter({ has: page.locator('h2', { hasText: 'ShadowCard · 四部曲' }) })
+      .locator('[data-comp="shadow-card"]')
+
+  test('四张标本：组合恰为基础 / hover / 打孔 / 打孔＋hover', async ({ page }) => {
+    const cards = specimens(page)
+    await expect(cards).toHaveCount(4)
+    const combos = await cards.evaluateAll((ns) =>
+      ns.map((el) => {
+        const face = el.querySelector<HTMLElement>('.ticket-face')
+        return {
+          ticket: !!face,
+          // 普通卡＝tailwind hover 变体；票券＝.ticket-lift
+          hover: el.className.includes('shadow-hard-lift') || el.classList.contains('ticket-lift'),
+          punched: !!face && getComputedStyle(face).maskImage.includes('radial-gradient'),
+        }
+      }),
+    )
+    expect(combos).toEqual([
+      { ticket: false, hover: false, punched: false },
+      { ticket: false, hover: true, punched: false },
+      { ticket: true, hover: false, punched: true },
+      { ticket: true, hover: true, punched: true },
+    ])
+  })
+
+  test('第 4 张（打孔＋hover）：阴影 5→8px 跟随打孔轮廓，浮起 3px，离开复原', async ({ page }) => {
+    const card = specimens(page).nth(3)
+    await card.scrollIntoViewIfNeeded()
+    await page.mouse.move(0, 0)
+    const shadow = card.locator('.ticket-shadow')
+    await expect.poll(() => shadow.evaluate((el) => getComputedStyle(el).filter)).toBe('drop-shadow(rgb(17, 17, 17) 5px 5px 0px)')
+    expect(await card.locator('.ticket-face').evaluate((el) => getComputedStyle(el).maskImage)).toContain('radial-gradient') // 真打孔
+    const initial = (await card.boundingBox())!
+    await card.hover()
+    // 与 Ticket hover 契约同款：filter 过渡在内层包裹，位移（transform）在外层 shell
+    await expect.poll(() => shadow.evaluate((el) => getComputedStyle(el).filter)).toBe('drop-shadow(rgb(17, 17, 17) 8px 8px 0px)')
+    expect((await card.boundingBox())!.y).toBeCloseTo(initial.y - 3, 1)
+    await page.mouse.move(0, 0)
+    await expect.poll(() => shadow.evaluate((el) => getComputedStyle(el).filter)).toBe('drop-shadow(rgb(17, 17, 17) 5px 5px 0px)')
+    expect((await card.boundingBox())!.y).toBeCloseTo(initial.y, 1)
+  })
+})

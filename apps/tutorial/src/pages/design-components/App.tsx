@@ -85,7 +85,7 @@ export function App() {
           <RoutableCard no={5} title="全栈基础" href="/ch5.html" className="absolute left-[780px] top-[70px] w-[180px]" />
         </RoutableScene>
       </Section>
-      <Section label="ShadowCard · 三部曲" note="基础阴影卡 → hover 拿起 → 撕线打孔；硬阴影偏移 5px / 拿起 8px，票面先 mask 打孔，外层 drop-shadow 跟随轮廓生成阴影">
+      <Section label="ShadowCard · 四部曲" note="基础阴影卡 → hover 拿起 → 撕线打孔 → 打孔 hover 拿起；硬阴影偏移 5px / 拿起 8px，票面先 mask 打孔，外层 drop-shadow 跟随打孔轮廓生成阴影">
         <div className="flex flex-wrap items-start gap-8">
           <div>
             <ShadowCard className="h-[80px]" />
@@ -100,7 +100,12 @@ export function App() {
           <div>
             <ShadowCard ticket className="h-[80px]" />
             <div className="mt-1 text-[13px] font-extrabold">3 · ticket 打孔</div>
-            <div className="text-small text-[#555]">同一张卡＋撕线＋咬边孔（可与 hover 叠加）</div>
+            <div className="text-small text-[#555]">同一张卡＋撕线＋咬边孔</div>
+          </div>
+          <div>
+            <ShadowCard ticket hover className="h-[80px]" />
+            <div className="mt-1 text-[13px] font-extrabold">4 · 打孔 hover 拿起</div>
+            <div className="text-small text-[#555]">浮 3px＋阴影 5→8 跟随打孔轮廓（虚线撕线不动）</div>
           </div>
         </div>
       </Section>
