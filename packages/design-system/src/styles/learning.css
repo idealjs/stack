@@ -220,10 +220,35 @@
 .learning-brick dt { font-weight: 800; }
 .learning-brick dd { margin: 2px 0 10px; color: var(--color-body); }
 .learning-brick dd:last-child { margin-bottom: 0; }
-.learning-toolbox[data-variant='overview'] .learning-toolbox-tray { align-items: start; gap: 22px 16px; padding: 24px 16px 18px; }
-.learning-toolbox[data-variant='overview'] .learning-brick summary { padding: 10px 12px 12px; }
-.learning-toolbox[data-variant='overview'] .learning-brick summary b { padding-right: 20px; }
-.learning-toolbox[data-variant='overview'] .learning-eyebrow { color: var(--color-body); font-size: 10px; letter-spacing: 0; }
+/* overview 变体专属：收起态就要像一块真积木——撞色顶面（studs + 顶签条）压在纸身上，
+ * 编号、stage、名称、一句话四层一眼扫完。基础 .learning-brick 规则与 lesson 变体共享，这里只叠不删。 */
+.learning-toolbox[data-variant='overview'] .learning-toolbox-tray { align-items: start; gap: 26px 18px; padding: 26px 16px 18px; }
+.learning-toolbox[data-variant='overview'] .learning-brick summary { padding: 0 12px 12px; }
+/* 顶面：tone 染色条承载编号徽标与 stage 小签；右侧留出「＋」的位置（32px 起让开圆牌） */
+.learning-toolbox[data-variant='overview'] .learning-brick-top {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 6px;
+  margin: 0 -12px 10px; padding: 8px 32px 7px 12px;
+  border-bottom: 2px solid var(--color-ink); border-radius: 3px 3px 0 0;
+  background: var(--learning-accent, var(--color-paper-deep));
+}
+.learning-toolbox[data-variant='overview'] .learning-brick-num {
+  min-width: 28px; padding: 0 5px; border: 2px solid var(--color-ink); border-radius: 4px;
+  background: var(--color-paper); font-family: monospace; font-size: 12px; font-weight: 800; line-height: 1.6; text-align: center;
+}
+.learning-toolbox[data-variant='overview'] .learning-brick-stage {
+  padding: 0 8px; border: 2px solid var(--color-ink); border-radius: 4px;
+  background: var(--learning-accent, var(--color-paper));
+  font-size: 10px; font-weight: 800; letter-spacing: .08em; line-height: 1.7;
+}
+/* studs 与顶面同色才读作一块积木；未传 tone 回落纸色（lesson 变体保持基础规则的紫罗兰） */
+.learning-toolbox[data-variant='overview'] .learning-brick-studs i { background: var(--learning-accent, var(--color-paper)); }
+.learning-toolbox[data-variant='overview'] .learning-brick summary b { font-size: 17px; font-weight: 800; }
+.learning-toolbox[data-variant='overview'] .learning-brick-open { top: 11px; }
+/* 展开详情：dt 做成小签，宽屏展开跨整行后签与释义成对排布更好扫读 */
+.learning-toolbox[data-variant='overview'] .learning-brick dt {
+  display: inline-block; padding: 0 8px; border: 2px solid var(--color-ink); border-radius: 4px;
+  background: var(--learning-accent, var(--color-paper-deep)); font-size: 10px; line-height: 1.7;
+}
 .learning-brick-summary { display: block; margin-top: 4px; color: var(--color-body); font-size: 12px; line-height: 1.5; }
 @media (min-width: 360px) {
   .learning-toolbox[data-variant='overview'] .learning-toolbox-tray { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -231,6 +256,8 @@
 }
 @media (min-width: 1024px) {
   .learning-toolbox[data-variant='overview'] .learning-toolbox-tray { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .learning-toolbox[data-variant='overview'] .learning-brick dl { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 10px 16px; align-items: start; }
+  .learning-toolbox[data-variant='overview'] .learning-brick dd { margin: 0; }
 }
 
 /* 11 / 交付装箱单 */
@@ -305,4 +332,59 @@
 @media (prefers-reduced-motion: reduce) {
   .learning-action, .learning-bookmark { transition: none; }
   .learning-flashcard-face, .learning-envelope-letter, .learning-stamp { animation: none; }
+}
+
+/* 13 / 数据流水线板：工位卡沿读向排列，圆牌箭头缝在卡片间隙里。
+ * 横竖排由板面自身宽度（容器查询）决定而非视口——标本落进窄栏时自动退回竖排，
+ * 集成到概览页通栏时同一段样式自动横排；容器查询不支持时回落竖排，语义仍完整。 */
+.learning-flow {
+  container-type: inline-size;
+  padding: 24px 16px 18px;
+  border: 2px solid var(--color-ink);
+  border-radius: 10px;
+  background: var(--color-paper-deep);
+  box-shadow: var(--shadow-hard);
+}
+.learning-flow > h3 { margin-bottom: 18px; }
+.learning-flow-line { display: flex; flex-direction: column; gap: 36px; margin: 0; padding: 0; list-style: none; }
+.learning-flow-step {
+  position: relative; min-width: 0;
+  padding: 17px 14px 13px;
+  border: 2px solid var(--color-ink); border-radius: 5px;
+  background: var(--color-paper);
+  box-shadow: 3px 3px 0 var(--color-ink);
+  transition: transform 150ms, box-shadow 150ms;
+}
+/* 起点工位：虚线框＝等用户输入，与后续实线工位区分 */
+.learning-flow-step[data-input='true'] { border-style: dashed; }
+.learning-flow-step:hover { transform: translateY(-2px); box-shadow: 5px 5px 0 var(--color-ink); }
+.learning-flow-badge {
+  position: absolute; top: -13px; left: 12px;
+  padding: 0 7px; border: 2px solid var(--color-ink); border-radius: 4px;
+  background: var(--learning-accent, var(--color-clash2a));
+  font-family: monospace; font-size: 12px; font-weight: 800; line-height: 1.6;
+}
+.learning-flow-title { display: block; font-size: 14px; }
+.learning-flow-detail { display: block; margin-top: 4px; color: var(--color-body); font-size: 12px; line-height: 1.6; }
+/* 连接符：30px 圆牌压进 36px 间隙——定位 −(间隙+圆牌)/2 = −33px，两种读向同一套几何 */
+.learning-flow-step:not(:last-child)::after {
+  content: '↓';
+  position: absolute; left: 50%; bottom: -33px; z-index: 1;
+  display: flex; align-items: center; justify-content: center;
+  width: 26px; height: 26px; margin-left: -13px;
+  border: 2px solid var(--color-ink); border-radius: 50%;
+  background: var(--color-paper); font-size: 13px; font-weight: 800; line-height: 1;
+}
+@container (min-width: 620px) {
+  .learning-flow-line { flex-direction: row; align-items: stretch; }
+  .learning-flow-step { flex: 1 1 0; }
+  .learning-flow-step:not(:last-child)::after {
+    content: '→';
+    left: auto; right: -33px; bottom: auto; top: 50%; margin: -15px 0 0;
+  }
+}
+/* 只停本组件的 hover 位移；独立成块，不改动文件前部通用的停用规则 */
+@media (prefers-reduced-motion: reduce) {
+  .learning-flow-step { transition: none; }
+  .learning-flow-step:hover { transform: none; }
 }

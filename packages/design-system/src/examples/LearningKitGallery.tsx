@@ -11,6 +11,7 @@ import { Stamp } from '../components/learning/Stamp'
 import { BrickToolbox } from '../components/learning/BrickToolbox'
 import { DeliveryManifest } from '../components/learning/DeliveryManifest'
 import { ComparisonBoard } from '../components/learning/ComparisonBoard'
+import { DataFlowBoard } from '../components/learning/DataFlowBoard'
 import { Mark } from '../components/shapes'
 
 function Sample({ name, title, note, wide, children }: {
@@ -129,6 +130,18 @@ export function LearningKitGallery() {
               <div className="learning-gallery-stamps"><Stamp /><Stamp status="review" /><Stamp status="pending" /></div>
             </Sample>
           </div>
+          <Sample name="DataFlowBoard" title="数据流水线板" wide note="把一条数据流拆成工位卡：板面宽时横排、窄栏退回竖排，箭头固定读向；第一步虚线框＝等你操作的起点。">
+            <DataFlowBoard
+              title="一次勾选，数据怎样流动？"
+              note="读向固定：先改数据，再动界面，最后落库；顺序由列表顺序决定。"
+              steps={[
+                { id: 'action', title: '用户操作', detail: '在待办列表里点中「买牛奶」的复选框。', tone: 'coral', input: true },
+                { id: 'state', title: '更新数据', detail: '这条 todo 的 done 从 false 改成 true，数据先于界面变化。', tone: 'teal' },
+                { id: 'render', title: '更新界面', detail: '界面按新数据重画：勾选框打勾，文字加删除线。', tone: 'yellow' },
+                { id: 'persist', title: '保存数据', detail: '通过 API 把新状态写入数据库，刷新页面勾选仍在。', tone: 'blue' },
+              ]}
+            />
+          </Sample>
           <Sample name="ComparisonBoard" title="纸页式对照板" wide note="宽屏并排核对，窄屏上下排列；适合请求与响应、源码与产物。">
             <ComparisonBoard title="一次请求，怎样带回数据？"
               left={{ label: '浏览器 / 请求', content: <><pre className="learning-demo-code">{'GET /todos HTTP/1.1\nHost: localhost:3000\nAccept: application/json'}</pre><p className="mt-3">请求里说明：<b>要哪个资源</b>。</p></> }}

@@ -22,7 +22,7 @@ export function App() {
           )}
         </div>
         <p className="mb-0 mt-7 text-content">
-          在浏览器练习场中，通过 WebContainer 运行工程，与 Agent 一起编写、运行和改进代码。
+          在浏览器练习场中，通过浏览器内的 Node 运行时跑起工程，与 Agent 一起编写、运行和改进代码。
         </p>
         <div className="mt-2.5">
           <Button tone="clash2b" href="/practice.html">打开在线练习场</Button>

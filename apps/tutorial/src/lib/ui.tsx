@@ -77,7 +77,6 @@ export function Page({
   subtitle,
   desc,
   active,
-  navigation = 'all',
   children,
 }: {
   /** 章节页标题在章头横幅里，可省 */
@@ -87,8 +86,6 @@ export function Page({
   desc?: string
   /** 站头高亮：章节 id / 首页 / 开始学习（learn）/ 分块着陆页（blog、design、practice）/ 设计系统册 / 博客月（blog-YYYY-MM） */
   active?: ChapterId | 'index' | 'learn' | 'blog' | 'design' | 'practice' | DesignKey | `blog-${string}`
-  /** 概览页只展开当前分块；顶层入口始终可见。 */
-  navigation?: 'all' | 'section'
   children: ReactNode
 }) {
   // 语义 active → 导航 key：learn 页归入 tutorial 分块（高亮分块与行首，不选中任何条目）
@@ -106,9 +103,7 @@ export function Page({
       <SiteNavbar
         brand={{ key: 'index', label: 'idealjs stack', href: '/index.html' }}
         sections={NAV_SECTIONS}
-        rows={navigation === 'section'
-          ? NAV_ROWS.filter((row) => row.sectionKey === activeKey || row.items.some((item) => item.key === activeKey))
-          : NAV_ROWS}
+        rows={NAV_ROWS}
         active={activeKey}
         viewTransitionName="site-header"
       />

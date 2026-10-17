@@ -32,6 +32,21 @@ test.describe('教程首页', () => {
     await expect(demo.getByRole('status')).toHaveText('2 件 · 完成 1')
   })
 
+  test('站头恒为完整四行：四个分块与各条目在任何页面不缩减', async ({ page }) => {
+    // header 在 <main> 内不携带 banner 角色，直接按结构定位
+    const header = page.locator('main > header')
+    // 分块链与内容行行首各渲染一次同名链接 → 各 2 个
+    for (const label of ['全栈教程', '博客', '设计系统', '在线练习']) {
+      await expect(header.getByRole('link', { name: label, exact: true })).toHaveCount(2)
+    }
+    // 各行条目：教程章节 / 博客月份 / 设计系统四册 / 练习入口
+    await expect(header.getByRole('link', { name: '快速开始', exact: true })).toBeVisible()
+    await expect(header.getByRole('link', { name: /20\d{2}-\d{2}/ }).first()).toBeVisible()
+    await expect(header.getByRole('link', { name: '颜色', exact: true })).toBeVisible()
+    await expect(header.getByRole('link', { name: '组件', exact: true })).toBeVisible()
+    await expect(header.getByRole('link', { name: 'react-starter', exact: true })).toBeVisible()
+  })
+
   test('技术用途直接可读，键盘能展开详情并使用实际学习入口', async ({ page }) => {
     const toolbox = page.locator('[data-comp="brick-toolbox"]')
     await expect(toolbox).toContainText('搭出输入框、列表和按钮。')
@@ -57,13 +72,44 @@ test.describe('教程首页', () => {
       const dimensions = await page.evaluate(() => ({
         viewport: innerWidth,
         document: document.documentElement.scrollWidth,
-        content: [...document.querySelectorAll('.learn-hero, .learn-core, .learning-brick, .learning-comparison-page')].map((element) => {
+        content: [...document.querySelectorAll('.learn-top, .learning-flow, .learning-brick, .learning-comparison-page')].map((element) => {
           const rect = element.getBoundingClientRect()
           return { left: rect.left, right: rect.right }
         }),
       }))
       expect(dimensions.document).toBe(dimensions.viewport)
       expect(dimensions.content.filter((rect) => rect.left < 0 || rect.right > width)).toEqual([])
+
+      // 阅读顺序（文档坐标，剔除滚动影响）：<768px 单列，DOM 序即阅读序；
+      // ≥768px 两栏——copy 与预览同行起步，actions 随后，数据控制与便签同行。
+      const tops = await page.evaluate(() => {
+        const top = (selector: string) => {
+          const element = document.querySelector(selector)
+          return element ? element.getBoundingClientRect().top + scrollY : Number.NaN
+        }
+        return ['.learn-copy', '.learn-actions', '.learn-preview', '.learn-core', '.learn-time'].map(top)
+      })
+      if (width >= 768) {
+        const [copy, actions, preview, core, note] = tops
+        expect(Math.abs(copy - preview)).toBeLessThanOrEqual(1)
+        expect(actions).toBeGreaterThan(copy)
+        expect(Math.abs(core - note)).toBeLessThanOrEqual(1)
+        expect(core).toBeGreaterThan(actions)
+      } else {
+        expect(tops).toEqual([...tops].sort((a, b) => a - b))
+      }
+
+      // ≥768px 右栏成立：预览与「要多久」便签同宽同右缘（±1px 容差）
+      if (width >= 768) {
+        const edges = await page.evaluate(() => {
+          const right = (selector: string) => {
+            const element = document.querySelector(selector)
+            return element ? element.getBoundingClientRect().right : Number.NaN
+          }
+          return { preview: right('.learn-preview'), note: right('.learn-time') }
+        })
+        expect(Math.abs(edges.preview - edges.note)).toBeLessThanOrEqual(1)
+      }
     })
   }
 })

@@ -6,18 +6,22 @@ test.describe('拟物学习组件', () => {
     await page.goto('/design-components.html')
   })
 
-  test('展示 12 类可复用组件，卡片继续沿用统一硬投影', async ({ page }) => {
+  test('展示 13 类可复用组件，卡片继续沿用统一硬投影', async ({ page }) => {
     const gallery = page.getByTestId('learning-kit-gallery')
     const kinds = await gallery.locator('[data-comp]').evaluateAll((elements) =>
       [...new Set(elements.map((element) => element.getAttribute('data-comp')))].sort())
     expect(kinds).toEqual([
-      'bookmark', 'brick-toolbox', 'clipboard-checklist', 'comparison-board', 'delivery-manifest',
+      'bookmark', 'brick-toolbox', 'clipboard-checklist', 'comparison-board', 'data-flow-board', 'delivery-manifest',
       'experiment-frame', 'flash-card', 'folder-tabs', 'output-receipt', 'stamp', 'sticky-note', 'task-envelope',
     ])
-    for (const kind of ['clipboard-checklist', 'flash-card', 'experiment-frame', 'task-envelope', 'brick-toolbox', 'delivery-manifest']) {
+    for (const kind of ['clipboard-checklist', 'flash-card', 'experiment-frame', 'task-envelope', 'brick-toolbox', 'delivery-manifest', 'data-flow-board']) {
       const shadow = await gallery.locator(`[data-comp="${kind}"]`).evaluate((element) => getComputedStyle(element).boxShadow)
       expect(shadow).toBe('rgb(17, 17, 17) 5px 5px 0px 0px')
     }
+    const flow = page.locator('[data-comp="data-flow-board"]')
+    await expect(flow.getByRole('listitem')).toHaveCount(4)
+    await expect(flow.locator('.learning-flow-title')).toHaveText(['用户操作', '更新数据', '更新界面', '保存数据'])
+    await expect(flow.locator('.learning-flow-step').first()).toHaveAttribute('data-input', 'true')
   })
 
   test('逐项核对，全部完成才盖章，取消勾选后撤回印章', async ({ page }) => {

@@ -1,28 +1,35 @@
-.learn-hero { display: grid; gap: 20px 40px; margin-bottom: 32px; }
-.learn-hero h2, .learn-core h2 { margin: 0; color: var(--color-ink); font-size: var(--text-t2); font-weight: 800; line-height: 1.45; }
-.learn-hero-copy > p { margin: 12px 0 0; max-width: 56ch; line-height: 1.75; }
-.learn-hero-copy b { color: var(--color-ink); }
-.learn-hero-copy .learn-hero-meta { margin-top: 14px; color: var(--color-body); font-size: 13px; }
-.learn-hero-meta a { color: var(--color-ink); font-weight: 800; text-underline-offset: 3px; }
-.learn-preview { width: 100%; max-width: 400px; }
-.learn-hero-actions { display: flex; flex-wrap: wrap; align-content: start; align-items: center; gap: 12px; }
-.learn-hero-actions p { flex-basis: 100%; width: 100%; margin: 2px 0 0; color: var(--color-body); font-size: 13px; line-height: 1.7; }
-.learn-overview { display: grid; gap: 28px; align-items: start; margin-bottom: 36px; }
+/* 课程概览：基础样式＝移动端单列，DOM 顺序即阅读顺序
+ * （目标 → 入口 → 可操作演示 → 数据控制 → 要多久）；≥768px 升两栏。 */
+.learn-top { display: grid; gap: 28px; margin-bottom: 36px; }
+.learn-top h2 { margin: 0; color: var(--color-ink); font-size: var(--text-t2); font-weight: 800; line-height: 1.45; }
+
+/* ① 目标文案 */
+.learn-copy > p { margin: 12px 0 0; max-width: 56ch; line-height: 1.75; }
+.learn-copy b { color: var(--color-ink); }
+.learn-meta { margin-top: 14px; color: var(--color-body); font-size: 13px; }
+.learn-meta a { color: var(--color-ink); font-weight: 800; text-underline-offset: 3px; }
+
+/* ② 入口 */
+.learn-actions { display: flex; flex-wrap: wrap; align-content: start; align-items: center; gap: 12px; }
+.learn-actions p { flex-basis: 100%; width: 100%; margin: 2px 0 0; color: var(--color-body); font-size: 13px; line-height: 1.7; }
+
+/* ③ 可操作演示 */
+.learn-preview { width: 100%; }
+
+/* ④ 数据控制 */
 .learn-core { min-width: 0; scroll-margin-top: 24px; }
 .learn-core h2 { font-size: var(--text-t3); }
-.learn-core > p { margin: 12px 0; font-size: 14px; line-height: 1.75; }
-.learn-core .learn-core-note { margin-bottom: 0; color: var(--color-body); font-size: 13px; }
-.learn-data-flow { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; list-style: none; padding: 0; margin: 16px 0; counter-reset: learn-data-step; }
-.learn-data-flow li { min-width: 0; padding: 10px 12px; border-left: 3px solid var(--color-clash2b); background: var(--color-paper-deep); }
-.learn-data-flow b, .learn-data-flow span { display: block; }
-.learn-data-flow b { color: var(--color-ink); font-size: 13px; }
-.learn-data-flow b::before { counter-increment: learn-data-step; content: counter(learn-data-step) '. '; }
-.learn-data-flow span { margin-top: 3px; font-size: 12px; overflow-wrap: anywhere; }
+.learn-core > p { margin: 12px 0 16px; font-size: 14px; line-height: 1.75; }
+.learn-core-note { margin-bottom: 0; color: var(--color-body); font-size: 13px; }
+
+/* ⑤ 要多久 */
 .learn-time-list { margin: 0; }
 .learn-time-list > div { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 4px 16px; margin-bottom: 8px; font-size: 13px; }
 .learn-time-list dt { color: var(--color-body); }
 .learn-time-list dd { margin: 0; font-weight: 800; }
 .learn-time-note { margin: 12px 0 0; color: var(--color-body); font-size: 12px; line-height: 1.7; }
+
+/* ⑥⑦ 分块 */
 .learn-section { scroll-margin-top: 24px; }
 .learn-section > h2 { gap: 6px 14px; margin: 0 0 16px; }
 .learn-section > h2 .t-small-strong { font-size: var(--text-t3); }
@@ -32,6 +39,28 @@
 .learn-environment-list dt { margin-bottom: 3px; color: var(--color-ink); font-size: 13px; font-weight: 800; }
 .learn-environment-list dd { margin: 0; color: var(--color-body); font-size: 13px; line-height: 1.75; }
 .learn-environment-note { color: var(--color-body); font-size: 12px; line-height: 1.7; }
+
+/* 桌面两栏：左 1fr 走 copy/actions/core，右固定栏放 preview 与 note，
+ * 右栏两块同宽同右缘；行高各自自适应，预览过高时只是把 r1/r2 撑开，便签仍与 core 顶对齐。 */
+@media (min-width: 768px) {
+  .learn-top {
+    grid-template-columns: minmax(0, 1fr) minmax(300px, 360px);
+    grid-template-areas:
+      'copy    preview'
+      'actions preview'
+      'core    note';
+    gap: 24px 40px;
+    align-items: start;
+    align-content: start;
+  }
+  .learn-copy { grid-area: copy; }
+  .learn-actions { grid-area: actions; }
+  .learn-preview { grid-area: preview; }
+  .learn-core { grid-area: core; }
+  .learn-time { grid-area: note; }
+}
+
+/* 待办演示（页内成品，非设计系统组件） */
 .learn-todo { display: flex; flex-direction: column; gap: 12px; text-align: left; }
 .learn-todo-heading { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 4px 12px; }
 .learn-todo-heading b { font-size: 17px; }
@@ -48,12 +77,3 @@
 .learn-todo-items button { flex-shrink: 0; align-self: stretch; width: 36px; border: 0; border-radius: 4px; background: transparent; color: var(--color-body); font-size: 20px; cursor: pointer; }
 .learn-todo-items button:hover { background: var(--color-paper-deep); color: var(--color-ink); }
 .learn-todo-hint, .learn-todo-empty { margin: 0; color: var(--color-body); font-size: 12px; line-height: 1.65; }
-@media (min-width: 768px) {
-  .learn-hero { grid-template-columns: minmax(0, 1fr) minmax(300px, 360px); grid-template-rows: max-content 1fr; }
-  .learn-preview { grid-column: 2; grid-row: 1 / 3; justify-self: end; }
-  .learn-hero-actions { grid-column: 1; }
-  .learn-overview { grid-template-columns: minmax(0, 1fr) minmax(270px, 320px); gap: 32px; }
-}
-@media (min-width: 1024px) {
-  .learn-data-flow { grid-template-columns: repeat(4, minmax(0, 1fr)); }
-}
