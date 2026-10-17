@@ -13,7 +13,10 @@
  * `.peer:checked ~ *`）驱动；关闭走遮罩 label 与抽屉内 × label（点击切换 checkbox）。
  * 桌面（≥lg）新增 DOM 全部 display:none，像素零变化。checkbox 用 sr-only：
  * 保持可聚焦（Tab→Space 可开合），但不挡任何点击。纯 CSS 天然限制：无 Esc 关闭、
- * 开合不写 aria-expanded（无 JS 可改），故开关联用 aria-label 表意。 */
+ * 开合不写 aria-expanded（无 JS 可改），故开关联用 aria-label 表意。
+ * 层级：header 自带 view-transition-name＝自带堆叠上下文，抽屉的 z-50 会被困在里面，
+ * 页面后文 z≥1 的定位元素（夹板纸夹、CoachSticky 等）会反盖抽屉——移动端把 header
+ * 整体抬到 z-50，让遮罩/抽屉的层级在页面之上重新成立。 */
 import type { ReactNode } from 'react'
 
 export interface NavSectionLink {
@@ -75,7 +78,7 @@ export function SiteNavbar({
     active === row.sectionKey || row.items.some((i) => i.key === active)
   return (
     <header
-      className="relative mb-8 rounded-2xl border-2 border-ink bg-paper p-2.5 shadow-hard"
+      className="relative max-lg:z-50 mb-8 rounded-2xl border-2 border-ink bg-paper p-2.5 shadow-hard"
       style={viewTransitionName ? { viewTransitionName } : undefined}
     >
       {/* 纯 CSS 抽屉开关（daisyUI drawer 同款）：checkbox 前置，后续兄弟经 peer-checked 驱动；sr-only 保聚焦不挡点击 */}
