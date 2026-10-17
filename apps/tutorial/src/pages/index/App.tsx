@@ -1,4 +1,4 @@
-/** idealjs stack 首页：教程、博客与浏览器练习场入口。 */
+/** idealjs stack 首页：教程、博客与练习场（重建中）入口。 */
 import { Page } from '../../lib/ui'
 import { Button } from '@stack/design-system'
 import { MONTHS } from '../../content/blogs'
@@ -22,7 +22,7 @@ export function App() {
           )}
         </div>
         <p className="mb-0 mt-7 text-content">
-          在浏览器练习场中，通过浏览器内的 Node 运行时跑起工程，与 Agent 一起编写、运行和改进代码。
+          在线练习场正在以 ESM + MCP 的形式重建；在那之前，从教程开始、在本地环境跟练。
         </p>
         <div className="mt-2.5">
           <Button tone="clash2b" href="/practice.html">打开在线练习场</Button>

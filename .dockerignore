@@ -4,7 +4,6 @@
 **/dist
 **/test-results
 **/playwright-report
-apps/design-lab/e2e
 .zcode*
 .env
 .pnp.*

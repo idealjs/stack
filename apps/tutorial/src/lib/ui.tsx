@@ -51,7 +51,7 @@ const NAV_ROWS: NavRowGroup[] = [
     label: '在线练习',
     href: '/practice.html',
     // v1 单任务直入练习场；任务库落地后由任务表生成（/practice.html?task=<id>）
-    items: [{ key: 'practice-starter', label: 'react-starter', href: '/practice.html', mono: true }],
+    items: [{ key: 'practice-starter', label: '重建中', href: '/practice.html', mono: true }],
   },
 ]
 

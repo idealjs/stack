@@ -12,9 +12,6 @@
   },
   "dependencies": {
     "@stack/design-system": "workspace:*",
-    "@webcontainer/api": "^1.6.4",
-    "@xterm/addon-fit": "^0.11.0",
-    "@xterm/xterm": "^6.0.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
   },

@@ -141,15 +141,13 @@ export function App() {
         <ComparisonBoard
           connector="or"
           left={{
-            label: '浏览器练习 · 推荐起步',
+            label: '浏览器练习 · 重建中',
             content: (
               <>
                 <dl className="learn-environment-list">
-                  <div><dt>运行项目</dt><dd>本站的浏览器内 Node 运行时（Vivari）直接跑起工程，无需本地安装开发工具。</dd></div>
-                  <div><dt>协助实现</dt><dd>Agent Playground 根据你的要求修改代码、执行命令，你通过预览检查结果。</dd></div>
+                  <div><dt>运行项目</dt><dd>练习场正在重建：计划以 ESM 模块承载练习工程，页面即工程、无需安装。</dd></div>
+                  <div><dt>协助实现</dt><dd>Agent 经 MCP 工具协议协助你写代码、跑命令——方案上线前，先走右侧本地路线。</dd></div>
                 </dl>
-                <p className="learn-environment-note">使用 Agent 前配置模型 API Key；项目环境会自动启动。</p>
-                <Button tone="clash1b" href="/practice.html">打开浏览器练习场</Button>
               </>
             ),
           }}

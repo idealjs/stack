@@ -11,7 +11,6 @@ WORKDIR /workspace
 COPY .yarnrc.yml package.json yarn.lock ./
 COPY .yarn/releases/yarn-4.9.2.cjs .yarn/releases/
 COPY apps/tutorial/package.json apps/tutorial/
-COPY apps/design-lab/package.json apps/design-lab/
 COPY packages/design-system/package.json packages/design-system/
 COPY packages/stack-idealjs/package.json packages/stack-idealjs/
 

@@ -44,7 +44,7 @@ test.describe('教程首页', () => {
     await expect(header.getByRole('link', { name: /20\d{2}-\d{2}/ }).first()).toBeVisible()
     await expect(header.getByRole('link', { name: '颜色', exact: true })).toBeVisible()
     await expect(header.getByRole('link', { name: '组件', exact: true })).toBeVisible()
-    await expect(header.getByRole('link', { name: 'react-starter', exact: true })).toBeVisible()
+    await expect(header.getByRole('link', { name: '重建中', exact: true })).toBeVisible()
   })
 
   test('技术用途直接可读，键盘能展开详情并使用实际学习入口', async ({ page }) => {
