@@ -18,6 +18,12 @@ test.describe('拟物学习组件', () => {
       const shadow = await gallery.locator(`[data-comp="${kind}"]`).evaluate((element) => getComputedStyle(element).boxShadow)
       expect(shadow).toBe('rgb(17, 17, 17) 5px 5px 0px 0px')
     }
+    // 清单类分组：夹板与装箱单归入；装箱单与验收印章组合盖印
+    await expect(gallery.getByRole('navigation')).toContainText('清单类')
+    const listGroup = page.locator('#learning-kit-list')
+    await expect(listGroup.locator('[data-comp="clipboard-checklist"]')).toContainText('第一个网页，跑起来了吗？')
+    await expect(listGroup.locator('[data-comp="delivery-manifest"]')).toContainText('已备齐 3 / 3')
+    await expect(listGroup.locator('[data-comp="stamp"]')).toHaveText('✓已核对')
     const flow = page.locator('[data-comp="data-flow-board"]')
     await expect(flow.getByRole('listitem')).toHaveCount(4)
     await expect(flow.locator('.learning-flow-title')).toHaveText(['用户操作', '更新数据', '更新界面', '保存数据'])

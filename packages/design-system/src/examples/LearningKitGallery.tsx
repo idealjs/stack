@@ -35,22 +35,12 @@ export function LearningKitGallery() {
         <a href="#learning-kit-read">阅读与复习</a>
         <a href="#learning-kit-task">任务与交付</a>
         <a href="#learning-kit-connect">知识与对照</a>
+        <a href="#learning-kit-list">清单类</a>
       </nav>
 
       <section className="learning-gallery-group" id="learning-kit-check" aria-labelledby="learning-kit-check-heading">
         <h3 id="learning-kit-check-heading" className="learning-gallery-group-heading"><strong>01 · 学习与验收</strong><small>做完一步，亲手核对结果。</small></h3>
         <div className="learning-gallery-grid">
-          <Sample name="ClipboardChecklist" title="夹板验收清单" note="勾选所有条件后盖章；取消任一条件，回到待验收。">
-            <ClipboardChecklist
-              title="第一个网页，跑起来了吗？" description="回到自己的浏览器，逐项核对。"
-              defaultCheckedIds={['page']}
-              items={[
-                { id: 'page', label: '页面显示标题与一句话', detail: '确认看到的是自己写的内容。' },
-                { id: 'server', label: '地址栏是 localhost', detail: '页面由服务器返回。' },
-                { id: 'network', label: 'Network 返回 200', detail: '找到这次页面请求的响应。' },
-              ]}
-            />
-          </Sample>
           <Sample name="StickyNote" title="折角便签" note="第一次遇到的概念就地解释；折角为纸张提供可辨识的轮廓。">
             <StickyNote title="先记住这一件事">
               <p><b>dev server</b> 帮你边改边看。</p>
@@ -106,13 +96,6 @@ export function LearningKitGallery() {
             <OutputReceipt title="API 请求，收到响应" command="curl -i localhost:3000/todos"
               output={'HTTP/1.1 200 OK\nContent-Type: application/json\n\n[\n  { "id": 1,\n    "title": "第一个 todo",\n    "done": false }\n]'} />
           </Sample>
-          <Sample name="DeliveryManifest" title="装箱单／交付清单" note="按实际产物列出交付状态，给章节收尾一个明确的核对入口。">
-            <DeliveryManifest title="这一章，你带走了什么？" reference="CHAPTER 01 / 装箱单" items={[
-              { id: 'html', label: 'index.html', detail: '有标题与一句话的页面', ready: true },
-              { id: 'server', label: 'server.js', detail: '返回静态文件的服务', ready: true },
-              { id: 'evidence', label: '运行记录', detail: 'localhost 页面与 200 响应', ready: false },
-            ]} />
-          </Sample>
         </div>
       </section>
 
@@ -126,7 +109,7 @@ export function LearningKitGallery() {
                 { id: 'rest', name: 'REST 路由', what: '用请求方法与路径表达对资源的操作。', why: '让 todo 的读取、创建与删除有清晰入口。', family: '同样可以比较 RPC 与 GraphQL 的组织方式。' },
               ]} />
             </Sample>
-            <Sample name="Stamp" title="验收印章" note="已核对、待复查、待验收各有文字与符号，也可嵌入清单或票券。">
+            <Sample name="Stamp" title="验收印章" note="已核对、待复查、待验收各有文字与符号；与装箱单的组合见下方「清单类」。">
               <div className="learning-gallery-stamps"><Stamp /><Stamp status="review" /><Stamp status="pending" /></div>
             </Sample>
           </div>
@@ -147,6 +130,35 @@ export function LearningKitGallery() {
               left={{ label: '浏览器 / 请求', content: <><pre className="learning-demo-code">{'GET /todos HTTP/1.1\nHost: localhost:3000\nAccept: application/json'}</pre><p className="mt-3">请求里说明：<b>要哪个资源</b>。</p></> }}
               right={{ label: '服务器 / 响应', content: <><pre className="learning-demo-code">{'HTTP/1.1 200 OK\nContent-Type: application/json\n\n[{ "id": 1, "done": false }]'}</pre><p className="mt-3">核对状态码，再看<Mark>返回的数据结构</Mark>。</p></> }}
               caption="沿着请求与响应读一遍，把 Network 面板里的内容与两张纸对上。" />
+          </Sample>
+        </div>
+      </section>
+
+      <section className="learning-gallery-group" id="learning-kit-list" aria-labelledby="learning-kit-list-heading">
+        <h3 id="learning-kit-list-heading" className="learning-gallery-group-heading"><strong>05 · 清单类</strong><small>核对与交付，都落在一纸清单上。</small></h3>
+        <div className="learning-gallery-grid">
+          <Sample name="ClipboardChecklist" title="夹板验收清单" note="勾选所有条件后盖章；取消任一条件，回到待验收。">
+            <ClipboardChecklist
+              title="第一个网页，跑起来了吗？" description="回到自己的浏览器，逐项核对。"
+              defaultCheckedIds={['page']}
+              items={[
+                { id: 'page', label: '页面显示标题与一句话', detail: '确认看到的是自己写的内容。' },
+                { id: 'server', label: '地址栏是 localhost', detail: '页面由服务器返回。' },
+                { id: 'network', label: 'Network 返回 200', detail: '找到这次页面请求的响应。' },
+              ]}
+            />
+          </Sample>
+          <Sample name="DeliveryManifest + Stamp" title="装箱单／交付清单 × 验收印章" note="按实际产物列出交付状态；全部就绪后，把验收印章盖在装箱单右上角，核对入口一眼可辨。">
+            <div className="relative">
+              <DeliveryManifest title="这一章，你带走了什么？" reference="CHAPTER 01 / 装箱单" items={[
+                { id: 'html', label: 'index.html', detail: '有标题与一句话的页面', ready: true },
+                { id: 'server', label: 'server.js', detail: '返回静态文件的服务', ready: true },
+                { id: 'evidence', label: '运行记录', detail: 'localhost 页面与 200 响应', ready: true },
+              ]} />
+              <div className="absolute -top-3 right-6">
+                <Stamp />
+              </div>
+            </div>
           </Sample>
         </div>
       </section>
