@@ -6,7 +6,7 @@ const BOOKS = [
   { key: 'design-typography', label: '字体', desc: '展示、正文、等宽的字阶与排版层级。' },
   { key: 'design-symbols', label: '符号形状', desc: '线条的形式规格：实线、虚线、点线与形状记号。' },
   { key: 'design-components', label: '组件', desc: 'CourseCard、票券、Button、SiteNavbar 等组件的实际组合。' },
-  { key: 'design-shadow', label: '阴影', desc: 'shadow-ink、drop-shadow-ink 与 hoverable-shadow：两种影、一个动效层，及其组合与拆法。' },
+  { key: 'design-shadow', label: '阴影', desc: '一份投影配方的四枚 token（两档 × 两形）、拿起动效层 hoverable-shadow，与组件选影归位表。' },
 ]
 
 export function App() {
