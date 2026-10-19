@@ -6,17 +6,10 @@ import tailwindcss from '@tailwindcss/vite'
 
 const pages = readdirSync(__dirname).filter((f) => f.endsWith('.html'))
 
-const ISOLATION_HEADERS = {
-  'Cross-Origin-Opener-Policy': 'same-origin',
-  'Cross-Origin-Embedder-Policy': 'require-corp',
-}
-
 export default defineConfig({
-  server: { headers: ISOLATION_HEADERS },
-
+  server: {},
   preview: {
     allowedHosts: ['.code.idealjs.com'],
-    headers: ISOLATION_HEADERS,
   },
   plugins: [react(), tailwindcss()],
   build: {

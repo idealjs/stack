@@ -11,7 +11,6 @@
     "build:runtime": "vite build --config vite.runtime.config.ts"
   },
   "dependencies": {
-    "@stack/design-system": "workspace:*",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
   },

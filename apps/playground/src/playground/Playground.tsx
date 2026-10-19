@@ -26,7 +26,7 @@
  *   import 的解析要等 esbuild-wasm 打包阶段（刻意靠后，待框架设定与教程过程对齐），届时
  *   执行语义从「单文件 Blob」升级为「工程打包产物」，本组件与协议的其余部分不变。 */
 import { useEffect, useRef, useState } from 'react'
-import { ShadowButton } from '@stack/design-system'
+import { ShadowButton } from '../../../../tutorial/src/design-system'
 import { isRuntimeMessage, PROTOCOL_VERSION, type ConsoleLevel } from './protocol'
 // 「一份原文、两条路」：运行时文档原文以 ?raw 进包，srcdoc 退化路径直接注入 iframe；
 // 跨源路不用它（iframe src 直指第二端口/另一域名 serve 的同一文件）。
