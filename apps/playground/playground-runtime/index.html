@@ -4,36 +4,6 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>playground 运行时（沙箱文档）</title>
-    <!--
-      Playground 运行时文档 —— 本文件是「一份原文、两条路」的唯一源，必须保持零外部依赖：
-      1) 跨源模式：`yarn dev:runtime`（vite.runtime.config.ts，端口 5174）直接 serve
-         本文件，宿主页以 <iframe sandbox="allow-scripts" src="http://localhost:5174/"> 嵌入；
-      2) srcdoc 退化模式：宿主构建/开发时经 `?raw` 把本文件原文作为 srcDoc 注入 iframe
-         （见 src/playground/Playground.tsx）。
-      两条路里 iframe 都只有 sandbox="allow-scripts"——本文档因此运行在 opaque origin：
-      - 拿不到宿主任何数据（读 parent.location 即抛 SecurityError，见下方 ready 自证）；
-      - navigator.storage.getDirectory（OPFS）在 opaque origin 下被浏览器禁用。
-      这正是「运行时必须有真实但独立的源（另一端口/另一域名）」的根因，也是后续 OPFS 阶段
-      （挂载虚拟工程目录、模块解析）的前提：届时沙箱放宽为 allow-scripts + allow-same-origin，
-      因为文档部署在独立源上，放宽不破宿主隔离，真实 origin 与 OPFS 才拿得到。
-      【持久化 XSS——存储放宽阶段（allow-same-origin）的头号风险，存储代码落地时必读】
-      放宽后本文档源将拥有 IDB/OPFS/localStorage，且浏览器按「顶层站＋框源」分区存储——
-      所有用户沙箱共享同一份运行时源存储。恶意代码因此可以投毒：写入被加工过的数据/代码，
-      同源的其他项目读取时即被波及（跨项目持久化攻击）。存储相关代码必须遵守三条纪律：
-      1) 读取即不可信：任何从存储读出的数据先过结构校验与大小限额，再谈使用——存储内容
-         一律按不可信输入对待，绝不因「是我们自己写的」而豁免；
-      2) 项目命名空间：虚拟工程以不可猜测 ID 隔离，禁止全局可寻址的平铺键，读写只落
-         自己的命名空间；
-      3) 执行通道唯一：存储内容永远不进 eval / new Function / 裸 import()——一切代码
-         只经本文件的 run 消息 → Blob URL + import() 这一条沙箱通道执行，本文件永不含
-         eval，保持到底。
-      宿主侧配套不变量（纯文本渲染、文件名白名单）见 src/playground/Playground.tsx 头注释。
-      生产部署接缝：
-      本文件及其目录整体放到另一域名静态托管即可，宿主页设 VITE_PLAYGROUND_RUNTIME_ORIGIN
-      指向它重新构建（dev 直连第二端口见 vite.runtime.config.ts；沙箱文档以 Origin: null
-      拉取本源 module script，故该源须放开 CORS——dev 配置已带 cors: true）。
-      因此本文件禁止引用任何外部脚本/样式/资源：它要在两个宿主、两种源下都原样可跑。
-    -->
   </head>
   <body>
     <script type="module">

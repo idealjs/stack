@@ -1,20 +1,12 @@
-/** SitePage —— 站点整页骨架：站头（design-system 的 SiteNavbar 装配）＋页眉块＋children＋页脚。
- * 从 apps/tutorial/src/lib/ui.tsx 的 Page 平移而来，只做「参数化的骨架」：
- * - 导航行数据 / 品牌 / active key 由调用方经 nav 传入（SiteNavbar 的 active 是单个 key，
- *   语义（章节 id、'learn' 等）→ key 的翻译属于调用方的内容语义，不进本包）；
- * - 页脚是站点级身份（友情链接/社交/源码＋版权行），属骨架的一部分，数据随包走。
- * 站头为 view-transition-name 共享元素，站内页间导航不闪烁。 */
 import type { ReactNode } from 'react'
 import type { NavSectionLink, NavRowGroup } from '../../../apps/tutorial/src/design-system'
 import { SiteNavbar } from '../../../apps/tutorial/src/design-system'
 
-/** 站点导航配置：品牌＋内容行（全部由调用方装配） */
 export interface SiteNav {
   brand: NavSectionLink
   rows: NavRowGroup[]
 }
 
-/** 页脚链接（站点级身份；外链全部新窗口打开） */
 const FOOTER_GROUPS: { label: string; links: { href: string; label: string }[] }[] = [
   { label: '友情链接', links: [{ href: 'https://idealjs.com', label: 'idealjs.com' }] },
   {
@@ -86,12 +78,12 @@ export function SitePage({
 
 export interface SitePageProps {
   nav: SiteNav
-  /** 当前位置的导航 key（SiteNavbar 的 key 语义：品牌 / 分块 / 条目） */
+
   active?: string
   viewTransitionName?: string
-  /** 章节页标题在章头横幅里，可省 */
+
   title?: string
-  /** 首页标语等补充标题 */
+
   subtitle?: string
   desc?: string
   children: ReactNode
