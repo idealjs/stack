@@ -1,6 +1,8 @@
 @import "tailwindcss";
 
 @source "../";
+@source "../../../../../packages/site-kit/src";
+
 
 @theme {
   --color-clash1a: #ff6b6b;
