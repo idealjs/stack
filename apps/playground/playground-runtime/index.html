@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>playground 运行时（沙箱文档）</title>
+    <!--
+      Playground 运行时文档 —— 本文件是「一份原文、两条路」的唯一源，必须保持零外部依赖：
+      1) 跨源模式：`yarn dev:runtime`（vite.runtime.config.ts，端口 5174）直接 serve
+         本文件，宿主页以 <iframe sandbox="allow-scripts" src="http://localhost:5174/"> 嵌入；
+      2) srcdoc 退化模式：宿主构建/开发时经 `?raw` 把本文件原文作为 srcDoc 注入 iframe
+         （见 src/playground/Playground.tsx）。
+      两条路里 iframe 都只有 sandbox="allow-scripts"——本文档因此运行在 opaque origin：
+      - 拿不到宿主任何数据（读 parent.location 即抛 SecurityError，见下方 ready 自证）；
+      - navigator.storage.getDirectory（OPFS）在 opaque origin 下被浏览器禁用。
+      这正是「运行时必须有真实但独立的源（另一端口/另一域名）」的根因，也是后续 OPFS 阶段
+      （挂载虚拟工程目录、模块解析）的前提：届时沙箱放宽为 allow-scripts + allow-same-origin，
+      因为文档部署在独立源上，放宽不破宿主隔离，真实 origin 与 OPFS 才拿得到。生产部署接缝：
+      本文件及其目录整体放到另一域名静态托管即可，宿主页设 VITE_PLAYGROUND_RUNTIME_ORIGIN
+      指向它重新构建（dev 直连第二端口见 vite.runtime.config.ts；沙箱文档以 Origin: null
+      拉取本源 module script，故该源须放开 CORS——dev 配置已带 cors: true）。
+      因此本文件禁止引用任何外部脚本/样式/资源：它要在两个宿主、两种源下都原样可跑。
+    -->
+  </head>
+  <body>
+    <script type="module">
+      // ===== Playground 运行时：宿主 ↔ 运行时唯一通道是 postMessage =====
+      // 协议 v1：与宿主侧 src/pages/playground/protocol.ts 手工镜像。本文件零 import 是
+      // 「一份原文两条路」的代价；后续 esbuild/OPFS 阶段若协议变复杂，改为打包时共享同一份
+      // 协议源码即可（届时跨源路走构建产物，srcdoc 路注入打包后的内联脚本）。
+
+      const PROTOCOL_VERSION = 1
+      const CONSOLE_LEVELS = ['log', 'info', 'warn', 'error']
+
+      /** 运行时 → 宿主。targetOrigin 只能填 '*'：本文档被 sandbox 剥成 opaque origin，
+       * 任何具体 origin 都匹配不上它（"null" 不是合法匹配值）；接收方身份由「谁把本文档
+       * 装进 iframe」决定，宿主侧则用 event.source === iframe.contentWindow 反向校验。 */
+      function post(message) {
+        window.parent.postMessage({ v: PROTOCOL_VERSION, ...message }, '*')
+      }
+
+      /** 任意值 → 单行文本（输出面板按级别显示；对象走 JSON，失败兜底 String） */
+      function format(value) {
+        if (typeof value === 'string') return value
+        if (value instanceof Error) return value.name + ': ' + value.message
+        if (typeof value === 'function') return '[Function ' + (value.name || '(anonymous)') + ']'
+        try {
+          const json = JSON.stringify(value)
+          return json === undefined ? String(value) : json
+        } catch {
+          return String(value) // 循环引用等 JSON 失败场景
+        }
+      }
+
+      // ===== console 捕获：包一层，先放行原生输出（DevTools 里仍可看），再回传宿主 =====
+      for (const level of CONSOLE_LEVELS) {
+        const native = console[level].bind(console)
+        console[level] = (...args) => {
+          native(...args)
+          post({ type: 'console', level, text: args.map(format).join(' ') })
+        }
+      }
+
+      // ===== 未捕获异常与未处理的 Promise rejection =====
+      window.addEventListener('error', (event) => {
+        post({ type: 'error', text: event.message || '未知错误' })
+      })
+      window.addEventListener('unhandledrejection', (event) => {
+        post({ type: 'error', text: 'Unhandled rejection: ' + format(event.reason) })
+      })
+
+      // ===== 执行入口：代码 → Blob URL → import()（以 ESM 执行）=====
+      // Blob URL 是 opaque origin 文档里唯一可用的模块通道。本阶段刻意不做（后续接缝）：
+      // - 相对路径 import / 裸说明符（外部依赖）无法解析——esbuild-wasm 先在运行时侧把
+      //   JSX/TS 转译成 JS 再走同一 Blob URL 通道；
+      // - 虚拟工程目录的多文件模块解析——OPFS 挂载后由 Service Worker（或运行时内 fetch
+      //   拦截）按目录结构给出真实 URL。两步都落地后，这里的三行执行核心不变。
+      let runSeq = 0 // 递增执行序号：慢模块的迟回包（异步 console/error）不计入新一轮
+      async function execute(code) {
+        const seq = ++runSeq
+        const blobUrl = URL.createObjectURL(new Blob([code], { type: 'text/javascript' }))
+        try {
+          // @vite-ignore：blob URL 不是静态可分析的说明符——vite dev 的 import-analysis
+          // 会因此拒绝 serve 本脚本（build 不受影响），显式标注跳过分析
+          const mod = await import(/* @vite-ignore */ blobUrl)
+          // 最小生命周期约定：默认导出可选 { init() }——import 完成后调用。
+          // 这是将来 init()/update() 练习框架的接缝：本阶段只认 init，不做更多。
+          if (typeof mod.default?.init === 'function') await mod.default.init()
+          if (seq === runSeq) post({ type: 'done' })
+        } catch (err) {
+          if (seq === runSeq) post({ type: 'error', text: format(err) })
+        } finally {
+          // 模块执行已进入 ESM 缓存，URL 即刻失效无碍；每次 Run 都生成新 URL → 天然绕开
+          // 模块缓存、同一份代码可重复执行
+          URL.revokeObjectURL(blobUrl)
+        }
+      }
+
+      // ===== 宿主 → 运行时：只认「父窗口 + 结构合法」的消息，其余静默丢弃 =====
+      // - ping：宿主索要一次 ready 报到（启动竞态的确定性兜底，见协议文件）
+      // - run：结构合法才执行
+      window.addEventListener('message', (event) => {
+        if (event.source !== window.parent) return
+        const msg = event.data
+        if (!msg || msg.v !== PROTOCOL_VERSION) return
+        if (msg.type === 'ping') return postReady()
+        if (msg.type === 'run' && typeof msg.code === 'string') execute(msg.code)
+      })
+
+      // ===== ready：向宿主报到，并带上一份「隔离生效」的自证 =====
+      // - origin：location.origin 的序列化——srcdoc 路是 "null"；跨源 src 路是部署位 URL。
+      //   它只是部署位标识：allow-scripts 沙箱下文档 origin 对存储仍按 opaque 处理，OPFS
+      //   照样被拒（见上）；宿主用它做同源击穿报警（等于宿主源即亮红）。
+      // - parentBlocked：读 parent.location.href 必抛 SecurityError——「沙箱拿不到宿主任何
+      //   数据」的直接证据，e2e 据此断言（e2e/playground.spec.ts）。
+      // 加载完成先自发报到一次；宿主监听器若尚未挂上会漏收，ping 补发兜底。
+      let parentBlocked = false
+      try {
+        void window.parent.location.href
+        parentBlocked = false
+      } catch {
+        parentBlocked = true // 预期路径：opaque origin 对父窗口的同源访问全部抛错
+      }
+      function postReady() {
+        post({ type: 'ready', origin: String(window.location.origin), parentBlocked })
+      }
+      postReady()
+    </script>
+  </body>
+</html>
