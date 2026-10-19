@@ -1,9 +1,6 @@
 import { expect, test } from '@playwright/test'
 
-/**
- * 像素级视觉回归基线——防止后续改动出现画面偏差（自 design-lab 迁入）。
- * 有意的设计变更：`yarn test:e2e:update` 后提交新基线。
- */
+
 const CASES: [name: string, path: string][] = [
   ['design', '/design.html'],
   ['design-colors', '/design-colors.html'],

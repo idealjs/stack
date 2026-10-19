@@ -1,7 +1,4 @@
-/** CourseCard —— 教程的入口载体（孟菲斯骨架 × 拟物纸感）
- * 卡头三件套＝靶子：▲目标 + ○预期结果(16:9 相框) + ●积木点列
- * 交互：hover/聚焦拿起（浮起+投影加深）并播放 GIF；desc ⇄ GIF 每 8000ms 翻转；
- *      hover/Tab 锁定；触屏与 prefers-reduced-motion 不翻转。 */
+
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import type { Chapter } from '../lib/types'
 import { Ring, Tri } from './shapes'
@@ -45,13 +42,13 @@ export function MemphisCard({
   chapter: Chapter
   entry?: 1 | 2 | 3
   compact?: boolean
-  /** 静置态相框文字（可含 <Mark> 荧光标记）：教程卡片的价值区用法示例 */
+  
   zoneText?: ReactNode
-  /** 卡片跳转目标：缺省锚点 #ch<id>（单页演示）；整页跳转传 /ch<id>.html */
+  
   href?: string
-  /** 挂 view-transition-name（跨文档共享元素变形）。同页同章多卡时勿开（重名失效） */
+  
   morph?: boolean
-  /** 右上角插槽（随卡片 hover 浮起）：RoutableCard 的卡片号徽章由此进入 */
+  
   corner?: ReactNode
 }) {
   const [gifOn, setGifOn] = useState(false)
@@ -123,10 +120,10 @@ export function MemphisCard({
             {chapter.target.goal}
           </span>
         ) : zoneText ? (
-          /* 静置态（用法示例）：过程文字骑在相框里，价值区短语带荧光标记 */
+          
           <span className="px-3 text-center text-small font-semibold leading-snug text-ink">{zoneText}</span>
         ) : (
-          /* 静置态：章节 emoji 是相框的视觉主体（对齐设计稿解剖卡） */
+          
           <span style={{ fontSize: compact ? '28px' : '40px' }}>{chapter.emoji}</span>
         )}
         <span className="absolute left-1.5 top-1 text-small font-bold tracking-wide text-paper">

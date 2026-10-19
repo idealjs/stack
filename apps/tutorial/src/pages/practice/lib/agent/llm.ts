@@ -1,5 +1,4 @@
-/** LLM seam——OpenAI 兼容 chat/completions 流式客户端。
- * 默认 DeepSeek；baseURL/key/model 可换（任何兼容端点）。key 只存 localStorage，不出浏览器。 */
+
 
 export interface LlmConfig {
   baseURL: string
@@ -16,7 +15,7 @@ export const DEFAULT_LLM_CONFIG: LlmConfig = {
 const STORE_KEY = 'practice.llm.v1'
 
 export function loadLlmConfig(): LlmConfig {
-  if (typeof localStorage === 'undefined') return DEFAULT_LLM_CONFIG // SSG 安全
+  if (typeof localStorage === 'undefined') return DEFAULT_LLM_CONFIG 
   try {
     return { ...DEFAULT_LLM_CONFIG, ...JSON.parse(localStorage.getItem(STORE_KEY) ?? '{}') }
   } catch {
@@ -49,7 +48,7 @@ export interface ChatMessage {
   tool_call_id?: string
 }
 
-/** 发起一轮流式补全：文本增量走 onDelta；返回聚合完整的 assistant 消息（含 tool_calls）。 */
+
 export async function streamChat(opts: {
   config: LlmConfig
   messages: ChatMessage[]

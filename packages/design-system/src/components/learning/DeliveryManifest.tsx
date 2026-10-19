@@ -12,7 +12,7 @@ export interface DeliveryManifestProps {
   title: string
   reference?: string
   items: readonly DeliveryItem[]
-  /** 状态列用验收印章盖印（备齐=实章、待交付=虚线章）；缺省保持纯文本 */
+  
   stamp?: boolean
   className?: string
 }

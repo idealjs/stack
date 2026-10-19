@@ -1,11 +1,11 @@
-/** 博客内容注册表——markdown 原文随仓，日期取首提日期（git） */
+
 import gorzil from './blog/gorzil.md?raw'
 import sapling from './blog/sapling_transformer.md?raw'
 
 export interface BlogPost {
   slug: string
   title: string
-  /** YYYY-MM-DD（首提日期） */
+  
   date: string
   author: string
   raw: string
@@ -28,9 +28,9 @@ export const POSTS: BlogPost[] = [
   },
 ]
 
-/** 按月分组（navbar 第三行的日期分类） */
+
 export interface BlogMonth {
-  key: string // YYYY-MM
+  key: string 
   posts: BlogPost[]
 }
 
@@ -44,5 +44,5 @@ export const MONTHS: BlogMonth[] = [...POSTS]
     return acc
   }, [])
 
-/** 文章所属月（用于文章页 navbar 高亮） */
+
 export const monthOf = (slug: string) => POSTS.find((p) => p.slug === slug)!.date.slice(0, 7)

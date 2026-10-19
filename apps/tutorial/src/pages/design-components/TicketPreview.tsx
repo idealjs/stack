@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Ticket } from '@stack/design-system'
 
-/** 直接改变 React props，预览孔位、孔径和拿起动效（自 design-lab 迁入）。 */
+
 export function TicketPreview() {
   const [position, setPosition] = useState('50%')
   const [size, setSize] = useState(20)

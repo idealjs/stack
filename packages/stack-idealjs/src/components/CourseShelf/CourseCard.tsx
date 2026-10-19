@@ -5,11 +5,7 @@ import useBaseUrl from "@docusaurus/useBaseUrl";
 import type { CourseSection } from "./courses";
 import styles from "./styles.module.css";
 
-/**
- * 单张课程卡：静态展示 title/desc/done/relations，
- * hover（或键盘 focus）时挂载 GIF——"学完能得到什么"的动态预告。
- * GIF 只在首次 hover 时加载，避免首屏拉全部动图。
- */
+
 export default function CourseCard({ course }: { course: CourseSection }) {
   const [previewing, setPreviewing] = useState(false);
   const gifUrl = useBaseUrl(`gifs/${course.id}.gif`);

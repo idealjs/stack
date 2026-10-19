@@ -1,11 +1,10 @@
-/** 博客页——日期页（月内文章卡片预览）+ 文章页（markdown 风格化渲染）。
- * 迷你 md 解析：#/##/###、> 引言、``` 代码块、-/* 列表、**粗体**、`行内码`。 */
+
 import type { ReactNode } from 'react'
 import { Page, Section } from '../lib/ui'
 import { MONTHS, POSTS, monthOf } from '../content/blogs'
 import { BrickDot, Mark, Tri } from '@stack/design-system'
 
-/* ── 行内：**粗体** 与 `行内码` ── */
+
 function inline(text: string): ReactNode[] {
   const parts: ReactNode[] = []
   const re = /(\*\*[^*]+\*\*|`[^`]+`)/g
@@ -27,7 +26,7 @@ function inline(text: string): ReactNode[] {
   return parts
 }
 
-/* ── 块级渲染（对齐字体系统：h2=t2、h3=t3、正文=content、列表=积木点） ── */
+
 function Markdown({ raw }: { raw: string }) {
   const lines = raw.replace(/^---\n[\s\S]*?\n---\n/, '').split('\n')
   const out: ReactNode[] = []
@@ -35,7 +34,7 @@ function Markdown({ raw }: { raw: string }) {
   let key = 0
   while (i < lines.length) {
     const ln = lines[i]
-    if (!ln.trim() || ln.trim() === '{/* truncate */}') {
+    if (!ln.trim() || ln.trim() === '') {
       i++
       continue
     }
@@ -112,7 +111,7 @@ function Markdown({ raw }: { raw: string }) {
       )
       continue
     }
-    // 段落：连续非格式行合并
+    
     const buf: string[] = [ln]
     i++
     while (
@@ -132,12 +131,12 @@ function Markdown({ raw }: { raw: string }) {
   return <div className="space-y-5">{out}</div>
 }
 
-/* ── 文章卡片（日期页预览） ── */
+
 export function BlogCard({ post }: { post: (typeof POSTS)[number] }) {
   const quote =
     post.raw
       .split('\n')
-      .find((l) => l.startsWith('> ') && l.trim() !== '{/* truncate */}') ??
+      .find((l) => l.startsWith('> ') && l.trim() !== '') ??
     post.raw.split('\n').find((l) => l.trim() && !l.startsWith('#') && !l.startsWith('---') && !l.startsWith('---')) ??
     ''
   return (
@@ -158,7 +157,7 @@ export function BlogCard({ post }: { post: (typeof POSTS)[number] }) {
   )
 }
 
-/* ── 日期页：某月的文章卡片 ── */
+
 export function BlogDatePage({ dateKey }: { dateKey: string }) {
   const month = MONTHS.find((m) => m.key === dateKey)!
   return (
@@ -178,7 +177,7 @@ export function BlogDatePage({ dateKey }: { dateKey: string }) {
   )
 }
 
-/* ── 文章页 ── */
+
 export function BlogPostPage({ slug }: { slug: string }) {
   const post = POSTS.find((p) => p.slug === slug)!
   return (

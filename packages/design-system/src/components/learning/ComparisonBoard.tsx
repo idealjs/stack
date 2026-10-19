@@ -10,7 +10,7 @@ export interface ComparisonBoardProps {
   left: ComparisonSide
   right: ComparisonSide
   caption?: string
-  /** 对照用双向箭头，互斥的路线选择用“或”。 */
+  
   connector?: 'compare' | 'or'
   className?: string
 }

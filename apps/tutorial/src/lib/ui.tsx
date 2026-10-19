@@ -1,14 +1,12 @@
-/** 教程站页面骨架：站头导航跨页常驻（view-transition-name 共享元素，页间不闪烁）。
- * 站头为 design-system 的 SiteNavbar 组件（五行：品牌＋分块 / 全栈教程 / 博客 / 设计系统 / 在线练习），
- * 本文件只负责把语义化的 active 翻译成导航 key，高亮细节由组件内部推导。 */
+
 import '@stack/design-system'
 import type { ReactNode } from 'react'
-import type { ChapterId, NavItemLink, NavRowGroup, NavSectionLink } from '@stack/design-system'
+import type { ChapterId, NavItemLink, NavRowGroup } from '@stack/design-system'
 import { SiteNavbar } from '@stack/design-system'
 import { CHAPTERS } from './chapters'
 import { MONTHS } from '../content/blogs'
 
-/** 设计系统五册 */
+
 export type DesignKey = 'design-colors' | 'design-typography' | 'design-symbols' | 'design-components' | 'design-shadow'
 
 const DESIGN: { href: string; label: string; key: DesignKey }[] = [
@@ -17,13 +15,6 @@ const DESIGN: { href: string; label: string; key: DesignKey }[] = [
   { href: '/design-symbols.html', label: '符号形状', key: 'design-symbols' },
   { href: '/design-components.html', label: '组件', key: 'design-components' },
   { href: '/design-shadow.html', label: '阴影', key: 'design-shadow' },
-]
-
-const NAV_SECTIONS: NavSectionLink[] = [
-  { key: 'tutorial', label: '全栈教程', href: '/learn.html' },
-  { key: 'blog', label: '博客', href: '/blog.html' },
-  { key: 'design', label: '设计系统', href: '/design.html' },
-  { key: 'practice', label: '在线练习', href: '/practice.html' },
 ]
 
 const CHAPTER_ITEMS: NavItemLink[] = ([1, 2, 3, 4, 5, 6] as ChapterId[]).map((id) => ({
@@ -51,12 +42,12 @@ const NAV_ROWS: NavRowGroup[] = [
     sectionKey: 'practice',
     label: '在线练习',
     href: '/practice.html',
-    // v1 单任务直入练习场；任务库落地后由任务表生成（/practice.html?task=<id>）
+    
     items: [{ key: 'practice-starter', label: '重建中', href: '/practice.html', mono: true }],
   },
 ]
 
-/** 页脚链接（外链全部新窗口打开） */
+
 const FOOTER_GROUPS: { label: string; links: { href: string; label: string }[] }[] = [
   { label: '友情链接', links: [{ href: 'https://idealjs.com', label: 'idealjs.com' }] },
   {
@@ -80,16 +71,16 @@ export function Page({
   active,
   children,
 }: {
-  /** 章节页标题在章头横幅里，可省 */
+  
   title?: string
-  /** 首页标语等补充标题 */
+  
   subtitle?: string
   desc?: string
-  /** 站头高亮：章节 id / 首页 / 开始学习（learn）/ 分块着陆页（blog、design、practice）/ 设计系统册 / 博客月（blog-YYYY-MM） */
+  
   active?: ChapterId | 'index' | 'learn' | 'blog' | 'design' | 'practice' | DesignKey | `blog-${string}`
   children: ReactNode
 }) {
-  // 语义 active → 导航 key：learn 页归入 tutorial 分块（高亮分块与行首，不选中任何条目）
+  
   const activeKey =
     active === 'index'
       ? 'index'
@@ -103,7 +94,6 @@ export function Page({
     <main className="mx-auto max-w-[1200px] px-6 py-8 text-content text-body">
       <SiteNavbar
         brand={{ key: 'index', label: 'idealjs stack', href: '/index.html' }}
-        sections={NAV_SECTIONS}
         rows={NAV_ROWS}
         active={activeKey}
         viewTransitionName="site-header"
@@ -143,13 +133,15 @@ export function Page({
   )
 }
 
-export function Section({ label, note, id, className = '', children }: { label: string; note?: string; id?: string; className?: string; children: ReactNode }) {
+export function Section({ label, note, id, className = '', children }: { label?: string; note?: string; id?: string; className?: string; children: ReactNode }) {
   return (
     <section id={id} className={`mb-8 ${className}`}>
-      <h2 className="mb-2.5 flex flex-wrap items-baseline gap-2">
-        <span className="t-small-strong">{label}</span>
-        {note && <i className="t-small-mute not-italic">{note}</i>}
-      </h2>
+      {(label || note) && (
+        <h2 className="mb-2.5 flex flex-wrap items-baseline gap-2">
+          {label && <span className="t-small-strong">{label}</span>}
+          {note && <i className="t-small-mute not-italic">{note}</i>}
+        </h2>
+      )}
       {children}
     </section>
   )

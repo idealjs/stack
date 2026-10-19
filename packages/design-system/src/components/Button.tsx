@@ -1,8 +1,4 @@
-/** Button —— 孟菲斯按钮：hover 时上层浮起 3px（-translate-y）、
- * 下层硬阴影 5px→8px 跟随位移（shadow-ink→shadow-ink-lift），两层反向分开。
- * tone＝clash 色板实底＋ink 描边＋ink 文字；有 href 渲染链接（a），
- * 无 href 渲染动作按钮（button）；disabled＝虚线描边占位（敬请期待），不动不起。
- * 与 MemphisCard 的 -3px 拿起规格一致；box-shadow 一并过渡，阴影位移平滑。 */
+
 import type { ReactNode } from 'react'
 
 const TONE_BG = {
@@ -23,11 +19,11 @@ export function Button({
   disabled = false,
   children,
 }: {
-  /** 实底色（clash 色板 token 名）；disabled 时忽略 */
+  
   tone?: keyof typeof TONE_BG
-  /** 跳转目标：渲染为链接；缺省且未 disabled 时渲染为动作按钮（button） */
+  
   href?: string
-  /** 未上线/敬请期待：虚线描边占位，无 hover 位移 */
+  
   disabled?: boolean
   children: ReactNode
 }) {

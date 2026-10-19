@@ -8,11 +8,10 @@ export interface ToolboxBrick {
   why: string
   family: string
   learned?: boolean
-  /** 课程概览直接展示用途与阶段；章节工具盒继续展示学习进度。 */
+  
   summary?: string
   stage?: string
-  /** 概览积木的撞色：studs、顶面小签与详情 dt 共用 --learning-accent；
-   * 不传回落纸色，lesson 变体调用方不传即保持原样。相邻积木建议换 tone。 */
+  
   tone?: LearningTone
 }
 
@@ -23,8 +22,7 @@ export interface BrickToolboxProps {
   className?: string
 }
 
-/** 积木工具盒：原生 details 收纳「是什么/为何在这/带一族」；
- * overview 变体把收起态做成一块可扫读的撞色积木（编号 + stage 顶签 + 名称 + 一句话）。 */
+
 export function BrickToolbox({ title, bricks, variant = 'lesson', className = '' }: BrickToolboxProps) {
   return (
     <section data-comp="brick-toolbox" data-variant={variant} className={`learning-object learning-toolbox ${className}`}>

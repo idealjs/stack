@@ -1,5 +1,4 @@
-/** 聊天面板——用户与陪练 agent 的对话视图（纯展示，会话状态在工作区）。
- * 常驻于 CoachSticky 便签的展开态：notice 是注入输入区上方的开场提示词条，flat 去掉外投影（便签框内不再叠影）。 */
+
 import { useState } from 'react'
 import type { KeyboardEvent, ReactNode } from 'react'
 
@@ -22,16 +21,16 @@ export function ChatPanel({
 }: {
   items: ChatItem[]
   busy: boolean
-  /** 浏览器内运行时就绪后才允许发消息 */
+  
   ready: boolean
   hasKey: boolean
   model: string
   onSend: (text: string) => void
   onStop: () => void
   onOpenKey: () => void
-  /** 输入区上方的注入条（如当前任务的开场提示词） */
+  
   notice?: ReactNode
-  /** 去掉外投影（嵌在便签框内时） */
+  
   flat?: boolean
 }) {
   const [draft, setDraft] = useState('')
@@ -54,8 +53,7 @@ export function ChatPanel({
     <div
       className={`flex h-full min-h-0 flex-col rounded-xl border-2 border-ink bg-paper ${flat ? '' : 'shadow-ink'}`}
     >
-      {/* 头部：模型 + key 配置入口 */}
-      <div className="flex items-center gap-2 border-b border-dashed border-ink/20 px-3 py-2">
+            <div className="flex items-center gap-2 border-b border-dashed border-ink/20 px-3 py-2">
         <span className="t-small-strong">陪练 agent</span>
         <span className="t-small-mute min-w-0 flex-1 truncate font-mono">{model}</span>
         <button
@@ -69,8 +67,7 @@ export function ChatPanel({
         </button>
       </div>
 
-      {/* 消息流 */}
-      <div className="flex min-h-0 flex-1 flex-col gap-2.5 overflow-auto p-3">
+            <div className="flex min-h-0 flex-1 flex-col gap-2.5 overflow-auto p-3">
         {items.map((item, i) =>
           item.kind === 'tool' ? (
             <p key={i} className="t-small-mute m-0 font-mono">
@@ -91,11 +88,9 @@ export function ChatPanel({
         {busy && <p className="t-small-mute m-0 animate-pulse font-mono">agent 工作中…</p>}
       </div>
 
-      {/* 注入条（开场提示词等）：位于输入区上方 */}
-      {notice && <div className="border-t border-dashed border-ink/20 p-2.5">{notice}</div>}
+            {notice && <div className="border-t border-dashed border-ink/20 p-2.5">{notice}</div>}
 
-      {/* 输入区 */}
-      <div className="border-t border-dashed border-ink/20 p-2.5">
+            <div className="border-t border-dashed border-ink/20 p-2.5">
         <textarea
           value={draft}
           onChange={(e) => setDraft(e.target.value)}

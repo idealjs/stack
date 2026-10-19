@@ -1,7 +1,4 @@
-/** SSG —— vite build 之后把每页 renderToString 注入 dist 的 html。
- * 流程：vite dev server（middlewareMode）→ ssrLoadModule 各页 main.tsx
- * （main.tsx 导出页面元素，node 环境下不挂载）→ renderToString →
- * 替换模板里的 <div id="root"></div>。浏览器端由 mount() 走 hydrateRoot 接管。 */
+
 import { readdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { join, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'

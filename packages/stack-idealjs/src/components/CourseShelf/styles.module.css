@@ -1,5 +1,4 @@
-/* 课程书架：卡片网格，风格取自设计稿 00（E-learning Learning Plan Dashboard）
-   多彩课程卡 + 顶部 accent 条 + 完成角标。 */
+
 
 .shelf {
   padding: 2rem 0 3rem;
@@ -21,7 +20,7 @@
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
 }
 
-/* ---- 单张卡片 ---- */
+
 
 .card {
   --course-color: #6366f1;
@@ -47,7 +46,7 @@
   text-decoration: none;
 }
 
-/* 书脊：卡片左侧的主题色竖条，hover 常亮 */
+
 .spine {
   position: absolute;
   inset: 0 auto 0 0;
@@ -62,7 +61,7 @@
   opacity: 1;
 }
 
-/* ---- 媒体区：hover 轮播预期成果 GIF ---- */
+
 
 .media {
   aspect-ratio: 16 / 9;
@@ -93,7 +92,7 @@
   color: var(--course-color);
 }
 
-/* ---- 内容区 ---- */
+
 
 .body {
   display: flex;
@@ -155,7 +154,7 @@
   line-height: 1.5;
 }
 
-/* ---- 关系区：后续列出章节依赖后渲染 chips ---- */
+
 
 .relations {
   display: flex;

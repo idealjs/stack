@@ -1,5 +1,4 @@
-/** LLM 配置弹窗——DeepSeek 预设，baseURL/model 可换（任何 OpenAI 兼容端点）。
- * key 只存本机 localStorage，随聊天请求直连所选端点，不经过任何中间服务器。 */
+
 import { useState } from 'react'
 import type { LlmConfig } from '../lib/agent/llm'
 

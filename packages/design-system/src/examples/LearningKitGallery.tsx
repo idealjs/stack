@@ -26,7 +26,7 @@ function Sample({ name, title, note, wide, children }: {
   )
 }
 
-/** 组件标本，不绑定教程进度；交互仅在当前页面演示。 */
+
 export function LearningKitGallery() {
   return (
     <div className="learning-gallery" data-testid="learning-kit-gallery">
@@ -47,16 +47,6 @@ export function LearningKitGallery() {
               <p><b>build</b> 把源码变成可以部署的文件。</p>
               <p>去 <code>dist/</code> 看一眼，核对产物到底长什么样。</p>
             </StickyNote>
-          </Sample>
-          <Sample name="ExperimentFrame" title="实验台预览框" note="在预览区域操作 todo，观察界面跟着状态变化。">
-            <ExperimentFrame title="React Todo / 预期结果" address="localhost:5173" caption="点选任务，查看变化">
-              <h3 className="mb-3">今天的练习</h3>
-              <ul className="learning-demo-todo">
-                <li><label><input type="checkbox" defaultChecked /><span>让第一个网页跑起来</span></label></li>
-                <li><label><input type="checkbox" /><span>把列表拆成 React 组件</span></label></li>
-                <li><label><input type="checkbox" /><span>刷新后，数据还在</span></label></li>
-              </ul>
-            </ExperimentFrame>
           </Sample>
         </div>
       </section>
@@ -137,6 +127,16 @@ export function LearningKitGallery() {
       <section className="learning-gallery-group" id="learning-kit-list" aria-labelledby="learning-kit-list-heading">
         <h3 id="learning-kit-list-heading" className="learning-gallery-group-heading"><strong>05 · 清单类</strong><small>核对与交付，都落在一纸清单上。</small></h3>
         <div className="learning-gallery-grid">
+          <Sample name="ExperimentFrame" title="实验台预览框" note="预览区域里也是一份 todo 清单——在清单上操作，观察界面跟着状态变化。">
+            <ExperimentFrame title="React Todo / 预期结果" address="localhost:5173" caption="点选任务，查看变化">
+              <h3 className="mb-3">今天的练习</h3>
+              <ul className="learning-demo-todo">
+                <li><label><input type="checkbox" defaultChecked /><span>让第一个网页跑起来</span></label></li>
+                <li><label><input type="checkbox" /><span>把列表拆成 React 组件</span></label></li>
+                <li><label><input type="checkbox" /><span>刷新后，数据还在</span></label></li>
+              </ul>
+            </ExperimentFrame>
+          </Sample>
           <Sample name="ClipboardChecklist" title="夹板验收清单" note="勾选所有条件后盖章；取消任一条件，回到待验收。">
             <ClipboardChecklist
               title="第一个网页，跑起来了吗？" description="回到自己的浏览器，逐项核对。"

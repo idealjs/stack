@@ -1,5 +1,5 @@
-/** 教程内容数据——大纲见 OUTLINE.md，词汇与结构对齐 ai-era-tutorial skill */
-import type { Assignment, Chapter, ChapterId, Profile } from '@stack/design-system'
+
+import type { Chapter, ChapterId, Profile } from '@stack/design-system'
 
 export const CHAPTERS: Record<ChapterId, Chapter> = {
   1: {
@@ -118,17 +118,17 @@ export const PROFILES: Profile[] = [
   },
 ]
 
-/* ===== 章节正文（章节页渲染） ===== */
 
-/** 步骤：目标 + 验收产物，不写键位；先分类 */
+
+
 export interface Step {
   title: string
-  kind: 'value' | 'agent' // 价值区（过程就地写清）/ 代理区（交给 agent）
-  what: string // 这一步产出什么
-  accept: string // 读者亲自核对什么
+  kind: 'value' | 'agent' 
+  what: string 
+  accept: string 
 }
 
-/** 积木三句话：是什么 / 与靶子的关系 / 家族 */
+
 export interface Brick3 {
   name: string
   what: string
@@ -139,9 +139,8 @@ export interface Brick3 {
 export interface ChapterContent {
   steps: Step[]
   bricks: Brick3[]
-  /** 认知基础：脚下的地（env/库/运行环境），第一次用到就地露出 */
+  
   base?: string
-  assign?: Assignment
 }
 
 export const CONTENT: Record<ChapterId, ChapterContent> = {
@@ -187,16 +186,6 @@ export const CONTENT: Record<ChapterId, ChapterContent> = {
       },
     ],
     base: '终端、node、编辑器不是积木，是脚下的地——第一次用到就在这里露出：终端是你指挥机器的嘴，node 是让 JavaScript 在机器上跑的运行时，编辑器是看代码的眼睛。',
-    assign: {
-      title: '指派学习 · HTTP 协议',
-      pos: 'Web 通信的地基，旁边是 DNS（找机器）与 TCP（铺线路）',
-      expect: '能向 agent 讲清一次请求的往返：URL → DNS → 连接 → 请求行/头/体 → 响应 → 渲染',
-      scenes: ['打开 Network 面板复述一次页面加载', '用 curl 拿一个网页的原始响应'],
-      miss: {
-        how: '装了但没跑',
-        looks: '命令成功、页面空白——缺「真机验收」这块积木',
-      },
-    },
   },
   2: {
     steps: [
@@ -240,16 +229,6 @@ export const CONTENT: Record<ChapterId, ChapterContent> = {
       },
     ],
     base: 'node_modules / package.json 不是积木，是认知基础：node_modules 是这台机器的零件仓库，package.json 是购物清单——平台会替你装，但你要知道「装了什么、装到哪」。',
-    assign: {
-      title: '指派学习 · 受控 vs 非受控',
-      pos: '表单一族；旁边是校验与重置',
-      expect: '两种写法各写一遍，能说清数据住谁家',
-      scenes: ['把输入框两种写法互换', '给输入框加初始值再对比行为'],
-      miss: {
-        how: '组件跑通但答不出数据从哪来往哪去',
-        looks: '增删能用、一刷新全丢——缺 state 数据流这块积木',
-      },
-    },
   },
   3: {
     steps: [
@@ -280,16 +259,6 @@ export const CONTENT: Record<ChapterId, ChapterContent> = {
         family: '二维用 grid；「区域划分」感强时优先它',
       },
     ],
-    assign: {
-      title: '指派学习 · 布局一族',
-      pos: 'CSS 排版；旁边是定位（position）与响应式',
-      expect: '同一张卡片三种布局各摆一遍，判断特征说得出口',
-      scenes: ['侧栏布局', '水平垂直居中', '等宽三列'],
-      miss: {
-        how: '抄了 CSS 能用但换张卡就摆不平',
-        looks: '样式能抄、布局说不清——没有把布局当一族学',
-      },
-    },
   },
   4: {
     steps: [
@@ -364,16 +333,6 @@ export const CONTENT: Record<ChapterId, ChapterContent> = {
       },
     ],
     base: 'SQLite 是一个文件当数据库——零安装、看得见摸得着（库文件就在目录里），是认知基础里最直观的一块地。',
-    assign: {
-      title: '指派学习 · 数据库迁移一族',
-      pos: 'schema 演进；旁边是种子数据与回滚',
-      expect: '给 todo 加一个字段，走完「改 schema → 迁移 → 验证」全流程',
-      scenes: ['给 todo 加截止日期', '把完成状态改成时间戳'],
-      miss: {
-        how: '前端直连数据库「也能跑」',
-        looks: '页面能写库、换台设备就看不到——架构上少了 API 这层，撞上并发/换端就疼',
-      },
-    },
   },
   6: {
     steps: [
@@ -410,15 +369,5 @@ export const CONTENT: Record<ChapterId, ChapterContent> = {
         family: '同族是 code review 流；验收产物越清楚，协作越轻',
       },
     ],
-    assign: {
-      title: '指派学习 · 协同编程探索',
-      pos: '工程协作；旁边是 code review 与分支策略',
-      expect: '和 agent 结对完成一个小功能，全程你出靶子它出过程，交接物可核对',
-      scenes: ['让 agent 重构一段你写的代码，你验收', '让 agent 出两版方案，你选并说理由'],
-      miss: {
-        how: 'agent 说什么信什么',
-        looks: '代码能跑、讲不出为什么这样写——识别力没长，缺的正是本章',
-      },
-    },
   },
 }

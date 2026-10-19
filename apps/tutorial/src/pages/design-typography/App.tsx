@@ -1,8 +1,7 @@
-/** 设计系统 · 字体册——字阶与两种强调。
- * 全部样式直接用 tokens.css 的字体系统（所见即 token）。 */
+
 import { Page, Section } from '../../lib/ui'
 
-/* 字阶：名称 / token / 规格 / 用途 / 活样 */
+
 const SCALE = [
   { n: '正文 content', token: 'text-content', spec: '16px / 1.75（浏览器默认）', use: '全站基准——步骤与认知基础正文', sample: <span className="text-content text-body">把 16px 当正文，浏览器默认字号即设计基准。</span>, cls: '' },
   { n: '三级标题 t3', token: 'text-t3', spec: '18px / 1.5', use: '步骤标题、积木名', sample: <span className="text-t3 font-bold text-ink">组件是界面拼接的最小单位</span>, cls: '' },

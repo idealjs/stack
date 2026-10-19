@@ -1,5 +1,4 @@
-/** 课程概览：目标 → 入口 → 可操作演示 → 主线（数据控制）→ 时间 → 练习环境 → 技术积木。
- * DOM 顺序即移动端阅读顺序；桌面端由 learn.css 的 .learn-top 升两栏。 */
+
 import { Page, Section } from '../../lib/ui'
 import { BrickToolbox, Button, ComparisonBoard, DataFlowBoard, ExperimentFrame, Mark, StickyNote } from '@stack/design-system'
 import type { DataFlowStep, ToolboxBrick } from '@stack/design-system'
@@ -63,7 +62,7 @@ const BRICKS: readonly ToolboxBrick[] = [
   },
 ]
 
-/** 主线叙事的四步数据流：从一次勾选出发，前端两步、后端一步收尾。 */
+
 const DATA_FLOW_STEPS: readonly DataFlowStep[] = [
   {
     id: 'input', title: '用户操作', tone: 'coral', input: true,
@@ -90,8 +89,7 @@ export function App() {
       title="全栈教程"
       desc="从第一个网页到前后端协作，用同一个待办应用串起整个过程。"
     >
-      {/* 移动端单列＝阅读顺序；≥768px 升两栏：左 1fr（copy/actions/core），右固定栏（preview/note） */}
-      <div className="learn-top">
+            <div className="learn-top">
         <section className="learn-copy" aria-labelledby="learn-goal">
           <h2 id="learn-goal">做一个自己的待办清单</h2>
           <p>

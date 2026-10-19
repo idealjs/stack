@@ -1,5 +1,5 @@
 import { Page, Section } from '../../lib/ui'
-import { BrickDot, Cross, Mark, Ring, Tremble, Tri, Wave } from '@stack/design-system'
+import { BrickDot, Mark, Ring, Tri, Wave } from '@stack/design-system'
 import { CHAPTERS } from '../../lib/chapters'
 import { ChapterTicket } from '@stack/design-system'
 import type { ReactNode } from 'react'
@@ -10,23 +10,19 @@ const SHAPES = [
   { el: <Ring size={28} />, n: '○ 预期', m: '可核对的结果', s: '预期结果' },
   { el: <Wave size={36} />, n: '～ 代理区', m: '交给 agent', s: '每步先分类' },
   { el: <Mark>过程</Mark>, n: '荧光标记 价值区', m: '划在文字上，不是散落图形', s: '每步先分类' },
-  { el: <Tremble size={22} />, n: '⌇ 脱靶', m: '图形入口：追随图形进入阅读', s: '脱靶提醒' },
-  { el: <Cross size={22} />, n: '＋ 指派', m: '位置/预期/场景', s: '指派学习' },
 ]
 
 const VOCAB: { p: string; rows: [ReactNode, string][] }[] = [
   { p: '靶子', rows: [['▲ 目标', '做什么'], ['○ 预期结果', '做成长什么样、怎么核对'], ['● 积木清单', '要用到的零件——只列用到的；说零件不说知识']] },
   { p: '步骤分类', rows: [['～ 代理区', '无学习价值——交给 agent'], [<Mark key="v">价值区</Mark>, '有学习价值——就地写清']] },
-  { p: '指派学习', rows: [['＋ 三样（图形入口）', '教材只留三样，讲解交给 agent'], ['└ 位置', '知识体系中的坐标'], ['└ 预期', '实践结果应长什么样——当尺子'], ['└ 场景', '带回 agent 再做的练习——管巩固']] },
-  { p: '脱靶提醒', rows: [['⌇ 图形标记', '不人为挖坑；跟在指派后'], ['└ 可能性 / 长相', '怎么脱靶＋脱靶什么样——撞上认出缺哪块']] },
   { p: '认知基础', rows: [['底座纹·真机验收章', 'env/库/运行环境——脚下的地，不是积木']] },
 ]
 
 export function App() {
   return (
     <Page active="design-symbols" title="符号、形状 · 装饰即语义" desc="形状对内容下定义、散落于空白；票券只表达完成状态。">
-      <Section label="语义形状 ×7" note="散落＝卡片附近空当＋随机旋转/落点（Scatter 种子化），密度 ≤ 8/屏">
-        <div className="grid grid-cols-4 gap-3.5 md:grid-cols-7">
+      <Section label="语义形状 ×5" note="散落＝卡片附近空当＋随机旋转/落点（Scatter 种子化），密度 ≤ 8/屏">
+        <div className="grid grid-cols-3 gap-3.5 sm:grid-cols-5">
           {SHAPES.map((s) => (
             <div key={s.n} className="text-center">
               <div className="mx-auto flex h-[46px] w-[46px] items-center justify-center rounded-xl border-2 border-ink bg-white">{s.el}</div>

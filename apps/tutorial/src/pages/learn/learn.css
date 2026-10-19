@@ -1,35 +1,34 @@
-/* 课程概览：基础样式＝移动端单列，DOM 顺序即阅读顺序
- * （目标 → 入口 → 可操作演示 → 数据控制 → 要多久）；≥768px 升两栏。 */
+
 .learn-top { display: grid; gap: 28px; margin-bottom: 36px; }
 .learn-top h2 { margin: 0; color: var(--color-ink); font-size: var(--text-t2); font-weight: 800; line-height: 1.45; }
 
-/* ① 目标文案 */
+
 .learn-copy > p { margin: 12px 0 0; max-width: 56ch; line-height: 1.75; }
 .learn-copy b { color: var(--color-ink); }
 .learn-meta { margin-top: 14px; color: var(--color-body); font-size: 13px; }
 .learn-meta a { color: var(--color-ink); font-weight: 800; text-underline-offset: 3px; }
 
-/* ② 入口 */
+
 .learn-actions { display: flex; flex-wrap: wrap; align-content: start; align-items: center; gap: 12px; }
 .learn-actions p { flex-basis: 100%; width: 100%; margin: 2px 0 0; color: var(--color-body); font-size: 13px; line-height: 1.7; }
 
-/* ③ 可操作演示 */
+
 .learn-preview { width: 100%; }
 
-/* ④ 数据控制 */
+
 .learn-core { min-width: 0; scroll-margin-top: 24px; }
 .learn-core h2 { font-size: var(--text-t3); }
 .learn-core > p { margin: 12px 0 16px; font-size: 14px; line-height: 1.75; }
 .learn-core-note { margin-bottom: 0; color: var(--color-body); font-size: 13px; }
 
-/* ⑤ 要多久 */
+
 .learn-time-list { margin: 0; }
 .learn-time-list > div { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 4px 16px; margin-bottom: 8px; font-size: 13px; }
 .learn-time-list dt { color: var(--color-body); }
 .learn-time-list dd { margin: 0; font-weight: 800; }
 .learn-time-note { margin: 12px 0 0; color: var(--color-body); font-size: 12px; line-height: 1.7; }
 
-/* ⑥⑦ 分块 */
+
 .learn-section { scroll-margin-top: 24px; }
 .learn-section > h2 { gap: 6px 14px; margin: 0 0 16px; }
 .learn-section > h2 .t-small-strong { font-size: var(--text-t3); }
@@ -40,8 +39,7 @@
 .learn-environment-list dd { margin: 0; color: var(--color-body); font-size: 13px; line-height: 1.75; }
 .learn-environment-note { color: var(--color-body); font-size: 12px; line-height: 1.7; }
 
-/* 桌面两栏：左 1fr 走 copy/actions/core，右固定栏放 preview 与 note，
- * 右栏两块同宽同右缘；行高各自自适应，预览过高时只是把 r1/r2 撑开，便签仍与 core 顶对齐。 */
+
 @media (min-width: 768px) {
   .learn-top {
     grid-template-columns: minmax(0, 1fr) minmax(300px, 360px);
@@ -60,7 +58,7 @@
   .learn-time { grid-area: note; }
 }
 
-/* 待办演示（页内成品，非设计系统组件） */
+
 .learn-todo { display: flex; flex-direction: column; gap: 12px; text-align: left; }
 .learn-todo-heading { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 4px 12px; }
 .learn-todo-heading b { font-size: 17px; }

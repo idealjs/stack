@@ -1,25 +1,21 @@
-/** 练习任务库：每个任务 = 任务卡（位置/预期/场景 + 验收清单）+ 开场提示词。
- * 任务卡同时驱动两处：SSG 首屏的静态说明、agent 的 system prompt 与 TASK.md——单一数据源。
- * v1 只有 react-starter 一个任务；后续按 ch1-ch6 扩充，导航行由本表生成。 */
+
 
 export interface PracticeTask {
   id: string
-  /** 导航/任务卡上的短名 */
+  
   label: string
   title: string
-  /** 场景：给用户的开场说明（任务卡正文） */
+  
   scene: string
-  /** 预期：给 agent 与用户共同的目标描述 */
+  
   expectation: string
-  /** 验收清单：完成后用户逐条对照 */
+  
   acceptance: string[]
-  /** 开场提示词：把这段话发给陪练 agent 就能开工（便签「发给陪练」一键直发）。
-   * 与 scene/expectation/acceptance 同源分叉出「用户话术版」，不是第二份任务描述。 */
+  
   opener: string
 }
 
-/* 模板工程（vite + react 起手文件）随运行时移除，归档于 exp/vivari-playground 分支；
- * ESM + MCP 方案确定工程载体后在此恢复。 */
+
 
 export const TASKS: PracticeTask[] = [
   {
@@ -41,7 +37,7 @@ export const TASKS: PracticeTask[] = [
   },
 ]
 
-/** 由任务卡生成 TASK.md（注入模板工程，agent 的任务说明与其 UI 展示同源） */
+
 export function taskMarkdown(task: PracticeTask): string {
   return [
     `# 练习任务 · ${task.title}`,
@@ -58,7 +54,7 @@ export function taskMarkdown(task: PracticeTask): string {
   ].join('\n')
 }
 
-/** 从 ?task= 选任务；SSG/水合差异可接受（React 客户端渲染接管） */
+
 export function taskFromLocation(): PracticeTask {
   if (typeof window === 'undefined') return TASKS[0]
   const id = new URLSearchParams(window.location.search).get('task')

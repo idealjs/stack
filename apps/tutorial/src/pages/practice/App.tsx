@@ -1,6 +1,4 @@
-/** 在线练习——练习场页：任务卡 + 陪练 agent 对话 + 创建项目示例先行上线。
- * 代码执行运行时待 ESM + MCP 接入（历史实现归档于 exp/vivari-playground 分支）；
- * SSG 只渲染静态壳，对话在浏览器端直连 LLM。 */
+
 import { Page } from '../../lib/ui'
 import { PracticeWorkspace } from './components/PracticeWorkspace'
 

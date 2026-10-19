@@ -1,5 +1,4 @@
-/** 入口梳理 —— 读者画像推荐路径：是推荐不是强制（无锁）。
- * 章节数据与画像由宿主注入（真实教程数据）。 */
+
 import type { Chapter, ChapterId, Profile } from '../lib/types'
 
 export function EntryGuide({
@@ -9,7 +8,7 @@ export function EntryGuide({
 }: {
   chapters: Record<ChapterId, Chapter>
   profiles: Profile[]
-  /** 路径 chip 是否链接章节页（教程站 true） */
+  
   linkChapter?: boolean
 }) {
   return (

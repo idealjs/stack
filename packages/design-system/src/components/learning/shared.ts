@@ -16,7 +16,7 @@ export function toneStyle(tone: LearningTone): CSSProperties {
   return { '--learning-accent': COLORS[tone] } as CSSProperties
 }
 
-/** 示例可独立操作；实际接入学习进度时，交给调用方持有状态。 */
+
 export function useLearningState<T>(value: T | undefined, initial: T, onChange?: (value: T) => void) {
   const [local, setLocal] = useState(initial)
   return [value ?? local, (next: T) => {

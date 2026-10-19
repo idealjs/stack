@@ -1,13 +1,9 @@
-/** 章节页——一章的完整教学结构（对齐 ai-era-tutorial）：
- * 章头靶子卡（▲目标 ○预期 ●积木，view-transition-name 与书架相框同名 morph）
- * → 步骤列（价值区荧光标记 / 代理区波浪，每步＝目标＋验收产物）
- * → 积木三句话（是什么/与靶子的关系/带一族）
- * → 认知基础（脚下的地，就地露出）→ 指派学习三样＋脱靶提醒 */
+
 import type { CSSProperties } from 'react'
 import { Page, Section } from '../lib/ui'
 import { CHAPTERS, CONTENT } from '../lib/chapters'
 import type { ChapterId } from '@stack/design-system'
-import { AssignBlock, BrickDots, Mark, Ring, Tri, Wave } from '@stack/design-system'
+import { BrickDots, Mark, Ring, Tri, Wave } from '@stack/design-system'
 
 const ALL: ChapterId[] = [1, 2, 3, 4, 5, 6]
 
@@ -19,8 +15,7 @@ export function ChapterPage({ id }: { id: ChapterId }) {
 
   return (
     <Page active={id}>
-      {/* 章头：与书架相框共享 view-transition-name —— 点卡片进来时相框飞进来变成章头 */}
-      <div
+            <div
         className="relative flex items-center gap-4 overflow-hidden rounded-2xl border-2 border-ink p-5 shadow-ink"
         style={{ background: ch.color, viewTransitionName: `ch-${id}` } as CSSProperties}
       >
@@ -99,12 +94,6 @@ export function ChapterPage({ id }: { id: ChapterId }) {
               <Ring size={18} className="mt-0.5 shrink-0" />
               <p className="m-0 text-content text-body">{c.base}</p>
             </div>
-          </Section>
-        )}
-
-        {c.assign && (
-          <Section label="指派学习" note="位置给坐标、预期当尺子、场景管巩固；讲解交给你的 agent">
-            <AssignBlock {...c.assign} />
           </Section>
         )}
 

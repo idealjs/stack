@@ -1,7 +1,4 @@
-/** 散落形状摆放——「卡片附近空当 ＋ 随机」：
- * 网格采样容器空白 → 过滤出距内容盒（[data-comp]）≤ near 的空当（不胡乱撒）→
- * 种子随机挑位（彼此保距）＋空当内随机偏移＋随机旋转。
- * 种子固定 → 每次渲染一致（视觉基线可测）；容器重排（ResizeObserver）自动重算。 */
+
 import { useLayoutEffect, useRef, useState, type ReactNode } from 'react'
 
 function mulberry32(seed: number) {

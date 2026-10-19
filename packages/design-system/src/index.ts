@@ -1,5 +1,4 @@
-/** @stack/design-system —— 孟菲斯 × 拟物卡设计系统（唯一定义处）
- * 组件、tokens、类型从此导出；消费方（教程站页面与其 E2E）共同引用，禁止再拷贝。 */
+
 import './styles/tokens.css'
 import './styles/learning.css'
 
@@ -18,11 +17,10 @@ export { Ticket } from './components/Ticket'
 export type { TicketProps } from './components/Ticket'
 export { ChapterTicket } from './components/ChapterTicket'
 export type { ChapterTicketProps } from './components/ChapterTicket'
-export { AssignBlock } from './components/AssignBlock'
 export { ShadowCard } from './components/ShadowCard'
 export { EntryGuide } from './components/EntryGuide'
 export { Scatter } from './components/Scatter'
-export { Tri, BrickDot, Ring, Wave, Mark, Tremble, Cross, MissMark } from './components/shapes'
+export { Tri, BrickDot, Ring, Wave, Mark } from './components/shapes'
 export { ClipboardChecklist } from './components/learning/ClipboardChecklist'
 export type { ClipboardChecklistProps, ChecklistItem } from './components/learning/ClipboardChecklist'
 export { FolderTabs } from './components/learning/FolderTabs'

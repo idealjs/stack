@@ -1,4 +1,4 @@
-/** 博客着陆页——全部文章按月归档 */
+
 import { Page, Section } from '../../lib/ui'
 import { BlogCard } from '../../components/BlogPages'
 import { MONTHS } from '../../content/blogs'

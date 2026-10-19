@@ -1,4 +1,4 @@
-/** 页面内成品演示：只展示增删和状态变化，刷新后回到初始示例。 */
+
 import { useRef, useState } from 'react'
 
 const INITIAL_ITEMS = [

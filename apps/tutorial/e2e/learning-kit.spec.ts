@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test'
 
-/** 拟物学习组件交互契约（自 design-lab 迁入；标本为 design-system 共享的 LearningKitGallery）。 */
+
 test.describe('拟物学习组件', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/design-components.html')
@@ -18,7 +18,7 @@ test.describe('拟物学习组件', () => {
       const shadow = await gallery.locator(`[data-comp="${kind}"]`).evaluate((element) => getComputedStyle(element).boxShadow)
       expect(shadow).toBe('rgb(17, 17, 17) 5px 5px 0px 0px')
     }
-    // 清单类分组：夹板与装箱单归入；装箱单与验收印章组合盖印
+    
     await expect(gallery.getByRole('navigation')).toContainText('清单类')
     const listGroup = page.locator('#learning-kit-list')
     await expect(listGroup.locator('[data-comp="clipboard-checklist"]')).toContainText('第一个网页，跑起来了吗？')
@@ -68,15 +68,15 @@ test.describe('拟物学习组件', () => {
     const card = page.locator('[data-comp="flash-card"]')
     const question = card.locator('.learning-flashcard-face').nth(0)
     const answer = card.locator('.learning-flashcard-face').nth(1)
-    // 两面常驻 DOM；隐藏面 visibility:hidden——不可见、可达树与焦点链整体摘除
+    
     await expect(question).toBeVisible()
     await expect(question).toContainText('分别由谁决定')
     await expect(answer).toBeHidden()
     expect(await card.ariaSnapshot()).not.toContain('从数据的来源判断')
     const hiddenSubtree = await answer.evaluate((face) =>
       [face, ...face.querySelectorAll('*')].every((el) => getComputedStyle(el).visibility === 'hidden'))
-    expect(hiddenSubtree).toBe(true) // 面内若有可聚焦元素也一并失效，不会残留可聚焦残留
-    // 等高契约：翻面只切换可见面，容器 boundingBox 高度分毫不变（零抖动）
+    expect(hiddenSubtree).toBe(true) 
+    
     const heightBefore = (await card.boundingBox())!.height
     await card.getByRole('button', { name: '翻面看答案' }).click()
     await expect(answer).toBeVisible()

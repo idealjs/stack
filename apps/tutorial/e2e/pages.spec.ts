@@ -2,10 +2,7 @@ import { expect, test } from '@playwright/test'
 import type { Page } from '@playwright/test'
 import type { TicketProps } from '../../../packages/design-system/src/components/Ticket'
 
-/**
- * 设计系统结构契约断言——规格级防回归（自 design-lab 迁入，断言对象改为教程站页面）。
- * 布局微调不误报，但破坏设计规格（描边/投影/比例/半嵌/裁切）必红。
- */
+
 
 const PAGES = ['design', 'design-colors', 'design-symbols', 'design-components'] as const
 
@@ -20,8 +17,7 @@ async function mountTicket(page: Page, props: TicketProps = {}) {
   const ticket = preview.locator('[data-comp="ticket"]')
   await ticket.scrollIntoViewIfNeeded()
   await page.mouse.move(0, 0)
-  // filter 在内层包裹 .ticket-shadow 上（shell 只负责定位与 transform）
-  await expect.poll(() => ticket.locator('.ticket-shadow').evaluate((el) => getComputedStyle(el).filter)).toBe('drop-shadow(rgb(17, 17, 17) 5px 5px 0px)')
+  await expect.poll(() => ticket.locator('div').first().evaluate((el) => getComputedStyle(el).filter)).toBe('drop-shadow(rgb(17, 17, 17) 5px 5px 0px)')
   return ticket
 }
 
@@ -65,15 +61,16 @@ test.describe('CourseCard 规格契约', () => {
     })
     expect(s.bw).toBe('2px')
     expect(s.bc).toBe('rgb(17, 17, 17)')
-    // 唯一配方 --shadow-ink：恰好一层 ink 硬投影（tw 变体层均为透明占位），无纸叠多层
+    
     expect(s.shadow.split('rgb(17, 17, 17)').length - 1).toBe(1)
     expect(s.shadow).toContain('rgb(17, 17, 17) 5px 5px 0px 0px')
   })
 
   test('基础组件投影统一：同一配方复用，不得各写各的', async ({ page }) => {
     const { kinds, recipes } = await page.evaluate(() => {
-      const els = [...document.querySelectorAll('[data-comp="assign"], [data-comp="course-card"], [data-comp="entry-card"], [data-comp="ticket"]')]
-      // 常规卡 box-shadow 与票券 drop-shadow（内层包裹）使用相同的 ink 色与 (5,5) 偏移。
+      const els = [...document.querySelectorAll('[data-comp="course-card"], [data-comp="entry-card"], [data-comp="ticket"]')]
+      
+      
       const recipe = (el: Element) => {
         const target = el.dataset.comp === 'ticket' ? el.querySelector('.ticket-shadow')! : el
         const cs = getComputedStyle(target)
@@ -84,10 +81,10 @@ test.describe('CourseCard 规格契约', () => {
         recipes: els.map(recipe),
       }
     })
-    expect(kinds).toEqual(['assign', 'course-card', 'entry-card', 'ticket']) // 四类基础组件都有钩子
+    expect(kinds).toEqual(['course-card', 'entry-card', 'ticket']) 
     expect(recipes.length).toBeGreaterThanOrEqual(6)
     recipes.forEach((r) => expect(r).toContain('rgb(17, 17, 17) 5px 5px'))
-    recipes.forEach((r) => expect(r.split('rgb(17, 17, 17)').length - 1).toBe(1)) // 每卡只出一份阴影
+    recipes.forEach((r) => expect(r.split('rgb(17, 17, 17)').length - 1).toBe(1))
   })
 
   test('价值区标记用法卡：相框静置态过程文字带荧光 Mark', async ({ page }) => {
@@ -99,8 +96,8 @@ test.describe('CourseCard 规格契约', () => {
       return { bg: cs.backgroundColor, rot: cs.rotate, inZone: !!card.querySelector('.aspect-video mark'), txt: mark.textContent }
     })
     expect(m).not.toBeNull()
-    expect(m!.inZone).toBeTruthy() // 标记骑在相框内的过程文字上
-    expect(m!.bg).toBe('rgb(255, 217, 61)') // 荧光笔 mustard
+    expect(m!.inZone).toBeTruthy() 
+    expect(m!.bg).toBe('rgb(255, 217, 61)') 
     expect(m!.rot).toContain('deg')
     expect(m!.txt).toContain('咬合')
   })
@@ -115,7 +112,7 @@ test.describe('CourseCard 规格契约', () => {
     expect(Math.abs(s.ratio - 16 / 9)).toBeLessThan(0.02)
     expect(s.bw).toBe('3px')
     expect(s.shadow).toContain('inset')
-    expect(s.bg).toBe('rgb(255, 107, 107)') // ch1 coral 只进相框
+    expect(s.bg).toBe('rgb(255, 107, 107)') 
   })
 
   test('卡头三件套：▲ + 标题 + 积木点（实心=已学）', async ({ page }) => {
@@ -123,8 +120,8 @@ test.describe('CourseCard 规格契约', () => {
     const dots = card.locator('span[aria-label^="积木"] i')
     expect(await dots.count()).toBe(4)
     const filled = await dots.evaluateAll((ns) => ns.filter((n) => getComputedStyle(n).backgroundColor === 'rgb(17, 17, 17)').length)
-    expect(filled).toBe(2) // ch2 已学 2/4
-    // ▲ 在卡头（相框 ○ 环之后）：用 evaluate 通道断言，规避 toBeVisible 协议偶发崩溃
+    expect(filled).toBe(2) 
+    
     const hasTri = await card.evaluate((el) => !!el.querySelector('.mt-2 svg'))
     expect(hasTri).toBeTruthy()
   })
@@ -161,7 +158,7 @@ test.describe('RouteLine 规格契约', () => {
       const c2 = wrap.querySelector('a[href="/ch2.html"]').getBoundingClientRect()
       const stations = [...svg.querySelectorAll('circle')]
         .map((n) => ({ cx: +(n.getAttribute('cx') ?? 0), r: +(n.getAttribute('r') ?? 0) }))
-        .filter((s) => s.r === 6) // 排除散落 ○ 预期环
+        .filter((s) => s.r === 6) 
       return {
         n: stations.length,
         cxs: stations.map((s) => s.cx),
@@ -174,7 +171,7 @@ test.describe('RouteLine 规格契约', () => {
     expect(r!.n).toBeGreaterThanOrEqual(4)
     expect(r!.cxs.some((cx) => Math.abs(cx - r!.c1Right) <= 3), `源站点圆心应骑卡右描边 x≈${r!.c1Right}`).toBeTruthy()
     expect(r!.cxs.some((cx) => Math.abs(cx - r!.c2Border) <= 3), `目标站点圆心应骑左描边 x≈${r!.c2Border}`).toBeTruthy()
-    expect(r!.z).toBe('10') // 线层置于卡之上——否则半嵌站点被卡盖住
+    expect(r!.z).toBe('10') 
   })
 
   test('hover 卡片：线与站点跟随浮起（-3px 同步，直线变斜线）', async ({ page }) => {
@@ -184,6 +181,7 @@ test.describe('RouteLine 规格契约', () => {
         return {
           stations: [...svg.querySelectorAll('g[style]')].map((g) => (g as HTMLElement).style.transform),
           d25: [...svg.querySelectorAll('path')].map((el) => el.getAttribute('d') || '').find((d) => d.startsWith('M 600')),
+          
           cardTranslate: getComputedStyle(svg.parentElement.querySelector('a[data-comp="course-card"][href="/ch2.html"]')).translate,
         }
       })
@@ -191,11 +189,11 @@ test.describe('RouteLine 规格契约', () => {
     await page.locator('div.absolute.left-\\[420px\\]').hover()
     await page.waitForTimeout(250)
     const after = await get()
-    expect(before.d25).toBe('M 600 94 L 780 94') // 静置：几何水平（L 结构可平滑插值）
-    expect(after.d25).toBe('M 600 91 L 780 94') // hover 卡2：源端随站点抬升，直线变斜线
+    expect(before.d25).toBe('M 600 94 L 780 94') 
+    expect(after.d25).toBe('M 600 91 L 780 94') 
     expect(before.stations.every((t) => t === 'translateY(0px)')).toBeTruthy()
-    expect(after.stations.filter((t) => t === 'translateY(-3px)').length).toBe(2) // 源+目标站点跟随
-    expect(after.cardTranslate).toBe('0px -3px') // 卡片本体同步浮起
+    expect(after.stations.filter((t) => t === 'translateY(-3px)').length).toBe(2) 
+    expect(after.cardTranslate).toBe('0px -3px') 
   })
 
   test('实线端点落在水平端口（M x y H 起、H x 止）', async ({ page }) => {
@@ -217,10 +215,10 @@ test.describe('价值区荧光标记契约', () => {
       return { bg: cs.backgroundColor, bw: cs.borderTopWidth, rot: cs.rotate, h: r.height }
     })
     expect(s).not.toBeNull()
-    expect(s!.bg).toBe('rgb(255, 217, 61)') // clash2a mustard——荧光笔
-    expect(s!.bw).toBe('0px') // 标记无描边：2px ink 是形状的规则，标记划在文字上
-    expect(s!.rot).toContain('deg') // 微斜（rotate 属性生效，手划手感）
-    expect(s!.h).toBeGreaterThan(14) // 骑在文字上，有字高
+    expect(s!.bg).toBe('rgb(255, 217, 61)') 
+    expect(s!.bw).toBe('0px') 
+    expect(s!.rot).toContain('deg') 
+    expect(s!.h).toBeGreaterThan(14) 
   })
 })
 
@@ -238,7 +236,7 @@ test.describe('票券规格契约', () => {
     })
     expect(s.ov).toBe('hidden')
     expect(s.bw).toBe('2px')
-    expect(s.headBorder).toBe('0px') // 头部色块永不自带描边
+    expect(s.headBorder).toBe('0px') 
     expect(s.headBg).not.toBe('rgba(0, 0, 0, 0)')
   })
 
@@ -249,8 +247,8 @@ test.describe('票券规格契约', () => {
       return cs.maskImage || cs.webkitMaskImage || 'none'
     })
     expect(mask).toContain('radial-gradient')
-    expect(mask.split('radial-gradient').length - 1).toBe(2) // 上下各一孔
-    // 阴影直接由内层包裹滤镜生成，票面是唯一的打孔层。
+    expect(mask.split('radial-gradient').length - 1).toBe(2) 
+    
     const f = await done.evaluate((el) => {
       const w = el.parentElement as HTMLElement
       return {
@@ -259,11 +257,12 @@ test.describe('票券规格契约', () => {
         innerShadow: getComputedStyle(el).boxShadow,
       }
     })
+    
     expect(f.filter).toBe('drop-shadow(rgb(17, 17, 17) 5px 5px 0px)')
     expect(f.wrapperMask).toBe('none')
     expect(f.pseudoContent).toBe('none')
     expect(f.innerShadow).toBe('none')
-    // 孔缘弧线：圆心骑撕线两端，不依赖旧票宽的固定坐标；弧是包裹的兄弟，不参与投影。
+    
     const arcs = await page.evaluate(() => {
       const done = document.querySelector('.ticket-pk') as HTMLElement
       const shell = done.closest('.ticket-shell') as HTMLElement
@@ -283,7 +282,7 @@ test.describe('票券规格契约', () => {
     })
     expect(arcs[0].clip).toBe('inset(50% 0px 0px)')
     expect(arcs[1].clip).toBe('inset(0px 0px 50%)')
-    // 未开始票不带 mask
+    
     const plain = await page.evaluate(() => {
       const t = document.querySelector('[data-comp="ticket"]:not(.tk-pk)')!
       return [getComputedStyle(t.querySelector('.ticket-face')!).maskImage, getComputedStyle(t, '::before').maskImage]
@@ -307,7 +306,9 @@ test.describe('票券规格契约', () => {
       if (width === 375) {
         await ticket.locator('b').evaluate((el) => { el.textContent = 'ChapterWithAnUnbrokenLongTitle' })
       }
-      await ticket.scrollIntoViewIfNeeded()
+      
+      
+      await ticket.evaluate((el) => el.scrollIntoView({ block: 'center' }))
 
       for (const background of [[78, 205, 196], [167, 139, 250]]) {
         await ticket.evaluate((el, rgb) => {
@@ -328,7 +329,8 @@ test.describe('票券规格契约', () => {
         const png = await page.screenshot({ clip })
         const points = [
           [geometry.tearX, geometry.y + 3],
-          [geometry.tearX + 5, geometry.y + geometry.height + 3],
+          
+          [geometry.tearX + 8, geometry.y + geometry.height + 4],
           [geometry.tearX - 4, geometry.y + geometry.height + 3],
         ].map(([x, y]) => [Math.floor(x - clip.x), Math.floor(y - clip.y)])
         const readPixels = async (png: Buffer) => page.evaluate(async ({ base64, points }) => {
@@ -344,9 +346,9 @@ test.describe('票券规格契约', () => {
         }, { base64: png.toString('base64'), points })
         const pixels = await readPixels(png)
         expect(pixels.slice(0, 2)).toEqual(Array.from({ length: 2 }, () => [...background, 255]))
-        expect(pixels[2]).toEqual([17, 17, 17, 255]) // 缺口随阴影偏移，旁边保留硬阴影
+        expect(pixels[2]).toEqual([17, 17, 17, 255]) 
 
-        // 只关闭票面 mask，阴影缺口就应消失；不能靠阴影层自己的孔通过测试。
+        
         const face = ticket.locator('.ticket-face')
         await face.evaluate((el) => { (el as HTMLElement).style.maskImage = 'none' })
         const unpunched = await readPixels(await page.screenshot({ clip }))
@@ -375,7 +377,7 @@ test.describe('票券规格契约', () => {
       expect(geometry.arcs).toHaveLength(2)
       for (const arc of geometry.arcs) {
         expect(arc.x).toBeCloseTo(holeX, 1)
-        expect(arc.width).toBe(config.size + 4) // 孔径＋两侧 2px 描边
+        expect(arc.width).toBe(config.size + 4) 
       }
       const clip = { x: geometry.x, y: geometry.y, width: geometry.width + 10, height: geometry.height + 10 }
       const png = await page.screenshot({ clip })
@@ -410,7 +412,6 @@ test.describe('票券规格契约', () => {
       const ticket = await mountTicket(page, { punched })
       const initial = (await ticket.boundingBox())!
       await ticket.hover()
-      // 阴影过渡在内层包裹上，位移（transform）仍在外层 shell
       await expect.poll(() => ticket.locator('.ticket-shadow').evaluate((el) => getComputedStyle(el).filter)).toBe('drop-shadow(rgb(17, 17, 17) 8px 8px 0px)')
       expect((await ticket.boundingBox())!.y).toBeCloseTo(initial.y - 3, 1)
       await page.mouse.move(0, 0)
@@ -424,7 +425,7 @@ test.describe('票券规格契约', () => {
     const initial = (await ticket.boundingBox())!
     await ticket.hover()
     await page.waitForTimeout(200)
-    expect(await ticket.locator('.ticket-shadow').evaluate((el) => getComputedStyle(el).filter)).toBe('drop-shadow(rgb(17, 17, 17) 5px 5px 0px)')
+    expect(await ticket.locator('div').first().evaluate((el) => getComputedStyle(el).filter)).toBe('drop-shadow(rgb(17, 17, 17) 5px 5px 0px)')
     expect((await ticket.boundingBox())!.y).toBe(initial.y)
   })
 })
@@ -433,15 +434,15 @@ test.describe('ShadowButton 按压契约', () => {
   test.beforeEach(async ({ page }) => await page.goto('/design-components.html'))
 
   test('多态渲染：有 href=a、无 href=button[type=button]、disabled=虚线占位', async ({ page }) => {
-    // 站头抽屉里也有一份同源 a 形态（桌面隐藏），标本断言一律 :visible 圈定
+    
     const buttons = page.locator('[data-comp="shadow-button"]:visible')
     await expect(buttons.first()).toBeVisible()
-    // 三种形态齐备（标本：默认按钮/链接/占位；站头抽屉内还有同源的 a 形态）
+    
     const tags = await buttons.evaluateAll((ns) => ns.map((n) => n.tagName))
     expect(tags).toEqual(expect.arrayContaining(['BUTTON', 'A', 'SPAN']))
     await expect(page.locator('a[data-comp="shadow-button"]:visible').first()).toHaveAttribute('href', /\/(learn|design-components)\.html/)
     await expect(page.locator('button[data-comp="shadow-button"]').first()).toHaveAttribute('type', 'button')
-    // 占位：aria-disabled＋虚线描边，不带硬投影（不动不起）
+    
     const placeholder = page.locator('span[data-comp="shadow-button"]')
     const s = await placeholder.evaluate((el) => {
       const cs = getComputedStyle(el)
@@ -461,18 +462,18 @@ test.describe('ShadowButton 按压契约', () => {
         const cs = getComputedStyle(el)
         return { shadow: cs.boxShadow, translate: cs.translate }
       })
-    // 静置：硬投影 3px 3px，零位移（无 translate 工具类命中时 computed 为 none）
+    
     expect((await state()).shadow).toContain('rgb(17, 17, 17) 3px 3px 0px 0px')
     expect((await state()).translate).toBe('none')
-    // hover：浮起 2px，投影跟涨到 5px
+    
     await btn.hover()
     await expect.poll(async () => (await state()).shadow).toContain('rgb(17, 17, 17) 5px 5px 0px 0px')
     expect((await state()).translate).toBe('0px -2px')
-    // 按住不松（鼠标已在按钮上）：朝阴影方向压进 translate(2px,2px)，投影收 1px
+    
     await page.mouse.down()
     await expect.poll(async () => (await state()).shadow).toContain('rgb(17, 17, 17) 1px 1px 0px 0px')
     expect((await state()).translate).toBe('2px 2px')
-    // 松开并移出：回到静置三部曲起点
+    
     await page.mouse.up()
     await page.mouse.move(0, 0)
     await expect.poll(async () => (await state()).shadow).toContain('rgb(17, 17, 17) 3px 3px 0px 0px')
@@ -483,8 +484,7 @@ test.describe('ShadowButton 按压契约', () => {
 test.describe('ShadowCard · 四部曲契约', () => {
   test.beforeEach(async ({ page }) => await page.goto('/design-components.html'))
 
-  /* 三部曲标本区第四张＝打孔＋hover 的组合；ShadowCard 的 ticket 分支复用 Ticket 机制，
-   * 阴影同样挂在 .ticket-shadow 的 filter 上（契约与上方「票券规格契约」同源）。 */
+  
   const specimens = (page: Page) =>
     page
       .locator('section')
@@ -499,7 +499,6 @@ test.describe('ShadowCard · 四部曲契约', () => {
         const face = el.querySelector<HTMLElement>('.ticket-face')
         return {
           ticket: !!face,
-          // 普通卡＝tailwind hover 变体；票券＝.ticket-lift
           hover: el.className.includes('shadow-ink-lift') || el.classList.contains('ticket-lift'),
           punched: !!face && getComputedStyle(face).maskImage.includes('radial-gradient'),
         }
@@ -519,10 +518,9 @@ test.describe('ShadowCard · 四部曲契约', () => {
     await page.mouse.move(0, 0)
     const shadow = card.locator('.ticket-shadow')
     await expect.poll(() => shadow.evaluate((el) => getComputedStyle(el).filter)).toBe('drop-shadow(rgb(17, 17, 17) 5px 5px 0px)')
-    expect(await card.locator('.ticket-face').evaluate((el) => getComputedStyle(el).maskImage)).toContain('radial-gradient') // 真打孔
+    expect(await card.locator('.ticket-face').evaluate((el) => getComputedStyle(el).maskImage)).toContain('radial-gradient')
     const initial = (await card.boundingBox())!
     await card.hover()
-    // 与 Ticket hover 契约同款：filter 过渡在内层包裹，位移（transform）在外层 shell
     await expect.poll(() => shadow.evaluate((el) => getComputedStyle(el).filter)).toBe('drop-shadow(rgb(17, 17, 17) 8px 8px 0px)')
     expect((await card.boundingBox())!.y).toBeCloseTo(initial.y - 3, 1)
     await page.mouse.move(0, 0)
@@ -543,12 +541,12 @@ test.describe('阴影册 · hover-host 触发模型', () => {
     await expect(inner).toHaveCSS('translate', '0px -3px')
     await expect(inner).toHaveCSS('box-shadow', /rgb\(17, 17, 17\) 8px 8px 0px 0px/)
 
-    // 光标移到宿主角落（元素浮起后已远离光标）：状态保持＝无边界震荡
+    
     const hostBox = await host.boundingBox()
     await page.mouse.move(hostBox.x + 2, hostBox.y + 2)
     await expect(inner).toHaveCSS('translate', '0px -3px')
 
-    // 出宿主：复位
+    
     await page.mouse.move(hostBox.x - 40, hostBox.y - 40)
     await expect(inner).toHaveCSS('translate', 'none')
   })

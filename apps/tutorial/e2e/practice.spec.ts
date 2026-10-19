@@ -1,10 +1,6 @@
 import { expect, test } from '@playwright/test'
 
-/**
- * 在线练习场（practice.html）表现层契约：陪练 agent 便签 + 任务卡拟物组件 + 创建项目板块。
- * 当前为「无运行时」形态：对话直连 LLM（不依赖 API Key 与代码执行运行时）——
- * 只断言 SSG 静态壳与纯客户端交互；运行时与自托管资产断言归档于 exp/vivari-playground 分支。
- */
+
 
 const TAB = '[data-comp="coach-sticky"]'
 const PANEL = '#coach-sticky-panel'
@@ -20,7 +16,7 @@ test.describe('练习场 · 陪练 agent 便签', () => {
     const tab = page.locator(TAB)
     await expect(tab).toBeVisible()
     await expect(tab).toContainText('陪练 agent')
-    await expect(tab).toContainText('react-starter') // 当前任务 label
+    await expect(tab).toContainText('react-starter') 
     await expect(tab).toHaveAttribute('aria-expanded', 'false')
     await expect(tab).toHaveAttribute('aria-controls', 'coach-sticky-panel')
     await expect(page.locator(PANEL)).toBeHidden()
@@ -31,31 +27,31 @@ test.describe('练习场 · 陪练 agent 便签', () => {
     await expect(panel).toBeVisible()
     await expect(panel).toContainText('陪练 agent')
 
-    await tab.click() // 再点折叠
+    await tab.click() 
     await expect(page.locator(PANEL)).toBeHidden()
     await expect(tab).toHaveAttribute('aria-expanded', 'false')
 
     await tab.click()
     await expect(page.locator(PANEL)).toBeVisible()
-    await page.keyboard.press('Escape') // Esc 折叠
+    await page.keyboard.press('Escape') 
     await expect(page.locator(PANEL)).toBeHidden()
     await expect(tab).toHaveAttribute('aria-expanded', 'false')
   })
 
   test('展开后可见当前任务 opener，复制/发给陪练动作在场', async ({ page }) => {
     const tab = page.locator(TAB)
-    await expect(page.getByTestId('coach-opener')).toBeHidden() // 折叠时不可见
+    await expect(page.getByTestId('coach-opener')).toBeHidden() 
     await tab.click()
     const opener = page.getByTestId('coach-opener')
     await expect(opener).toBeVisible()
     await expect(opener).toContainText('开场提示词')
-    await expect(opener).toContainText('自我介绍卡') // react-starter opener 终稿关键句
+    await expect(opener).toContainText('自我介绍卡') 
     await expect(opener.getByRole('button', { name: '复制' })).toBeVisible()
     const sendOpener = opener.getByRole('button', { name: '发给陪练' })
     await expect(sendOpener).toBeVisible()
-    await expect(sendOpener).toBeEnabled() // 对话直连 LLM，无环境闸门
+    await expect(sendOpener).toBeEnabled() 
     await sendOpener.click()
-    await expect(page.getByRole('presentation')).toContainText('模型接入') // 无 Key → 弹接入配置
+    await expect(page.getByRole('presentation')).toContainText('模型接入') 
   })
 })
 
@@ -72,7 +68,7 @@ test.describe('练习场 · 任务卡拟物组件', () => {
     await expect(letter).toBeHidden()
     await envelope.locator('summary').click()
     await expect(letter).toBeVisible()
-    await expect(letter).toContainText('# 练习任务 · 我的自我介绍卡') // taskMarkdown(task) 原文
+    await expect(letter).toContainText('# 练习任务 · 我的自我介绍卡') 
     await expect(letter).toContainText('## 验收清单')
     await expect(letter).toContainText('预览页大标题显示名字')
     await envelope.locator('summary').click()
@@ -96,7 +92,7 @@ test.describe('练习场 · 任务卡拟物组件', () => {
 
 test.describe('练习场 · 创建项目板块', () => {
   const SECTION = '[data-testid="create-project"]'
-  const SENTENCE = '创建一个 vite 项目，使用' // 三条示例共同守住的句式开头
+  const SENTENCE = '创建一个 vite 项目，使用' 
   const IDS = ['basic', 'counter', 'compare']
 
   test.beforeEach(async ({ page }) => {
@@ -114,11 +110,11 @@ test.describe('练习场 · 创建项目板块', () => {
 
     const prompts = section.locator('[data-testid^="create-prompt-"]')
     await expect(prompts).toHaveCount(3)
-    // FolderTabs 的隐藏页签仍挂载在 DOM：逐条断言句式关键词
+    
     for (const id of IDS) {
       await expect(page.getByTestId(`create-prompt-${id}`)).toContainText(SENTENCE)
     }
-    // 初始只展示第一条（基础），其余随页签切换
+    
     await expect(page.getByTestId('create-prompt-basic')).toBeVisible()
     await expect(page.getByTestId('create-prompt-counter')).toBeHidden()
     await expect(page.getByTestId('create-prompt-compare')).toBeHidden()
@@ -138,10 +134,10 @@ test.describe('练习场 · 创建项目板块', () => {
       await expect(strip.getByRole('button', { name: '复制' })).toBeVisible()
       const send = strip.getByRole('button', { name: '发给陪练' })
       await expect(send).toBeVisible()
-      await expect(send).toBeEnabled() // 对话直连 LLM，无环境闸门
+      await expect(send).toBeEnabled() 
     }
 
-    // 方向键也能翻页（FolderTabs 契约在本页的用法回归）
+    
     await tabs.nth(0).click()
     await tabs.nth(0).press('ArrowRight')
     await expect(tabs.nth(1)).toHaveAttribute('aria-selected', 'true')
@@ -169,7 +165,7 @@ test.describe('练习场 · 布局自查', () => {
       await expect(page.locator(PANEL)).toBeVisible()
       await page.keyboard.press('Escape')
       await expect(page.locator(PANEL)).toBeHidden()
-      // 折叠态锚定右下角：距右缘与距底缘都是贴边小间距（防「占位面板把按钮顶离角落」回归）
+      
       const tabBox = await page.locator(TAB).boundingBox()
       expect(tabBox).not.toBeNull()
       expect(900 - (tabBox!.y + tabBox!.height), `宽度 ${width} 便签距底缘过大`).toBeLessThanOrEqual(24)

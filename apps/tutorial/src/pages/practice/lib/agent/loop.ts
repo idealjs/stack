@@ -1,8 +1,4 @@
-/** Agent 会话 seam——当前为「无工具直连对话」形态。
- * 练习场的代码执行运行时（WebContainer / Vivari 适配层）已随 ESM + MCP 重规划移除，
- * 工具循环（write_file / run_command 与 ⚙ 状态行）归档于 exp/vivari-playground 分支；
- * 新运行时接入后按原 seam 形状接回：streamChat 的 tools 参数、TurnHooks 的
- * onToolCall/onToolResult 回调位都留在这里。 */
+
 import type { ChatMessage, LlmConfig } from './llm'
 import { streamChat } from './llm'
 import type { PracticeTask } from '../tasks'
@@ -24,14 +20,14 @@ export function systemPrompt(task: PracticeTask): string {
 }
 
 export interface TurnHooks {
-  /** assistant 文本增量（流式） */
+  
   onAssistantDelta: (delta: string) => void
 }
 
-/** 推进一轮对话：就地追加 user/assistant 消息到 history。Abort 后直接抛出。 */
+
 export async function runAgentTurn(opts: {
   config: LlmConfig
-  /** 完整历史（应已含 system prompt），就地追加 */
+  
   history: ChatMessage[]
   userText: string
   signal: AbortSignal

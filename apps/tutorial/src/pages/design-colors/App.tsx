@@ -2,7 +2,7 @@ import { Page, Section } from '../../lib/ui'
 
 const PAIRS = [
   { a: '#FF6B6B', b: '#4ECDC4', name: '对 1 · coral × teal', use: '主用对：课程相框与主图形' },
-  { a: '#FFD93D', b: '#A78BFA', name: '对 2 · mustard × violet', use: '辅助对：指派与脱靶等警示类' },
+  { a: '#FFD93D', b: '#A78BFA', name: '对 2 · mustard × violet', use: '辅助对：荧光标记、积木点等强调类' },
   { a: '#FF8FAB', b: '#5B8DEF', name: '对 3 · pink × blue', use: '点缀对：代理区与散落形状' },
 ]
 const NEUTRALS = [
@@ -24,7 +24,7 @@ function Chip({ c, n, h }: { c: string; n: string; h: string }) {
   )
 }
 
-/* 三条规则的「为什么」：鲜艳如何成立、如何被收束、注意力如何分配 */
+
 const RULES = [
   {
     name: '相邻必撞色（跨对取色）',

@@ -1,4 +1,4 @@
-/** idealjs stack 首页：教程、博客与练习场（重建中）入口。 */
+
 import { Page } from '../../lib/ui'
 import { Button } from '@stack/design-system'
 import { MONTHS } from '../../content/blogs'

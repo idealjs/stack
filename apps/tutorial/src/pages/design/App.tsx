@@ -1,4 +1,4 @@
-/** 设计系统着陆页——五册入口 */
+
 import { Page, Section } from '../../lib/ui'
 
 const BOOKS = [

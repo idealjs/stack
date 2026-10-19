@@ -1,4 +1,4 @@
-/** 章节完成状态票券：内容由章节提供，票券外形由通用 Ticket 负责。 */
+
 import type { Chapter } from '../lib/types'
 import { Ticket } from './Ticket'
 import type { TicketProps } from './Ticket'

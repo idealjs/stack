@@ -1,28 +1,23 @@
-/**
- * 全栈工程师教程 · 课程数据源
- *
- * 卡片书架的唯一数据入口：改卡片内容、完成度、关系，只动这个文件。
- * GIF 换片：替换 static/gifs/<id>.gif 即可，无需改代码。
- */
+
 
 export type CourseSection = {
-  /** 章节短 id，同时是占位 GIF 的文件名（static/gifs/<id>.gif） */
+  
   id: string;
-  /** 卡片标题（对应 docs 里 _category_.json 的 label） */
+  
   title: string;
-  /** 一句话预期结果：学完这一部分，读者能做出什么 */
+  
   description: string;
-  /** 写作完成度 */
+  
   done: boolean;
-  /** 与其他部分的关系（前置/依赖等）。TODO: 关系列出后填充，元素为对方 id */
+  
   relations: string[];
-  /** 章节首页路由（generated-index） */
+  
   href: string;
-  /** 卡片主题色（书脊/角标），来自设计稿 00 的多彩课程卡 */
+  
   color: string;
 };
 
-// "垃圾桶"（docs/web/archive）是旧文归档，不进书架。
+
 export const courseSections: CourseSection[] = [
   {
     id: "hello-world",

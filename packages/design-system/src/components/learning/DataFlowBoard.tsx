@@ -1,14 +1,14 @@
 import { toneStyle } from './shared'
 import type { LearningTone } from './shared'
 
-/** 流水线上的一个工位：编号由渲染顺序推导，不写入数据。 */
+
 export interface DataFlowStep {
   id: string
   title: string
   detail: string
-  /** 编号徽标的撞色；相邻工位换 tone 扫读性更好，不传回落纸色。 */
+  
   tone?: LearningTone
-  /** 起点工位＝等用户输入：虚线框提示「流程从这里开始」。 */
+  
   input?: boolean
 }
 
@@ -19,8 +19,7 @@ export interface DataFlowBoardProps {
   className?: string
 }
 
-/** 数据流水线板：把一条数据流拆成工位卡，箭头固定读向——
- * 板面够宽时横排（→），窄栏自动退回竖排（↓）；外层 ol 语义，屏幕阅读器按顺序读出。 */
+
 export function DataFlowBoard({ title, steps, note, className = '' }: DataFlowBoardProps) {
   return (
     <section data-comp="data-flow-board" className={`learning-object learning-flow ${className}`}>

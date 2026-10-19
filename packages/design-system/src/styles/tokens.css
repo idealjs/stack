@@ -1,33 +1,32 @@
 @import 'tailwindcss';
-/* 显式声明包内组件源码为扫描源——经 node_modules 符号链接解析时，
- * 自动内容检测不会覆盖 workspace 包，工具类会静默丢失 */
+
 @source '../';
 
-/* ===== 设计系统 tokens（孟菲斯 × 拟物卡）===== */
-@theme {
-  /* 撞色对（鲜艳的全部来源，相邻必撞） */
-  --color-clash1a: #ff6b6b; /* coral  · ch1 */
-  --color-clash1b: #4ecdc4; /* teal    · ch4 */
-  --color-clash2a: #ffd93d; /* mustard · ch3 */
-  --color-clash2b: #a78bfa; /* violet  · ch6 */
-  --color-clash3a: #ff8fab; /* pink    · ch2 */
-  --color-clash3b: #5b8def; /* blue    · ch5 */
 
-  /* 中性阶（纸的世界） */
+@theme {
+  
+  --color-clash1a: #ff6b6b; 
+  --color-clash1b: #4ecdc4; 
+  --color-clash2a: #ffd93d; 
+  --color-clash2b: #a78bfa; 
+  --color-clash3a: #ff8fab; 
+  --color-clash3b: #5b8def; 
+
+  
   --color-ink: #111111;
   --color-paper: #fff9f0;
-  --color-paper-deep: #f2ead9; /* 纸按压色——hover 专用暖阶，不借 ink（黑色＝选中语义） */
+  --color-paper-deep: #f2ead9; 
   --color-mute: #8a7a5c;
   --color-body: #3d3d3d;
 
-  /* 统一硬投影——唯一投影配方，所有基础组件复用（rest / 拿起） */
+  
   --shadow-ink: 5px 5px 0 var(--color-ink);
   --shadow-ink-lift: 8px 8px 0 var(--color-ink);
-  /* 同配方的 drop-shadow 形态，供透明图形复用 */
+  
   --drop-shadow-ink: 5px 5px 0 var(--color-ink);
   --drop-shadow-ink-lift: 8px 8px 0 var(--color-ink);
 
-  /* 章节色别名 */
+  
   --color-ch1: #ff6b6b;
   --color-ch2: #ff8fab;
   --color-ch3: #ffd93d;
@@ -36,18 +35,14 @@
   --color-ch6: #a78bfa;
 }
 
-/* 票面先 mask 打孔；阴影由内层包裹 .ticket-shadow 的 drop-shadow 按挖空后的轮廓生成，
- * 孔位由票根宽度推导；阴影连同孔洞一起偏移，无独立阴影图层。
- * filter 不能放到 .ticket-face 上：同元素上 mask 在 filter 之后应用，会把孔位处的
- * 阴影一起裁掉、偏移缺口消失；也不能留在 .ticket-shell 上——孔缘描边 .pk-arc 是 shell
- * 的直接子元素，跟着投影后 hover 偏移变化时影子会脱开弧根、落进透明孔口读成悬浮横线。 */
+
 .ticket-shell {
   --ticket-border: 2px;
   --ticket-stub-width: 38px;
   --ticket-perforation-width: 1.5px;
   --hole-radius: 6px;
   --hole-x: calc(100% - var(--ticket-border) - var(--ticket-stub-width) + var(--ticket-perforation-width) / 2);
-  position: relative; /* 仅供孔缘定位 */
+  position: relative; 
 }
 .ticket-shadow {
   filter: drop-shadow(var(--drop-shadow-ink));
@@ -63,7 +58,7 @@
 }
 .ticket-perforation {
   position: absolute;
-  inset: calc(0px - var(--ticket-border)); /* 扩展到票面 border-box，与 mask 使用同一坐标系 */
+  inset: calc(0px - var(--ticket-border)); 
   pointer-events: none;
 }
 .ticket-perforation::before {
@@ -85,24 +80,11 @@
 .ticket-lift:hover .ticket-shadow {
   filter: drop-shadow(var(--drop-shadow-ink-lift));
 }
-/* ===== hoverable-shadow —— hover 拿起动效层（叠加用，不自带阴影）=====
- * 只规定「拿起」这件事：浮起 3px ＋ 阴影按同元素上的基础类换 lift 档；
- * 静置态长什么样它不管，完全由同元素的基础类（shadow-ink / drop-shadow-ink
- * 或组件自写的配方）决定——所以它永远以第二个类叠加：
- *   矩形盒   <div class="hover-host"><div class="shadow-ink hoverable-shadow">      → hover 阴影 5→8（box-shadow）
- *   异形轮廓 <div class="hover-host"><div class="drop-shadow-ink hoverable-shadow">  → hover 滤镜换 lift（filter）
- *   都不叠   <div class="hover-host"><div class="hoverable-shadow">                  → 只浮起，阴影不换档
- *
- * 触发模型（防边界震荡的关键）：:hover 挂在「不动的命中宿主」.hover-host 上，
- * 位移只作用于内部元素——元素浮起时命中区不动，光标不会被甩出去；无宿主时
- * 退化为自身 :hover（边缘可能震荡，仅兜底）。
- * 浮起用 translate 属性而非 transform：translate 与 transform 是两个独立属性，
- * 与既有 transform 动效（RouteLine 跟随、翻面、盖印）可组合、互不覆盖。
- * 注意别与 Button 等自带的 hover:* 工具类重复叠加——拿起动效只写一处。 */
+
 .hoverable-shadow {
   position: relative;
 }
-/* 宿主触发（首选）：命中区不动，浮起的是内部元素 */
+
 .hover-host:hover .hoverable-shadow {
   translate: 0 -3px;
 }
@@ -112,7 +94,7 @@
 .hover-host:hover .hoverable-shadow.drop-shadow-ink {
   filter: drop-shadow(var(--drop-shadow-ink-lift));
 }
-/* 自身触发（无宿主时的退化路径）*/
+
 .hoverable-shadow:hover {
   translate: 0 -3px;
 }
@@ -139,7 +121,7 @@
     radial-gradient(circle calc(var(--hole-radius) + 1px) at var(--hole-x) 100%, transparent var(--hole-radius), #000 calc(var(--hole-radius) + 0.5px));
   mask-composite: intersect;
 }
-/* 孔缘尺寸由孔径与描边推导，只保留票内一半；留在 .ticket-shadow 包裹之外，不参与投影 */
+
 .pk-arc {
   position: absolute;
   left: calc(var(--hole-x) - var(--hole-radius) - var(--ticket-border));
@@ -158,9 +140,7 @@
   clip-path: inset(0 0 50% 0);
 }
 
-/* ===== MPA 跨文档 View Transitions：页面切换交叉淡入，不闪白 =====
- * 同名 view-transition-name 的元素（site-header 站头、ch-<id> 相框↔章头）
- * 在导航时做共享元素变形；其余内容默认交叉淡入。 */
+
 @view-transition {
   navigation: auto;
 }
@@ -173,11 +153,7 @@
   }
 }
 
-/* ===== 字体系统 =====
- * 基准＝浏览器默认 16px＝正文字号（content，不另设基准）。
- * 向上：t3 → t2 → t1 三级标题；再向上是大字。
- * 小字两态：t-small-mute 边缘可忽略（弱化灰）/ t-small-strong 缩小但加强（加粗收字距）。
- * 大字两态：t1 大而强（页面主标题）/ t-display 大而弱（幽灵背景字，可被忽略）。 */
+
 @theme {
   --text-content: 1rem;
   --text-content--line-height: 1.75;

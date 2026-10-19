@@ -2,7 +2,7 @@ import type { ReactNode } from 'react'
 
 export interface ExperimentFrameProps {
   title: string
-  /** null 用于页面内演示，不显示虚构的工程地址。 */
+  
   address?: string | null
   status?: 'ready' | 'running' | 'idle' | 'demo'
   caption?: string
