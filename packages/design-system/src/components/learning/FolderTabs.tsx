@@ -17,9 +17,20 @@ export interface FolderTabsProps {
   className?: string
 }
 
-export function FolderTabs({ label, tabs, selectedId, defaultSelectedId, onSelect, className = '' }: FolderTabsProps) {
+export function FolderTabs({
+  label,
+  tabs,
+  selectedId,
+  defaultSelectedId,
+  onSelect,
+  className = '',
+}: FolderTabsProps) {
   const uid = useId()
-  const [selected, setSelected] = useLearningState(selectedId, defaultSelectedId ?? tabs[0]?.id ?? '', onSelect)
+  const [selected, setSelected] = useLearningState(
+    selectedId,
+    defaultSelectedId ?? tabs[0]?.id ?? '',
+    onSelect,
+  )
   const active = tabs.some((tab) => tab.id === selected) ? selected : tabs[0]?.id
 
   function navigate(event: KeyboardEvent<HTMLButtonElement>, index: number) {
@@ -39,19 +50,32 @@ export function FolderTabs({ label, tabs, selectedId, defaultSelectedId, onSelec
       <div className="learning-folder-tabs" role="tablist" aria-label={label}>
         {tabs.map((tab, index) => (
           <button
-            key={tab.id} type="button" role="tab" id={`${uid}-tab-${index}`}
-            aria-controls={`${uid}-panel-${index}`} aria-selected={active === tab.id}
+            key={tab.id}
+            type="button"
+            role="tab"
+            id={`${uid}-tab-${index}`}
+            aria-controls={`${uid}-panel-${index}`}
+            aria-selected={active === tab.id}
             tabIndex={active === tab.id ? 0 : -1}
-            onClick={() => setSelected(tab.id)} onKeyDown={(event) => navigate(event, index)}
-          >{tab.label}</button>
+            onClick={() => setSelected(tab.id)}
+            onKeyDown={(event) => navigate(event, index)}
+          >
+            {tab.label}
+          </button>
         ))}
       </div>
       <div className="learning-folder-paper">
         {tabs.map((tab, index) => (
           <div
-            key={tab.id} role="tabpanel" id={`${uid}-panel-${index}`}
-            aria-labelledby={`${uid}-tab-${index}`} hidden={active !== tab.id} tabIndex={0}
-          >{tab.content}</div>
+            key={tab.id}
+            role="tabpanel"
+            id={`${uid}-panel-${index}`}
+            aria-labelledby={`${uid}-tab-${index}`}
+            hidden={active !== tab.id}
+            tabIndex={0}
+          >
+            {tab.content}
+          </div>
         ))}
       </div>
     </div>

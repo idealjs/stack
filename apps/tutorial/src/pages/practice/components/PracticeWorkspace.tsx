@@ -1,4 +1,3 @@
-
 import { useMemo, useRef, useState } from 'react'
 import { ClipboardChecklist, FolderTabs, TaskEnvelope } from '@stack/design-system'
 import type { ChatMessage, LlmConfig } from '../lib/agent/llm'
@@ -12,11 +11,11 @@ import { CoachSticky } from './CoachSticky'
 import { KeyModal } from './KeyModal'
 import { PromptStrip } from './PromptStrip'
 
-
 function appendAssistant(items: ChatItem[], delta: string): ChatItem[] {
   const next = items.slice()
   const last = next[next.length - 1]
-  if (last && last.kind === 'assistant') next[next.length - 1] = { ...last, text: last.text + delta }
+  if (last && last.kind === 'assistant')
+    next[next.length - 1] = { ...last, text: last.text + delta }
   else next.push({ kind: 'assistant', text: delta })
   return next
 }
@@ -43,7 +42,8 @@ export function PracticeWorkspace() {
       setKeyOpen(true)
       return
     }
-    if (historyRef.current.length === 0) historyRef.current.push({ role: 'system', content: systemPrompt(task) })
+    if (historyRef.current.length === 0)
+      historyRef.current.push({ role: 'system', content: systemPrompt(task) })
 
     setChat((c) => [...c, { kind: 'user', text }, { kind: 'assistant', text: '' }])
     setBusy(true)
@@ -71,7 +71,6 @@ export function PracticeWorkspace() {
 
   const stop = () => abortRef.current?.abort()
 
-  
   const openerNotice = (
     <PromptStrip
       testId="coach-opener"
@@ -86,12 +85,12 @@ export function PracticeWorkspace() {
 
   return (
     <div className="flex flex-col gap-4 pb-24" suppressHydrationWarning>
-            <div className="rounded-lg border-2 border-dashed border-ink/30 bg-paper-deep px-3 py-2 text-[12.5px] leading-5 text-body">
+      <div className="rounded-lg border-2 border-dashed border-ink/30 bg-paper-deep px-3 py-2 text-[12.5px] leading-5 text-body">
         代码执行运行时未接入（ESM + MCP 规划中）——下面的任务卡、创建示例与右下角的陪练对话照常可用；
         要真正跑代码，先走本地路线。
       </div>
 
-            <section className="grid gap-4">
+      <section className="grid gap-4">
         <TaskEnvelope
           title={`练习任务 · ${task.title}`}
           summary={`${task.expectation.split('。')[0]}。`}
@@ -110,13 +109,15 @@ export function PracticeWorkspace() {
         />
       </section>
 
-            <section data-testid="create-project" className="grid gap-2.5">
+      <section data-testid="create-project" className="grid gap-2.5">
         <h2 className="m-0 flex flex-wrap items-baseline gap-2">
           <span className="t-small-strong">创建项目</span>
           <i className="t-small-mute not-italic">{CREATE_PROJECT_NOTE}</i>
         </h2>
         <p className="m-0 text-[13.5px] leading-6 text-body">
-          {CREATE_PROJECT_INTRO.map((seg, i) => (typeof seg === 'string' ? seg : <b key={i}>{seg.b}</b>))}
+          {CREATE_PROJECT_INTRO.map((seg, i) =>
+            typeof seg === 'string' ? seg : <b key={i}>{seg.b}</b>,
+          )}
         </p>
         <FolderTabs
           label="创建项目 · 示例提示词"
@@ -139,7 +140,7 @@ export function PracticeWorkspace() {
         />
       </section>
 
-            <CoachSticky taskLabel={task.label}>
+      <CoachSticky taskLabel={task.label}>
         <ChatPanel
           items={chat}
           busy={busy}

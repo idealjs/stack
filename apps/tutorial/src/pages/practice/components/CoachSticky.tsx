@@ -1,4 +1,3 @@
-
 import { useEffect, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 
@@ -8,7 +7,6 @@ export function CoachSticky({ taskLabel, children }: { taskLabel: string; childr
   const [open, setOpen] = useState(false)
   const panelRef = useRef<HTMLDivElement>(null)
 
-  
   useEffect(() => {
     if (!open) return
     const onKey = (event: KeyboardEvent) => {
@@ -18,15 +16,13 @@ export function CoachSticky({ taskLabel, children }: { taskLabel: string; childr
     return () => window.removeEventListener('keydown', onKey)
   }, [open])
 
-  
   useEffect(() => {
     if (open) panelRef.current?.focus()
   }, [open])
 
   return (
-    
     <div className="fixed right-3 bottom-3 z-40 sm:right-4 sm:bottom-4">
-            <button
+      <button
         type="button"
         data-comp="coach-sticky"
         aria-expanded={open}
@@ -37,10 +33,12 @@ export function CoachSticky({ taskLabel, children }: { taskLabel: string; childr
         <span aria-hidden className="size-3 shrink-0 rounded-full border-2 border-ink bg-paper" />
         <span>陪练 agent</span>
         <span className="font-mono text-[11px] opacity-70">{taskLabel}</span>
-        <span aria-hidden className="ml-0.5">{open ? '▾' : '▴'}</span>
+        <span aria-hidden className="ml-0.5">
+          {open ? '▾' : '▴'}
+        </span>
       </button>
 
-            <div
+      <div
         ref={panelRef}
         id={COACH_STICKY_PANEL_ID}
         aria-label="陪练 agent 对话"
@@ -51,7 +49,10 @@ export function CoachSticky({ taskLabel, children }: { taskLabel: string; childr
             : 'invisible pointer-events-none translate-y-2 scale-[0.97] opacity-0'
         }`}
       >
-                <span aria-hidden className="absolute right-0 bottom-0 size-4 border-t-2 border-l-2 border-ink bg-paper-deep" />
+        <span
+          aria-hidden
+          className="absolute right-0 bottom-0 size-4 border-t-2 border-l-2 border-ink bg-paper-deep"
+        />
         <div className="h-full min-h-0">{children}</div>
       </div>
     </div>

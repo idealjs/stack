@@ -1,4 +1,3 @@
-
 import { createRoot, hydrateRoot } from 'react-dom/client'
 import type { ReactNode } from 'react'
 

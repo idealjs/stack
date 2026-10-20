@@ -1,9 +1,8 @@
-import React from "react";
-import Heading from "@theme/Heading";
-import { courseSections } from "./courses";
-import CourseCard from "./CourseCard";
-import styles from "./styles.module.css";
-
+import React from 'react'
+import Heading from '@theme/Heading'
+import { courseSections } from './courses'
+import CourseCard from './CourseCard'
+import styles from './styles.module.css'
 
 export default function CourseShelf() {
   return (
@@ -20,5 +19,5 @@ export default function CourseShelf() {
         ))}
       </div>
     </section>
-  );
+  )
 }

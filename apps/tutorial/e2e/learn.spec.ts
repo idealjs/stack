@@ -33,13 +33,12 @@ test.describe('教程首页', () => {
   })
 
   test('站头恒为完整四行：四个行首与各条目在任何页面不缩减', async ({ page }) => {
-    
     const header = page.locator('main > header')
-    
+
     for (const label of ['全栈教程', '博客', '设计系统', '在线练习']) {
       await expect(header.getByRole('link', { name: label, exact: true })).toHaveCount(1)
     }
-    
+
     await expect(header.getByRole('link', { name: '快速开始', exact: true })).toBeVisible()
     await expect(header.getByRole('link', { name: /20\d{2}-\d{2}/ }).first()).toBeVisible()
     await expect(header.getByRole('link', { name: '颜色', exact: true })).toBeVisible()
@@ -53,13 +52,13 @@ test.describe('教程首页', () => {
     const open = page.locator('label[aria-label="打开导航菜单"]')
     const close = page.locator('label[aria-label="收起导航菜单"]')
     const drawer = page.locator('#site-nav-drawer')
-    
+
     await expect(open).toBeVisible()
     await expect(open).toHaveAttribute('aria-expanded', 'false')
     await expect(close).toBeHidden()
     await expect(drawer).toBeHidden()
     await open.click()
-    
+
     await expect(drawer).toBeVisible()
     await expect(open).toBeHidden()
     await expect(close).toBeVisible()
@@ -95,7 +94,11 @@ test.describe('教程首页', () => {
       const dimensions = await page.evaluate(() => ({
         viewport: innerWidth,
         document: document.documentElement.scrollWidth,
-        content: [...document.querySelectorAll('.learn-top, .learning-flow, .learning-brick, .learning-comparison-page')].map((element) => {
+        content: [
+          ...document.querySelectorAll(
+            '.learn-top, .learning-flow, .learning-brick, .learning-comparison-page',
+          ),
+        ].map((element) => {
           const rect = element.getBoundingClientRect()
           return { left: rect.left, right: rect.right }
         }),
@@ -103,14 +106,18 @@ test.describe('教程首页', () => {
       expect(dimensions.document).toBe(dimensions.viewport)
       expect(dimensions.content.filter((rect) => rect.left < 0 || rect.right > width)).toEqual([])
 
-      
-      
       const tops = await page.evaluate(() => {
         const top = (selector: string) => {
           const element = document.querySelector(selector)
           return element ? element.getBoundingClientRect().top + scrollY : Number.NaN
         }
-        return ['.learn-copy', '.learn-actions', '.learn-preview', '.learn-core', '.learn-time'].map(top)
+        return [
+          '.learn-copy',
+          '.learn-actions',
+          '.learn-preview',
+          '.learn-core',
+          '.learn-time',
+        ].map(top)
       })
       if (width >= 768) {
         const [copy, actions, preview, core, note] = tops
@@ -122,7 +129,6 @@ test.describe('教程首页', () => {
         expect(tops).toEqual([...tops].sort((a, b) => a - b))
       }
 
-      
       if (width >= 768) {
         const edges = await page.evaluate(() => {
           const right = (selector: string) => {

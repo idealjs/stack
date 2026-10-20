@@ -1,8 +1,8 @@
-
 import { useState } from 'react'
 import type { LlmConfig } from '../lib/agent/llm'
 
-const FIELD = 'w-full rounded-lg border-2 border-ink bg-paper px-2.5 py-1.5 font-mono text-[13px] outline-none focus:bg-paper-deep'
+const FIELD =
+  'w-full rounded-lg border-2 border-ink bg-paper px-2.5 py-1.5 font-mono text-[13px] outline-none focus:bg-paper-deep'
 
 export function KeyModal({
   config,
@@ -36,7 +36,12 @@ export function KeyModal({
           默认 DeepSeek；也可填任何 OpenAI 兼容端点。key 仅保存在浏览器 localStorage。
         </p>
         <label className="t-small-strong mb-1 block">API 地址（baseURL）</label>
-        <input className={FIELD} value={baseURL} onChange={(e) => setBaseURL(e.target.value)} spellCheck={false} />
+        <input
+          className={FIELD}
+          value={baseURL}
+          onChange={(e) => setBaseURL(e.target.value)}
+          spellCheck={false}
+        />
         <label className="t-small-strong mt-3 mb-1 block">API Key</label>
         <input
           className={FIELD}
@@ -48,7 +53,12 @@ export function KeyModal({
           spellCheck={false}
         />
         <label className="t-small-strong mt-3 mb-1 block">模型</label>
-        <input className={FIELD} value={model} onChange={(e) => setModel(e.target.value)} spellCheck={false} />
+        <input
+          className={FIELD}
+          value={model}
+          onChange={(e) => setModel(e.target.value)}
+          spellCheck={false}
+        />
         <div className="mt-5 flex justify-end gap-2">
           <button
             type="button"

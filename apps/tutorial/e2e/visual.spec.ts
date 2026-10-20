@@ -1,6 +1,5 @@
 import { expect, test } from '@playwright/test'
 
-
 const CASES: [name: string, path: string][] = [
   ['design', '/design.html'],
   ['design-colors', '/design-colors.html'],

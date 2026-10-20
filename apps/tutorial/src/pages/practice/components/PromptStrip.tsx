@@ -1,22 +1,20 @@
-
 import { useEffect, useRef, useState } from 'react'
 
 export interface PromptStripProps {
-  
   title?: string
-  
+
   text: string
-  
+
   onSend: (text: string) => void
-  
+
   disabled?: boolean
-  
+
   busy?: boolean
-  
+
   sendLabel?: string
-  
+
   flat?: boolean
-  
+
   testId?: string
 }
 

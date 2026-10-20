@@ -10,13 +10,27 @@ export interface BookmarkProps {
   className?: string
 }
 
-export function Bookmark({ label, saved, defaultSaved = false, onSavedChange, tone = 'teal', className = '' }: BookmarkProps) {
+export function Bookmark({
+  label,
+  saved,
+  defaultSaved = false,
+  onSavedChange,
+  tone = 'teal',
+  className = '',
+}: BookmarkProps) {
   const [marked, setMarked] = useLearningState(saved, defaultSaved, onSavedChange)
   return (
-    <div data-comp="bookmark" className={`learning-bookmark-shell ${className}`} style={toneStyle(tone)}>
+    <div
+      data-comp="bookmark"
+      className={`learning-bookmark-shell ${className}`}
+      style={toneStyle(tone)}
+    >
       <button
-        type="button" className="learning-object learning-bookmark"
-        aria-label={label} aria-pressed={marked} onClick={() => setMarked(!marked)}
+        type="button"
+        className="learning-object learning-bookmark"
+        aria-label={label}
+        aria-pressed={marked}
+        onClick={() => setMarked(!marked)}
       >
         <span className="learning-bookmark-hole" aria-hidden="true" />
         <b>{label}</b>

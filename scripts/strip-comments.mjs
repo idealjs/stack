@@ -9,7 +9,16 @@ const require = createRequire(import.meta.url)
 const ts = require(require.resolve('typescript', { paths: [join(ROOT, 'apps/tutorial'), ROOT] }))
 
 const EXTS = new Set(['.ts', '.tsx', '.js', '.jsx', '.mjs', '.cjs', '.css'])
-const SKIP_DIRS = new Set(['node_modules', 'dist', 'dist-runtime', 'test-results', 'playwright-report', '.git', 'build', '.zcode'])
+const SKIP_DIRS = new Set([
+  'node_modules',
+  'dist',
+  'dist-runtime',
+  'test-results',
+  'playwright-report',
+  '.git',
+  'build',
+  '.zcode',
+])
 const SCANS = ['packages', 'apps']
 
 const isBiome = (text) => /biome-(ignore|format|check|lint)/.test(text)
@@ -29,16 +38,20 @@ function* walk(dir) {
 }
 
 const scriptKind = (file) =>
-  file.endsWith('.tsx') ? ts.ScriptKind.TSX
-  : file.endsWith('.jsx') ? ts.ScriptKind.JSX
-  : file.endsWith('.ts') ? ts.ScriptKind.TS
-  : ts.ScriptKind.JS
+  file.endsWith('.tsx')
+    ? ts.ScriptKind.TSX
+    : file.endsWith('.jsx')
+      ? ts.ScriptKind.JSX
+      : file.endsWith('.ts')
+        ? ts.ScriptKind.TS
+        : ts.ScriptKind.JS
 
 function stripCode(text, file) {
   const sf = ts.createSourceFile(file, text, ts.ScriptTarget.Latest, true, scriptKind(file))
   const ranges = new Map()
   const visit = (node) => {
-    for (const r of ts.getLeadingCommentRanges(text, node.getFullStart()) ?? []) ranges.set(r.pos, r)
+    for (const r of ts.getLeadingCommentRanges(text, node.getFullStart()) ?? [])
+      ranges.set(r.pos, r)
     for (const r of ts.getTrailingCommentRanges(text, node.getEnd()) ?? []) ranges.set(r.pos, r)
     ts.forEachChild(node, visit)
   }

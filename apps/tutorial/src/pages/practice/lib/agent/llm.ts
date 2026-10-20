@@ -1,5 +1,3 @@
-
-
 export interface LlmConfig {
   baseURL: string
   apiKey: string
@@ -15,7 +13,7 @@ export const DEFAULT_LLM_CONFIG: LlmConfig = {
 const STORE_KEY = 'practice.llm.v1'
 
 export function loadLlmConfig(): LlmConfig {
-  if (typeof localStorage === 'undefined') return DEFAULT_LLM_CONFIG 
+  if (typeof localStorage === 'undefined') return DEFAULT_LLM_CONFIG
   try {
     return { ...DEFAULT_LLM_CONFIG, ...JSON.parse(localStorage.getItem(STORE_KEY) ?? '{}') }
   } catch {
@@ -47,7 +45,6 @@ export interface ChatMessage {
   tool_calls?: ToolCall[]
   tool_call_id?: string
 }
-
 
 export async function streamChat(opts: {
   config: LlmConfig
@@ -113,6 +110,7 @@ export async function streamChat(opts: {
   }
 
   const message: ChatMessage = { role: 'assistant', content }
-  if (toolAcc.size) message.tool_calls = [...toolAcc.entries()].sort(([a], [b]) => a - b).map(([, v]) => v)
+  if (toolAcc.size)
+    message.tool_calls = [...toolAcc.entries()].sort(([a], [b]) => a - b).map(([, v]) => v)
   return message
 }

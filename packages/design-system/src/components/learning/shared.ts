@@ -16,11 +16,17 @@ export function toneStyle(tone: LearningTone): CSSProperties {
   return { '--learning-accent': COLORS[tone] } as CSSProperties
 }
 
-
-export function useLearningState<T>(value: T | undefined, initial: T, onChange?: (value: T) => void) {
+export function useLearningState<T>(
+  value: T | undefined,
+  initial: T,
+  onChange?: (value: T) => void,
+) {
   const [local, setLocal] = useState(initial)
-  return [value ?? local, (next: T) => {
-    if (value === undefined) setLocal(next)
-    onChange?.(next)
-  }] as const
+  return [
+    value ?? local,
+    (next: T) => {
+      if (value === undefined) setLocal(next)
+      onChange?.(next)
+    },
+  ] as const
 }

@@ -1,6 +1,5 @@
 import { expect, test } from '@playwright/test'
 
-
 test.describe('拟物学习组件', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/design-components.html')
@@ -8,27 +7,58 @@ test.describe('拟物学习组件', () => {
 
   test('展示 13 类可复用组件，卡片继续沿用统一硬投影', async ({ page }) => {
     const gallery = page.getByTestId('learning-kit-gallery')
-    const kinds = await gallery.locator('[data-comp]').evaluateAll((elements) =>
-      [...new Set(elements.map((element) => element.getAttribute('data-comp')))].sort())
+    const kinds = await gallery
+      .locator('[data-comp]')
+      .evaluateAll((elements) =>
+        [...new Set(elements.map((element) => element.getAttribute('data-comp')))].sort(),
+      )
     expect(kinds).toEqual([
-      'bookmark', 'brick-toolbox', 'clipboard-checklist', 'comparison-board', 'data-flow-board', 'delivery-manifest',
-      'experiment-frame', 'flash-card', 'folder-tabs', 'output-receipt', 'stamp', 'sticky-note', 'task-envelope',
+      'bookmark',
+      'brick-toolbox',
+      'clipboard-checklist',
+      'comparison-board',
+      'data-flow-board',
+      'delivery-manifest',
+      'experiment-frame',
+      'flash-card',
+      'folder-tabs',
+      'output-receipt',
+      'stamp',
+      'sticky-note',
+      'task-envelope',
     ])
-    for (const kind of ['clipboard-checklist', 'flash-card', 'experiment-frame', 'task-envelope', 'brick-toolbox', 'delivery-manifest', 'data-flow-board']) {
-      const shadow = await gallery.locator(`[data-comp="${kind}"]`).evaluate((element) => getComputedStyle(element).boxShadow)
+    for (const kind of [
+      'clipboard-checklist',
+      'flash-card',
+      'experiment-frame',
+      'task-envelope',
+      'brick-toolbox',
+      'delivery-manifest',
+      'data-flow-board',
+    ]) {
+      const shadow = await gallery
+        .locator(`[data-comp="${kind}"]`)
+        .evaluate((element) => getComputedStyle(element).boxShadow)
       expect(shadow).toBe('rgb(17, 17, 17) 5px 5px 0px 0px')
     }
-    
+
     await expect(gallery.getByRole('navigation')).toContainText('清单类')
     const listGroup = page.locator('#learning-kit-list')
-    await expect(listGroup.locator('[data-comp="clipboard-checklist"]')).toContainText('第一个网页，跑起来了吗？')
+    await expect(listGroup.locator('[data-comp="clipboard-checklist"]')).toContainText(
+      '第一个网页，跑起来了吗？',
+    )
     const manifestStamps = listGroup.locator('[data-comp="delivery-manifest"] [data-comp="stamp"]')
     await expect(manifestStamps).toHaveCount(3)
     await expect(manifestStamps.first()).toContainText('已备齐')
     await expect(manifestStamps.first()).toHaveAttribute('data-status', 'done')
     const flow = page.locator('[data-comp="data-flow-board"]')
     await expect(flow.getByRole('listitem')).toHaveCount(4)
-    await expect(flow.locator('.learning-flow-title')).toHaveText(['用户操作', '更新数据', '更新界面', '保存数据'])
+    await expect(flow.locator('.learning-flow-title')).toHaveText([
+      '用户操作',
+      '更新数据',
+      '更新界面',
+      '保存数据',
+    ])
     await expect(flow.locator('.learning-flow-step').first()).toHaveAttribute('data-input', 'true')
   })
 
@@ -68,15 +98,18 @@ test.describe('拟物学习组件', () => {
     const card = page.locator('[data-comp="flash-card"]')
     const question = card.locator('.learning-flashcard-face').nth(0)
     const answer = card.locator('.learning-flashcard-face').nth(1)
-    
+
     await expect(question).toBeVisible()
     await expect(question).toContainText('分别由谁决定')
     await expect(answer).toBeHidden()
     expect(await card.ariaSnapshot()).not.toContain('从数据的来源判断')
     const hiddenSubtree = await answer.evaluate((face) =>
-      [face, ...face.querySelectorAll('*')].every((el) => getComputedStyle(el).visibility === 'hidden'))
-    expect(hiddenSubtree).toBe(true) 
-    
+      [face, ...face.querySelectorAll('*')].every(
+        (el) => getComputedStyle(el).visibility === 'hidden',
+      ),
+    )
+    expect(hiddenSubtree).toBe(true)
+
     const heightBefore = (await card.boundingBox())!.height
     await card.getByRole('button', { name: '翻面看答案' }).click()
     await expect(answer).toBeVisible()
@@ -99,7 +132,9 @@ test.describe('拟物学习组件', () => {
     await expect(envelope.locator('.learning-envelope-letter')).toBeHidden()
     await envelope.locator('summary').click()
     await expect(envelope.locator('.learning-envelope-letter')).toBeVisible()
-    await expect(envelope.locator('.learning-envelope-letter')).toContainText('建立 React + TypeScript 的 Vite 工程。')
+    await expect(envelope.locator('.learning-envelope-letter')).toContainText(
+      '建立 React + TypeScript 的 Vite 工程。',
+    )
     await envelope.locator('summary').click()
     await expect(envelope.locator('.learning-envelope-letter')).toBeHidden()
     const receipt = page.locator('[data-comp="output-receipt"]')
@@ -120,16 +155,20 @@ test.describe('拟物学习组件', () => {
     const gallery = page.getByTestId('learning-kit-gallery')
     await page.locator('[data-comp="task-envelope"] summary').click()
     await page.locator('[data-comp="brick-toolbox"] summary').first().click()
-    const geometry = await gallery.locator('[data-comp]').evaluateAll((elements) => elements.map((element) => {
-      const rect = element.getBoundingClientRect()
-      return { kind: element.getAttribute('data-comp'), left: rect.left, right: rect.right }
-    }))
+    const geometry = await gallery.locator('[data-comp]').evaluateAll((elements) =>
+      elements.map((element) => {
+        const rect = element.getBoundingClientRect()
+        return { kind: element.getAttribute('data-comp'), left: rect.left, right: rect.right }
+      }),
+    )
     expect(geometry.filter((rect) => rect.left < 0 || rect.right > 390)).toEqual([])
     const pages = page.locator('.learning-comparison-page')
     const first = await pages.nth(0).boundingBox()
     const second = await pages.nth(1).boundingBox()
     expect(second!.y).toBeGreaterThan(first!.y + first!.height)
-    const animation = await page.locator('.learning-flashcard-face[data-active="true"]').evaluate((element) => getComputedStyle(element).animationName)
+    const animation = await page
+      .locator('.learning-flashcard-face[data-active="true"]')
+      .evaluate((element) => getComputedStyle(element).animationName)
     expect(animation).toBe('none')
   })
 })

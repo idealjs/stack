@@ -18,14 +18,23 @@ export interface ClipboardChecklistProps {
 }
 
 export function ClipboardChecklist({
-  title, description, items, checkedIds, defaultCheckedIds = [], onCheckedChange, className = '',
+  title,
+  description,
+  items,
+  checkedIds,
+  defaultCheckedIds = [],
+  onCheckedChange,
+  className = '',
 }: ClipboardChecklistProps) {
   const [checked, setChecked] = useLearningState(checkedIds, defaultCheckedIds, onCheckedChange)
   const count = items.filter((item) => checked.includes(item.id)).length
   const complete = items.length > 0 && count === items.length
 
   return (
-    <section data-comp="clipboard-checklist" className={`learning-object learning-clipboard ${className}`}>
+    <section
+      data-comp="clipboard-checklist"
+      className={`learning-object learning-clipboard ${className}`}
+    >
       <span className="learning-clipboard-clip" aria-hidden="true" />
       <div className="learning-clipboard-paper">
         <div className="learning-eyebrow">CHECK / 验收清单</div>
@@ -38,17 +47,26 @@ export function ClipboardChecklist({
                 <input
                   type="checkbox"
                   checked={checked.includes(item.id)}
-                  onChange={(event) => setChecked(event.target.checked
-                    ? [...checked.filter((id) => id !== item.id), item.id]
-                    : checked.filter((id) => id !== item.id))}
+                  onChange={(event) =>
+                    setChecked(
+                      event.target.checked
+                        ? [...checked.filter((id) => id !== item.id), item.id]
+                        : checked.filter((id) => id !== item.id),
+                    )
+                  }
                 />
-                <span><b>{item.label}</b>{item.detail && <small>{item.detail}</small>}</span>
+                <span>
+                  <b>{item.label}</b>
+                  {item.detail && <small>{item.detail}</small>}
+                </span>
               </label>
             </li>
           ))}
         </ul>
         <div className="learning-clipboard-footer" aria-live="polite">
-          <span>已核对 {count} / {items.length}</span>
+          <span>
+            已核对 {count} / {items.length}
+          </span>
           {complete && <Stamp />}
         </div>
       </div>

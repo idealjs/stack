@@ -1,4 +1,3 @@
-
 import { Page } from '../../lib/ui'
 import { Button } from '@stack/design-system'
 import { MONTHS } from '../../content/blogs'
@@ -25,7 +24,9 @@ export function App() {
           在线练习场正在以 ESM + MCP 的形式重建；在那之前，从教程开始、在本地环境跟练。
         </p>
         <div className="mt-2.5">
-          <Button tone="clash2b" href="/practice.html">打开在线练习场</Button>
+          <Button tone="clash2b" href="/practice.html">
+            打开在线练习场
+          </Button>
         </div>
       </div>
     </Page>

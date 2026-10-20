@@ -1,0 +1,28 @@
+name: CI
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+env:
+  YARN_NPM_REGISTRY_SERVER: https://registry.npmmirror.com
+
+jobs:
+  check:
+    name: check
+    runs-on: ci
+    steps:
+      - name: 拉源码（actions/checkout）
+        uses: actions/checkout@v4
+
+      - name: 安装依赖（yarn 4 由 yarnPath 提供，node 直调）
+        run: node .yarn/releases/yarn-4.9.2.cjs install --immutable
+
+      - name: 格式检查（biome format）
+        run: node .yarn/releases/yarn-4.9.2.cjs run format:check
+
+      - name: 类型检查（tsc -b，连带 design-system 源码）
+        run: node .yarn/releases/yarn-4.9.2.cjs workspace @stack/tutorial run tsc -b
+
+      - name: 打包（vite build + SSG，产物随任务容器丢弃）
+        run: node .yarn/releases/yarn-4.9.2.cjs workspace @stack/tutorial build

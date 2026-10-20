@@ -1,21 +1,16 @@
-
-
 export interface CreateProjectExample {
-  
   id: string
-  
+
   tab: string
-  
+
   title: string
-  
+
   text: string
-  
+
   hint: string
 }
 
-
 export const CREATE_PROJECT_NOTE = '下一步——让 agent 从零建一个工程'
-
 
 export const CREATE_PROJECT_INTRO: readonly (string | { b: string })[] = [
   '真实工作里，接手的第一件事往往就是建个新项目。它也最考验你把需求说全：用哪个',

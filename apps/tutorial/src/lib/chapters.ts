@@ -1,4 +1,3 @@
-
 import type { Chapter, ChapterId, Profile } from '@stack/design-system'
 
 export const CHAPTERS: Record<ChapterId, Chapter> = {
@@ -118,16 +117,12 @@ export const PROFILES: Profile[] = [
   },
 ]
 
-
-
-
 export interface Step {
   title: string
-  kind: 'value' | 'agent' 
-  what: string 
-  accept: string 
+  kind: 'value' | 'agent'
+  what: string
+  accept: string
 }
-
 
 export interface Brick3 {
   name: string
@@ -139,7 +134,7 @@ export interface Brick3 {
 export interface ChapterContent {
   steps: Step[]
   bricks: Brick3[]
-  
+
   base?: string
 }
 

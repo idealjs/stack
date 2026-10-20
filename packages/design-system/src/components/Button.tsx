@@ -1,4 +1,3 @@
-
 import type { ReactNode } from 'react'
 
 const TONE_BG = {
@@ -19,11 +18,10 @@ export function Button({
   disabled = false,
   children,
 }: {
-  
   tone?: keyof typeof TONE_BG
-  
+
   href?: string
-  
+
   disabled?: boolean
   children: ReactNode
 }) {
@@ -44,5 +42,9 @@ export function Button({
       </a>
     )
   }
-  return <button type="button" className={`${BASE} ${TONE_BG[tone]}`}>{children}</button>
+  return (
+    <button type="button" className={`${BASE} ${TONE_BG[tone]}`}>
+      {children}
+    </button>
+  )
 }

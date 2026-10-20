@@ -1,32 +1,27 @@
-@import 'tailwindcss';
+@import "tailwindcss";
 
-@source '../';
-
+@source "../";
 
 @theme {
-  
-  --color-clash1a: #ff6b6b; 
-  --color-clash1b: #4ecdc4; 
-  --color-clash2a: #ffd93d; 
-  --color-clash2b: #a78bfa; 
-  --color-clash3a: #ff8fab; 
-  --color-clash3b: #5b8def; 
+  --color-clash1a: #ff6b6b;
+  --color-clash1b: #4ecdc4;
+  --color-clash2a: #ffd93d;
+  --color-clash2b: #a78bfa;
+  --color-clash3a: #ff8fab;
+  --color-clash3b: #5b8def;
 
-  
   --color-ink: #111111;
   --color-paper: #fff9f0;
-  --color-paper-deep: #f2ead9; 
+  --color-paper-deep: #f2ead9;
   --color-mute: #8a7a5c;
   --color-body: #3d3d3d;
 
-  
   --shadow-ink: 5px 5px 0 var(--color-ink);
   --shadow-ink-lift: 8px 8px 0 var(--color-ink);
-  
+
   --drop-shadow-ink: 5px 5px 0 var(--color-ink);
   --drop-shadow-ink-lift: 8px 8px 0 var(--color-ink);
 
-  
   --color-ch1: #ff6b6b;
   --color-ch2: #ff8fab;
   --color-ch3: #ffd93d;
@@ -35,14 +30,19 @@
   --color-ch6: #a78bfa;
 }
 
-
 .ticket-shell {
   --ticket-border: 2px;
   --ticket-stub-width: 38px;
   --ticket-perforation-width: 1.5px;
   --hole-radius: 6px;
-  --hole-x: calc(100% - var(--ticket-border) - var(--ticket-stub-width) + var(--ticket-perforation-width) / 2);
-  position: relative; 
+  --hole-x: calc(
+    100% -
+    var(--ticket-border) -
+    var(--ticket-stub-width) +
+    var(--ticket-perforation-width) /
+    2
+  );
+  position: relative;
 }
 .ticket-shadow {
   filter: drop-shadow(var(--drop-shadow-ink));
@@ -58,11 +58,11 @@
 }
 .ticket-perforation {
   position: absolute;
-  inset: calc(0px - var(--ticket-border)); 
+  inset: calc(0px - var(--ticket-border));
   pointer-events: none;
 }
 .ticket-perforation::before {
-  content: '';
+  content: "";
   position: absolute;
   inset-block: 0;
   left: calc(var(--hole-x) - var(--ticket-perforation-width) / 2);
@@ -113,12 +113,28 @@
 
 .ticket-pk {
   -webkit-mask-image:
-    radial-gradient(circle calc(var(--hole-radius) + 1px) at var(--hole-x) 0, transparent var(--hole-radius), #000 calc(var(--hole-radius) + 0.5px)),
-    radial-gradient(circle calc(var(--hole-radius) + 1px) at var(--hole-x) 100%, transparent var(--hole-radius), #000 calc(var(--hole-radius) + 0.5px));
+    radial-gradient(
+      circle calc(var(--hole-radius) + 1px) at var(--hole-x) 0,
+      transparent var(--hole-radius),
+      #000 calc(var(--hole-radius) + 0.5px)
+    ),
+    radial-gradient(
+      circle calc(var(--hole-radius) + 1px) at var(--hole-x) 100%,
+      transparent var(--hole-radius),
+      #000 calc(var(--hole-radius) + 0.5px)
+    );
   -webkit-mask-composite: source-in;
   mask-image:
-    radial-gradient(circle calc(var(--hole-radius) + 1px) at var(--hole-x) 0, transparent var(--hole-radius), #000 calc(var(--hole-radius) + 0.5px)),
-    radial-gradient(circle calc(var(--hole-radius) + 1px) at var(--hole-x) 100%, transparent var(--hole-radius), #000 calc(var(--hole-radius) + 0.5px));
+    radial-gradient(
+      circle calc(var(--hole-radius) + 1px) at var(--hole-x) 0,
+      transparent var(--hole-radius),
+      #000 calc(var(--hole-radius) + 0.5px)
+    ),
+    radial-gradient(
+      circle calc(var(--hole-radius) + 1px) at var(--hole-x) 100%,
+      transparent var(--hole-radius),
+      #000 calc(var(--hole-radius) + 0.5px)
+    );
   mask-composite: intersect;
 }
 
@@ -140,7 +156,6 @@
   clip-path: inset(0 0 50% 0);
 }
 
-
 @view-transition {
   navigation: auto;
 }
@@ -152,7 +167,6 @@
     animation-duration: 0.01ms;
   }
 }
-
 
 @theme {
   --text-content: 1rem;

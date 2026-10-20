@@ -5,5 +5,12 @@
     "examples/*",
     "apps/*"
   ],
-  "packageManager": "yarn@4.9.2"
+  "packageManager": "yarn@4.9.2",
+  "scripts": {
+    "format": "biome format --write .",
+    "format:check": "biome format ."
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.5.15"
+  }
 }

@@ -1,9 +1,7 @@
-
 import type { ReactNode } from 'react'
 import { Page, Section } from '../lib/ui'
 import { MONTHS, POSTS, monthOf } from '../content/blogs'
 import { BrickDot, Mark, Tri } from '@stack/design-system'
-
 
 function inline(text: string): ReactNode[] {
   const parts: ReactNode[] = []
@@ -15,17 +13,20 @@ function inline(text: string): ReactNode[] {
     if (m.index > last) parts.push(text.slice(last, m.index))
     const t = m[0]
     if (t.startsWith('**')) parts.push(<b key={i++}>{t.slice(2, -2)}</b>)
-    else parts.push(
-      <code key={i++} className="rounded bg-paper-deep px-1 py-0.5 font-mono text-[0.9em] text-ink">
-        {t.slice(1, -1)}
-      </code>,
-    )
+    else
+      parts.push(
+        <code
+          key={i++}
+          className="rounded bg-paper-deep px-1 py-0.5 font-mono text-[0.9em] text-ink"
+        >
+          {t.slice(1, -1)}
+        </code>,
+      )
     last = m.index + t.length
   }
   if (last < text.length) parts.push(text.slice(last))
   return parts
 }
-
 
 function Markdown({ raw }: { raw: string }) {
   const lines = raw.replace(/^---\n[\s\S]*?\n---\n/, '').split('\n')
@@ -55,7 +56,10 @@ function Markdown({ raw }: { raw: string }) {
     }
     if (ln.startsWith('> ')) {
       out.push(
-        <blockquote key={key++} className="m-0 rounded-xl border-2 border-dashed border-ink/40 bg-paper-deep/60 p-4">
+        <blockquote
+          key={key++}
+          className="m-0 rounded-xl border-2 border-dashed border-ink/40 bg-paper-deep/60 p-4"
+        >
           <p className="m-0 text-content text-body">{inline(ln.slice(2))}</p>
         </blockquote>,
       )
@@ -111,7 +115,7 @@ function Markdown({ raw }: { raw: string }) {
       )
       continue
     }
-    
+
     const buf: string[] = [ln]
     i++
     while (
@@ -131,13 +135,14 @@ function Markdown({ raw }: { raw: string }) {
   return <div className="space-y-5">{out}</div>
 }
 
-
 export function BlogCard({ post }: { post: (typeof POSTS)[number] }) {
   const quote =
+    post.raw.split('\n').find((l) => l.startsWith('> ') && l.trim() !== '') ??
     post.raw
       .split('\n')
-      .find((l) => l.startsWith('> ') && l.trim() !== '') ??
-    post.raw.split('\n').find((l) => l.trim() && !l.startsWith('#') && !l.startsWith('---') && !l.startsWith('---')) ??
+      .find(
+        (l) => l.trim() && !l.startsWith('#') && !l.startsWith('---') && !l.startsWith('---'),
+      ) ??
     ''
   return (
     <a
@@ -145,18 +150,21 @@ export function BlogCard({ post }: { post: (typeof POSTS)[number] }) {
       className="block w-[420px] rounded-2xl border-2 border-ink bg-paper p-5 no-underline shadow-ink transition-transform duration-150 hover:-translate-y-[3px] hover:shadow-ink-lift"
     >
       <div className="flex items-center gap-2.5">
-        <span className="rounded-full bg-clash3b/15 px-2.5 py-0.5 font-mono t-small-strong">{post.date}</span>
+        <span className="rounded-full bg-clash3b/15 px-2.5 py-0.5 font-mono t-small-strong">
+          {post.date}
+        </span>
         <span className="t-small-mute">{post.author}</span>
       </div>
       <h2 className="m-0 mt-3 text-t3 font-extrabold text-ink">{post.title}</h2>
-      <p className="m-0 mt-2 line-clamp-2 text-small leading-relaxed text-body">{quote.replace(/^> /, '').slice(0, 90)}…</p>
+      <p className="m-0 mt-2 line-clamp-2 text-small leading-relaxed text-body">
+        {quote.replace(/^> /, '').slice(0, 90)}…
+      </p>
       <p className="m-0 mt-3 t-small-strong">
         阅读全文 <span aria-hidden>→</span>
       </p>
     </a>
   )
 }
-
 
 export function BlogDatePage({ dateKey }: { dateKey: string }) {
   const month = MONTHS.find((m) => m.key === dateKey)!
@@ -177,18 +185,22 @@ export function BlogDatePage({ dateKey }: { dateKey: string }) {
   )
 }
 
-
 export function BlogPostPage({ slug }: { slug: string }) {
   const post = POSTS.find((p) => p.slug === slug)!
   return (
     <Page active={`blog-${monthOf(slug)}`}>
       <div className="relative overflow-hidden rounded-2xl border-2 border-ink bg-paper p-5 shadow-ink">
-        <span className="t-display pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 select-none" aria-hidden>
+        <span
+          className="t-display pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 select-none"
+          aria-hidden
+        >
           {post.date.slice(2, 4)}
         </span>
         <h1 className="m-0 max-w-[46ch] text-t1 font-extrabold text-ink">{post.title}</h1>
         <p className="m-0 mt-3 flex flex-wrap items-center gap-3">
-          <span className="rounded-full bg-clash3b/15 px-2.5 py-0.5 font-mono t-small-strong">{post.date}</span>
+          <span className="rounded-full bg-clash3b/15 px-2.5 py-0.5 font-mono t-small-strong">
+            {post.date}
+          </span>
           <span className="t-small-mute">{post.author}</span>
           <Mark className="t-small-strong">开发自述</Mark>
         </p>
@@ -203,7 +215,10 @@ export function BlogPostPage({ slug }: { slug: string }) {
         >
           ← 返回 {monthOf(slug)}
         </a>
-        <a href="/index.html" className="rounded-xl border-2 border-ink bg-ink px-4 py-2 text-small font-bold text-paper no-underline">
+        <a
+          href="/index.html"
+          className="rounded-xl border-2 border-ink bg-ink px-4 py-2 text-small font-bold text-paper no-underline"
+        >
           返回首页
         </a>
       </div>

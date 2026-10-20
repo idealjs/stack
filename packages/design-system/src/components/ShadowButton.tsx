@@ -1,8 +1,13 @@
-
 import type { MouseEventHandler, ReactNode } from 'react'
 
-
-export type ShadowButtonTone = 'paper' | 'clash1a' | 'clash1b' | 'clash2a' | 'clash2b' | 'clash3a' | 'clash3b'
+export type ShadowButtonTone =
+  | 'paper'
+  | 'clash1a'
+  | 'clash1b'
+  | 'clash2a'
+  | 'clash2b'
+  | 'clash3a'
+  | 'clash3b'
 
 const TONE_BG: Record<ShadowButtonTone, string> = {
   paper: 'bg-paper',
@@ -14,44 +19,41 @@ const TONE_BG: Record<ShadowButtonTone, string> = {
   clash3b: 'bg-clash3b',
 }
 
-
 export const SHADOW_BUTTON_BASE =
   'cursor-pointer items-center justify-center border-2 border-ink text-ink no-underline transition-[transform,box-shadow,background-color] duration-150 focus-visible:outline-[3px] focus-visible:outline-clash3b focus-visible:outline-offset-2'
 
-
 export const SHADOW_BUTTON_REST = 'shadow-[3px_3px_0_var(--color-ink)]'
 
+export const SHADOW_BUTTON_HOVER =
+  'hover:-translate-y-[2px] hover:shadow-[5px_5px_0_var(--color-ink)]'
 
-export const SHADOW_BUTTON_HOVER = 'hover:-translate-y-[2px] hover:shadow-[5px_5px_0_var(--color-ink)]'
+export const SHADOW_BUTTON_ACTIVE =
+  'active:translate-x-[2px] active:translate-y-[2px] active:shadow-[1px_1px_0_var(--color-ink)]'
 
-
-export const SHADOW_BUTTON_ACTIVE = 'active:translate-x-[2px] active:translate-y-[2px] active:shadow-[1px_1px_0_var(--color-ink)]'
-
-
-const RING_REST = 'bg-paper-deep shadow-[inset_0_0_0_2px_var(--color-ink),3px_3px_0_var(--color-ink)]'
-const RING_HOVER = 'hover:-translate-y-[2px] hover:shadow-[inset_0_0_0_2px_var(--color-ink),5px_5px_0_var(--color-ink)]'
-const RING_ACTIVE = 'active:translate-x-[2px] active:translate-y-[2px] active:shadow-[inset_0_0_0_2px_var(--color-ink),1px_1px_0_var(--color-ink)]'
+const RING_REST =
+  'bg-paper-deep shadow-[inset_0_0_0_2px_var(--color-ink),3px_3px_0_var(--color-ink)]'
+const RING_HOVER =
+  'hover:-translate-y-[2px] hover:shadow-[inset_0_0_0_2px_var(--color-ink),5px_5px_0_var(--color-ink)]'
+const RING_ACTIVE =
+  'active:translate-x-[2px] active:translate-y-[2px] active:shadow-[inset_0_0_0_2px_var(--color-ink),1px_1px_0_var(--color-ink)]'
 
 const SIZE = {
-  
   md: 'rounded-xl px-4 py-2 text-small font-bold',
-  
+
   sm: 'rounded-lg px-2.5 py-1 text-content font-bold',
-  
+
   none: 'rounded-lg',
 } as const
 
 export interface ShadowButtonClassesOptions {
-  
   tone?: ShadowButtonTone
-  
+
   active?: boolean
-  
+
   size?: keyof typeof SIZE
-  
+
   className?: string
 }
-
 
 export function shadowButtonClasses({
   tone = 'paper',
@@ -63,7 +65,9 @@ export function shadowButtonClasses({
     SHADOW_BUTTON_BASE,
     SIZE[size],
     active ? RING_REST : TONE_BG[tone],
-    active ? `${RING_HOVER} ${RING_ACTIVE}` : `${SHADOW_BUTTON_REST} ${SHADOW_BUTTON_HOVER} ${SHADOW_BUTTON_ACTIVE}`,
+    active
+      ? `${RING_HOVER} ${RING_ACTIVE}`
+      : `${SHADOW_BUTTON_REST} ${SHADOW_BUTTON_HOVER} ${SHADOW_BUTTON_ACTIVE}`,
     className,
   ]
     .filter(Boolean)
@@ -71,17 +75,16 @@ export function shadowButtonClasses({
 }
 
 export interface ShadowButtonProps {
-  
   tone?: ShadowButtonTone
-  
+
   active?: boolean
-  
+
   href?: string
-  
+
   disabled?: boolean
-  
+
   size?: keyof typeof SIZE
-  
+
   className?: string
   children: ReactNode
   onClick?: MouseEventHandler<HTMLElement>

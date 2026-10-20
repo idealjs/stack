@@ -1,4 +1,3 @@
-
 import '@stack/design-system'
 import type { ReactNode } from 'react'
 import type { ChapterId, NavItemLink, NavRowGroup } from '@stack/design-system'
@@ -6,8 +5,12 @@ import { SiteNavbar } from '@stack/design-system'
 import { CHAPTERS } from './chapters'
 import { MONTHS } from '../content/blogs'
 
-
-export type DesignKey = 'design-colors' | 'design-typography' | 'design-symbols' | 'design-components' | 'design-shadow'
+export type DesignKey =
+  | 'design-colors'
+  | 'design-typography'
+  | 'design-symbols'
+  | 'design-components'
+  | 'design-shadow'
 
 const DESIGN: { href: string; label: string; key: DesignKey }[] = [
   { href: '/design-colors.html', label: '颜色', key: 'design-colors' },
@@ -30,7 +33,12 @@ const NAV_ROWS: NavRowGroup[] = [
     sectionKey: 'blog',
     label: '博客',
     href: '/blog.html',
-    items: MONTHS.map((m) => ({ key: `blog-${m.key}`, label: m.key, href: `/blog-${m.key}.html`, mono: true })),
+    items: MONTHS.map((m) => ({
+      key: `blog-${m.key}`,
+      label: m.key,
+      href: `/blog-${m.key}.html`,
+      mono: true,
+    })),
   },
   {
     sectionKey: 'design',
@@ -42,11 +50,10 @@ const NAV_ROWS: NavRowGroup[] = [
     sectionKey: 'practice',
     label: '在线练习',
     href: '/practice.html',
-    
+
     items: [{ key: 'practice-starter', label: '重建中', href: '/practice.html', mono: true }],
   },
 ]
-
 
 const FOOTER_GROUPS: { label: string; links: { href: string; label: string }[] }[] = [
   { label: '友情链接', links: [{ href: 'https://idealjs.com', label: 'idealjs.com' }] },
@@ -71,16 +78,22 @@ export function Page({
   active,
   children,
 }: {
-  
   title?: string
-  
+
   subtitle?: string
   desc?: string
-  
-  active?: ChapterId | 'index' | 'learn' | 'blog' | 'design' | 'practice' | DesignKey | `blog-${string}`
+
+  active?:
+    | ChapterId
+    | 'index'
+    | 'learn'
+    | 'blog'
+    | 'design'
+    | 'practice'
+    | DesignKey
+    | `blog-${string}`
   children: ReactNode
 }) {
-  
   const activeKey =
     active === 'index'
       ? 'index'
@@ -133,7 +146,19 @@ export function Page({
   )
 }
 
-export function Section({ label, note, id, className = '', children }: { label?: string; note?: string; id?: string; className?: string; children: ReactNode }) {
+export function Section({
+  label,
+  note,
+  id,
+  className = '',
+  children,
+}: {
+  label?: string
+  note?: string
+  id?: string
+  className?: string
+  children: ReactNode
+}) {
   return (
     <section id={id} className={`mb-8 ${className}`}>
       {(label || note) && (

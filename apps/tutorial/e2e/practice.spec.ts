@@ -1,7 +1,5 @@
 import { expect, test } from '@playwright/test'
 
-
-
 const TAB = '[data-comp="coach-sticky"]'
 const PANEL = '#coach-sticky-panel'
 const ENVELOPE = '[data-comp="task-envelope"]'
@@ -16,7 +14,7 @@ test.describe('练习场 · 陪练 agent 便签', () => {
     const tab = page.locator(TAB)
     await expect(tab).toBeVisible()
     await expect(tab).toContainText('陪练 agent')
-    await expect(tab).toContainText('react-starter') 
+    await expect(tab).toContainText('react-starter')
     await expect(tab).toHaveAttribute('aria-expanded', 'false')
     await expect(tab).toHaveAttribute('aria-controls', 'coach-sticky-panel')
     await expect(page.locator(PANEL)).toBeHidden()
@@ -27,31 +25,31 @@ test.describe('练习场 · 陪练 agent 便签', () => {
     await expect(panel).toBeVisible()
     await expect(panel).toContainText('陪练 agent')
 
-    await tab.click() 
+    await tab.click()
     await expect(page.locator(PANEL)).toBeHidden()
     await expect(tab).toHaveAttribute('aria-expanded', 'false')
 
     await tab.click()
     await expect(page.locator(PANEL)).toBeVisible()
-    await page.keyboard.press('Escape') 
+    await page.keyboard.press('Escape')
     await expect(page.locator(PANEL)).toBeHidden()
     await expect(tab).toHaveAttribute('aria-expanded', 'false')
   })
 
   test('展开后可见当前任务 opener，复制/发给陪练动作在场', async ({ page }) => {
     const tab = page.locator(TAB)
-    await expect(page.getByTestId('coach-opener')).toBeHidden() 
+    await expect(page.getByTestId('coach-opener')).toBeHidden()
     await tab.click()
     const opener = page.getByTestId('coach-opener')
     await expect(opener).toBeVisible()
     await expect(opener).toContainText('开场提示词')
-    await expect(opener).toContainText('自我介绍卡') 
+    await expect(opener).toContainText('自我介绍卡')
     await expect(opener.getByRole('button', { name: '复制' })).toBeVisible()
     const sendOpener = opener.getByRole('button', { name: '发给陪练' })
     await expect(sendOpener).toBeVisible()
-    await expect(sendOpener).toBeEnabled() 
+    await expect(sendOpener).toBeEnabled()
     await sendOpener.click()
-    await expect(page.getByRole('presentation')).toContainText('模型接入') 
+    await expect(page.getByRole('presentation')).toContainText('模型接入')
   })
 })
 
@@ -68,7 +66,7 @@ test.describe('练习场 · 任务卡拟物组件', () => {
     await expect(letter).toBeHidden()
     await envelope.locator('summary').click()
     await expect(letter).toBeVisible()
-    await expect(letter).toContainText('# 练习任务 · 我的自我介绍卡') 
+    await expect(letter).toContainText('# 练习任务 · 我的自我介绍卡')
     await expect(letter).toContainText('## 验收清单')
     await expect(letter).toContainText('预览页大标题显示名字')
     await envelope.locator('summary').click()
@@ -81,7 +79,9 @@ test.describe('练习场 · 任务卡拟物组件', () => {
     await expect(checklist.locator('[data-comp="stamp"]')).toHaveCount(0)
     await checklist.getByRole('checkbox', { name: '预览页大标题显示名字' }).check()
     await checklist.getByRole('checkbox', { name: '介绍恰好 3 行' }).check()
-    await checklist.getByRole('checkbox', { name: '只改了 src/App.tsx（可以让 agent 展示改动内容）' }).check()
+    await checklist
+      .getByRole('checkbox', { name: '只改了 src/App.tsx（可以让 agent 展示改动内容）' })
+      .check()
     await expect(checklist).toContainText('已核对 3 / 3')
     await expect(checklist.locator('[data-comp="stamp"]')).toHaveText('✓已核对')
     await checklist.getByRole('checkbox', { name: '介绍恰好 3 行' }).uncheck()
@@ -92,14 +92,16 @@ test.describe('练习场 · 任务卡拟物组件', () => {
 
 test.describe('练习场 · 创建项目板块', () => {
   const SECTION = '[data-testid="create-project"]'
-  const SENTENCE = '创建一个 vite 项目，使用' 
+  const SENTENCE = '创建一个 vite 项目，使用'
   const IDS = ['basic', 'counter', 'compare']
 
   test.beforeEach(async ({ page }) => {
     await page.goto('/practice.html')
   })
 
-  test('板块在场：标题 + 教学文案（四要素加粗词）+ 文件夹页签；三条示例都在 DOM 且同句式', async ({ page }) => {
+  test('板块在场：标题 + 教学文案（四要素加粗词）+ 文件夹页签；三条示例都在 DOM 且同句式', async ({
+    page,
+  }) => {
     const section = page.locator(SECTION)
     await expect(section).toBeVisible()
     await expect(section.locator('h2')).toContainText('创建项目')
@@ -110,11 +112,11 @@ test.describe('练习场 · 创建项目板块', () => {
 
     const prompts = section.locator('[data-testid^="create-prompt-"]')
     await expect(prompts).toHaveCount(3)
-    
+
     for (const id of IDS) {
       await expect(page.getByTestId(`create-prompt-${id}`)).toContainText(SENTENCE)
     }
-    
+
     await expect(page.getByTestId('create-prompt-basic')).toBeVisible()
     await expect(page.getByTestId('create-prompt-counter')).toBeHidden()
     await expect(page.getByTestId('create-prompt-compare')).toBeHidden()
@@ -134,10 +136,9 @@ test.describe('练习场 · 创建项目板块', () => {
       await expect(strip.getByRole('button', { name: '复制' })).toBeVisible()
       const send = strip.getByRole('button', { name: '发给陪练' })
       await expect(send).toBeVisible()
-      await expect(send).toBeEnabled() 
+      await expect(send).toBeEnabled()
     }
 
-    
     await tabs.nth(0).click()
     await tabs.nth(0).press('ArrowRight')
     await expect(tabs.nth(1)).toHaveAttribute('aria-selected', 'true')
@@ -165,11 +166,17 @@ test.describe('练习场 · 布局自查', () => {
       await expect(page.locator(PANEL)).toBeVisible()
       await page.keyboard.press('Escape')
       await expect(page.locator(PANEL)).toBeHidden()
-      
+
       const tabBox = await page.locator(TAB).boundingBox()
       expect(tabBox).not.toBeNull()
-      expect(900 - (tabBox!.y + tabBox!.height), `宽度 ${width} 便签距底缘过大`).toBeLessThanOrEqual(24)
-      expect(width - (tabBox!.x + tabBox!.width), `宽度 ${width} 便签距右缘过大`).toBeLessThanOrEqual(24)
+      expect(
+        900 - (tabBox!.y + tabBox!.height),
+        `宽度 ${width} 便签距底缘过大`,
+      ).toBeLessThanOrEqual(24)
+      expect(
+        width - (tabBox!.x + tabBox!.width),
+        `宽度 ${width} 便签距右缘过大`,
+      ).toBeLessThanOrEqual(24)
     }
   })
 })

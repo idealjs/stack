@@ -1,4 +1,3 @@
-
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
 import type { CSSProperties, ReactNode } from 'react'
 import type { Chapter, ChapterId } from '../lib/types'
@@ -13,7 +12,6 @@ export interface PinActions {
 
 export const PinActionsContext = createContext<PinActions | null>(null)
 export const PinsContext = createContext<Partial<Record<ChapterId, LaneNode>>>({})
-
 
 export function RoutableScene({
   height,
@@ -39,7 +37,10 @@ export function RoutableScene({
       }),
     [],
   )
-  const actions = useMemo<PinActions>(() => ({ sceneRef, register, unregister }), [register, unregister])
+  const actions = useMemo<PinActions>(
+    () => ({ sceneRef, register, unregister }),
+    [register, unregister],
+  )
   return (
     <PinActionsContext.Provider value={actions}>
       <PinsContext.Provider value={pins}>
@@ -55,7 +56,6 @@ export function RoutableScene({
   )
 }
 
-
 export function RoutableCard({
   no,
   chapter,
@@ -66,24 +66,22 @@ export function RoutableCard({
   style,
   children,
 }: {
-  
   no: ChapterId
-  
+
   chapter?: Chapter
-  
+
   title?: string
   href?: string
   compact?: boolean
-  
+
   className?: string
   style?: CSSProperties
-  
+
   children?: ReactNode
 }) {
   const actions = useContext(PinActionsContext)
   const ref = useRef<HTMLDivElement>(null)
-  
-  
+
   useEffect(() => {
     const card = ref.current
     const scene = actions?.sceneRef.current

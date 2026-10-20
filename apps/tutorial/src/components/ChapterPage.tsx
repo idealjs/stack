@@ -1,4 +1,3 @@
-
 import type { CSSProperties } from 'react'
 import { Page, Section } from '../lib/ui'
 import { CHAPTERS, CONTENT } from '../lib/chapters'
@@ -15,11 +14,14 @@ export function ChapterPage({ id }: { id: ChapterId }) {
 
   return (
     <Page active={id}>
-            <div
+      <div
         className="relative flex items-center gap-4 overflow-hidden rounded-2xl border-2 border-ink p-5 shadow-ink"
         style={{ background: ch.color, viewTransitionName: `ch-${id}` } as CSSProperties}
       >
-        <span className="t-display pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 select-none" aria-hidden>
+        <span
+          className="t-display pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 select-none"
+          aria-hidden
+        >
           0{id}
         </span>
         <span className="text-[44px] leading-none">{ch.emoji}</span>
@@ -53,7 +55,9 @@ export function ChapterPage({ id }: { id: ChapterId }) {
                     <span className="flex items-center gap-1.5 text-t3 font-bold text-ink">
                       <Wave size={30} />
                       {s.title}
-                      <span className="rounded-full bg-clash3b/15 px-2 py-0.5 text-[10.5px]">代理区 · 交给 agent</span>
+                      <span className="rounded-full bg-clash3b/15 px-2 py-0.5 text-[10.5px]">
+                        代理区 · 交给 agent
+                      </span>
                     </span>
                   )}
                 </div>
@@ -71,7 +75,10 @@ export function ChapterPage({ id }: { id: ChapterId }) {
         <Section label="积木清单" note="从靶子倒推、每块三句话、教一块带一族">
           <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
             {c.bricks.map((b) => (
-              <div key={b.name} className="rounded-xl border-2 border-ink bg-paper p-3.5 shadow-ink">
+              <div
+                key={b.name}
+                className="rounded-xl border-2 border-ink bg-paper p-3.5 shadow-ink"
+              >
                 <div className="flex items-center gap-2">
                   <Tri size={13} />
                   <b className="text-t3">{b.name}</b>

@@ -1,4 +1,3 @@
-
 import { useState } from 'react'
 import type { KeyboardEvent, ReactNode } from 'react'
 
@@ -21,16 +20,16 @@ export function ChatPanel({
 }: {
   items: ChatItem[]
   busy: boolean
-  
+
   ready: boolean
   hasKey: boolean
   model: string
   onSend: (text: string) => void
   onStop: () => void
   onOpenKey: () => void
-  
+
   notice?: ReactNode
-  
+
   flat?: boolean
 }) {
   const [draft, setDraft] = useState('')
@@ -53,7 +52,7 @@ export function ChatPanel({
     <div
       className={`flex h-full min-h-0 flex-col rounded-xl border-2 border-ink bg-paper ${flat ? '' : 'shadow-ink'}`}
     >
-            <div className="flex items-center gap-2 border-b border-dashed border-ink/20 px-3 py-2">
+      <div className="flex items-center gap-2 border-b border-dashed border-ink/20 px-3 py-2">
         <span className="t-small-strong">陪练 agent</span>
         <span className="t-small-mute min-w-0 flex-1 truncate font-mono">{model}</span>
         <button
@@ -67,14 +66,17 @@ export function ChatPanel({
         </button>
       </div>
 
-            <div className="flex min-h-0 flex-1 flex-col gap-2.5 overflow-auto p-3">
+      <div className="flex min-h-0 flex-1 flex-col gap-2.5 overflow-auto p-3">
         {items.map((item, i) =>
           item.kind === 'tool' ? (
             <p key={i} className="t-small-mute m-0 font-mono">
               {item.text}
             </p>
           ) : (
-            <div key={i} className={`flex ${item.kind === 'user' ? 'justify-end' : 'justify-start'}`}>
+            <div
+              key={i}
+              className={`flex ${item.kind === 'user' ? 'justify-end' : 'justify-start'}`}
+            >
               <div
                 className={`max-w-[92%] rounded-xl border-2 border-ink px-3 py-2 text-[13.5px] leading-6 whitespace-pre-wrap ${
                   item.kind === 'user' ? 'bg-paper-deep text-ink' : 'bg-paper text-body'
@@ -88,16 +90,20 @@ export function ChatPanel({
         {busy && <p className="t-small-mute m-0 animate-pulse font-mono">agent 工作中…</p>}
       </div>
 
-            {notice && <div className="border-t border-dashed border-ink/20 p-2.5">{notice}</div>}
+      {notice && <div className="border-t border-dashed border-ink/20 p-2.5">{notice}</div>}
 
-            <div className="border-t border-dashed border-ink/20 p-2.5">
+      <div className="border-t border-dashed border-ink/20 p-2.5">
         <textarea
           value={draft}
           onChange={(e) => setDraft(e.target.value)}
           onKeyDown={onKeyDown}
           rows={2}
           placeholder={
-            !ready ? '练习环境启动中…' : hasKey ? '告诉 agent 要做什么（Enter 发送，Shift+Enter 换行）' : '先填写 API Key'
+            !ready
+              ? '练习环境启动中…'
+              : hasKey
+                ? '告诉 agent 要做什么（Enter 发送，Shift+Enter 换行）'
+                : '先填写 API Key'
           }
           className="w-full resize-none rounded-lg border-2 border-ink bg-paper px-2.5 py-1.5 text-[13.5px] leading-6 outline-none focus:bg-paper-deep"
         />

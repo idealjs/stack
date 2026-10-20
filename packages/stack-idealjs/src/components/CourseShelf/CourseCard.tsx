@@ -1,20 +1,19 @@
-import React, { useState } from "react";
-import clsx from "clsx";
-import Link from "@docusaurus/Link";
-import useBaseUrl from "@docusaurus/useBaseUrl";
-import type { CourseSection } from "./courses";
-import styles from "./styles.module.css";
-
+import React, { useState } from 'react'
+import clsx from 'clsx'
+import Link from '@docusaurus/Link'
+import useBaseUrl from '@docusaurus/useBaseUrl'
+import type { CourseSection } from './courses'
+import styles from './styles.module.css'
 
 export default function CourseCard({ course }: { course: CourseSection }) {
-  const [previewing, setPreviewing] = useState(false);
-  const gifUrl = useBaseUrl(`gifs/${course.id}.gif`);
+  const [previewing, setPreviewing] = useState(false)
+  const gifUrl = useBaseUrl(`gifs/${course.id}.gif`)
 
   return (
     <Link
       to={course.href}
-      className={clsx("card", styles.card)}
-      style={{ ["--course-color" as string]: course.color }}
+      className={clsx('card', styles.card)}
+      style={{ ['--course-color' as string]: course.color }}
       onMouseEnter={() => setPreviewing(true)}
       onMouseLeave={() => setPreviewing(false)}
       onFocus={() => setPreviewing(true)}
@@ -32,7 +31,7 @@ export default function CourseCard({ course }: { course: CourseSection }) {
           />
         ) : (
           <div className={styles.mediaHint}>
-            <span className={styles.mediaHintIcon}>{"\u25B6"}</span>
+            <span className={styles.mediaHintIcon}>{'\u25B6'}</span>
             悬停预览预期成果
           </div>
         )}
@@ -42,13 +41,10 @@ export default function CourseCard({ course }: { course: CourseSection }) {
         <div className={styles.titleRow}>
           <h3 className={styles.title}>{course.title}</h3>
           <span
-            className={clsx(
-              styles.doneFlag,
-              course.done ? styles.done : styles.wip,
-            )}
-            title={course.done ? "已完成" : "写作中"}
+            className={clsx(styles.doneFlag, course.done ? styles.done : styles.wip)}
+            title={course.done ? '已完成' : '写作中'}
           >
-            {course.done ? "✓ 已完成" : "写作中"}
+            {course.done ? '✓ 已完成' : '写作中'}
           </span>
         </div>
 
@@ -67,5 +63,5 @@ export default function CourseCard({ course }: { course: CourseSection }) {
         </div>
       </div>
     </Link>
-  );
+  )
 }

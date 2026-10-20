@@ -1,11 +1,10 @@
-
 import gorzil from './blog/gorzil.md?raw'
 import sapling from './blog/sapling_transformer.md?raw'
 
 export interface BlogPost {
   slug: string
   title: string
-  
+
   date: string
   author: string
   raw: string
@@ -28,9 +27,8 @@ export const POSTS: BlogPost[] = [
   },
 ]
 
-
 export interface BlogMonth {
-  key: string 
+  key: string
   posts: BlogPost[]
 }
 
@@ -43,6 +41,5 @@ export const MONTHS: BlogMonth[] = [...POSTS]
     else acc.push({ key, posts: [p] })
     return acc
   }, [])
-
 
 export const monthOf = (slug: string) => POSTS.find((p) => p.slug === slug)!.date.slice(0, 7)

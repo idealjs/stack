@@ -1,14 +1,13 @@
 import { toneStyle } from './shared'
 import type { LearningTone } from './shared'
 
-
 export interface DataFlowStep {
   id: string
   title: string
   detail: string
-  
+
   tone?: LearningTone
-  
+
   input?: boolean
 }
 
@@ -18,7 +17,6 @@ export interface DataFlowBoardProps {
   note?: string
   className?: string
 }
-
 
 export function DataFlowBoard({ title, steps, note, className = '' }: DataFlowBoardProps) {
   return (
@@ -32,7 +30,9 @@ export function DataFlowBoard({ title, steps, note, className = '' }: DataFlowBo
             data-input={step.input ? 'true' : undefined}
             style={step.tone ? toneStyle(step.tone) : undefined}
           >
-            <span className="learning-flow-badge" aria-hidden="true">{String(index + 1).padStart(2, '0')}</span>
+            <span className="learning-flow-badge" aria-hidden="true">
+              {String(index + 1).padStart(2, '0')}
+            </span>
             <b className="learning-flow-title">{step.title}</b>
             <span className="learning-flow-detail">{step.detail}</span>
           </li>

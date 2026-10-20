@@ -1,18 +1,16 @@
-
 import type { CSSProperties, HTMLAttributes } from 'react'
 
 export interface TicketProps extends HTMLAttributes<HTMLDivElement> {
-  
   punched?: boolean
-  
+
   holePosition?: number | string
-  
+
   holeSize?: number
-  
+
   hover?: boolean
-  
+
   className?: string
-  
+
   wrapperClassName?: string
   'data-comp'?: string
 }
@@ -46,7 +44,9 @@ export function Ticket({
       style={ticketStyle}
     >
       <div className="ticket-shadow">
-        <div className={`ticket-face relative overflow-hidden rounded-xl border-2 border-ink bg-paper ${hasHoles ? 'ticket-pk' : ''} ${className}`}>
+        <div
+          className={`ticket-face relative overflow-hidden rounded-xl border-2 border-ink bg-paper ${hasHoles ? 'ticket-pk' : ''} ${className}`}
+        >
           {children}
         </div>
       </div>

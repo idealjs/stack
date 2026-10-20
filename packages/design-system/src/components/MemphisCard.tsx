@@ -1,4 +1,3 @@
-
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import type { Chapter } from '../lib/types'
 import { Ring, Tri } from './shapes'
@@ -7,7 +6,10 @@ const FLIP_MS = 8000
 
 export function BrickDots({ bricks }: { bricks: Chapter['target']['bricks'] }) {
   return (
-    <span className="flex items-center gap-1" aria-label={`积木 ${bricks.filter((b) => b.learned).length}/${bricks.length}`}>
+    <span
+      className="flex items-center gap-1"
+      aria-label={`积木 ${bricks.filter((b) => b.learned).length}/${bricks.length}`}
+    >
       {bricks.map((b, i) => (
         <i
           key={i}
@@ -42,13 +44,13 @@ export function MemphisCard({
   chapter: Chapter
   entry?: 1 | 2 | 3
   compact?: boolean
-  
+
   zoneText?: ReactNode
-  
+
   href?: string
-  
+
   morph?: boolean
-  
+
   corner?: ReactNode
 }) {
   const [gifOn, setGifOn] = useState(false)
@@ -109,7 +111,11 @@ export function MemphisCard({
       >
         {showGif ? (
           chapter.gifUrl ? (
-            <img src={chapter.gifUrl} alt={chapter.target.expectation} className="h-full w-full object-cover" />
+            <img
+              src={chapter.gifUrl}
+              alt={chapter.target.expectation}
+              className="h-full w-full object-cover"
+            />
           ) : (
             <span className="px-3 text-center text-small font-bold leading-snug text-paper">
               ▶ {chapter.target.expectation}
@@ -120,10 +126,10 @@ export function MemphisCard({
             {chapter.target.goal}
           </span>
         ) : zoneText ? (
-          
-          <span className="px-3 text-center text-small font-semibold leading-snug text-ink">{zoneText}</span>
+          <span className="px-3 text-center text-small font-semibold leading-snug text-ink">
+            {zoneText}
+          </span>
         ) : (
-          
           <span style={{ fontSize: compact ? '28px' : '40px' }}>{chapter.emoji}</span>
         )}
         <span className="absolute left-1.5 top-1 text-small font-bold tracking-wide text-paper">

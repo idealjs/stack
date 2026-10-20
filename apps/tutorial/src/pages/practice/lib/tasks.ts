@@ -1,21 +1,17 @@
-
-
 export interface PracticeTask {
   id: string
-  
+
   label: string
   title: string
-  
+
   scene: string
-  
+
   expectation: string
-  
+
   acceptance: string[]
-  
+
   opener: string
 }
-
-
 
 export const TASKS: PracticeTask[] = [
   {
@@ -37,7 +33,6 @@ export const TASKS: PracticeTask[] = [
   },
 ]
 
-
 export function taskMarkdown(task: PracticeTask): string {
   return [
     `# 练习任务 · ${task.title}`,
@@ -53,7 +48,6 @@ export function taskMarkdown(task: PracticeTask): string {
     '',
   ].join('\n')
 }
-
 
 export function taskFromLocation(): PracticeTask {
   if (typeof window === 'undefined') return TASKS[0]

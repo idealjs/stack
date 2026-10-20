@@ -1,11 +1,8 @@
-
-
 process.env.TMPDIR ??= `${process.env.HOME}/.cache/pw-tmp`
 import { mkdirSync } from 'node:fs'
 mkdirSync(process.env.TMPDIR, { recursive: true })
 
 import { defineConfig, devices } from '@playwright/test'
-
 
 export default defineConfig({
   testDir: 'e2e',
@@ -15,7 +12,7 @@ export default defineConfig({
   fullyParallel: true,
   use: {
     baseURL: 'http://localhost:4491',
-    
+
     contextOptions: { reducedMotion: 'reduce', viewport: { width: 1280, height: 900 } },
   },
   webServer: {

@@ -1,4 +1,3 @@
-
 import type { ChatMessage, LlmConfig } from './llm'
 import { streamChat } from './llm'
 import type { PracticeTask } from '../tasks'
@@ -20,14 +19,12 @@ export function systemPrompt(task: PracticeTask): string {
 }
 
 export interface TurnHooks {
-  
   onAssistantDelta: (delta: string) => void
 }
 
-
 export async function runAgentTurn(opts: {
   config: LlmConfig
-  
+
   history: ChatMessage[]
   userText: string
   signal: AbortSignal
