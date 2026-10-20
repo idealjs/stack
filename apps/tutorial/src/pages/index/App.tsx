@@ -1,5 +1,5 @@
 import { Page } from '../../lib/ui'
-import { Button } from '@stack/design-system'
+import { Button } from '../../design-system'
 import { MONTHS } from '../../content/blogs'
 
 export function App() {

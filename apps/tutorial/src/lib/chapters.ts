@@ -1,4 +1,4 @@
-import type { Chapter, ChapterId, Profile } from '@stack/design-system'
+import type { Chapter, ChapterId, Profile } from '../design-system'
 
 export const CHAPTERS: Record<ChapterId, Chapter> = {
   1: {

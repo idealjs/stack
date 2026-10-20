@@ -1,7 +1,7 @@
 import { Page, Section } from '../../lib/ui'
-import { BrickDot, Mark, Ring, Tri, Wave } from '@stack/design-system'
+import { BrickDot, Mark, Ring, Tri, Wave } from '../../design-system'
 import { CHAPTERS } from '../../lib/chapters'
-import { ChapterTicket } from '@stack/design-system'
+import { ChapterTicket } from '../../design-system'
 import type { ReactNode } from 'react'
 
 const SHAPES = [

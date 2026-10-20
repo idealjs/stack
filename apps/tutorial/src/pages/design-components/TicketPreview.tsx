@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Ticket } from '@stack/design-system'
+import { Ticket } from '../../design-system'
 
 export function TicketPreview() {
   const [position, setPosition] = useState('50%')

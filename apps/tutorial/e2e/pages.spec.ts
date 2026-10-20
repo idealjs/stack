@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test'
 import type { Page } from '@playwright/test'
-import type { TicketProps } from '../../../packages/design-system/src/components/Ticket'
+import type { TicketProps } from '../src/design-system/components/Ticket'
 
 const PAGES = ['design', 'design-colors', 'design-symbols', 'design-components'] as const
 

@@ -1,5 +1,5 @@
 import { Page, Section } from '../../lib/ui'
-import { ChapterTicket } from '@stack/design-system'
+import { ChapterTicket } from '../../design-system'
 import { CHAPTERS } from '../../lib/chapters'
 import type { ReactNode } from 'react'
 

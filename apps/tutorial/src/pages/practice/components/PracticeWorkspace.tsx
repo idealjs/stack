@@ -1,5 +1,5 @@
 import { useMemo, useRef, useState } from 'react'
-import { ClipboardChecklist, FolderTabs, TaskEnvelope } from '@stack/design-system'
+import { ClipboardChecklist, FolderTabs, TaskEnvelope } from '../../../design-system'
 import type { ChatMessage, LlmConfig } from '../lib/agent/llm'
 import { hasKey, loadLlmConfig, saveLlmConfig } from '../lib/agent/llm'
 import { runAgentTurn, systemPrompt } from '../lib/agent/loop'

@@ -1,7 +1,7 @@
-import '@stack/design-system'
+import '../design-system'
 import type { ReactNode } from 'react'
-import type { ChapterId, NavItemLink, NavRowGroup } from '@stack/design-system'
-import { SiteNavbar } from '@stack/design-system'
+import type { ChapterId, NavItemLink, NavRowGroup } from '../design-system'
+import { SiteNavbar } from '../design-system'
 import { CHAPTERS } from './chapters'
 import { MONTHS } from '../content/blogs'
 

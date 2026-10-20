@@ -11,7 +11,6 @@ WORKDIR /workspace
 COPY .yarnrc.yml package.json yarn.lock ./
 COPY .yarn/releases/yarn-4.9.2.cjs .yarn/releases/
 COPY apps/tutorial/package.json apps/tutorial/
-COPY packages/design-system/package.json packages/design-system/
 COPY packages/stack-idealjs/package.json packages/stack-idealjs/
 
 # ② 安装依赖——yarn 4.9.2 由 yarnPath（.yarn/releases）提供，node 直调脚本，不依赖 corepack/全局 yarn

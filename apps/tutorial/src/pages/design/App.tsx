@@ -25,7 +25,7 @@ export function App() {
     <Page
       active="design"
       title="设计系统"
-      desc="孟菲斯 × 拟物卡的四个切面；组件与 tokens 唯一定义于 @stack/design-system。"
+      desc="孟菲斯 × 拟物卡的四个切面；组件与 tokens 唯一定义于 src/design-system。"
     >
       <Section label="五册" note="点卡片进入对应册">
         <div className="flex flex-wrap gap-6">

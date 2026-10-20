@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
 import { Page, Section } from '../lib/ui'
 import { MONTHS, POSTS, monthOf } from '../content/blogs'
-import { BrickDot, Mark, Tri } from '@stack/design-system'
+import { BrickDot, Mark, Tri } from '../design-system'
 
 function inline(text: string): ReactNode[] {
   const parts: ReactNode[] = []

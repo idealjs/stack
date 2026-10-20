@@ -1,8 +1,8 @@
 import type { CSSProperties } from 'react'
 import { Page, Section } from '../lib/ui'
 import { CHAPTERS, CONTENT } from '../lib/chapters'
-import type { ChapterId } from '@stack/design-system'
-import { BrickDots, Mark, Ring, Tri, Wave } from '@stack/design-system'
+import type { ChapterId } from '../design-system'
+import { BrickDots, Mark, Ring, Tri, Wave } from '../design-system'
 
 const ALL: ChapterId[] = [1, 2, 3, 4, 5, 6]
 

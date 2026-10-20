@@ -1,13 +1,13 @@
-# @stack/design-system
+# design-system
 
 孟菲斯 × 拟物卡设计系统的唯一定义处：组件（MemphisCard/RouteLine/Ticket/ChapterTicket/AssignBlock/EntryGuide/Scatter/shapes）、tokens（颜色/字体/投影/票券打孔）、类型。
 
-`apps/tutorial`（教程站）引用本包——特性只改这里，站点同步获得；结构契约与视觉基线的 E2E 在 `apps/tutorial/e2e/`。消费方式：workspace 依赖 + 源码直出（vite 编译 TS，无需构建步骤）。
+教程站内的唯一定义处——特性只改这里，站点直接获得；结构契约与视觉基线的 E2E 在 `apps/tutorial/e2e/`。消费方式：源码直出（vite 编译 TS，无需构建步骤），调用方按相对路径引 `src/design-system`。
 
 `Ticket` 是独立的通用票券，内容通过 `children` 传入。票面先用 mask 打孔，内层 `.ticket-shadow` 包裹用 `filter: drop-shadow()` 根据挖空轮廓生成阴影；孔缘描边留在包裹之外，不参与投影（filter 不能放在被 mask 的票面上——同元素上 mask 在 filter 之后应用，会把孔位处的阴影一起裁掉）。上下孔的圆心使用同一个横坐标，位置相对于票面左侧计算。
 
 ```tsx
-import { Ticket, ChapterTicket } from '@stack/design-system'
+import { Ticket, ChapterTicket } from '../../design-system'
 
 <Ticket holePosition="50%" holeSize={20} className="h-20 w-60 p-4">
   自定义票券内容
@@ -27,7 +27,7 @@ import { Ticket, ChapterTicket } from '@stack/design-system'
 | `className` | 票面的尺寸和内容布局 | 无 |
 | `wrapperClassName` | 外层布局类名 | 无 |
 
-`style`、事件与其他 div 属性传给外层。`ChapterTicket` 负责章节内容与完成状态，复用 `Ticket`，同样接受 `holePosition`、`holeSize`、`hover`。`TicketProps` 与 `ChapterTicketProps` 从包入口导出。
+`style`、事件与其他 div 属性传给外层。`ChapterTicket` 负责章节内容与完成状态，复用 `Ticket`，同样接受 `holePosition`、`holeSize`、`hover`。`TicketProps` 与 `ChapterTicketProps` 从入口 `index.ts` 导出。
 
 ## 拟物学习组件
 
@@ -60,7 +60,7 @@ import { Ticket, ChapterTicket } from '@stack/design-system'
 | `FlashCard` | `flipped` | `defaultFlipped` | `onFlip` |
 
 ```tsx
-import { ClipboardChecklist, TaskEnvelope } from '@stack/design-system'
+import { ClipboardChecklist, TaskEnvelope } from '../../design-system'
 
 <ClipboardChecklist
   title="核对第一个页面"
@@ -77,4 +77,4 @@ import { ClipboardChecklist, TaskEnvelope } from '@stack/design-system'
 </TaskEnvelope>
 ```
 
-教程站 `design-components.html` 引用 `LearningKitGallery` 标本，从 `@stack/design-system/examples/learning-kit` 导入。标本的交互状态仅保留在当前页面，不写入真实学习进度。
+教程站 `design-components.html` 引用 `LearningKitGallery` 标本，从 `../../design-system/examples/LearningKitGallery` 导入。标本的交互状态仅保留在当前页面，不写入真实学习进度。

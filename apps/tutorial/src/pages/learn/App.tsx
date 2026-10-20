@@ -7,8 +7,8 @@ import {
   ExperimentFrame,
   Mark,
   StickyNote,
-} from '@stack/design-system'
-import type { DataFlowStep, ToolboxBrick } from '@stack/design-system'
+} from '../../design-system'
+import type { DataFlowStep, ToolboxBrick } from '../../design-system'
 import { TodoPreview } from './components/TodoPreview'
 import './learn.css'
 
