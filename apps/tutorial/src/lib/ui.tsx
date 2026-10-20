@@ -115,7 +115,7 @@ export function Page({
         <div className="mb-7">
           {title && <h1 className="m-0 text-t1 font-extrabold text-ink">{title}</h1>}
           {subtitle && <p className="m-0 mt-2 text-t2 font-bold text-ink">{subtitle}</p>}
-          {desc && <p className="m-0 mt-2 max-w-[72ch] text-content text-mute">{desc}</p>}
+          {desc && <p className="m-0 mt-2 text-content text-mute">{desc}</p>}
         </div>
       )}
       {children}
