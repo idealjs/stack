@@ -37,25 +37,27 @@ export function Ticket({
   }
 
   return (
-    <div
-      {...props}
-      data-comp={component}
-      className={`ticket-shell w-fit rounded-xl ${hasHoles ? 'tk-pk' : ''} ${hover ? 'ticket-lift' : ''} ${wrapperClassName}`}
-      style={ticketStyle}
-    >
-      <div className="ticket-shadow">
-        <div
-          className={`ticket-face relative overflow-hidden rounded-xl border-2 border-ink bg-paper ${hasHoles ? 'ticket-pk' : ''} ${className}`}
-        >
-          {children}
+    <span className="hover-host block w-fit">
+      <div
+        {...props}
+        data-comp={component}
+        className={`ticket-shell w-fit rounded-xl ${hasHoles ? 'tk-pk' : ''} ${hover ? 'ticket-lift' : ''} ${wrapperClassName}`}
+        style={ticketStyle}
+      >
+        <div className="ticket-shadow">
+          <div
+            className={`ticket-face relative overflow-hidden rounded-xl border-2 border-ink bg-paper ${hasHoles ? 'ticket-pk' : ''} ${className}`}
+          >
+            {children}
+          </div>
         </div>
+        {hasHoles && (
+          <>
+            <i className="pk-arc pk-arc-t" aria-hidden />
+            <i className="pk-arc pk-arc-b" aria-hidden />
+          </>
+        )}
       </div>
-      {hasHoles && (
-        <>
-          <i className="pk-arc pk-arc-t" aria-hidden />
-          <i className="pk-arc pk-arc-b" aria-hidden />
-        </>
-      )}
-    </div>
+    </span>
   )
 }

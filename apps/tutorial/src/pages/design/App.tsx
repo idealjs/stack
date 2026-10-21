@@ -30,14 +30,15 @@ export function App() {
       <Section label="五册" note="点卡片进入对应册">
         <div className="flex flex-wrap gap-6">
           {BOOKS.map((b) => (
-            <a
-              key={b.key}
-              href={`/${b.key}.html`}
-              className="block w-[280px] rounded-2xl border-2 border-ink bg-paper p-5 no-underline shadow-ink transition-transform duration-150 hover:-translate-y-[3px] hover:shadow-ink-lift"
-            >
-              <span className="text-t3 font-extrabold text-ink">{b.label}</span>
-              <span className="mt-2 block text-small leading-relaxed text-body">{b.desc}</span>
-            </a>
+            <span key={b.key} className="hover-host block w-fit">
+              <a
+                href={`/${b.key}.html`}
+                className="hoverable-shadow block w-[280px] rounded-2xl border-2 border-ink bg-paper p-5 no-underline shadow-ink transition-[translate,box-shadow] duration-150"
+              >
+                <span className="text-t3 font-extrabold text-ink">{b.label}</span>
+                <span className="mt-2 block text-small leading-relaxed text-body">{b.desc}</span>
+              </a>
+            </span>
           ))}
         </div>
       </Section>

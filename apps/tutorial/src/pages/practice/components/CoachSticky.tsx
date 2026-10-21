@@ -22,21 +22,23 @@ export function CoachSticky({ taskLabel, children }: { taskLabel: string; childr
 
   return (
     <div className="fixed right-3 bottom-3 z-40 sm:right-4 sm:bottom-4">
-      <button
-        type="button"
-        data-comp="coach-sticky"
-        aria-expanded={open}
-        aria-controls={COACH_STICKY_PANEL_ID}
-        onClick={() => setOpen((v) => !v)}
-        className="flex cursor-pointer items-center gap-2 rounded-t-lg border-2 border-ink bg-clash2a py-2 pr-4 pl-3 text-[12.5px] font-extrabold text-ink shadow-[3px_3px_0_var(--color-ink)] transition-transform duration-150 hover:-translate-y-0.5 motion-reduce:transition-none motion-reduce:hover:translate-y-0"
-      >
-        <span aria-hidden className="size-3 shrink-0 rounded-full border-2 border-ink bg-paper" />
-        <span>陪练 agent</span>
-        <span className="font-mono text-[11px] opacity-70">{taskLabel}</span>
-        <span aria-hidden className="ml-0.5">
-          {open ? '▾' : '▴'}
-        </span>
-      </button>
+      <span className="hover-host block">
+        <button
+          type="button"
+          data-comp="coach-sticky"
+          aria-expanded={open}
+          aria-controls={COACH_STICKY_PANEL_ID}
+          onClick={() => setOpen((v) => !v)}
+          className="hoverable-shadow lift-sm flex cursor-pointer items-center gap-2 rounded-t-lg border-2 border-ink bg-clash2a py-2 pr-4 pl-3 text-[12.5px] font-extrabold text-ink shadow-[3px_3px_0_var(--color-ink)] transition-[translate] duration-150 motion-reduce:transition-none"
+        >
+          <span aria-hidden className="size-3 shrink-0 rounded-full border-2 border-ink bg-paper" />
+          <span>陪练 agent</span>
+          <span className="font-mono text-[11px] opacity-70">{taskLabel}</span>
+          <span aria-hidden className="ml-0.5">
+            {open ? '▾' : '▴'}
+          </span>
+        </button>
+      </span>
 
       <div
         ref={panelRef}

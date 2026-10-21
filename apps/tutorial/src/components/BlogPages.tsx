@@ -145,24 +145,26 @@ export function BlogCard({ post }: { post: (typeof POSTS)[number] }) {
       ) ??
     ''
   return (
-    <a
-      href={`/blog-${post.slug}.html`}
-      className="block w-[420px] rounded-2xl border-2 border-ink bg-paper p-5 no-underline shadow-ink transition-transform duration-150 hover:-translate-y-[3px] hover:shadow-ink-lift"
-    >
-      <div className="flex items-center gap-2.5">
-        <span className="rounded-full bg-clash3b/15 px-2.5 py-0.5 font-mono t-small-strong">
-          {post.date}
-        </span>
-        <span className="t-small-mute">{post.author}</span>
-      </div>
-      <h2 className="m-0 mt-3 text-t3 font-extrabold text-ink">{post.title}</h2>
-      <p className="m-0 mt-2 line-clamp-2 text-small leading-relaxed text-body">
-        {quote.replace(/^> /, '').slice(0, 90)}…
-      </p>
-      <p className="m-0 mt-3 t-small-strong">
-        阅读全文 <span aria-hidden>→</span>
-      </p>
-    </a>
+    <span className="hover-host block w-fit">
+      <a
+        href={`/blog-${post.slug}.html`}
+        className="hoverable-shadow block w-[420px] rounded-2xl border-2 border-ink bg-paper p-5 no-underline shadow-ink transition-[translate,box-shadow] duration-150"
+      >
+        <div className="flex items-center gap-2.5">
+          <span className="rounded-full bg-clash3b/15 px-2.5 py-0.5 font-mono t-small-strong">
+            {post.date}
+          </span>
+          <span className="t-small-mute">{post.author}</span>
+        </div>
+        <h2 className="m-0 mt-3 text-t3 font-extrabold text-ink">{post.title}</h2>
+        <p className="m-0 mt-2 line-clamp-2 text-small leading-relaxed text-body">
+          {quote.replace(/^> /, '').slice(0, 90)}…
+        </p>
+        <p className="m-0 mt-3 t-small-strong">
+          阅读全文 <span aria-hidden>→</span>
+        </p>
+      </a>
+    </span>
   )
 }
 

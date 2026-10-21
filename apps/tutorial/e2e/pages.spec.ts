@@ -156,6 +156,7 @@ test.describe('CourseCard 规格契约', () => {
 
 test.describe('RouteLine 规格契约', () => {
   test.beforeEach(async ({ page }) => await page.goto('/design-components.html'))
+  test.use({ reducedMotion: 'no-preference' })
 
   test('线形：实线先后 2.5px 无 dash；点线同族 0.1/6 圆帽', async ({ page }) => {
     const specs = await page.locator('svg path').evaluateAll((ns) =>
@@ -271,6 +272,7 @@ test.describe('价值区荧光标记契约', () => {
 
 test.describe('票券规格契约', () => {
   test.beforeEach(async ({ page }) => await page.goto('/design-symbols.html'))
+  test.use({ reducedMotion: 'no-preference' })
 
   test('裁切式：overflow hidden + 单一 2px 描边 + 头部色块无独立边框', async ({ page }) => {
     const done = page.locator('.ticket-pk').first()
@@ -543,6 +545,7 @@ test.describe('票券规格契约', () => {
 
 test.describe('ShadowButton 按压契约', () => {
   test.beforeEach(async ({ page }) => await page.goto('/design-components.html'))
+  test.use({ reducedMotion: 'no-preference' })
 
   test('多态渲染：有 href=a、无 href=button[type=button]、disabled=虚线占位', async ({ page }) => {
     const buttons = page.locator('[data-comp="shadow-button"]:visible')
@@ -611,6 +614,7 @@ test.describe('ShadowButton 按压契约', () => {
 
 test.describe('ShadowCard · 四部曲契约', () => {
   test.beforeEach(async ({ page }) => await page.goto('/design-components.html'))
+  test.use({ reducedMotion: 'no-preference' })
 
   const specimens = (page: Page) =>
     page
@@ -626,7 +630,7 @@ test.describe('ShadowCard · 四部曲契约', () => {
         const face = el.querySelector<HTMLElement>('.ticket-face')
         return {
           ticket: !!face,
-          hover: el.className.includes('shadow-ink-lift') || el.classList.contains('ticket-lift'),
+          hover: el.classList.contains('hoverable-shadow') || el.classList.contains('ticket-lift'),
           punched: !!face && getComputedStyle(face).maskImage.includes('radial-gradient'),
         }
       }),
@@ -665,9 +669,11 @@ test.describe('ShadowCard · 四部曲契约', () => {
 })
 
 test.describe('阴影册 · hover-host 触发模型', () => {
+  test.use({ reducedMotion: 'no-preference' })
+
   test('宿主承接 hover：命中区不动，位移作用于内部元素（防边界震荡）', async ({ page }) => {
     await page.goto('/design-shadow.html')
-    const host = page.locator('.hover-host').first()
+    const host = page.locator('main section .hover-host').first()
     const inner = host.locator('.hoverable-shadow')
     await expect(inner).toHaveCSS('translate', 'none')
 
@@ -681,5 +687,16 @@ test.describe('阴影册 · hover-host 触发模型', () => {
 
     await page.mouse.move(hostBox.x - 40, hostBox.y - 40)
     await expect(inner).toHaveCSS('translate', 'none')
+  })
+})
+
+test.describe('阴影册 · hover-host 尊重 reduced-motion', () => {
+  test('reduce 下宿主 hover 只换影、不位移', async ({ page }) => {
+    await page.goto('/design-shadow.html')
+    const host = page.locator('main section .hover-host').first()
+    const inner = host.locator('.hoverable-shadow')
+    await host.hover()
+    await expect(inner).toHaveCSS('translate', 'none')
+    await expect(inner).toHaveCSS('box-shadow', /rgb\(17, 17, 17\) 8px 8px 0px 0px/)
   })
 })

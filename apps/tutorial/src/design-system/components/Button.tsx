@@ -10,7 +10,7 @@ const TONE_BG = {
 } as const
 
 const BASE =
-  'inline-block cursor-pointer rounded-xl border-2 border-ink px-4 py-2 text-small font-bold text-ink no-underline shadow-ink transition-[transform,box-shadow] duration-150 hover:-translate-y-[3px] hover:shadow-ink-lift'
+  'inline-block cursor-pointer rounded-xl border-2 border-ink px-4 py-2 text-small font-bold text-ink no-underline shadow-ink hoverable-shadow transition-[translate,box-shadow] duration-150'
 
 export function Button({
   tone = 'clash1a',
@@ -37,14 +37,18 @@ export function Button({
   }
   if (href) {
     return (
-      <a href={href} className={`${BASE} ${TONE_BG[tone]}`}>
-        {children}
-      </a>
+      <span className="hover-host inline-block">
+        <a href={href} className={`${BASE} ${TONE_BG[tone]}`}>
+          {children}
+        </a>
+      </span>
     )
   }
   return (
-    <button type="button" className={`${BASE} ${TONE_BG[tone]}`}>
-      {children}
-    </button>
+    <span className="hover-host inline-block">
+      <button type="button" className={`${BASE} ${TONE_BG[tone]}`}>
+        {children}
+      </button>
+    </span>
   )
 }

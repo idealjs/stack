@@ -1,5 +1,5 @@
 import { Page, Section } from '../../lib/ui'
-import { ChapterTicket } from '../../design-system'
+import { ChapterTicket, ShadowButton } from '../../design-system'
 import { CHAPTERS } from '../../lib/chapters'
 import type { ReactNode } from 'react'
 
@@ -242,6 +242,55 @@ export function App() {
               </>
             }
           />
+        </div>
+      </Section>
+
+      <Section
+        label="触发模型 · hover-host"
+        note="位移的 :hover 挂在不动的宿主上——命中区不跟位移，底边不抖"
+      >
+        <Rule
+          demo={
+            <>
+              <DoDont bad text="自 hover：命中区跟着位移，指针停底边就疯狂抖动">
+                <div className="w-fit cursor-pointer rounded-xl border-2 border-ink bg-paper px-3.5 py-3 shadow-ink transition-[translate,box-shadow] duration-150 hover:-translate-y-[3px] hover:shadow-ink-lift">
+                  <b className="text-small">纸卡</b>
+                </div>
+              </DoDont>
+              <DoDont text="hover-host：宿主承接 hover，子元素才位移">
+                <div className="hover-host w-fit">
+                  <div className="hoverable-shadow shadow-ink w-fit cursor-pointer rounded-xl border-2 border-ink bg-paper px-3.5 py-3">
+                    <b className="text-small">纸卡</b>
+                  </div>
+                </div>
+              </DoDont>
+            </>
+          }
+        />
+        <div className="mt-6 flex flex-wrap items-end gap-x-10 gap-y-6">
+          <Particle
+            title="按钮档 · shadow-btn"
+            code='<span className="hover-host inline-flex">\n  <button className="… hoverable-shadow shadow-btn" />\n</span>'
+          >
+            <ShadowButton size="sm">按钮</ShadowButton>
+          </Particle>
+          <Particle
+            title="撕角档 · drop-shadow-ink"
+            code={`<div className="hover-host">\n  <TornNote className="drop-shadow-ink hoverable-shadow" />\n</div>`}
+          >
+            <TornNote className="drop-shadow-ink hoverable-shadow w-fit cursor-pointer" />
+          </Particle>
+          <Particle
+            title="便签档 · lift-sm"
+            code='<span className="hover-host block">\n  <button className="… hoverable-shadow lift-sm" />\n</span>'
+          >
+            <button
+              type="button"
+              className="hoverable-shadow lift-sm flex cursor-pointer items-center gap-2 rounded-t-lg border-2 border-ink bg-clash2a px-3 py-1.5 text-[12.5px] font-extrabold text-ink shadow-[3px_3px_0_var(--color-ink)] transition-[translate] duration-150"
+            >
+              便签 Tab
+            </button>
+          </Particle>
         </div>
       </Section>
     </Page>

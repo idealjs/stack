@@ -20,20 +20,15 @@ const TONE_BG: Record<ShadowButtonTone, string> = {
 }
 
 export const SHADOW_BUTTON_BASE =
-  'cursor-pointer items-center justify-center border-2 border-ink text-ink no-underline transition-[transform,box-shadow,background-color] duration-150 focus-visible:outline-[3px] focus-visible:outline-clash3b focus-visible:outline-offset-2'
+  'cursor-pointer items-center justify-center border-2 border-ink text-ink no-underline transition-[translate,box-shadow,background-color] duration-150 focus-visible:outline-[3px] focus-visible:outline-clash3b focus-visible:outline-offset-2'
 
 export const SHADOW_BUTTON_REST = 'shadow-[3px_3px_0_var(--color-ink)]'
-
-export const SHADOW_BUTTON_HOVER =
-  'hover:-translate-y-[2px] hover:shadow-[5px_5px_0_var(--color-ink)]'
 
 export const SHADOW_BUTTON_ACTIVE =
   'active:translate-x-[2px] active:translate-y-[2px] active:shadow-[1px_1px_0_var(--color-ink)]'
 
 const RING_REST =
   'bg-paper-deep shadow-[inset_0_0_0_2px_var(--color-ink),3px_3px_0_var(--color-ink)]'
-const RING_HOVER =
-  'hover:-translate-y-[2px] hover:shadow-[inset_0_0_0_2px_var(--color-ink),5px_5px_0_var(--color-ink)]'
 const RING_ACTIVE =
   'active:translate-x-[2px] active:translate-y-[2px] active:shadow-[inset_0_0_0_2px_var(--color-ink),1px_1px_0_var(--color-ink)]'
 
@@ -64,10 +59,9 @@ export function shadowButtonClasses({
   return [
     SHADOW_BUTTON_BASE,
     SIZE[size],
-    active ? RING_REST : TONE_BG[tone],
     active
-      ? `${RING_HOVER} ${RING_ACTIVE}`
-      : `${SHADOW_BUTTON_REST} ${SHADOW_BUTTON_HOVER} ${SHADOW_BUTTON_ACTIVE}`,
+      ? `hoverable-shadow shadow-btn-ring ${RING_REST} ${RING_ACTIVE}`
+      : `hoverable-shadow shadow-btn ${TONE_BG[tone]} ${SHADOW_BUTTON_REST} ${SHADOW_BUTTON_ACTIVE}`,
     className,
   ]
     .filter(Boolean)
@@ -112,16 +106,17 @@ export function ShadowButton({
       </span>
     )
   }
-  if (href) {
-    return (
-      <a href={href} data-comp="shadow-button" className={cls}>
-        {children}
-      </a>
-    )
-  }
   return (
-    <button type="button" data-comp="shadow-button" onClick={onClick} className={cls}>
-      {children}
-    </button>
+    <span className="hover-host inline-flex">
+      {href ? (
+        <a href={href} data-comp="shadow-button" className={cls}>
+          {children}
+        </a>
+      ) : (
+        <button type="button" data-comp="shadow-button" onClick={onClick} className={cls}>
+          {children}
+        </button>
+      )}
+    </span>
   )
 }

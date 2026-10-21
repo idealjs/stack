@@ -76,7 +76,7 @@ export function SiteNavbar({
         className="peer sr-only"
       />
 
-      <div className="flex flex-wrap items-center gap-1.5 max-lg:peer-checked:[&>label]:invisible">
+      <div className="flex flex-wrap items-center gap-1.5 max-lg:peer-checked:[&>span]:invisible">
         <a
           href={brand.href}
           className={`mr-auto rounded-lg border-2 px-2.5 py-0.5 font-mono text-t2 font-extrabold leading-snug no-underline transition-[transform,box-shadow,background-color] duration-150 ${SHADOW_BUTTON_ACTIVE} ${
@@ -87,19 +87,21 @@ export function SiteNavbar({
         >
           {brand.label}
         </a>
-        <label
-          htmlFor="site-nav-toggle"
-          aria-label="打开导航菜单"
-          aria-expanded="false"
-          aria-controls="site-nav-drawer"
-          className={`hidden max-lg:grid max-lg:size-10 max-lg:place-items-center ${shadowButtonClasses({ size: 'none' })}`}
-        >
-          <span aria-hidden="true" className="flex flex-col gap-[5px]">
-            <i className="block h-[3px] w-5 rounded-sm bg-ink" />
-            <i className="block h-[3px] w-5 rounded-sm bg-ink" />
-            <i className="block h-[3px] w-5 rounded-sm bg-ink" />
-          </span>
-        </label>
+        <span className="hover-host hidden max-lg:inline-flex">
+          <label
+            htmlFor="site-nav-toggle"
+            aria-label="打开导航菜单"
+            aria-expanded="false"
+            aria-controls="site-nav-drawer"
+            className={`hidden max-lg:grid max-lg:size-10 max-lg:place-items-center ${shadowButtonClasses({ size: 'none' })}`}
+          >
+            <span aria-hidden="true" className="flex flex-col gap-[5px]">
+              <i className="block h-[3px] w-5 rounded-sm bg-ink" />
+              <i className="block h-[3px] w-5 rounded-sm bg-ink" />
+              <i className="block h-[3px] w-5 rounded-sm bg-ink" />
+            </span>
+          </label>
+        </span>
       </div>
 
       <div
@@ -115,15 +117,17 @@ export function SiteNavbar({
           >
             {brand.label}
           </ShadowButton>
-          <label
-            htmlFor="site-nav-toggle"
-            aria-label="收起导航菜单"
-            aria-expanded="true"
-            aria-controls="site-nav-drawer"
-            className={`grid size-8 place-items-center text-lg font-extrabold leading-none ${shadowButtonClasses({ size: 'none' })}`}
-          >
-            <span aria-hidden="true">×</span>
-          </label>
+          <span className="hover-host inline-flex">
+            <label
+              htmlFor="site-nav-toggle"
+              aria-label="收起导航菜单"
+              aria-expanded="true"
+              aria-controls="site-nav-drawer"
+              className={`grid size-8 place-items-center text-lg font-extrabold leading-none ${shadowButtonClasses({ size: 'none' })}`}
+            >
+              <span aria-hidden="true">×</span>
+            </label>
+          </span>
         </div>
         {rows.map((row) => (
           <div

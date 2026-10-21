@@ -84,67 +84,68 @@ export function MemphisCard({
   const showGif = gifOn && (locked ? true : flip)
 
   return (
-    <a
-      ref={boxRef}
-      href={href ?? `#ch${chapter.id}`}
-      data-comp="course-card"
-      className="group relative block rounded-[14px] border-2 border-ink bg-paper p-[11px] no-underline
-                 shadow-ink transition-transform duration-150 focus-visible:outline-none
-                 hover:-translate-y-[3px] hover:shadow-ink-lift
-                 focus-visible:-translate-y-[3px] focus-visible:shadow-ink-lift"
-      onMouseEnter={() => setLocked(true)}
-      onMouseLeave={() => setLocked(false)}
-      onFocus={() => setLocked(true)}
-      onBlur={() => setLocked(false)}
-      aria-label={`${chapter.title}：${chapter.target.goal}`}
-    >
-      {entry && <EntryBadge n={entry} />}
-      {corner}
-      {/* ○ 预期结果：16:9 相框（章节撞色只进这里） */}
-      <div
-        className="relative flex aspect-video items-center justify-center overflow-hidden rounded-lg border-[3px] border-ink"
-        style={{
-          background: chapter.color,
-          boxShadow: 'inset 0 3px 8px rgba(26,26,26,0.30), inset 0 -1px 0 rgba(255,255,255,0.55)',
-          ...(morph ? { viewTransitionName: `ch-${chapter.id}` } : {}),
-        }}
+    <span className="hover-host block">
+      <a
+        ref={boxRef}
+        href={href ?? `#ch${chapter.id}`}
+        data-comp="course-card"
+        className="group hoverable-shadow relative block rounded-[14px] border-2 border-ink bg-paper p-[11px] no-underline
+                   shadow-ink transition-[translate,box-shadow] duration-150 focus-visible:outline-none
+                   focus-visible:-translate-y-[3px] focus-visible:shadow-ink-lift"
+        onMouseEnter={() => setLocked(true)}
+        onMouseLeave={() => setLocked(false)}
+        onFocus={() => setLocked(true)}
+        onBlur={() => setLocked(false)}
+        aria-label={`${chapter.title}：${chapter.target.goal}`}
       >
-        {showGif ? (
-          chapter.gifUrl ? (
-            <img
-              src={chapter.gifUrl}
-              alt={chapter.target.expectation}
-              className="h-full w-full object-cover"
-            />
-          ) : (
-            <span className="px-3 text-center text-small font-bold leading-snug text-paper">
-              ▶ {chapter.target.expectation}
+        {entry && <EntryBadge n={entry} />}
+        {corner}
+        {/* ○ 预期结果：16:9 相框（章节撞色只进这里） */}
+        <div
+          className="relative flex aspect-video items-center justify-center overflow-hidden rounded-lg border-[3px] border-ink"
+          style={{
+            background: chapter.color,
+            boxShadow: 'inset 0 3px 8px rgba(26,26,26,0.30), inset 0 -1px 0 rgba(255,255,255,0.55)',
+            ...(morph ? { viewTransitionName: `ch-${chapter.id}` } : {}),
+          }}
+        >
+          {showGif ? (
+            chapter.gifUrl ? (
+              <img
+                src={chapter.gifUrl}
+                alt={chapter.target.expectation}
+                className="h-full w-full object-cover"
+              />
+            ) : (
+              <span className="px-3 text-center text-small font-bold leading-snug text-paper">
+                ▶ {chapter.target.expectation}
+              </span>
+            )
+          ) : flip ? (
+            <span className="px-3 text-center text-small leading-snug text-ink/80 mix-blend-multiply">
+              {chapter.target.goal}
             </span>
-          )
-        ) : flip ? (
-          <span className="px-3 text-center text-small leading-snug text-ink/80 mix-blend-multiply">
-            {chapter.target.goal}
+          ) : zoneText ? (
+            <span className="px-3 text-center text-small font-semibold leading-snug text-ink">
+              {zoneText}
+            </span>
+          ) : (
+            <span style={{ fontSize: compact ? '28px' : '40px' }}>{chapter.emoji}</span>
+          )}
+          <span className="absolute left-1.5 top-1 text-small font-bold tracking-wide text-paper">
+            预期结果{showGif ? ' · GIF' : ''}
           </span>
-        ) : zoneText ? (
-          <span className="px-3 text-center text-small font-semibold leading-snug text-ink">
-            {zoneText}
-          </span>
-        ) : (
-          <span style={{ fontSize: compact ? '28px' : '40px' }}>{chapter.emoji}</span>
-        )}
-        <span className="absolute left-1.5 top-1 text-small font-bold tracking-wide text-paper">
-          预期结果{showGif ? ' · GIF' : ''}
-        </span>
-        <Ring size={16} className="absolute bottom-1.5 right-1.5" />
-      </div>
-      {/* 卡头：▲ 目标 + 标题 + ● 积木点列 */}
-      <div className="mt-2 flex items-center gap-2">
-        <Tri size={14} />
-        <b className="flex-1 text-t3 text-[#2b1d10] [text-shadow:0_1px_1px_rgba(255,255,255,0.9)]">
-          {chapter.title}
-        </b>
-        {!compact && <BrickDots bricks={chapter.target.bricks} />}
-      </div>
-    </a>
+          <Ring size={16} className="absolute bottom-1.5 right-1.5" />
+        </div>
+        {/* 卡头：▲ 目标 + 标题 + ● 积木点列 */}
+        <div className="mt-2 flex items-center gap-2">
+          <Tri size={14} />
+          <b className="flex-1 text-t3 text-[#2b1d10] [text-shadow:0_1px_1px_rgba(255,255,255,0.9)]">
+            {chapter.title}
+          </b>
+          {!compact && <BrickDots bricks={chapter.target.bricks} />}
+        </div>
+      </a>
+    </span>
   )
 }
