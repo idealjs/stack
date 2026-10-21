@@ -7,10 +7,12 @@
   ],
   "packageManager": "yarn@4.9.2",
   "scripts": {
+    "dev": "concurrently -k -n tutorial,runtime \"yarn workspace @stack/tutorial dev\" \"yarn workspace @stack/playground dev:runtime\"",
     "format": "biome format --write .",
     "format:check": "biome format ."
   },
   "devDependencies": {
-    "@biomejs/biome": "^2.5.15"
+    "@biomejs/biome": "^2.5.15",
+    "concurrently": "^10.0.6"
   }
 }
