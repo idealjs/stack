@@ -30,6 +30,7 @@
   --color-ch4: #4ecdc4;
   --color-ch5: #5b8def;
   --color-ch6: #a78bfa;
+  --color-ch7: #51cf66;
 }
 
 .ticket-shell {
@@ -71,16 +72,10 @@
   border-left: var(--ticket-perforation-width) dashed var(--color-ink);
 }
 .ticket-lift {
-  transition: transform 150ms;
+  transition: translate 150ms;
 }
 .ticket-lift .ticket-shadow {
   transition: filter 150ms;
-}
-.ticket-lift:hover {
-  transform: translateY(-3px);
-}
-.ticket-lift:hover .ticket-shadow {
-  filter: drop-shadow(var(--drop-shadow-ink-lift));
 }
 
 .hoverable-shadow {
@@ -96,21 +91,41 @@
 .hover-host:hover .hoverable-shadow.drop-shadow-ink {
   filter: drop-shadow(var(--drop-shadow-ink-lift));
 }
-
-.hoverable-shadow:hover {
+.hover-host:hover .hoverable-shadow.shadow-btn {
+  translate: 0 -2px;
+  box-shadow: 5px 5px 0 var(--color-ink);
+}
+.hover-host:hover .hoverable-shadow.shadow-btn-ring {
+  translate: 0 -2px;
+  box-shadow:
+    inset 0 0 0 2px var(--color-ink),
+    5px 5px 0 var(--color-ink);
+}
+.hover-host:hover .hoverable-shadow.lift-sm {
+  translate: 0 -2px;
+}
+.hover-host:hover .hoverable-shadow.shadow-btn:active {
+  translate: 2px 2px;
+  box-shadow: 1px 1px 0 var(--color-ink);
+}
+.hover-host:hover .hoverable-shadow.shadow-btn-ring:active {
+  translate: 2px 2px;
+  box-shadow:
+    inset 0 0 0 2px var(--color-ink),
+    1px 1px 0 var(--color-ink);
+}
+.hover-host:hover .ticket-lift {
   translate: 0 -3px;
 }
-.hoverable-shadow.shadow-ink:hover {
-  box-shadow: var(--shadow-ink-lift);
-}
-.hoverable-shadow.drop-shadow-ink:hover {
+.hover-host:hover .ticket-lift .ticket-shadow {
   filter: drop-shadow(var(--drop-shadow-ink-lift));
 }
-.hoverable-shadow.shadow-ink:hover {
-  box-shadow: var(--shadow-ink-lift);
-}
-.hoverable-shadow.drop-shadow-ink:hover {
-  filter: drop-shadow(var(--drop-shadow-ink-lift));
+
+@media (prefers-reduced-motion: reduce) {
+  .hover-host:hover .hoverable-shadow,
+  .hover-host:hover .ticket-lift {
+    translate: none;
+  }
 }
 
 .ticket-pk {

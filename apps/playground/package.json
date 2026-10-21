@@ -11,6 +11,7 @@
     "build:runtime": "vite build --config vite.runtime.config.ts"
   },
   "dependencies": {
+    "esbuild-wasm": "^0.25.12",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
   },

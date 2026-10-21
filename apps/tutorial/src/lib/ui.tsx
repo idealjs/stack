@@ -20,7 +20,7 @@ const DESIGN: { href: string; label: string; key: DesignKey }[] = [
   { href: '/design-shadow.html', label: '阴影', key: 'design-shadow' },
 ]
 
-const CHAPTER_ITEMS: NavItemLink[] = ([1, 2, 3, 4, 5, 6] as ChapterId[]).map((id) => ({
+const CHAPTER_ITEMS: NavItemLink[] = ([1, 2, 3, 4, 5, 6, 7] as ChapterId[]).map((id) => ({
   key: `ch${id}`,
   label: CHAPTERS[id].title,
   href: `/ch${id}.html`,

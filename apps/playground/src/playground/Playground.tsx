@@ -1,17 +1,17 @@
 import { useEffect, useRef, useState } from 'react'
 import { ShadowButton } from '../../../../apps/tutorial/src/design-system'
-import { isRuntimeMessage, PROTOCOL_VERSION, type ConsoleLevel } from './protocol'
+import { isRuntimeMessage, PROTOCOL_VERSION } from './protocol'
+import { buildProject } from './build'
+import { CONFIG_FILE_NAME, CONFIG_TEMPLATE, parseBuildConfig } from './config'
+import { OutputPanel, type OutputLine } from './OutputPanel'
 
 import runtimeHtml from '../../playground-runtime/index.html?raw'
 
 const RUNTIME_ORIGIN: string = import.meta.env.VITE_PLAYGROUND_RUNTIME_ORIGIN ?? ''
 
-const HELLO_WORLD = `// 沙箱里的第一个模块：默认导出 init()，运行时在 import 完成后调用它。
-export default {
-  init() {
-    console.log('hello, playground')
-  },
-}
+const MAIN_TS = `// 沙箱工程入口：TypeScript 直写，点「运行」先经 esbuild-wasm 构建再进沙箱执行。
+const greeting: string = 'hello, playground'
+console.log(greeting)
 `
 
 interface ProjectFile {
@@ -19,7 +19,14 @@ interface ProjectFile {
   code: string
 }
 
-const INITIAL_FILES: ProjectFile[] = [{ name: 'main.js', code: HELLO_WORLD }]
+const INITIAL_FILES: ProjectFile[] = [
+  { name: 'main.ts', code: MAIN_TS },
+  { name: CONFIG_FILE_NAME, code: CONFIG_TEMPLATE },
+]
+
+export interface PlaygroundProps {
+  initialFiles?: ProjectFile[]
+}
 
 const FILE_NAME_RE = /^[a-zA-Z0-9][a-zA-Z0-9._-]{0,63}$/
 
@@ -32,33 +39,22 @@ function checkFileName(raw: string, files: ProjectFile[]): string | null {
   return null
 }
 
-interface OutputLine {
-  level: ConsoleLevel | 'system'
-  text: string
-}
-
 interface RuntimeStatus {
   origin: string
   parentBlocked: boolean
 }
 
-const LEVEL_STYLE: Record<OutputLine['level'], string> = {
-  log: 'bg-paper-deep text-body',
-  info: 'bg-paper-deep text-body',
-  warn: 'bg-clash2a text-ink',
-  error: 'bg-clash1a text-ink',
-  system: 'bg-paper text-mute',
-}
-
-export function Playground() {
-  const [files, setFiles] = useState(INITIAL_FILES)
-  const [activeName, setActiveName] = useState(INITIAL_FILES[0].name)
+export function Playground({ initialFiles = INITIAL_FILES }: PlaygroundProps) {
+  const [files, setFiles] = useState<ProjectFile[]>(() => initialFiles.map((f) => ({ ...f })))
+  const [activeName, setActiveName] = useState(initialFiles[0].name)
   const [newName, setNewName] = useState('')
   const [nameError, setNameError] = useState<string | null>(null)
   const [lines, setLines] = useState<OutputLine[]>([])
   const [status, setStatus] = useState<RuntimeStatus | null>(null)
   const [sameOriginAlert, setSameOriginAlert] = useState(false)
   const [done, setDone] = useState(false)
+  const [building, setBuilding] = useState(false)
+  const [preview, setPreview] = useState(false)
   const iframeRef = useRef<HTMLIFrameElement>(null)
 
   const active = files.find((f) => f.name === activeName) ?? files[0]
@@ -81,7 +77,7 @@ export function Playground() {
   }
 
   const removeFile = (name: string) => {
-    if (files.length <= 1) return
+    if (name === CONFIG_FILE_NAME || files.length <= 1) return
     const next = files.filter((f) => f.name !== name)
     setFiles(next)
     if (name === active.name) setActiveName(next[0].name)
@@ -114,15 +110,43 @@ export function Playground() {
     return () => window.removeEventListener('message', onMessage)
   }, [])
 
-  const run = () => {
+  const run = async () => {
+    if (building) return
     setLines([])
     setDone(false)
     setSameOriginAlert(false)
-    iframeRef.current?.contentWindow?.postMessage(
-      { v: PROTOCOL_VERSION, type: 'run', code: active.code },
-
-      '*',
-    )
+    setBuilding(true)
+    try {
+      const configFile = files.find((f) => f.name === CONFIG_FILE_NAME)
+      const parsed = parseBuildConfig(configFile?.code ?? '')
+      if (!parsed.ok) {
+        setLines([{ level: 'error', stage: 'build', text: parsed.error }])
+        return
+      }
+      const outcome = await buildProject(files, parsed.config)
+      const problemLines: OutputLine[] = outcome.problems.map((p) => ({
+        level: p.level,
+        stage: 'build',
+        text: p.text,
+      }))
+      if (!outcome.ok || outcome.code === null) {
+        setLines(problemLines)
+        return
+      }
+      setLines(problemLines)
+      iframeRef.current?.contentWindow?.postMessage(
+        {
+          v: PROTOCOL_VERSION,
+          type: 'run',
+          code: outcome.code,
+          ...(outcome.html !== null ? { html: outcome.html } : {}),
+        },
+        '*',
+      )
+      setPreview(outcome.html !== null)
+    } finally {
+      setBuilding(false)
+    }
   }
 
   return (
@@ -146,8 +170,8 @@ export function Playground() {
         )}
       </p>
 
-      {/* 项目文件：切换＝按钮置灰当前项；删除＝×（至少保留一份）；新建＝白名单校验后入列。
-       * 文件名是用户输入，渲染永远走文本节点（持久化 XSS 防线之一，见头注释）。 */}
+      {/* 项目文件：切换＝按钮置灰当前项；删除＝×（至少保留一份，esbuild.config.json 是
+       * 构建配置位，永不删）；新建＝白名单校验后入列。文件名是用户输入，渲染永远走文本节点。 */}
       <div className="mb-2 flex flex-wrap items-center gap-1.5" role="group" aria-label="项目文件">
         {files.map((f) => (
           <span
@@ -164,7 +188,7 @@ export function Playground() {
             >
               {f.name}
             </button>
-            {files.length > 1 && (
+            {files.length > 1 && f.name !== CONFIG_FILE_NAME && (
               <button
                 type="button"
                 onClick={() => removeFile(f.name)}
@@ -225,40 +249,21 @@ export function Playground() {
       />
 
       <div className="mt-2.5 flex items-center gap-3">
-        <ShadowButton tone="clash1a" onClick={run}>
+        <ShadowButton tone="clash1a" onClick={run} disabled={building}>
           运行 ▶
         </ShadowButton>
         <span className="t-small-mute">
-          「{active.name}」作为 ESM 模块送进沙箱：Blob URL + import()
+          {building
+            ? 'esbuild-wasm 构建中…'
+            : `「${active.name}」经 esbuild-wasm 构建后送进沙箱：Blob URL + import()`}
         </span>
       </div>
 
-      {/* 输出面板：console 按级别显示；done 后缀一行执行完毕。
-       * 纯文本渲染——沙箱输出永不走 HTML（持久化 XSS 防线，见头注释）。 */}
-      <section aria-label="输出" className="mt-4 rounded-xl border-2 border-ink bg-white p-3">
-        <h2 className="t-small-strong m-0 mb-2">输出</h2>
-        {lines.length === 0 && !done && (
-          <p className="t-small-mute m-0">（还没有输出——点「运行」试试）</p>
-        )}
-        <ul className="m-0 mb-0 list-none p-0">
-          {lines.map((l, i) => (
-            <li
-              key={i}
-              className="mb-1 flex items-baseline gap-2 font-mono text-[13px] leading-relaxed"
-            >
-              <span
-                className={`shrink-0 rounded-md px-1.5 text-[11px] font-bold ${LEVEL_STYLE[l.level]}`}
-              >
-                {l.level}
-              </span>
-              <span className="min-w-0 break-all whitespace-pre-wrap text-body">{l.text}</span>
-            </li>
-          ))}
-        </ul>
-        {done && <p className="t-small-mute m-0 mt-1">✓ 执行完毕（顶层＋init 已结束）</p>}
-      </section>
+      {/* 输出面板：console 按级别显示，构建诊断带「构建」徽章；done 后缀一行执行完毕。 */}
+      <OutputPanel lines={lines} done={done} />
 
-      {/* 沙箱 iframe：唯一通道 postMessage，视觉退场（0×0）但脚本照常执行。
+      {/* 沙箱 iframe：唯一通道 postMessage。html 模式下它就是预览框——入口文档的身体
+       * 被装进这份沙箱文档（脚本已剥，执行只走构建通道）；console 模式保持 0×0 视觉退场。
        * sandbox 只有 allow-scripts——加任何一个 allow-*（尤其 allow-same-origin）都是击穿。 */}
       <iframe
         ref={iframeRef}
@@ -267,8 +272,10 @@ export function Playground() {
         src={RUNTIME_ORIGIN ? `${RUNTIME_ORIGIN.replace(/\/$/, '')}/` : undefined}
         srcDoc={RUNTIME_ORIGIN ? undefined : runtimeHtml}
         onLoad={pingRuntime}
-        className="border-0"
-        style={{ width: 0, height: 0 }}
+        className={
+          preview ? 'mt-4 block w-full rounded-xl border-2 border-ink bg-white' : 'border-0'
+        }
+        style={preview ? { height: 240 } : { width: 0, height: 0 }}
         data-testid="sandbox-frame"
       />
     </div>

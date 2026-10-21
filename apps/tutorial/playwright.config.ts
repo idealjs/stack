@@ -15,10 +15,19 @@ export default defineConfig({
 
     contextOptions: { reducedMotion: 'reduce', viewport: { width: 1280, height: 900 } },
   },
-  webServer: {
-    command: 'yarn preview --port 4491 --strictPort',
-    url: 'http://localhost:4491/index.html',
-    reuseExistingServer: true,
-  },
+  webServer: [
+    {
+      command:
+        'VITE_PLAYGROUND_RUNTIME_ORIGIN=http://localhost:5175 yarn build && yarn preview --port 4491 --strictPort',
+      url: 'http://localhost:4491/index.html',
+      reuseExistingServer: true,
+      timeout: 180_000,
+    },
+    {
+      command: 'yarn workspace @stack/playground dev:runtime --port 5175',
+      url: 'http://localhost:5175/',
+      reuseExistingServer: true,
+    },
+  ],
   projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
 })

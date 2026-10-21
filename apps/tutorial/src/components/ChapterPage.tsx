@@ -1,12 +1,12 @@
-import type { CSSProperties } from 'react'
+import type { CSSProperties, ReactNode } from 'react'
 import { Page, Section } from '../lib/ui'
 import { CHAPTERS, CONTENT } from '../lib/chapters'
 import type { ChapterId } from '../design-system'
 import { BrickDots, Mark, Ring, Tri, Wave } from '../design-system'
 
-const ALL: ChapterId[] = [1, 2, 3, 4, 5, 6]
+const ALL: ChapterId[] = [1, 2, 3, 4, 5, 6, 7]
 
-export function ChapterPage({ id }: { id: ChapterId }) {
+export function ChapterPage({ id, children }: { id: ChapterId; children?: ReactNode }) {
   const ch = CHAPTERS[id]
   const c = CONTENT[id]
   const prev = ALL[id - 2]
@@ -103,6 +103,8 @@ export function ChapterPage({ id }: { id: ChapterId }) {
             </div>
           </Section>
         )}
+
+        {children}
 
         <div className="flex items-center justify-between gap-4">
           {prev ? (

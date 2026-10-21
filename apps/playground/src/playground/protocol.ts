@@ -9,6 +9,8 @@ export interface RunMessage {
   v: typeof PROTOCOL_VERSION
   type: 'run'
   code: string
+
+  html?: string
 }
 
 export type ConsoleLevel = 'log' | 'info' | 'warn' | 'error'

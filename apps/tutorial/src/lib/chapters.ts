@@ -91,6 +91,21 @@ export const CHAPTERS: Record<ChapterId, Chapter> = {
       ],
     },
   },
+  7: {
+    id: 7,
+    title: 'MPA 入口',
+    emoji: '🧱',
+    color: 'var(--color-ch7)',
+    target: {
+      goal: '看懂一个网页怎么被「入口文档」组织起来：index.html 引 main.ts',
+      expectation: 'template 在沙箱里跑起来：#app 长出 hello, template，输出面板有 console 回传',
+      bricks: [
+        { name: 'MPA 入口', learned: true },
+        { name: 'module script', learned: true },
+        { name: 'DOM 挂载点', learned: true },
+      ],
+    },
+  },
 }
 
 export const PROFILES: Profile[] = [
@@ -364,5 +379,48 @@ export const CONTENT: Record<ChapterId, ChapterContent> = {
         family: '同族是 code review 流；验收产物越清楚，协作越轻',
       },
     ],
+  },
+  7: {
+    steps: [
+      {
+        title: '读懂入口文档',
+        kind: 'value',
+        what: 'index.html 是浏览器第一个吃的文件：挂载点 <div id="app"> 加一行 module script 引 main.ts。',
+        accept: '能指出哪一行负责把 TS 接进页面、哪个元素是 JS 的落脚点。',
+      },
+      {
+        title: '在沙箱里跑 template',
+        kind: 'value',
+        what: '下面的实验室预置了 template 的全部文件：点「运行」，esbuild 构建 main.ts，index.html 的身体装进沙箱文档。',
+        accept: '预览框长出 hello, template，输出面板同时有 console 回传。',
+      },
+      {
+        title: '改出你自己的入口',
+        kind: 'value',
+        what: '换文案、加一个新元素、给 #app 换个兄弟节点，每次改完再跑。',
+        accept: '每次运行都是全新文档：改了什么，预览框里就只是什么。',
+      },
+    ],
+    bricks: [
+      {
+        name: 'MPA 入口',
+        what: '每页一个 html 文档、各引各的入口脚本',
+        why: '多页应用的页与页互不依赖，入口即边界',
+        family: '同族是 SPA 单入口；页面间硬跳转用 MPA，客户端切换用 SPA',
+      },
+      {
+        name: 'module script',
+        what: '<script type="module">：浏览器按 ESM 加载的入口',
+        why: 'TS 文件靠它进页面，import 关系从这里展开',
+        family: '同族是 classic script；新代码一律 module——独立作用域、自动 defer',
+      },
+      {
+        name: 'DOM 挂载点',
+        what: 'JS 往页面里长出内容的那个根元素（#app）',
+        why: '静态结构归 HTML、动态内容归 JS，两者在挂载点交接',
+        family: '同族是 SSR 直出；客户端挂载用挂载点，首屏直出交给 SSR',
+      },
+    ],
+    base: 'esbuild.config.json 里的 html 字段是沙箱的接缝：宿主把入口文档的身体装进沙箱、剥掉其中的 <script>——页面里的脚本永远只走构建通道。',
   },
 }

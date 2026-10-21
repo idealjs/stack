@@ -8,9 +8,9 @@
   <body>
     <script type="module">
       // ===== Playground 运行时：宿主 ↔ 运行时唯一通道是 postMessage =====
-      // 协议 v1：与宿主侧 src/pages/playground/protocol.ts 手工镜像。本文件零 import 是
-      // 「一份原文两条路」的代价；后续 esbuild/OPFS 阶段若协议变复杂，改为打包时共享同一份
-      // 协议源码即可（届时跨源路走构建产物，srcdoc 路注入打包后的内联脚本）。
+      // 协议 v1：与宿主侧 src/playground/protocol.ts 手工镜像。本文件零 import 是
+      // 「一份原文两条路」的代价；若协议变复杂，改为打包时共享同一份协议源码即可
+      // （届时跨源路走构建产物，srcdoc 路注入打包后的内联脚本）。
 
       const PROTOCOL_VERSION = 1
       const CONSOLE_LEVELS = ['log', 'info', 'warn', 'error']
@@ -52,15 +52,18 @@
         post({ type: 'error', text: 'Unhandled rejection: ' + format(event.reason) })
       })
 
-      // ===== 执行入口：代码 → Blob URL → import()（以 ESM 执行）=====
-      // Blob URL 是 opaque origin 文档里唯一可用的模块通道。本阶段刻意不做（后续接缝）：
-      // - 相对路径 import / 裸说明符（外部依赖）无法解析——esbuild-wasm 先在运行时侧把
-      //   JSX/TS 转译成 JS 再走同一 Blob URL 通道；
-      // - 虚拟工程目录的多文件模块解析——OPFS 挂载后由 Service Worker（或运行时内 fetch
-      //   拦截）按目录结构给出真实 URL。两步都落地后，这里的三行执行核心不变。
+      // ===== 执行入口：构建产物 → Blob URL → import()（以 ESM 执行）=====
+      // 收到的 code 已是宿主组件侧 esbuild-wasm 的工程构建产物——TS 转译、多文件解析、
+      // esbuild.config.json 的读取校验都在组件那一侧完成，本文件保持零依赖纯执行器。
+      // html 是入口文档的身体（宿主已剥掉 <script>，脚本只许走构建通道）：每轮执行先
+      // 重置 body——有则注入、无则清空，每次运行都是全新文档；console 包装与异常监听
+      // 都挂在 window 上，body 置换不伤及（本内联脚本元素被移除也无碍，求值早已完成）。
+      // Blob URL 是 opaque origin 文档里唯一可用的模块通道；两行执行核心（import＋
+      // 可选 init）在此后阶段保持不变。
       let runSeq = 0 // 递增执行序号：慢模块的迟回包（异步 console/error）不计入新一轮
-      async function execute(code) {
+      async function execute(code, html) {
         const seq = ++runSeq
+        document.body.innerHTML = typeof html === 'string' ? html : ''
         const blobUrl = URL.createObjectURL(new Blob([code], { type: 'text/javascript' }))
         try {
           // @vite-ignore：blob URL 不是静态可分析的说明符——vite dev 的 import-analysis
@@ -87,7 +90,9 @@
         const msg = event.data
         if (!msg || msg.v !== PROTOCOL_VERSION) return
         if (msg.type === 'ping') return postReady()
-        if (msg.type === 'run' && typeof msg.code === 'string') execute(msg.code)
+        if (msg.type === 'run' && typeof msg.code === 'string') {
+          execute(msg.code, typeof msg.html === 'string' ? msg.html : undefined)
+        }
       })
 
       // ===== ready：向宿主报到，并带上一份「隔离生效」的自证 =====
