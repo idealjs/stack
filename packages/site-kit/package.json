@@ -5,7 +5,6 @@
   "type": "module",
   "main": "./src/index.ts",
   "exports": {
-    ".": "./src/index.ts",
-    "./mount": "./src/mount.ts"
+    ".": "./src/index.ts"
   }
 }
