@@ -20,7 +20,7 @@ test('切换文件：两份代码互不串', async ({ page }) => {
   await page.getByRole('button', { name: 'main.ts', exact: true }).click()
   const editor = page.getByLabel('模块代码')
   const mainCode = await editor.inputValue()
-  expect(mainCode).toContain('hello, playground')
+  expect(mainCode).toContain('hello, template')
   await page.getByRole('button', { name: 'utils.js', exact: true }).click()
   await expect(page.getByLabel('模块代码')).toHaveValue('export const one = 1')
 })
@@ -30,11 +30,17 @@ test('删除文件：删活跃文件后切到首个剩余文件，配置文件�
   await addFile(page, 'utils.js')
   await page.getByRole('button', { name: '删除 utils.js' }).click()
   await expect(page.getByRole('button', { name: 'utils.js', exact: true })).toHaveCount(0)
-  await expect(page.getByRole('button', { name: 'main.ts', exact: true })).toHaveAttribute(
+  await expect(page.getByRole('button', { name: 'index.html', exact: true })).toHaveAttribute(
     'aria-current',
     'true',
   )
 
+  await page.getByRole('button', { name: '删除 index.html' }).click()
+  await expect(page.getByRole('button', { name: 'index.html', exact: true })).toHaveCount(0)
+  await expect(page.getByRole('button', { name: 'main.ts', exact: true })).toHaveAttribute(
+    'aria-current',
+    'true',
+  )
   await page.getByRole('button', { name: '删除 main.ts' }).click()
   await expect(page.getByRole('button', { name: 'main.ts', exact: true })).toHaveCount(0)
   await expect(

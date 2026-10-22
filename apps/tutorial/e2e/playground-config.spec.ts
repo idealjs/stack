@@ -22,6 +22,7 @@ test('配置文件预览与编辑：进文件栏、可切换、改动切换后�
 
 test('配置生效：define 注入被构建加载，输出回传注入值', async ({ page }) => {
   await page.goto('/practice.html')
+  await page.getByRole('button', { name: 'main.ts', exact: true }).click()
   await page.getByLabel('模块代码').fill('console.log(GREETING)\n')
   await configTab(page).click()
   await page

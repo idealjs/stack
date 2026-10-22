@@ -1,14 +1,6 @@
 import { Playground } from '@stack/playground'
 import { Section } from '../../lib/ui'
-import indexHtmlRaw from '../../../../../examples/template/index.html?raw'
-import mainTsRaw from '../../../../../examples/template/main.ts?raw'
-import configRaw from '../../../../../examples/template/esbuild.config.json?raw'
-
-const TEMPLATE_FILES = [
-  { name: 'index.html', code: indexHtmlRaw },
-  { name: 'main.ts', code: mainTsRaw },
-  { name: 'esbuild.config.json', code: configRaw },
-]
+import { TEMPLATE_FILES } from '../../lib/templateFiles'
 
 function CodeCard({ label, code }: { label: string; code: string }) {
   return (
@@ -39,8 +31,8 @@ export function TemplateLab() {
         的身体被装进沙箱文档，#app 里长出 hello, template。
       </p>
       <div className="mt-3 grid grid-cols-1 gap-3 md:grid-cols-2">
-        <CodeCard label="index.html" code={indexHtmlRaw} />
-        <CodeCard label="main.ts" code={mainTsRaw} />
+        <CodeCard label="index.html" code={TEMPLATE_FILES[0].code} />
+        <CodeCard label="main.ts" code={TEMPLATE_FILES[1].code} />
       </div>
       <div className="mt-3">
         <Playground initialFiles={TEMPLATE_FILES} />

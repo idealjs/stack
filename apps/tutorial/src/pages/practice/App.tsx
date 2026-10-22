@@ -1,5 +1,6 @@
 import { Playground } from '@stack/playground'
 import { Page } from '../../lib/ui'
+import { TEMPLATE_FILES } from '../../lib/templateFiles'
 import { PracticeWorkspace } from './components/PracticeWorkspace'
 
 export function App() {
@@ -11,8 +12,10 @@ export function App() {
     >
       <PracticeWorkspace />
       <section aria-label="代码沙箱" className="mt-8">
-        <h2 className="t-small-strong m-0 mb-2.5">代码沙箱（跨源 iframe 隔离执行）</h2>
-        <Playground />
+        <h2 className="t-small-strong m-0 mb-2.5">
+          代码沙箱（跨源 iframe 隔离执行 · 预置 template 工程）
+        </h2>
+        <Playground initialFiles={TEMPLATE_FILES} />
       </section>
     </Page>
   )

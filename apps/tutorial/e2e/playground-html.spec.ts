@@ -1,10 +1,13 @@
 import { test, expect } from '@playwright/test'
 
-test('回归守卫：console 模式跑完沙箱 iframe 仍不可见', async ({ page }) => {
+test('回归守卫：去掉 html 字段即 console 模式，沙箱 iframe 保持不可见', async ({ page }) => {
   await page.goto('/practice.html')
+  await page.getByRole('button', { name: 'esbuild.config.json', exact: true }).click()
+  await page.getByLabel('模块代码').fill('{\n  "entry": "main.ts"\n}\n')
   await page.getByRole('button', { name: '运行 ▶' }).click()
   const out = page.getByRole('region', { name: '输出' })
-  await expect(out).toContainText('✓ 执行完毕', { timeout: 20_000 })
+  await expect(out).toContainText('hello, template', { timeout: 20_000 })
+  await expect(out).toContainText('✓ 执行完毕')
   const frame = page.locator('[data-testid="sandbox-frame"]')
   const box = await frame.boundingBox()
   expect(box ? box.height : 0).toBe(0)
