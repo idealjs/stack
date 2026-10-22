@@ -8,10 +8,15 @@ ENV YARN_NPM_REGISTRY_SERVER=https://registry.npmmirror.com
 WORKDIR /workspace
 
 # ① 依赖配置——只拷贝清单/锁文件/yarn 运行时，源码变更不失效依赖层
+# 五个 workspace 清单缺一不可：--immutable 会校验锁文件与 workspace 树一致，
+# tutorial 的 workspace:* 依赖（playground/site-kit）与 examples/* 缺任一即 Workspace not found
 COPY .yarnrc.yml package.json yarn.lock ./
 COPY .yarn/releases/yarn-4.9.2.cjs .yarn/releases/
 COPY apps/tutorial/package.json apps/tutorial/
+COPY apps/playground/package.json apps/playground/
 COPY packages/stack-idealjs/package.json packages/stack-idealjs/
+COPY packages/site-kit/package.json packages/site-kit/
+COPY examples/template/package.json examples/template/
 
 # ② 安装依赖——yarn 4.9.2 由 yarnPath（.yarn/releases）提供，node 直调脚本，不依赖 corepack/全局 yarn
 RUN node .yarn/releases/yarn-4.9.2.cjs install --immutable
