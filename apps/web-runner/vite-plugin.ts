@@ -7,7 +7,7 @@ import type { Plugin } from 'vite'
 const here = fileURLToPath(new URL('.', import.meta.url))
 const RUNTIME_HTML = resolve(here, 'index.html')
 const RUNTIME_MAIN = resolve(here, 'runtime/main.ts')
-const DOC_SLOT = '<!--web-runner-doc-->'
+const DOC_SLOT = '<!--web-runner-doc: runtime/main.ts 的构建产物将内联于此-->'
 
 export const WEB_RUNNER_DOC = 'virtual:web-runner-doc'
 
