@@ -114,10 +114,10 @@ web-runner 包（`apps/web-runner/`，无 React 依赖）＝纯运行时应用�
   esbuild-wasm 构建 `main.ts` 并把产物内联回 HTML（mtime 缓存，改文件刷新即生效），
   跳过 vite dev 的 HTML 转换——`/@vite/client` 注入与 script 外置正是鉴权链下沙箱内
   子资源 401 的根源，自包含后唯一网络请求是 iframe 文档导航（父页面发起、cookie
-`build:runtime`（`build.ts`，node 24 原生跑 TS）SSG 直产——调同一个
-  `composeRuntimeDoc` 写出 `dist-runtime/index.html`，与 dev 现场组装字节级同构；
-  vite build＋`inlineRuntimeHtml` 内联回填插件整体退场（rollup 先外置内联 script
-  再靠插件内联回去是逆着自己走，且 dev/build 两套 bundler 存在产物漂移面）。
+`build:runtime` = `vite build`：`emitComposedDoc` 插件在 generateBundle（enforce post，
+  最后执行）清空 rollup 产物、直发 `composeRuntimeDoc` 单文件到 `dist-runtime/index.html`，
+  与 dev 现场组装字节级同构；rollup 一趟的打包结果被弃用属可接受成本（5 模块、亚秒级），
+  换取标准命令面与 preview 复活。
   独立域名。
 - **srcdoc 路（兜底）**：宿主经 `@stack/web-runner/vite` 插件的 virtual module（`virtual:web-runner-doc`）
   拿到同一份现场 bundle 的自包含文档字符串再赋 `srcDoc`——零网络；这也是宿主消费

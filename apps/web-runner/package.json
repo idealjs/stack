@@ -8,7 +8,7 @@
   },
   "scripts": {
     "dev:runtime": "vite",
-    "build:runtime": "node build.ts"
+    "build:runtime": "vite build"
   },
   "dependencies": {
     "esbuild-wasm": "^0.25.12"
