@@ -1,4 +1,4 @@
-import { readFileSync, statSync } from 'node:fs'
+import { readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import * as esbuild from 'esbuild-wasm'
@@ -25,17 +25,6 @@ export async function composeRuntimeDoc(): Promise<string> {
   )
 }
 
-let cacheAt = 0
-let cacheDoc = ''
-
-export async function runtimeDoc(): Promise<string> {
-  const at = Math.max(statSync(RUNTIME_HTML).mtimeMs, statSync(RUNTIME_MAIN).mtimeMs)
-  if (at === cacheAt) return cacheDoc
-  cacheDoc = await composeRuntimeDoc()
-  cacheAt = at
-  return cacheDoc
-}
-
 export const webRunnerDoc: Plugin = {
   name: 'web-runner-doc',
   resolveId(id) {
@@ -43,6 +32,6 @@ export const webRunnerDoc: Plugin = {
   },
   async load(id) {
     if (id !== `\0${WEB_RUNNER_DOC}`) return
-    return `export default ${JSON.stringify(await runtimeDoc())}`
+    return `export default ${JSON.stringify(await composeRuntimeDoc())}`
   },
 }

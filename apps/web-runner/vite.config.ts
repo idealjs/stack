@@ -1,12 +1,12 @@
 import { defineConfig, type Plugin } from 'vite'
-import { runtimeDoc } from './vite-plugin'
+import { composeRuntimeDoc } from './vite-plugin'
 
-const composeRuntimeDoc: Plugin = {
+const serveComposedDoc: Plugin = {
   name: 'compose-runtime-doc',
   apply: 'serve',
   transformIndexHtml: {
     order: 'post',
-    handler: () => runtimeDoc(),
+    handler: () => composeRuntimeDoc(),
   },
 }
 
@@ -19,5 +19,5 @@ export default defineConfig({
     allowedHosts: ['5174.code.idealjs.com', 'code.idealjs.com'],
   },
   preview: { port: 5274, strictPort: true },
-  plugins: [composeRuntimeDoc],
+  plugins: [serveComposedDoc],
 })
