@@ -126,6 +126,12 @@ web-runner 包（`apps/web-runner/`，无 React 依赖）＝纯运行时应用�
 执行核心同为 Blob URL＋动态 `import()`（`@vite-ignore` 指令已随重构退场：main.ts 不再经
 vite dev 的 import-analysis，无任何工具需要它）。
 
+**暂定与后向接缝**：组装现存两处字符串操作——占位标记定点替换内联 script、virtual
+module 的 `export default ${JSON.stringify(...)}`——是「不引重型依赖」约束下的最小原语，
+暂定接受。后续方向：HTML 解析为可操作的 AST 数据结构（parse5 / node-html-parser 一类，
+树上节点替换取代字符串拼接、virtual module 走正规代码生成），待运行时文档结构复杂到
+字符串操作开始失控时再引入；当下引入属超前依赖。
+
 ## 文件管理边界
 
 文件列表存宿主内存（React state）。文件名白名单（字母/数字开头，仅 `._-`，≤64 字符）
