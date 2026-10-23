@@ -3551,6 +3551,19 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@stack/stack@workspace:*, @stack/stack@workspace:packages/stack":
+  version: 0.0.0-use.local
+  resolution: "@stack/stack@workspace:packages/stack"
+  dependencies:
+    "@types/node": "npm:^26.2.0"
+    acorn: "npm:^8.0.0"
+    esbuild-wasm: "npm:^0.25.12"
+    typescript: "npm:~5.6.2"
+  bin:
+    stack: bin/stack.mjs
+  languageName: unknown
+  linkType: soft
+
 "@stack/template@workspace:examples/template":
   version: 0.0.0-use.local
   resolution: "@stack/template@workspace:examples/template"
@@ -4224,6 +4237,15 @@ __metadata:
   version: 17.0.45
   resolution: "@types/node@npm:17.0.45"
   checksum: 10/b45fff7270b5e81be19ef91a66b764a8b21473a97a8d211218a52e3426b79ad48f371819ab9153370756b33ba284e5c875463de4d2cf48a472e9098d7f09e8a2
+  languageName: node
+  linkType: hard
+
+"@types/node@npm:^26.2.0":
+  version: 26.6.5
+  resolution: "@types/node@npm:26.6.5"
+  dependencies:
+    undici-types: "npm:~8.9.0"
+  checksum: 10/03780cc68280b566af47c0f673318e665258dbdcc953737a83c11593424d55aecb8b2642a573da33f76cb4dd5457379548388b78ab284cb3b762030e5d58b252
   languageName: node
   linkType: hard
 
@@ -12322,6 +12344,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"stack-demo@workspace:examples/stack-demo":
+  version: 0.0.0-use.local
+  resolution: "stack-demo@workspace:examples/stack-demo"
+  dependencies:
+    "@stack/stack": "workspace:*"
+    typescript: "npm:~5.6.2"
+  languageName: unknown
+  linkType: soft
+
 "stack-idealjs@workspace:packages/stack-idealjs":
   version: 0.0.0-use.local
   resolution: "stack-idealjs@workspace:packages/stack-idealjs"
@@ -12800,6 +12831,13 @@ __metadata:
   version: 8.3.0
   resolution: "undici-types@npm:8.3.0"
   checksum: 10/6681d2837ac75a75ac1cc46090aa2b8ddc7c6b8ecc295a6cdb06838752a730da3d8afeecf05e5ab7903160eafad3a8b6ffa1927e5ded260590f4d4fef18646d5
+  languageName: node
+  linkType: hard
+
+"undici-types@npm:~8.9.0":
+  version: 8.9.0
+  resolution: "undici-types@npm:8.9.0"
+  checksum: 10/8785591929de2b71d281c684e915c4a8c41becc225adbf42a3e89148f8b384724a21533494c30a1cbb85b4cbccd088d020788ff4f2d605013eb2863cd47a1639
   languageName: node
   linkType: hard
 

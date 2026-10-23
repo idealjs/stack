@@ -39,3 +39,4 @@ design-refs/mockup/single*/
 
 apps/*/dist/
 apps/*/dist-runtime/
+examples/*/dist/

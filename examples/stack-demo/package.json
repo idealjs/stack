@@ -1,0 +1,17 @@
+{
+  "name": "stack-demo",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "build": "stack",
+    "dev": "stack --watch",
+    "build:sdk": "node sdk.mjs"
+  },
+  "dependencies": {
+    "@stack/stack": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "~5.6.2"
+  }
+}
