@@ -7,7 +7,7 @@ import type { Plugin } from 'vite'
 const here = fileURLToPath(new URL('.', import.meta.url))
 const RUNTIME_HTML = resolve(here, 'index.html')
 const RUNTIME_MAIN = resolve(here, 'runtime/main.ts')
-const SCRIPT_TAG = /<script[^>]*src="[^"]*main\.ts"[^>]*>\s*<\/script>/
+const DOC_SLOT = '<!--web-runner-doc-->'
 
 export const WEB_RUNNER_DOC = 'virtual:web-runner-doc'
 
@@ -19,10 +19,11 @@ export async function composeRuntimeDoc(): Promise<string> {
     format: 'esm',
   })
   const code = out.outputFiles[0].text.replace(/<\/script>/g, '<\\/script>')
-  return readFileSync(RUNTIME_HTML, 'utf8').replace(
-    SCRIPT_TAG,
-    `<script type="module">\n${code}\n</script>`,
-  )
+  const html = readFileSync(RUNTIME_HTML, 'utf8')
+  if (!html.includes(DOC_SLOT)) {
+    throw new Error(`index.html 缺少 ${DOC_SLOT} 占位标记`)
+  }
+  return html.replace(DOC_SLOT, `<script type="module">\n${code}\n</script>`)
 }
 
 export const webRunnerDoc: Plugin = {
