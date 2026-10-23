@@ -105,8 +105,8 @@ WebContainer 路线），跨源嵌入要求框内文档自身也带 COEP require
 ## 运行时文档「一份原文、两条路」
 
 web-runner 包（`apps/web-runner/`，无 React 依赖）＝纯运行时应用：根 `index.html` ＋ `runtime/` 侧枝（`main.ts` 主干两行引导：装监听→报到；
-`types.ts` 协议常量与消息类型、`outbound.ts` 出站通道、`execute.ts` 执行核心、
-`listeners.ts` 挂接装置集中）。原文不是自包含单文件——两条路各自现场把它 bundle 成
+`types.ts` 协议常量与消息类型、`outbound.ts` 出站通道、`format.ts` 值→文本、
+`execute.ts` 执行核心、`listeners.ts` 挂接装置集中）。原文不是自包含单文件——两条路各自现场把它 bundle 成
 自包含文档：
 
 - **src 路（主形态）**：`dev:runtime` 的 `serveRuntimeDoc` 中间件在 dev 服务器侧用

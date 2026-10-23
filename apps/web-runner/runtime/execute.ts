@@ -1,4 +1,5 @@
-import { format, post } from './outbound'
+import { format } from './format'
+import { post } from './outbound'
 
 let runSeq = 0
 

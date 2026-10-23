@@ -1,5 +1,6 @@
 import { execute } from './execute'
-import { format, post, reportReady } from './outbound'
+import { format } from './format'
+import { post, reportReady } from './outbound'
 import { PROTOCOL_VERSION, type RuntimeInbound } from './types'
 
 const CONSOLE_LEVELS = ['log', 'info', 'warn', 'error'] as const
