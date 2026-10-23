@@ -44,9 +44,9 @@
   200、沙箱内 401；原文直出后 src 形态全通——握手、隔离自证、esbuild 构建、html 预览）。
   该入口下运行时与宿主同源（origin 不含路径），同源告警如实亮红，隔离只剩 sandbox
   一道——与 srcdoc 等强度。跨源 src ＋ 子资源形态只在无 cookie 鉴权的运行时位成立：
-  e2e（localhost:5175，同为原文直出）、生产（独立域名静态托管 `dist-runtime/` 单文件，
-  经 `inlineRuntimeHtml` 插件内联——vite build 默认把内联 script 提取为外部 chunk，必须
-  内联回）。srcdoc（`VITE_WEB_RUNNER_ORIGIN` 置空）保留为零网络兜底。
+  e2e（localhost:5175，同为现场组装）、生产（独立域名静态托管 `dist-runtime/` 单文件，
+  `build.ts` SSG 直产、与 dev 组装同构）。srcdoc（`VITE_WEB_RUNNER_ORIGIN` 置空）保留为
+  零网络兜底。
 
 教程站站内链接一律相对形态（`./xxx.html`）：根部署（本地、子域名、SSG 生产）与前缀
 部署（absproxy）双兼容；`e2e/pages.spec.ts` 的 href 选择器同步为相对形态。
@@ -113,8 +113,10 @@ web-runner 包（`apps/web-runner/`，无 React 依赖）＝纯运行时应用�
   esbuild-wasm 构建 `main.ts` 并把产物内联回 HTML（mtime 缓存，改文件刷新即生效），
   跳过 vite dev 的 HTML 转换——`/@vite/client` 注入与 script 外置正是鉴权链下沙箱内
   子资源 401 的根源，自包含后唯一网络请求是 iframe 文档导航（父页面发起、cookie
-  可达）；`build:runtime` 经 `inlineRuntimeHtml` 插件同样单文件化（vite build 默认把
-  内联 script 提取为外部 chunk，必须内联回），产出 `dist-runtime/index.html` 托管到
+`build:runtime`（`build.ts`，node 24 原生跑 TS）SSG 直产——调同一个
+  `composeRuntimeDoc` 写出 `dist-runtime/index.html`，与 dev 现场组装字节级同构；
+  vite build＋`inlineRuntimeHtml` 内联回填插件整体退场（rollup 先外置内联 script
+  再靠插件内联回去是逆着自己走，且 dev/build 两套 bundler 存在产物漂移面）。
   独立域名。
 - **srcdoc 路（兜底）**：宿主经 `@stack/web-runner/vite` 插件的 virtual module（`virtual:web-runner-doc`）
   拿到同一份现场 bundle 的自包含文档字符串再赋 `srcDoc`——零网络；这也是宿主消费
