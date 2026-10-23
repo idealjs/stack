@@ -1,4 +1,4 @@
-import { defineConfig } from '@stack/stack'
+import { defineConfig } from '@idealjs/stack'
 
 export default defineConfig({
   inputs: {

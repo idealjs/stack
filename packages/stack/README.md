@@ -1,4 +1,4 @@
-# @stack/stack
+# @idealjs/stack
 
 对标 vite/rollup 的 preserve-ESM 构建工具。MVP 阶段做一件事：**静态解析模块图，把 n 个输入 × m 个输出逐组合转译落位**，不拼接 bundle。
 
@@ -12,7 +12,7 @@
 ## 配置模型
 
 ```ts
-import { defineConfig } from '@stack/stack'
+import { defineConfig } from '@idealjs/stack'
 
 export default defineConfig({
   root: '.',                                  // 可选，默认 '.'

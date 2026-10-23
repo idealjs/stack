@@ -3072,6 +3072,21 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@idealjs/stack@workspace:*, @idealjs/stack@workspace:packages/stack":
+  version: 0.0.0-use.local
+  resolution: "@idealjs/stack@workspace:packages/stack"
+  dependencies:
+    "@playwright/test": "npm:1.63.0"
+    "@types/node": "npm:^26.2.0"
+    acorn: "npm:^8.18.0"
+    esbuild-wasm: "npm:^0.25.12"
+    typescript: "npm:~5.6.2"
+    vite: "npm:^6.0.0"
+  bin:
+    stack: bin/stack.mjs
+  languageName: unknown
+  linkType: soft
+
 "@isaacs/fs-minipass@npm:^4.0.0":
   version: 4.0.1
   resolution: "@isaacs/fs-minipass@npm:4.0.1"
@@ -3548,21 +3563,6 @@ __metadata:
 "@stack/site-kit@workspace:*, @stack/site-kit@workspace:packages/site-kit":
   version: 0.0.0-use.local
   resolution: "@stack/site-kit@workspace:packages/site-kit"
-  languageName: unknown
-  linkType: soft
-
-"@stack/stack@workspace:*, @stack/stack@workspace:packages/stack":
-  version: 0.0.0-use.local
-  resolution: "@stack/stack@workspace:packages/stack"
-  dependencies:
-    "@playwright/test": "npm:1.63.0"
-    "@types/node": "npm:^26.2.0"
-    acorn: "npm:^8.18.0"
-    esbuild-wasm: "npm:^0.25.12"
-    typescript: "npm:~5.6.2"
-    vite: "npm:^6.0.0"
-  bin:
-    stack: bin/stack.mjs
   languageName: unknown
   linkType: soft
 
@@ -12359,7 +12359,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "stack-demo@workspace:examples/stack-demo"
   dependencies:
-    "@stack/stack": "workspace:*"
+    "@idealjs/stack": "workspace:*"
     typescript: "npm:~5.6.2"
   languageName: unknown
   linkType: soft

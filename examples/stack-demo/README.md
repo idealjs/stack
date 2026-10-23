@@ -27,7 +27,7 @@ yarn workspace stack-demo dev          # stack --watch：防抖全量重建
 yarn workspace stack-demo build:sdk    # 运行 sdk.mjs
 ```
 
-`sdk.mjs` 直接 `import { build, defineConfig } from '@stack/stack'`，注入 node 宿主的 `nodeFsPlugin`（来自 `@stack/stack/node`）后拿到 `BuildResult` 并自行写盘——核心不含任何 node 依赖，文件系统永远由宿主以插件形式注入。
+`sdk.mjs` 直接 `import { build, defineConfig } from '@idealjs/stack'`，注入 node 宿主的 `nodeFsPlugin`（来自 `@idealjs/stack/node`）后拿到 `BuildResult` 并自行写盘——核心不含任何 node 依赖，文件系统永远由宿主以插件形式注入。
 
 ## 与 vite 的差异
 

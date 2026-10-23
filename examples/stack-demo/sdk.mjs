@@ -1,7 +1,7 @@
 import { mkdirSync, writeFileSync } from 'node:fs'
 import { dirname, resolve } from 'node:path'
-import { build, defineConfig } from '@stack/stack'
-import { nodeFsPlugin } from '@stack/stack/node'
+import { build, defineConfig } from '@idealjs/stack'
+import { nodeFsPlugin } from '@idealjs/stack/node'
 
 const root = process.cwd()
 const config = defineConfig({
