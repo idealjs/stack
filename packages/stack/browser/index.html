@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <title>stack 浏览器测试</title>
+    <style>
+      body {
+        font-family: ui-monospace, monospace;
+        margin: 2rem;
+      }
+      ul {
+        list-style: none;
+        padding: 0;
+      }
+      li {
+        padding: 0.25rem 0;
+      }
+      li[data-failed='true'] {
+        color: #b91c1c;
+      }
+      body[data-state='passed'] h1::after {
+        content: '（全部通过）';
+        color: #15803d;
+      }
+      body[data-state='failed'] h1::after {
+        content: '（存在失败）';
+        color: #b91c1c;
+      }
+    </style>
+  </head>
+  <body data-state="running">
+    <h1>stack 浏览器内存 FS 测试</h1>
+    <ul id="cases"></ul>
+    <script type="module" src="./main.ts"></script>
+  </body>
+</html>

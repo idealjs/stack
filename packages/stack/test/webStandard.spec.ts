@@ -9,15 +9,28 @@ const NODE_IMPORT_PATTERN = /(?:\bfrom|\bimport|\brequire)\s*\(?\s*['"]node:/
 const packageRoot = join(dirname(fileURLToPath(import.meta.url)), '..')
 const srcDir = join(packageRoot, 'src')
 const coreDir = join(srcDir, 'core')
+const browserDir = join(packageRoot, 'browser')
 
-const listCoreSources = (): string[] =>
-  readdirSync(coreDir)
+const listSources = (dir: string): string[] =>
+  readdirSync(dir)
     .filter((name) => name.endsWith('.ts'))
-    .map((name) => join(coreDir, name))
+    .map((name) => join(dir, name))
+
+const browserClosureFiles = (): string[] => [
+  join(packageRoot, 'test', 'scenarios.ts'),
+  ...listSources(browserDir).filter((file) => !file.endsWith('env.d.ts')),
+]
 
 test('SDK entry and core sources import zero node: modules', () => {
-  const files = [join(srcDir, 'index.ts'), ...listCoreSources()]
+  const files = [join(srcDir, 'index.ts'), ...listSources(coreDir)]
   for (const file of files) {
+    const content = readFileSync(file, 'utf8')
+    assert.ok(!NODE_IMPORT_PATTERN.test(content), `${file} 不得引用 node: 模块`)
+  }
+})
+
+test('browser harness and shared scenarios import zero node: modules', () => {
+  for (const file of browserClosureFiles()) {
     const content = readFileSync(file, 'utf8')
     assert.ok(!NODE_IMPORT_PATTERN.test(content), `${file} 不得引用 node: 模块`)
   }

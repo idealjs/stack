@@ -59,7 +59,14 @@ stack [--config stack.config.ts] [--watch]
 
 ## 浏览器路线
 
-核心与 SDK 入口只依赖 acorn 与 esbuild-wasm（两者均可浏览器运行）。将来的浏览器宿主：内存 FS 插件 + esbuild-wasm 的 `initialize({ wasmURL })`，即可在页面内跑完整构建——测试里的内存 FS 全流程就是这条路线的架构证明。
+核心与 SDK 入口只依赖 acorn 与 esbuild-wasm（两者均可浏览器运行）。浏览器宿主形态：内存 FS 插件 + esbuild-wasm 的 `initialize({ wasmURL })`，即可在页面内跑完整构建——这不是纸面承诺：`browser/` 是一个真实 harness（vite dev 直接 serve TS 源），`yarn test:browser`（Playwright，webServer 起 vite 于 5901 端口）在 chromium 里跑全部内存 FS 场景并断言零 console error。
+
+## 测试
+
+- `yarn test`：node 侧——parse 说明符收集、共享场景套件、CLI 端到端（test/fixtures/mini 夹具工程，子进程跑 bin/stack.mjs）、零 node: 断言（核心 + SDK 入口 + 浏览器闭包）。
+- `yarn test:browser`：Playwright 断言浏览器页面 data-state=passed、用例数与场景数一致、失败清单为空、页面零 console error / pageerror。
+- `yarn test:all`：两者串联。
+- 场景单一事实源在 `test/scenarios.ts`：场景文件表、配置与期望（含错误路径与协议行为）全部数据化/内联，node 的 build.spec.ts 与浏览器 harness 共用同一套 `SCENARIOS` 与 `runScenario`，杜绝双份漂移。
 
 ## MVP 边界（明确不做）
 
