@@ -33,8 +33,9 @@
   代码依旧拿不到宿主数据）。此入口是为远程开发便利而设，**不是**跨源能力的验证场所；
   验证跨源请走端口子域名入口。
 - 沙箱运行时：`https://code.idealjs.com/absproxy/5174/`（src 形态）。dev:runtime 经
-  `serveRuntimeDoc` 中间件在服务器侧 esbuild-wasm 现场构建 `runtime/main.ts` 并内联回
-  `index.html`——跳过 vite dev 的 HTML 转换（注入 `/@vite/client` 与外置 script 恰是
+  `transformIndexHtml`（order post、整文替换）返回现场组装产物——`/@vite/client` 注入与
+  script 外置被同一钩子的整文替换一并消灭，路径匹配/base 处理交还 vite 原生
+  （`/` 302 到 base）（注入 `/@vite/client` 与外置 script 恰是
   鉴权链下沙箱内子资源 401 的根源，见下），文档自包含、唯一网络请求是 iframe 文档导航
   （父页面发起、cookie 可达）；改运行时文档刷新即生效（mtime 缓存，无需重构建）。**经 code-server 鉴权链时必须如此**：
   `sandbox="allow-scripts"` 把运行时文档剥成 opaque origin，浏览器 SameSite 规则下
@@ -99,7 +100,7 @@ no-store`，作为「宿主页将来若开 COEP」的嵌入保险——当前教
 作用，2026-10 移除。**将来回补提示**：若某宿主页启用 `COEP: require-corp`（如重启
 WebContainer 路线），跨源嵌入要求框内文档自身也带 COEP require-corp（仅 CORP 不够），
 缺头浏览器以 `ERR_BLOCKED_BY_RESPONSE` 拒装（框成 chrome-error 页、协议静默死）——届时
-在 `vite.config.ts` 的 `serveRuntimeDoc` 与 preview/生产托管处加回同名头即可；
+在 `vite.config.ts` 的 dev 组装钩子与 preview/生产托管处加回同名头即可；
 `no-store` 则防 304 沿用旧缓存条目的响应头（修头后老标签页依旧拿旧头被拒）。
 
 ## 运行时文档「一份原文、两条路」
@@ -109,7 +110,7 @@ web-runner 包（`apps/web-runner/`，无 React 依赖）＝纯运行时应用�
 `execute.ts` 执行核心、`listeners.ts` 挂接装置集中）。原文不是自包含单文件——两条路各自现场把它 bundle 成
 自包含文档：
 
-- **src 路（主形态）**：`dev:runtime` 的 `serveRuntimeDoc` 中间件在 dev 服务器侧用
+- **src 路（主形态）**：`dev:runtime` 的 `dev 组装钩子` 中间件在 dev 服务器侧用
   esbuild-wasm 构建 `main.ts` 并把产物内联回 HTML（mtime 缓存，改文件刷新即生效），
   跳过 vite dev 的 HTML 转换——`/@vite/client` 注入与 script 外置正是鉴权链下沙箱内
   子资源 401 的根源，自包含后唯一网络请求是 iframe 文档导航（父页面发起、cookie
