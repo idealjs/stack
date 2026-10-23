@@ -25,27 +25,24 @@ export async function composeRuntimeDoc(): Promise<string> {
   )
 }
 
-export function webRunnerDoc(): Plugin {
-  return {
-    name: 'web-runner-doc',
-    resolveId(id) {
-      if (id === WEB_RUNNER_DOC) return `\0${WEB_RUNNER_DOC}`
-    },
-    async load(id) {
-      if (id !== `\0${WEB_RUNNER_DOC}`) return
-      return `export default ${JSON.stringify(await composeRuntimeDoc())}`
-    },
-  }
+let cacheAt = 0
+let cacheDoc = ''
+
+export async function runtimeDoc(): Promise<string> {
+  const at = Math.max(statSync(RUNTIME_HTML).mtimeMs, statSync(RUNTIME_MAIN).mtimeMs)
+  if (at === cacheAt) return cacheDoc
+  cacheDoc = await composeRuntimeDoc()
+  cacheAt = at
+  return cacheDoc
 }
 
-export function runtimeDocCache() {
-  let cacheAt = 0
-  let cacheDoc = ''
-  return async () => {
-    const at = Math.max(statSync(RUNTIME_HTML).mtimeMs, statSync(RUNTIME_MAIN).mtimeMs)
-    if (at === cacheAt) return cacheDoc
-    cacheDoc = await composeRuntimeDoc()
-    cacheAt = at
-    return cacheDoc
-  }
+export const webRunnerDoc: Plugin = {
+  name: 'web-runner-doc',
+  resolveId(id) {
+    if (id === WEB_RUNNER_DOC) return `\0${WEB_RUNNER_DOC}`
+  },
+  async load(id) {
+    if (id !== `\0${WEB_RUNNER_DOC}`) return
+    return `export default ${JSON.stringify(await runtimeDoc())}`
+  },
 }

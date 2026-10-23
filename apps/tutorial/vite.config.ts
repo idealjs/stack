@@ -28,7 +28,7 @@ export default defineConfig({
   server: {
     allowedHosts: ['5173.code.idealjs.com', 'code.idealjs.com'],
   },
-  plugins: [baseSlashRedirect(), webRunnerDoc(), react(), tailwindcss()],
+  plugins: [baseSlashRedirect(), webRunnerDoc, react(), tailwindcss()],
   build: {
     rollupOptions: {
       input: Object.fromEntries(
