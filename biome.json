@@ -6,7 +6,22 @@
     "useIgnoreFile": true
   },
   "files": {
-    "includes": ["**", "!**/.yarn", "!**/dist", "!**/build", "!**/.docusaurus"]
+    "includes": [
+      "**",
+      "!**/.yarn",
+      "!**/dist",
+      "!**/build",
+      "!**/.docusaurus",
+      "!**/.zcode",
+      "!**/design-refs"
+    ]
+  },
+  "assist": {
+    "actions": {
+      "source": {
+        "organizeImports": "on"
+      }
+    }
   },
   "formatter": {
     "indentStyle": "space",
@@ -28,5 +43,66 @@
     "parser": {
       "allowComments": true
     }
-  }
+  },
+  "overrides": [
+    {
+      "includes": ["**/e2e/**"],
+      "linter": {
+        "rules": {
+          "style": {
+            "noNonNullAssertion": "off"
+          },
+          "suspicious": {
+            "noArrayIndexKey": "off",
+            "useIterableCallbackReturn": "off"
+          }
+        }
+      }
+    },
+    {
+      "includes": ["**/learning.css"],
+      "linter": {
+        "rules": {
+          "style": {
+            "noDescendingSpecificity": "off"
+          },
+          "complexity": {
+            "noImportantStyles": "off"
+          }
+        }
+      }
+    },
+    {
+      "includes": ["**/playground/OutputPanel.tsx", "**/practice/components/ChatPanel.tsx"],
+      "linter": {
+        "rules": {
+          "suspicious": {
+            "noArrayIndexKey": "off"
+          }
+        }
+      }
+    },
+    {
+      "includes": ["**/ch7/TemplateLab.tsx"],
+      "linter": {
+        "rules": {
+          "a11y": {
+            "noNoninteractiveTabindex": "off",
+            "useAriaPropsSupportedByRole": "off"
+          }
+        }
+      }
+    },
+    {
+      "includes": ["**/practice/components/KeyModal.tsx"],
+      "linter": {
+        "rules": {
+          "a11y": {
+            "noStaticElementInteractions": "off",
+            "useKeyWithClickEvents": "off"
+          }
+        }
+      }
+    }
+  ]
 }

@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
-import { Ticket } from './Ticket'
 import type { TicketProps } from './Ticket'
+import { Ticket } from './Ticket'
 
 export function ShadowCard({
   hover = false,

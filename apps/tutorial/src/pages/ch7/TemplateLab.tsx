@@ -1,6 +1,6 @@
-import { Playground } from '@stack/playground'
-import { Section } from '../../lib/ui'
 import { TEMPLATE_FILES } from '../../lib/templateFiles'
+import { Section } from '../../lib/ui'
+import { Playground } from '../../playground'
 
 function CodeCard({ label, code }: { label: string; code: string }) {
   return (

@@ -1,7 +1,7 @@
-import { Page, Section } from '../../lib/ui'
+import type { ReactNode } from 'react'
 import { ChapterTicket, ShadowButton } from '../../design-system'
 import { CHAPTERS } from '../../lib/chapters'
-import type { ReactNode } from 'react'
+import { Page, Section } from '../../lib/ui'
 
 const CLIP_TAG =
   '[clip-path:polygon(0_0,100%_0,100%_calc(100%_-_22px),calc(100%_-_22px)_100%,0_100%)]'

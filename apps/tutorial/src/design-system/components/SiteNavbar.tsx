@@ -1,5 +1,5 @@
 import type { CSSProperties, ReactNode } from 'react'
-import { ShadowButton, shadowButtonClasses, SHADOW_BUTTON_ACTIVE } from './ShadowButton'
+import { SHADOW_BUTTON_ACTIVE, ShadowButton, shadowButtonClasses } from './ShadowButton'
 
 export interface NavSectionLink {
   key: string
@@ -88,6 +88,7 @@ export function SiteNavbar({
           {brand.label}
         </a>
         <span className="hover-host hidden max-lg:inline-flex">
+          {/* biome-ignore lint/a11y/useAriaPropsSupportedByRole: 纯 CSS checkbox 开合的触发 label，aria 状态为增强语义保留 */}
           <label
             htmlFor="site-nav-toggle"
             aria-label="打开导航菜单"
@@ -118,6 +119,7 @@ export function SiteNavbar({
             {brand.label}
           </ShadowButton>
           <span className="hover-host inline-flex">
+            {/* biome-ignore lint/a11y/useAriaPropsSupportedByRole: 纯 CSS checkbox 开合的触发 label，aria 状态为增强语义保留 */}
             <label
               htmlFor="site-nav-toggle"
               aria-label="收起导航菜单"
@@ -161,6 +163,7 @@ export function SiteNavbar({
         ))}
       </div>
 
+      {/* biome-ignore lint/a11y/noLabelWithoutControl: 遮罩 label 关联的 checkbox 由纯 CSS 开合机制持有 */}
       <label
         htmlFor="site-nav-toggle"
         aria-hidden="true"

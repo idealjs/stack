@@ -13,7 +13,7 @@ WORKDIR /workspace
 COPY .yarnrc.yml package.json yarn.lock ./
 COPY .yarn/releases/yarn-4.9.2.cjs .yarn/releases/
 COPY apps/tutorial/package.json apps/tutorial/
-COPY apps/playground/package.json apps/playground/
+COPY apps/web-runner/package.json apps/web-runner/
 COPY packages/stack-idealjs/package.json packages/stack-idealjs/
 COPY packages/site-kit/package.json packages/site-kit/
 COPY examples/template/package.json examples/template/

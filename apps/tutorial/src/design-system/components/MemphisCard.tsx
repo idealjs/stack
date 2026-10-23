@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type ReactNode } from 'react'
+import { type ReactNode, useEffect, useRef, useState } from 'react'
 import type { Chapter } from '../lib/types'
 import { Ring, Tri } from './shapes'
 
@@ -7,12 +7,13 @@ const FLIP_MS = 8000
 export function BrickDots({ bricks }: { bricks: Chapter['target']['bricks'] }) {
   return (
     <span
+      role="img"
       className="flex items-center gap-1"
       aria-label={`积木 ${bricks.filter((b) => b.learned).length}/${bricks.length}`}
     >
-      {bricks.map((b, i) => (
+      {bricks.map((b) => (
         <i
-          key={i}
+          key={b.name}
           className="inline-block h-[7px] w-[7px] rounded-full border-[1.5px] border-ink"
           style={{ background: b.learned ? 'var(--color-ink)' : '#fff' }}
         />
@@ -24,6 +25,7 @@ export function BrickDots({ bricks }: { bricks: Chapter['target']['bricks'] }) {
 export function EntryBadge({ n }: { n: 1 | 2 | 3 }) {
   return (
     <span
+      role="img"
       className="absolute -left-[11px] -top-[11px] z-10 flex h-6 w-6 items-center justify-center rounded-full border-2 border-paper bg-ink text-[12px] font-extrabold text-clash2a"
       aria-label={`推荐入口 ${n}`}
     >

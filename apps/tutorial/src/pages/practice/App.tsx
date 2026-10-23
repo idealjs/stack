@@ -1,6 +1,6 @@
-import { Playground } from '@stack/playground'
-import { Page } from '../../lib/ui'
 import { TEMPLATE_FILES } from '../../lib/templateFiles'
+import { Page } from '../../lib/ui'
+import { Playground } from '../../playground'
 import { PracticeWorkspace } from './components/PracticeWorkspace'
 
 export function App() {

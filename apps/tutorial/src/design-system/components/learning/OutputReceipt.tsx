@@ -25,6 +25,7 @@ export function OutputReceipt({
         </summary>
         <div className="learning-receipt-holes" aria-hidden="true">
           {Array.from({ length: 8 }, (_, i) => (
+            // biome-ignore lint/suspicious/noArrayIndexKey: 固定 8 孔装饰序列
             <i key={i} />
           ))}
         </div>
@@ -35,6 +36,8 @@ export function OutputReceipt({
               <code>{command}</code>
             </div>
           )}
+          {/* biome-ignore lint/a11y/noNoninteractiveTabindex: 输出可滚动，键盘可达刻意保留 */}
+          {/* biome-ignore lint/a11y/useAriaPropsSupportedByRole: pre 的可访问名刻意保留 */}
           <pre tabIndex={0} aria-label={`${title}的输出`}>
             <code>{output}</code>
           </pre>

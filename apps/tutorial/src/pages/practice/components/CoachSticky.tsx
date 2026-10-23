@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 export const COACH_STICKY_PANEL_ID = 'coach-sticky-panel'
 
@@ -40,7 +40,7 @@ export function CoachSticky({ taskLabel, children }: { taskLabel: string; childr
         </button>
       </span>
 
-      <div
+      <section
         ref={panelRef}
         id={COACH_STICKY_PANEL_ID}
         aria-label="陪练 agent 对话"
@@ -56,7 +56,7 @@ export function CoachSticky({ taskLabel, children }: { taskLabel: string; childr
           className="absolute right-0 bottom-0 size-4 border-t-2 border-l-2 border-ink bg-paper-deep"
         />
         <div className="h-full min-h-0">{children}</div>
-      </div>
+      </section>
     </div>
   )
 }

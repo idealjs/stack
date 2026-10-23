@@ -1,7 +1,7 @@
-import { useId } from 'react'
 import type { ReactNode } from 'react'
-import { toneStyle, useLearningState } from './shared'
+import { useId } from 'react'
 import type { LearningTone } from './shared'
+import { toneStyle, useLearningState } from './shared'
 
 export interface FlashCardProps {
   question: ReactNode

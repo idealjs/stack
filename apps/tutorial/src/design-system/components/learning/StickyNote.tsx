@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
-import { toneStyle } from './shared'
 import type { LearningTone } from './shared'
+import { toneStyle } from './shared'
 
 export interface StickyNoteProps {
   title: string

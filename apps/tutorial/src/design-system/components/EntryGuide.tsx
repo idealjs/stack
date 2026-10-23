@@ -33,7 +33,7 @@ export function EntryGuide({
                 {i > 0 && <span className="text-small text-mute">→</span>}
                 {linkChapter ? (
                   <a
-                    href={`/ch${id}.html`}
+                    href={`./ch${id}.html`}
                     className={`rounded-full border-[1.5px] border-ink px-2.5 py-0.5 text-small no-underline ${id === p.entry ? 'bg-clash2a font-extrabold' : 'bg-white'}`}
                   >
                     {id === p.entry && ['①', '②', '③'][profiles.indexOf(p)]} {chapters[id].title}

@@ -1,5 +1,7 @@
 process.env.TMPDIR ??= `${process.env.HOME}/.cache/pw-tmp`
+
 import { mkdirSync } from 'node:fs'
+
 mkdirSync(process.env.TMPDIR, { recursive: true })
 
 import { defineConfig, devices } from '@playwright/test'
@@ -18,13 +20,13 @@ export default defineConfig({
   webServer: [
     {
       command:
-        'VITE_PLAYGROUND_RUNTIME_ORIGIN=http://localhost:5175 yarn build && yarn preview --port 4491 --strictPort',
+        'VITE_WEB_RUNNER_ORIGIN=http://localhost:5175 yarn build && yarn preview --port 4491 --strictPort',
       url: 'http://localhost:4491/index.html',
       reuseExistingServer: true,
       timeout: 180_000,
     },
     {
-      command: 'yarn workspace @stack/playground dev:runtime --port 5175',
+      command: 'yarn workspace @stack/web-runner dev:runtime --port 5175',
       url: 'http://localhost:5175/',
       reuseExistingServer: true,
     },

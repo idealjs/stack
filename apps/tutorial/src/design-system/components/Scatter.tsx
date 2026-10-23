@@ -1,4 +1,4 @@
-import { useLayoutEffect, useRef, useState, type ReactNode } from 'react'
+import { type ReactNode, useLayoutEffect, useRef, useState } from 'react'
 
 function mulberry32(seed: number) {
   let t = seed >>> 0
@@ -87,7 +87,7 @@ export function Scatter({
     >
       {places.map((p, i) => (
         <div
-          key={i}
+          key={`${p.x}-${p.y}`}
           data-scatter
           className="absolute"
           style={{ left: p.x, top: p.y, transform: `translate(-50%, -50%) rotate(${p.rot}deg)` }}

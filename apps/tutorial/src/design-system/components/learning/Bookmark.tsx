@@ -1,5 +1,5 @@
-import { toneStyle, useLearningState } from './shared'
 import type { LearningTone } from './shared'
+import { toneStyle, useLearningState } from './shared'
 
 export interface BookmarkProps {
   label: string

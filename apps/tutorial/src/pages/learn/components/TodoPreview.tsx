@@ -12,12 +12,12 @@ export function TodoPreview() {
   const inputRef = useRef<HTMLInputElement>(null)
 
   return (
-    <div className="learn-todo" role="group" aria-label="待办应用演示">
+    <section className="learn-todo" aria-label="待办应用演示">
       <div className="learn-todo-heading">
         <b>今天</b>
-        <span role="status">
+        <output>
           {items.length} 件 · 完成 {items.filter((item) => item.done).length}
-        </span>
+        </output>
       </div>
       <form
         className="learn-todo-input"
@@ -79,6 +79,6 @@ export function TodoPreview() {
       </ul>
       {items.length === 0 && <p className="learn-todo-empty">清单空了，添加一件想做的事吧。</p>}
       <p className="learn-todo-hint">试着勾选一项，看看界面和计数怎样变化。</p>
-    </div>
+    </section>
   )
 }

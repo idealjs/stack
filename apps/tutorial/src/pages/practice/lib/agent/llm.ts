@@ -83,8 +83,7 @@ export async function streamChat(opts: {
     const { done, value } = await reader.read()
     if (done) break
     buf += decoder.decode(value, { stream: true })
-    let idx: number
-    while ((idx = buf.indexOf('\n')) >= 0) {
+    for (let idx = buf.indexOf('\n'); idx >= 0; idx = buf.indexOf('\n')) {
       const line = buf.slice(0, idx).trim()
       buf = buf.slice(idx + 1)
       if (!line.startsWith('data:')) continue

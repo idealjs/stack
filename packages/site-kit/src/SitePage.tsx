@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import type { NavSectionLink, NavRowGroup } from '../../../apps/tutorial/src/design-system'
+import type { NavRowGroup, NavSectionLink } from '../../../apps/tutorial/src/design-system'
 import { SiteNavbar } from '../../../apps/tutorial/src/design-system'
 
 export interface SiteNav {

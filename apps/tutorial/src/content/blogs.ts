@@ -42,4 +42,8 @@ export const MONTHS: BlogMonth[] = [...POSTS]
     return acc
   }, [])
 
-export const monthOf = (slug: string) => POSTS.find((p) => p.slug === slug)!.date.slice(0, 7)
+export const monthOf = (slug: string) => {
+  const post = POSTS.find((p) => p.slug === slug)
+  if (!post) throw new Error(`unknown post: ${slug}`)
+  return post.date.slice(0, 7)
+}

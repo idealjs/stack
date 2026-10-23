@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test'
+import { expect, test } from '@playwright/test'
 
 test('回归守卫：去掉 html 字段即 console 模式，沙箱 iframe 保持不可见', async ({ page }) => {
   await page.goto('/practice.html')

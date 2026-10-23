@@ -1,6 +1,6 @@
 import type { Chapter } from '../lib/types'
-import { Ticket } from './Ticket'
 import type { TicketProps } from './Ticket'
+import { Ticket } from './Ticket'
 
 export interface ChapterTicketProps
   extends Pick<TicketProps, 'holePosition' | 'holeSize' | 'hover'> {

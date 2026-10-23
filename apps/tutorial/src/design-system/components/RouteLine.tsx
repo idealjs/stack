@@ -1,7 +1,8 @@
-import { useContext, useEffect, useRef, useState } from 'react'
 import type React from 'react'
+import { useContext, useEffect, useRef, useState } from 'react'
 import type { ChapterId, Edge } from '../lib/types'
 import { PinsContext } from './RoutableCard'
+
 const STATION_COLORS = [
   'var(--color-clash2a)',
   'var(--color-clash1b)',
@@ -70,16 +71,18 @@ export function RouteLine({
         }
       },
     )
-    return () => offs.forEach((off) => off())
+    return () => {
+      for (const off of offs) off()
+    }
   }, [follow])
 
   const dy = (id: ChapterId) => (id === hovered ? HOVER_LIFT : 0)
 
   const seqEdges = edges.filter((e) => e.kind === 'seq')
   const insByTo = new Map<ChapterId, Edge[]>()
-  seqEdges.forEach((e) => insByTo.set(e.to, [...(insByTo.get(e.to) ?? []), e]))
+  for (const e of seqEdges) insByTo.set(e.to, [...(insByTo.get(e.to) ?? []), e])
   const firstIn = new Set<ChapterId>()
-  insByTo.forEach((list) => firstIn.add(list[0].to))
+  for (const list of insByTo.values()) firstIn.add(list[0].to)
 
   let si = 0
   return (
@@ -91,7 +94,7 @@ export function RouteLine({
       className="pointer-events-none absolute left-0 top-0 z-10"
       aria-hidden
     >
-      {edges.map((e, i) => {
+      {edges.map((e) => {
         const a = resolved[e.from]
         const b = resolved[e.to]
         if (!a || !b) return null
@@ -100,7 +103,7 @@ export function RouteLine({
         if (e.kind === 'rel')
           return (
             <path
-              key={i}
+              key={`${e.from}-${e.to}-${e.kind}`}
               d={d}
               style={follow}
               stroke="var(--color-ink)"
@@ -112,7 +115,7 @@ export function RouteLine({
         if (e.kind === 'family')
           return (
             <path
-              key={i}
+              key={`${e.from}-${e.to}-${e.kind}`}
               d={d}
               style={follow}
               stroke="var(--color-ink)"
@@ -124,7 +127,7 @@ export function RouteLine({
           )
         return (
           <path
-            key={i}
+            key={`${e.from}-${e.to}-${e.kind}`}
             d={d}
             style={follow}
             stroke="var(--color-ink)"
@@ -137,7 +140,8 @@ export function RouteLine({
         const a = resolved[e.from]
         const b = resolved[e.to]
         if (!a || !b) return null
-        const ins = insByTo.get(e.to)!
+        const ins = insByTo.get(e.to)
+        if (!ins) return null
         const capsule = ins.length > 1 && firstIn.has(e.to)
 
         return (

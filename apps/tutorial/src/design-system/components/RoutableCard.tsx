@@ -1,8 +1,8 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
 import type { CSSProperties, ReactNode } from 'react'
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
 import type { Chapter, ChapterId } from '../lib/types'
-import type { LaneNode } from './RouteLine'
 import { MemphisCard } from './MemphisCard'
+import type { LaneNode } from './RouteLine'
 
 export interface PinActions {
   sceneRef: React.RefObject<HTMLDivElement | null>
@@ -108,6 +108,7 @@ export function RoutableCard({
   }, [no, actions])
   const badge = (
     <span
+      role="img"
       aria-label={`卡片号 ${no}`}
       className="absolute -right-2 -top-2 z-10 flex h-6 min-w-6 items-center justify-center rounded-full border-2 border-ink bg-white px-1 font-mono text-[11px] font-bold text-ink"
     >

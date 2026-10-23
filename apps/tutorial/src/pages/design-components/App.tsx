@@ -1,15 +1,18 @@
-import { Page, Section } from '../../lib/ui'
-import { CHAPTERS, PROFILES } from '../../lib/chapters'
-import { RouteLine } from '../../design-system'
-import { MemphisCard } from '../../design-system'
-import { ChapterTicket } from '../../design-system'
-import { ShadowCard } from '../../design-system'
-import { EntryGuide } from '../../design-system'
-import { Mark } from '../../design-system'
-import { Button } from '../../design-system'
-import { ShadowButton } from '../../design-system'
-import { RoutableScene, RoutableCard } from '../../design-system'
+import {
+  Button,
+  ChapterTicket,
+  EntryGuide,
+  Mark,
+  MemphisCard,
+  RoutableCard,
+  RoutableScene,
+  RouteLine,
+  ShadowButton,
+  ShadowCard,
+} from '../../design-system'
 import { LearningKitGallery } from '../../design-system/examples/LearningKitGallery'
+import { CHAPTERS, PROFILES } from '../../lib/chapters'
+import { Page, Section } from '../../lib/ui'
 import { TicketPreview } from './TicketPreview'
 
 const nodes = {
@@ -92,7 +95,12 @@ export function App() {
         <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
           {LINES.map((l) => (
             <div key={l.n} className="rounded-xl border-2 border-ink bg-white p-3">
-              <svg className="h-auto w-full" viewBox="0 0 188 44">
+              <svg
+                role="img"
+                aria-label={`线条标本 ${l.n}`}
+                className="h-auto w-full"
+                viewBox="0 0 188 44"
+              >
                 <path
                   d={l.d}
                   stroke="var(--color-ink)"
@@ -127,7 +135,7 @@ export function App() {
             </div>
           ))}
           <div className="rounded-xl border-2 border-ink bg-white p-3">
-            <svg className="h-auto w-full" viewBox="0 0 188 44">
+            <svg role="img" aria-label="手写标本线" className="h-auto w-full" viewBox="0 0 188 44">
               <path
                 d="M12 22 q10 -22 20 0 t20 0 t20 0 t20 0 t20 0 t20 0 t20 0 t20 0 t20 0"
                 stroke="var(--color-clash3b)"
@@ -155,19 +163,19 @@ export function App() {
             <RoutableCard
               no={1}
               title="快速开始"
-              href="/ch1.html"
+              href="./ch1.html"
               className="absolute left-[60px] top-[110px] w-[180px]"
             />
             <RoutableCard
               no={2}
               title="React"
-              href="/ch2.html"
+              href="./ch2.html"
               className="absolute left-[420px] top-[70px] w-[180px] -rotate-1"
             />
             <RoutableCard
               no={5}
               title="全栈基础"
-              href="/ch5.html"
+              href="./ch5.html"
               className="absolute left-[780px] top-[70px] w-[180px]"
             />
           </RoutableScene>
@@ -237,7 +245,7 @@ export function App() {
       >
         <div className="flex flex-wrap items-center gap-4">
           <ShadowButton>默认 · paper</ShadowButton>
-          <ShadowButton href="/learn.html">链接 · href 渲染 a</ShadowButton>
+          <ShadowButton href="./learn.html">链接 · href 渲染 a</ShadowButton>
           <ShadowButton tone="clash1b">tone · clash1b</ShadowButton>
           <ShadowButton size="sm">紧凑 · sm</ShadowButton>
           <ShadowButton disabled>占位 · 虚线</ShadowButton>

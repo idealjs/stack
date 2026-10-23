@@ -1,7 +1,7 @@
-import React, { useState } from 'react'
-import clsx from 'clsx'
 import Link from '@docusaurus/Link'
 import useBaseUrl from '@docusaurus/useBaseUrl'
+import clsx from 'clsx'
+import { useState } from 'react'
 import type { CourseSection } from './courses'
 import styles from './styles.module.css'
 

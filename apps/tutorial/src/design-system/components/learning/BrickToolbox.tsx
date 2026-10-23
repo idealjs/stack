@@ -1,5 +1,5 @@
-import { toneStyle } from './shared'
 import type { LearningTone } from './shared'
+import { toneStyle } from './shared'
 
 export interface ToolboxBrick {
   id: string

@@ -1,15 +1,14 @@
 import type { ReactNode } from 'react'
-import { Page, Section } from '../lib/ui'
-import { MONTHS, POSTS, monthOf } from '../content/blogs'
+import { MONTHS, monthOf, POSTS } from '../content/blogs'
 import { BrickDot, Mark, Tri } from '../design-system'
+import { Page, Section } from '../lib/ui'
 
 function inline(text: string): ReactNode[] {
   const parts: ReactNode[] = []
   const re = /(\*\*[^*]+\*\*|`[^`]+`)/g
   let last = 0
-  let m: RegExpExecArray | null
   let i = 0
-  while ((m = re.exec(text))) {
+  for (const m of text.matchAll(re)) {
     if (m.index > last) parts.push(text.slice(last, m.index))
     const t = m[0]
     if (t.startsWith('**')) parts.push(<b key={i++}>{t.slice(2, -2)}</b>)
@@ -104,6 +103,7 @@ function Markdown({ raw }: { raw: string }) {
       out.push(
         <ul key={key++} className="m-0 list-none space-y-2 p-0">
           {items.map((it, n) => (
+            // biome-ignore lint/suspicious/noArrayIndexKey: 静态 markdown 列表渲染，顺序恒定、文本可重复
             <li key={n} className="flex items-start gap-2.5">
               <span className="mt-[9px] flex shrink-0">
                 <BrickDot size={11} on={ordered} />
@@ -147,7 +147,7 @@ export function BlogCard({ post }: { post: (typeof POSTS)[number] }) {
   return (
     <span className="hover-host block w-fit">
       <a
-        href={`/blog-${post.slug}.html`}
+        href={`./blog-${post.slug}.html`}
         className="hoverable-shadow block w-[420px] rounded-2xl border-2 border-ink bg-paper p-5 no-underline shadow-ink transition-[translate,box-shadow] duration-150"
       >
         <div className="flex items-center gap-2.5">
@@ -169,7 +169,8 @@ export function BlogCard({ post }: { post: (typeof POSTS)[number] }) {
 }
 
 export function BlogDatePage({ dateKey }: { dateKey: string }) {
-  const month = MONTHS.find((m) => m.key === dateKey)!
+  const month = MONTHS.find((m) => m.key === dateKey)
+  if (!month) throw new Error(`unknown month: ${dateKey}`)
   return (
     <Page
       active={`blog-${dateKey}`}
@@ -188,7 +189,8 @@ export function BlogDatePage({ dateKey }: { dateKey: string }) {
 }
 
 export function BlogPostPage({ slug }: { slug: string }) {
-  const post = POSTS.find((p) => p.slug === slug)!
+  const post = POSTS.find((p) => p.slug === slug)
+  if (!post) throw new Error(`unknown post: ${slug}`)
   return (
     <Page active={`blog-${monthOf(slug)}`}>
       <div className="relative overflow-hidden rounded-2xl border-2 border-ink bg-paper p-5 shadow-ink">
@@ -212,13 +214,13 @@ export function BlogPostPage({ slug }: { slug: string }) {
       </article>
       <div className="mt-10 flex items-center justify-between">
         <a
-          href={`/blog-${monthOf(slug)}.html`}
+          href={`./blog-${monthOf(slug)}.html`}
           className="rounded-xl border-2 border-ink bg-paper px-4 py-2 text-small font-bold text-ink no-underline shadow-ink"
         >
           ← 返回 {monthOf(slug)}
         </a>
         <a
-          href="/index.html"
+          href="./index.html"
           className="rounded-xl border-2 border-ink bg-ink px-4 py-2 text-small font-bold text-paper no-underline"
         >
           返回首页

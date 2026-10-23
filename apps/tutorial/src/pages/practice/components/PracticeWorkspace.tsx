@@ -3,10 +3,10 @@ import { ClipboardChecklist, FolderTabs, TaskEnvelope } from '../../../design-sy
 import type { ChatMessage, LlmConfig } from '../lib/agent/llm'
 import { hasKey, loadLlmConfig, saveLlmConfig } from '../lib/agent/llm'
 import { runAgentTurn, systemPrompt } from '../lib/agent/loop'
-import { taskFromLocation, taskMarkdown } from '../lib/tasks'
 import { CREATE_PROJECT_EXAMPLES, CREATE_PROJECT_INTRO, CREATE_PROJECT_NOTE } from '../lib/prompts'
-import { ChatPanel } from './ChatPanel'
+import { taskFromLocation, taskMarkdown } from '../lib/tasks'
 import type { ChatItem } from './ChatPanel'
+import { ChatPanel } from './ChatPanel'
 import { CoachSticky } from './CoachSticky'
 import { KeyModal } from './KeyModal'
 import { PromptStrip } from './PromptStrip'
@@ -116,7 +116,12 @@ export function PracticeWorkspace() {
         </h2>
         <p className="m-0 text-[13.5px] leading-6 text-body">
           {CREATE_PROJECT_INTRO.map((seg, i) =>
-            typeof seg === 'string' ? seg : <b key={i}>{seg.b}</b>,
+            typeof seg === 'string' ? (
+              seg
+            ) : (
+              // biome-ignore lint/suspicious/noArrayIndexKey: 静态文案段，顺序恒定
+              <b key={i}>{seg.b}</b>
+            ),
           )}
         </p>
         <FolderTabs

@@ -1,8 +1,7 @@
-import { Page, Section } from '../../lib/ui'
-import { BrickDot, Mark, Ring, Tri, Wave } from '../../design-system'
-import { CHAPTERS } from '../../lib/chapters'
-import { ChapterTicket } from '../../design-system'
 import type { ReactNode } from 'react'
+import { BrickDot, ChapterTicket, Mark, Ring, Tri, Wave } from '../../design-system'
+import { CHAPTERS } from '../../lib/chapters'
+import { Page, Section } from '../../lib/ui'
 
 const SHAPES = [
   { el: <Tri size={28} />, n: '▲ 靶子', m: '目标，卡头打头', s: '靶子先行' },
@@ -77,7 +76,7 @@ export function App() {
           <tbody>
             {VOCAB.map((g) =>
               g.rows.map(([sub, def], i) => (
-                <tr key={g.p + i} className="border-b border-[#ececea]">
+                <tr key={`${g.p}-${sub}`} className="border-b border-[#ececea]">
                   {i === 0 && (
                     <td
                       rowSpan={g.rows.length}

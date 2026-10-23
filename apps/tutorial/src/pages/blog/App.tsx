@@ -1,6 +1,6 @@
-import { Page, Section } from '../../lib/ui'
 import { BlogCard } from '../../components/BlogPages'
 import { MONTHS } from '../../content/blogs'
+import { Page, Section } from '../../lib/ui'
 
 export function App() {
   return (

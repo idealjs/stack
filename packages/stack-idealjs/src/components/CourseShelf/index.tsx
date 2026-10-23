@@ -1,7 +1,6 @@
-import React from 'react'
 import Heading from '@theme/Heading'
-import { courseSections } from './courses'
 import CourseCard from './CourseCard'
+import { courseSections } from './courses'
 import styles from './styles.module.css'
 
 export default function CourseShelf() {

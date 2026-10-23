@@ -1,5 +1,5 @@
-import { useState } from 'react'
 import type { CSSProperties } from 'react'
+import { useState } from 'react'
 
 export type LearningTone = 'coral' | 'teal' | 'yellow' | 'violet' | 'pink' | 'blue'
 

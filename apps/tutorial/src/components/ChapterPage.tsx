@@ -1,8 +1,8 @@
 import type { CSSProperties, ReactNode } from 'react'
-import { Page, Section } from '../lib/ui'
-import { CHAPTERS, CONTENT } from '../lib/chapters'
 import type { ChapterId } from '../design-system'
 import { BrickDots, Mark, Ring, Tri, Wave } from '../design-system'
+import { CHAPTERS, CONTENT } from '../lib/chapters'
+import { Page, Section } from '../lib/ui'
 
 const ALL: ChapterId[] = [1, 2, 3, 4, 5, 6, 7]
 
@@ -109,7 +109,7 @@ export function ChapterPage({ id, children }: { id: ChapterId; children?: ReactN
         <div className="flex items-center justify-between gap-4">
           {prev ? (
             <a
-              href={`/ch${prev}.html`}
+              href={`./ch${prev}.html`}
               className="rounded-xl border-2 border-ink bg-paper px-4 py-2 text-[12.5px] font-bold text-ink no-underline shadow-ink"
             >
               ← 第 {prev} 章 · {CHAPTERS[prev].title}
@@ -118,14 +118,14 @@ export function ChapterPage({ id, children }: { id: ChapterId; children?: ReactN
             <span />
           )}
           <a
-            href="/index.html"
+            href="./index.html"
             className="rounded-xl border-2 border-ink bg-ink px-4 py-2 text-[12.5px] font-bold text-paper no-underline"
           >
             返回首页
           </a>
           {next ? (
             <a
-              href={`/ch${next}.html`}
+              href={`./ch${next}.html`}
               className="rounded-xl border-2 border-ink bg-paper px-4 py-2 text-[12.5px] font-bold text-ink no-underline shadow-ink"
             >
               第 {next} 章 · {CHAPTERS[next].title} →

@@ -6,7 +6,7 @@ test.describe('教程首页', () => {
   })
 
   test('成品演示可增删、勾选；空白输入不产生任务，刷新回到示例', async ({ page }) => {
-    const demo = page.getByRole('group', { name: '待办应用演示' })
+    const demo = page.getByRole('region', { name: '待办应用演示' })
     const input = demo.getByRole('textbox', { name: '新的待办' })
     await expect(demo.getByRole('status')).toHaveText('2 件 · 完成 1')
     await input.fill('   ')

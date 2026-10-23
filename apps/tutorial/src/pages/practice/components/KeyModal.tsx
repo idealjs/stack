@@ -35,15 +35,21 @@ export function KeyModal({
         <p className="t-small-mute mt-1.5 mb-4">
           默认 DeepSeek；也可填任何 OpenAI 兼容端点。key 仅保存在浏览器 localStorage。
         </p>
-        <label className="t-small-strong mb-1 block">API 地址（baseURL）</label>
+        <label htmlFor="km-base-url" className="t-small-strong mb-1 block">
+          API 地址（baseURL）
+        </label>
         <input
+          id="km-base-url"
           className={FIELD}
           value={baseURL}
           onChange={(e) => setBaseURL(e.target.value)}
           spellCheck={false}
         />
-        <label className="t-small-strong mt-3 mb-1 block">API Key</label>
+        <label htmlFor="km-api-key" className="t-small-strong mt-3 mb-1 block">
+          API Key
+        </label>
         <input
+          id="km-api-key"
           className={FIELD}
           type="password"
           value={apiKey}
@@ -52,8 +58,11 @@ export function KeyModal({
           autoComplete="off"
           spellCheck={false}
         />
-        <label className="t-small-strong mt-3 mb-1 block">模型</label>
+        <label htmlFor="km-model" className="t-small-strong mt-3 mb-1 block">
+          模型
+        </label>
         <input
+          id="km-model"
           className={FIELD}
           value={model}
           onChange={(e) => setModel(e.target.value)}

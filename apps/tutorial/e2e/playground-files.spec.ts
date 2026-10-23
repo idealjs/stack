@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test'
+import { expect, test } from '@playwright/test'
 
 async function addFile(page: import('@playwright/test').Page, name: string) {
   await page.getByTestId('new-file-name').fill(name)

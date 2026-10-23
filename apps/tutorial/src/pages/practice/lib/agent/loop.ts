@@ -1,7 +1,7 @@
-import type { ChatMessage, LlmConfig } from './llm'
-import { streamChat } from './llm'
 import type { PracticeTask } from '../tasks'
 import { taskMarkdown } from '../tasks'
+import type { ChatMessage, LlmConfig } from './llm'
+import { streamChat } from './llm'
 
 export function systemPrompt(task: PracticeTask): string {
   return [
@@ -33,13 +33,13 @@ export async function runAgentTurn(opts: {
   const { config, history, userText, signal, hooks } = opts
   history.push({ role: 'user', content: userText })
 
-  let full = ''
+  let _full = ''
   const assistant = await streamChat({
     config,
     messages: history,
     signal,
     onDelta: (delta) => {
-      full += delta
+      _full += delta
       hooks.onAssistantDelta(delta)
     },
   })

@@ -1,5 +1,5 @@
-import { useId } from 'react'
 import type { KeyboardEvent, ReactNode } from 'react'
+import { useId } from 'react'
 import { useLearningState } from './shared'
 
 export interface FolderTab {
@@ -72,7 +72,6 @@ export function FolderTabs({
             id={`${uid}-panel-${index}`}
             aria-labelledby={`${uid}-tab-${index}`}
             hidden={active !== tab.id}
-            tabIndex={0}
           >
             {tab.content}
           </div>

@@ -1,0 +1,20 @@
+{
+  "name": "@stack/web-runner",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "exports": {
+    "./vite": "./vite-plugin.ts"
+  },
+  "scripts": {
+    "dev:runtime": "vite",
+    "build:runtime": "vite build"
+  },
+  "dependencies": {
+    "esbuild-wasm": "^0.25.12"
+  },
+  "devDependencies": {
+    "typescript": "~5.6.2",
+    "vite": "^6.0.0"
+  }
+}

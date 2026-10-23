@@ -30,8 +30,8 @@ export function ComparisonBoard({
     >
       {title && <h3>{title}</h3>}
       <div className="learning-comparison-pages">
-        {[left, right].map((side, index) => (
-          <section key={index} className="learning-comparison-page">
+        {[left, right].map((side) => (
+          <section key={side.label} className="learning-comparison-page">
             <h4>{side.label}</h4>
             <div className="learning-prose">{side.content}</div>
           </section>

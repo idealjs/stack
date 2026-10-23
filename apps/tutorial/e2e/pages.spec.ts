@@ -1,5 +1,5 @@
-import { expect, test } from '@playwright/test'
 import type { Page } from '@playwright/test'
+import { expect, test } from '@playwright/test'
 import type { TicketProps } from '../src/design-system/components/Ticket'
 
 const PAGES = ['design', 'design-colors', 'design-symbols', 'design-components'] as const
@@ -185,8 +185,8 @@ test.describe('RouteLine 规格契约', () => {
       if (!svg) return null
       const wrap = svg.parentElement
       const wb = wrap.getBoundingClientRect()
-      const c1 = wrap.querySelector('a[href="/ch1.html"]').getBoundingClientRect()
-      const c2 = wrap.querySelector('a[href="/ch2.html"]').getBoundingClientRect()
+      const c1 = wrap.querySelector('a[href="./ch1.html"]').getBoundingClientRect()
+      const c2 = wrap.querySelector('a[href="./ch2.html"]').getBoundingClientRect()
       const stations = [...svg.querySelectorAll('circle')]
         .map((n) => ({ cx: +(n.getAttribute('cx') ?? 0), r: +(n.getAttribute('r') ?? 0) }))
         .filter((s) => s.r === 6)
@@ -226,7 +226,7 @@ test.describe('RouteLine 规格契约', () => {
             .find((d) => d.startsWith('M 600')),
 
           cardTranslate: getComputedStyle(
-            svg.parentElement.querySelector('a[data-comp="course-card"][href="/ch2.html"]'),
+            svg.parentElement.querySelector('a[data-comp="course-card"][href="./ch2.html"]'),
           ).translate,
         }
       })

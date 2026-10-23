@@ -32,7 +32,7 @@ export function App() {
           {BOOKS.map((b) => (
             <span key={b.key} className="hover-host block w-fit">
               <a
-                href={`/${b.key}.html`}
+                href={`./${b.key}.html`}
                 className="hoverable-shadow block w-[280px] rounded-2xl border-2 border-ink bg-paper p-5 no-underline shadow-ink transition-[translate,box-shadow] duration-150"
               >
                 <span className="text-t3 font-extrabold text-ink">{b.label}</span>
