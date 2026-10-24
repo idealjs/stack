@@ -14,7 +14,7 @@ js 脚本**——他的 hook 应该长什么样？流程是什么？
   name: 'single-file',
   lower: async (ctx, id, artifact) => {
     if (id !== entryId) return [artifact]          // 非入口恒等返回（按 id 自筛纪律）
-    const imports = ctx.parseImports(artifact.code) // ['./b', './c']（external 由 demand 跳过）
+    const imports = ctx.lowerImport(artifact.code) // ['./b', './c']（external 由 demand 跳过）
     const deps = await ctx.demand(imports)          // 传递闭包终态：依赖先行、按 id 去重
     const code = [...deps, artifact]                // 依赖先行，入口最后
       .map((m) => stripLocalImports(m.code))        // 剥内部 import；external 保留
@@ -36,7 +36,7 @@ id，alias 生效）走**完整生命周期**（load → lower），返回**传�
 ```mermaid
 flowchart TD
     D1["需求 A"] --> P1["解析 A"]
-    P1 --> L1["lower A<br/>parseImports → demand B、C"]
+    P1 --> L1["lower A<br/>lowerImport → demand B、C"]
     L1 --> D2["需求 B"] --> P2["解析 B（终态）"]
     L1 --> D3["需求 C"] --> P3["解析 C（终态）"]
     P2 --> R["恢复 lower A<br/>合并 B＋C＋A → bundle.js"]
@@ -48,7 +48,7 @@ flowchart TD
 
 1. **需求 A 入队**——config `inputs` 的初始模块需求；
 2. **resolve → load**——定位 id、读源码；
-3. **lower A**——`parseImports` 拿到 `['./b', './c']`，`await ctx.demand(...)` 挂起；
+3. **lower A**——`lowerImport` 拿到 `['./b', './c']`，`await ctx.demand(...)` 挂起；
 4. **引擎调度 B、C**——各自 resolve → load → lower 至终态（若 B 的 lower 也 pull，
    递归同法）；
 5. **恢复 lower A**——拿到 B、C 终态，依赖先行剥 import 拼接，返回 `bundle.js`

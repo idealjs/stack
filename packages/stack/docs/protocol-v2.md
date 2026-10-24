@@ -83,13 +83,13 @@ lower 的 ctx API——细粒度资源等待（lower 可以拉取依赖模块的
 interface LowerContext {
   fs: { readFile(path: string): Promise<string> }   // 注入 fs 只读面
   output(spec: EmittedOutput): void                  // 唯一副作用：登记产出（登记即冻结）
-  parseImports(code: string): Specifier[]            // 工具：acorn 封装（静态＋动态字面量）
+  lowerImport(code: string): Specifier[]            // 工具：acorn 封装（静态＋动态字面量）
   demand(specifiers: string[]): Promise<FinalModule[]>  // 递归需求：拉取依赖终态（环时抛可捕获 CycleError）
   merge(specifiers: string[], name?: string): Promise<FinalModule>  // 环解法：load 结果精确清理→合并→注册新模块
 }
 ```
 
-- `ctx.parseImports`：供 lower 分析自身输入（引擎对 lower 返回的工件必再解析以长图，
+- `ctx.lowerImport`：供 lower 分析自身输入（引擎对 lower 返回的工件必再解析以长图，
   工具与引擎共用同一解析器，双解析可按内容缓存）；
 - **`ctx.demand(specifiers)`**：拉取依赖的**传递闭包终态**——每个 specifier 经 resolve
   链（相对当前 id，alias 生效）→ 完整生命周期（load→lower）→ 最终形态；语义四条：
@@ -97,7 +97,7 @@ interface LowerContext {
   （并发/重复 demand 共享同一 Promise）、external 跳过（保留为 import 语句）；
   **await 链成环 → 抛可捕获的 `CycleError`（带环路径）**——默认响亮（未捕获即构建
   失败），捕获后由插件决定如何处理（见「循环检测器与 merge 解环」）。
-  工程纪律：merge/join 是插件侧组合动作，协议供 parseImports＋demand＋merge 三个工具；
+  工程纪律：merge/join 是插件侧组合动作，协议供 lowerImport＋demand＋merge 三个工具；
 - 被 demand 的模块仍留在注册表：materialize 类产出自行筛选（如仅入口），避免双份。
 
 命名定案：**lower**（裂变语义；compiler lowering 行话——高级结构降为多个低级结构，
