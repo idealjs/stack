@@ -100,6 +100,28 @@ flowchart TD
 - **⑥ 主循环写盘**——宿主（CLI / SDK 调用方）拿 `BuildResult.outputs` 按登记序统一
   写盘；core 不碰 fs。
 
+## 为什么不循环（对比 rollup / vite / webpack）
+
+rollup/vite/webpack 的「新产物再走一遍管线」的循环，是**可变共享状态**的收敛手段：
+bundle 对象与 asset 袋允许插件增删改（rollup `generateBundle` 可删条目、webpack 的
+asset 袋多阶段读写），收敛需要多趟遍历；webpack 为此发明 `processAssets` 的 stage
+分级、vite/rollup 生态长出 `enforce: pre/post` 优先级体系——「插件顺序引起的错误」
+正是这套补丁的固有成本：顺序错了不报错，只是静默产出错误结果。
+
+stack 的产出 append-only、登记后不可变，没有需要收敛的可变状态，因此**不需要循环**，
+也不引入优先级体系——顺序只有一种：声明顺序。产物加工的强需求由三条路覆盖：
+
+| 需求 | 走法 | 循环吗 |
+|---|---|---|
+| 生成源码进入构建（代码生成模板等） | 插件在 `resolveId`/`load` 供虚拟模块——图阶段自然接纳 | 否，天然入口 |
+| 加工已产出的产物（压缩/加 banner/gzip） | 后序插件 `ctx.outputs` 只读引用＋`ctx.output` 登记衍生品 | 否，声明顺序即管线 |
+| 真要多趟加工 | 插件**内部**自持循环（读 outputs、加工、登记），趟数控制在插件一处可见 | 局部，不污染全局 |
+
+顺序错误的形态因此从「静默错产物」变成「显式报错」：后序插件引用不到依赖产出时，
+错误列出全部现有产出并提示检查声明顺序（见 minify 插件实现）——rollup/vite 里这类
+错误不抛出，只是产出悄悄不对。协议同时明确拒绝 `enforce`/优先级数字：第二个顺序
+概念的出现即是回归双轨。
+
 ## 钩子协议与 async 纪律
 
 - `resolveId` / `load` / `transform` / `buildEnd` 返回值一律 `T | Promise<T>`，调度器
