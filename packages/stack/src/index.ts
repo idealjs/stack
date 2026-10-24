@@ -1,4 +1,5 @@
 export { type BuildResult, build, DEFAULT_DIST } from './core/build.ts'
+export { type BundleOptions, bundle, moduleRuntime, stronglyConnected } from './core/bundle.ts'
 export {
   defineConfig,
   type LoadContext,
@@ -7,9 +8,6 @@ export {
   type StackInput,
   type StackLoader,
 } from './core/config.ts'
-export { memoryFs } from './core/memoryFs.ts'
-export { type MinifyOptions, minify } from './core/minify.ts'
-export { type BundleOptions, bundle, moduleRuntime, stronglyConnected } from './core/bundle.ts'
 export { CycleError } from './core/cycle.ts'
 export type {
   Artifact,
@@ -31,4 +29,6 @@ export type {
   StackHook,
   WatchHook,
 } from './core/hooks.ts'
+export { memoryFs } from './core/memoryFs.ts'
+export { type MinifyOptions, minify } from './core/minify.ts'
 export type { ParsedExport, ParsedImport, ParsedImportName } from './core/parse.ts'
