@@ -35,6 +35,9 @@ alias 语义：source 命中前缀（或整串等于 key）即替换为 target +
 
 ## 钩子协议
 
+产出通道语义、三条不变量与插件循环全景见 [docs/plugin-loop.md](./docs/plugin-loop.md)
+（改 `core/build.ts` / `core/plugin.ts` 前先读）。
+
 ```ts
 interface StackPlugin {
   name: string
