@@ -20,7 +20,8 @@
 ## 配置模型（inputs / fs / load / hooks 四件套）
 
 ```ts
-import { defineConfig, minify, bundle } from '@idealjs/stack'
+import { defineConfig } from '@idealjs/stack'
+import { bundle, minify } from '@idealjs/stack/builtins'
 import { nodeFs } from '@idealjs/stack/node'
 
 export default defineConfig({

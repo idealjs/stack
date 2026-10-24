@@ -1,4 +1,5 @@
-import { bundle, defineConfig, minify } from '@idealjs/stack'
+import { defineConfig } from '@idealjs/stack'
+import { bundle, minify } from '@idealjs/stack/builtins'
 import { nodeFs } from '@idealjs/stack/node'
 
 export default defineConfig({

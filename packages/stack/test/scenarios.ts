@@ -1,3 +1,4 @@
+import { bundle, minify } from '../src/builtins.ts'
 import { memoryFs } from '../src/core/memoryFs.ts'
 import { parseModuleImports } from '../src/core/parse.ts'
 import {
@@ -10,12 +11,10 @@ import {
 import {
   type BuildResult,
   build,
-  bundle,
   CycleError,
   type EmittedFile,
   type EmittedOutput,
   type ModuleHook,
-  minify,
   type StackConfig,
   type WatchHook,
 } from '../src/index.ts'

@@ -1,6 +1,7 @@
 import { mkdirSync, writeFileSync } from 'node:fs'
 import { dirname, resolve } from 'node:path'
-import { build, bundle, defineConfig, minify } from '@idealjs/stack'
+import { build, defineConfig } from '@idealjs/stack'
+import { bundle, minify } from '@idealjs/stack/builtins'
 import { nodeFs } from '@idealjs/stack/node'
 
 const root = process.cwd()

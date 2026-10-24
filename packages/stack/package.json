@@ -6,6 +6,7 @@
   "bin": "bin/stack.mjs",
   "exports": {
     ".": "./src/index.ts",
+    "./builtins": "./src/builtins.ts",
     "./node": "./src/node/index.ts"
   },
   "scripts": {

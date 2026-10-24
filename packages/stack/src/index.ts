@@ -1,5 +1,4 @@
 export { type BuildResult, build, DEFAULT_DIST } from './core/build.ts'
-export { type BundleOptions, bundle, moduleRuntime, stronglyConnected } from './core/bundle.ts'
 export {
   defineConfig,
   type LoadContext,
@@ -30,5 +29,4 @@ export type {
   WatchHook,
 } from './core/hooks.ts'
 export { memoryFs } from './core/memoryFs.ts'
-export { type MinifyOptions, minify } from './core/minify.ts'
 export type { ParsedExport, ParsedImport, ParsedImportName } from './core/parse.ts'

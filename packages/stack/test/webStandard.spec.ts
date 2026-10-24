@@ -22,7 +22,7 @@ const browserClosureFiles = (): string[] => [
 ]
 
 test('SDK entry and core sources import zero node: modules', () => {
-  const files = [join(srcDir, 'index.ts'), ...listSources(coreDir)]
+  const files = [join(srcDir, 'index.ts'), join(srcDir, 'builtins.ts'), ...listSources(coreDir)]
   for (const file of files) {
     const content = readFileSync(file, 'utf8')
     assert.ok(!NODE_IMPORT_PATTERN.test(content), `${file} 不得引用 node: 模块`)
