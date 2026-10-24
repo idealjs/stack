@@ -71,8 +71,7 @@ function renderGraph(graph: ModuleGraph): EmittedFile[] {
 }
 
 export async function build(config: StackConfig): Promise<BuildResult> {
-  const inputNames = Object.keys(config.inputs ?? {})
-  if (inputNames.length === 0) throw new Error('[stack] config.inputs 至少需要一个入口')
+  if ((config.inputs ?? []).length === 0) throw new Error('[stack] config.inputs 至少需要一个入口')
   const startedAt = Date.now()
   const scheduler = createPluginScheduler(config.plugins)
   const graph = await buildModuleGraph(

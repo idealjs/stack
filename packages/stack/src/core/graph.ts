@@ -1,4 +1,5 @@
 import { transform } from 'esbuild-wasm'
+import type { StackInput } from './config.ts'
 import { parseModuleImports } from './parse.ts'
 import { isRelativeSpecifier, normalizePath } from './pathUtil.ts'
 import type { PluginScheduler } from './plugin.ts'
@@ -23,7 +24,7 @@ export interface ModuleGraph {
 
 export interface GraphInput {
   root: string
-  inputs: Record<string, string>
+  inputs: StackInput[]
   alias?: Record<string, string>
 }
 
@@ -89,10 +90,10 @@ export async function buildModuleGraph(
   }
 
   const entries: { name: string; id: string }[] = []
-  for (const [name, entrySource] of Object.entries(input.inputs)) {
-    const resolved = await resolveDependency(entrySource, rootImporter)
-    if (resolved === null) throw new Error(`[stack] 无法解析入口 "${entrySource}"（root=${root}）`)
-    entries.push({ name, id: resolved })
+  for (const entry of input.inputs) {
+    const resolved = await resolveDependency(entry.path, rootImporter)
+    if (resolved === null) throw new Error(`[stack] 无法解析入口 "${entry.path}"（root=${root}）`)
+    entries.push({ name: entry.name, id: resolved })
     await visitModule(resolved)
   }
   return { entries, modules }

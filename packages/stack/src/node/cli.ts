@@ -135,7 +135,7 @@ export async function runCLI(argv: string[]): Promise<void> {
     root: resolvePath(process.cwd(), userConfig.root ?? '.'),
   }
   console.log(
-    `stack v${VERSION}：${Object.keys(config.inputs).length} 个输入，规范产物 → ${config.dist ?? 'dist'}（插件可在 buildEnd 追加产出）`,
+    `stack v${VERSION}：${config.inputs.length} 个输入，规范产物 → ${config.dist ?? 'dist'}（插件可在 buildEnd 追加产出）`,
   )
   if (options.watchMode) {
     await runWatch(config)

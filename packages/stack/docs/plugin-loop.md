@@ -24,7 +24,10 @@ import { defineConfig, minify } from '@idealjs/stack'
 
 export default defineConfig({
   root: '.',
-  inputs: { app: 'src/app.ts', tool: 'src/tool.ts' },
+  inputs: [
+    { name: 'app', path: 'src/app.ts' },
+    { name: 'tool', path: 'src/tool.ts' },
+  ],
   dist: 'dist',
   alias: { '@/': 'src/' },
   plugins: [minify({ dir: 'dist/min' })],
@@ -75,17 +78,28 @@ export function minify(options: { from?: string; name?: string; dir: string } = 
 ```mermaid
 flowchart TD
     subgraph CORE["构建会话 · core（零 node: / 不碰 fs）"]
-        A["n 个 inputs 各自成图<br/>resolveId → load → transform 链 → esbuild 剥类型 → acorn 解析依赖"] --> B["规范产物渲染<br/>落位重写：.ts→.js / alias / 动态 import 字面量"]
-        B --> C["core 经同一通道登记 default → config.dist<br/>（核心只是第一个产出方）"]
-        C --> D["buildEnd 插件链（按声明顺序）"]
-        D --> Pi["插件 i：<br/>ctx.outputs 只读引用先前产出（可选）<br/>ctx.output 登记新产出（重名抛错并报出两个来源插件名）"]
-        Pi -->|"还有下一个插件"| Pi
-        Pi -->|"插件链结束"| E["产出缓存：EmittedOutput[] 按登记序<br/>append-only · 登记后不可变"]
+        A["① 成图"] --> B["② 渲染"]
+        B --> C["③ 登记 default"]
+        C --> D["④ buildEnd 插件链"]
+        D --> E["⑤ 产出缓存"]
     end
-    E -->|"BuildResult.outputs"| H["宿主主循环（CLI / SDK 调用方）<br/>按登记序统一写盘"]
-    H --> O1["config.dist/ ← default"]
-    H --> O2["minify 声明的 dir/ ← min"]
+    E -->|"BuildResult.outputs"| H["⑥ 主循环写盘"]
 ```
+
+各块职责：
+
+- **① 成图**——n 个 `inputs`（`{ name, path }` 对象数组）各自成图：`resolveId → load →
+  transform 链 → esbuild 剥类型 → acorn 解析依赖`；循环依赖入图即止。
+- **② 渲染**——规范产物渲染：按入口公共祖先相对结构落位，说明符重写（`.ts→.js`、
+  alias、动态 import 字面量）。
+- **③ 登记 default**——core 经与插件完全相同的通道登记规范产物
+  `{ name: 'default', dir: config.dist ?? 'dist' }`；核心只是第一个产出方，不是特权
+  产出者。
+- **④ buildEnd 插件链**——按声明顺序逐个执行：插件经只读的 `ctx.outputs` 引用先前
+  产出（可选），经 `ctx.output(spec)` 登记新产出（重名抛错并报出两个来源插件名）。
+- **⑤ 产出缓存**——`EmittedOutput[]` 按登记序；append-only，登记后不可变。
+- **⑥ 主循环写盘**——宿主（CLI / SDK 调用方）拿 `BuildResult.outputs` 按登记序统一
+  写盘；core 不碰 fs。
 
 ## 钩子协议与 async 纪律
 

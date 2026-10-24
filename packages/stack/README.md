@@ -16,7 +16,10 @@ import { defineConfig, minify } from '@idealjs/stack'
 
 export default defineConfig({
   root: '.',                            // 可选，默认 '.'
-  inputs: { app: 'src/app.ts', tool: 'src/tool.ts' },
+  inputs: [
+    { name: 'app', path: 'src/app.ts' },
+    { name: 'tool', path: 'src/tool.ts' },
+  ],
   dist: 'dist/esm',                     // 可选，规范产物落位目录，默认 'dist'
   alias: { '@/': 'src/' },              // 前缀替换，target 是 root 相对路径
   plugins: [minify({ dir: 'dist/min' })],

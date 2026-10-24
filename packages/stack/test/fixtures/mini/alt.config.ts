@@ -1,7 +1,5 @@
 export default {
-  inputs: {
-    main: 'src/main.ts',
-  },
+  inputs: [{ name: 'main', path: 'src/main.ts' }],
   dist: 'dist/alt',
   alias: {
     '@/': 'src/',

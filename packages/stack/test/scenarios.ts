@@ -152,7 +152,10 @@ export const SCENARIOS: Scenario[] = [
     name: '一次构建产出两份：default 规范产物＋minify 插件衍生产物',
     files: cartesianFiles,
     config: {
-      inputs: { app: 'src/app.ts', tool: 'src/tool.ts' },
+      inputs: [
+        { name: 'app', path: 'src/app.ts' },
+        { name: 'tool', path: 'src/tool.ts' },
+      ],
       dist: 'dist/esm',
       alias: { '@/': 'src/' },
       plugins: [minify({ dir: 'dist/min' })],
@@ -195,7 +198,7 @@ export const SCENARIOS: Scenario[] = [
       'src/lazy.ts': 'export const lazyValue = 42\n',
     },
     config: {
-      inputs: { main: 'src/main.ts' },
+      inputs: [{ name: 'main', path: 'src/main.ts' }],
     },
     expected: {
       moduleCount: 2,
@@ -215,7 +218,7 @@ export const SCENARIOS: Scenario[] = [
       'src/main.ts': "import { missing } from './missing'\nconsole.log(missing)\n",
     },
     config: {
-      inputs: { main: 'src/main.ts' },
+      inputs: [{ name: 'main', path: 'src/main.ts' }],
     },
     expected: { error: '无法解析导入 "./missing"' },
   },
@@ -226,7 +229,7 @@ export const SCENARIOS: Scenario[] = [
       'src/b.ts': "import { a } from './a'\nexport const b = a + '-b'\n",
     },
     config: {
-      inputs: { a: 'src/a.ts' },
+      inputs: [{ name: 'a', path: 'src/a.ts' }],
     },
     expected: {
       moduleCount: 2,
@@ -248,7 +251,7 @@ export const SCENARIOS: Scenario[] = [
       'src/main.ts': 'export const value: number = 1\n',
     },
     config: {
-      inputs: { main: 'src/main.ts' },
+      inputs: [{ name: 'main', path: 'src/main.ts' }],
       plugins: [
         {
           name: 'renaming',
@@ -275,7 +278,7 @@ export const SCENARIOS: Scenario[] = [
       'src/main.ts': "import { extra } from './extra'\nconsole.log(extra)\n",
     },
     config: {
-      inputs: { main: 'src/main.ts' },
+      inputs: [{ name: 'main', path: 'src/main.ts' }],
       dist: 'dist/async',
       plugins: [
         {
@@ -334,7 +337,7 @@ export const SCENARIOS: Scenario[] = [
       'src/main.ts': "console.log('ok')\n",
     },
     config: {
-      inputs: { main: 'src/main.ts' },
+      inputs: [{ name: 'main', path: 'src/main.ts' }],
       dist: 'dist/site',
       plugins: [
         {
@@ -377,7 +380,7 @@ export const SCENARIOS: Scenario[] = [
       'src/main.ts': "console.log('ok')\n",
     },
     config: {
-      inputs: { main: 'src/main.ts' },
+      inputs: [{ name: 'main', path: 'src/main.ts' }],
       plugins: [
         {
           name: 'alpha-maker',
@@ -403,7 +406,7 @@ export const SCENARIOS: Scenario[] = [
       'src/main.ts': "console.log('ok')\n",
     },
     config: {
-      inputs: { main: 'src/main.ts' },
+      inputs: [{ name: 'main', path: 'src/main.ts' }],
       plugins: [lateProducer],
     },
     expected: {
@@ -411,7 +414,7 @@ export const SCENARIOS: Scenario[] = [
     },
     rebuild: {
       config: {
-        inputs: { main: 'src/main.ts' },
+        inputs: [{ name: 'main', path: 'src/main.ts' }],
         plugins: [lateProducer],
       },
       expectedError: '只能在 buildEnd 阶段产出',

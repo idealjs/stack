@@ -11,7 +11,7 @@ src/
     └── utils.ts      TS 接口 / 泛型函数（证明类型剥离转译）
 ```
 
-配置形态：`inputs × dist` 定义规范产物落位（`dist/esm`），`plugins: [minify({ dir: 'dist/min' })]` 定义衍生产物——多份输出的乘法不是配置数组，而是插件组合。
+配置形态：`inputs`（对象数组，name ＋ path）定义构建什么、`dist` 定义规范产物落位（`dist/esm`），`plugins: [minify({ dir: 'dist/min' })]` 定义衍生产物——多份输出的乘法不是配置运算，而是插件组合。
 
 ## CLI 用法
 
