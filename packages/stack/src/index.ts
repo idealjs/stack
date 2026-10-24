@@ -1,10 +1,12 @@
 export { type BuildResult, build, DEFAULT_DIST } from './core/build.ts'
 export {
   defineConfig,
+  inputKindOf,
   type LoadContext,
   type StackConfig,
   type StackFs,
   type StackInput,
+  type StackInputKind,
   type StackLoader,
 } from './core/config.ts'
 export { CycleError } from './core/cycle.ts'
@@ -30,3 +32,4 @@ export type {
 } from './core/hooks.ts'
 export { memoryFs } from './core/memoryFs.ts'
 export type { ParsedExport, ParsedImport, ParsedImportName } from './core/parse.ts'
+export type { ParsedHtmlAsset } from './core/parseHtml.ts'

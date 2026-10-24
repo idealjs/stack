@@ -1,5 +1,6 @@
 import { OutputChannel } from './channel.ts'
-import type { StackConfig, StackFs } from './config.ts'
+import type { StackConfig, StackFs, StackInput, StackInputKind } from './config.ts'
+import { inputKindOf } from './config.ts'
 import { CycleDetector } from './cycle.ts'
 import type {
   ModuleEntry,
@@ -25,7 +26,8 @@ import type {
 } from './hooks.ts'
 import { hookProducer } from './hooks.ts'
 import { createLoading, type Loading } from './loading.ts'
-import { parseModuleImports } from './parse.ts'
+import { type ParsedImport, parseModuleImports } from './parse.ts'
+import { parseHtmlAssets } from './parseHtml.ts'
 import {
   dirnamePath,
   isRelativeSpecifier,
@@ -52,6 +54,23 @@ const applyAlias = (
   return { source, aliased: false }
 }
 
+const artifactImports = (code: string, kind: StackInputKind): ParsedImport[] => {
+  if (kind === 'css') return []
+  if (kind === 'html') {
+    return parseHtmlAssets(code).map((asset) => ({
+      source: asset.specifier,
+      start: asset.start,
+      end: asset.end,
+      declarationStart: asset.start,
+      declarationEnd: asset.end,
+      defaultName: null,
+      namespaceName: null,
+      named: [],
+    }))
+  }
+  return parseModuleImports(code)
+}
+
 export class DemandEngine {
   readonly detector = new CycleDetector()
   readonly channel: OutputChannel
@@ -65,6 +84,7 @@ export class DemandEngine {
   readonly #config: StackConfig
   readonly #registry = new Map<string, ModuleEntry>()
   readonly #redirects = new Map<string, string>()
+  readonly #kindOverrides = new Map<string, StackInputKind>()
   readonly #loading: Loading
   readonly #runtime: ResourceRuntime
   readonly #queue: QueueTask[] = []
@@ -97,6 +117,7 @@ export class DemandEngine {
       ensureLifecycle: (id) => this.ensureLifecycle(id),
       resolveDemand: (source, importer) => this.resolveDemand(source, importer),
       followRedirects: (id) => this.followRedirects(id),
+      kindOf: (id) => this.kindOf(id),
       loading: this.#loading,
       detector: this.detector,
       commitMerge: (merged, pathAnchor, ids, artifacts) =>
@@ -120,11 +141,12 @@ export class DemandEngine {
     return this.#failure?.error
   }
 
-  async resolveEntry(input: { name: string; path: string }): Promise<void> {
+  async resolveEntry(input: StackInput): Promise<void> {
     const resolution = await this.resolveDemand(input.path, `${this.root}/`, { entry: true })
     if (resolution.kind === 'external') {
       throw new Error(`[stack] 无法解析入口 "${input.path}"（root=${this.root}）`)
     }
+    this.#kindOverrides.set(resolution.id, inputKindOf(input.path, input.type))
     this.entries.push({ name: input.name, id: resolution.id })
     await this.ensureLifecycle(resolution.id)
   }
@@ -158,6 +180,10 @@ export class DemandEngine {
     return { kind: 'external', specifier: rawSource }
   }
 
+  kindOf(id: string): StackInputKind {
+    return this.#kindOverrides.get(id) ?? inputKindOf(id)
+  }
+
   ensureLifecycle(id: string): Promise<FinalModule> {
     const target = this.followRedirects(id)
     const existing = this.#registry.get(target)
@@ -169,6 +195,7 @@ export class DemandEngine {
     const created: ModuleEntry = {
       id: target,
       pathAnchor: target,
+      kind: this.kindOf(target),
       promise: null,
       final: null,
       artifacts: [],
@@ -231,12 +258,27 @@ export class DemandEngine {
     return this.finalModules().length
   }
 
-  renderRecords(): { id: string; pathAnchor: string; artifacts: RenderArtifact[] }[] {
-    const records: { id: string; pathAnchor: string; artifacts: RenderArtifact[] }[] = []
+  renderRecords(): {
+    id: string
+    pathAnchor: string
+    kind: StackInputKind
+    artifacts: RenderArtifact[]
+  }[] {
+    const records: {
+      id: string
+      pathAnchor: string
+      kind: StackInputKind
+      artifacts: RenderArtifact[]
+    }[] = []
     for (const entry of this.#registry.values()) {
       if (entry.redirect !== null || entry.final === null) continue
       if (entry.artifacts.length === 0) continue
-      records.push({ id: entry.id, pathAnchor: entry.pathAnchor, artifacts: entry.artifacts })
+      records.push({
+        id: entry.id,
+        pathAnchor: entry.pathAnchor,
+        kind: entry.kind,
+        artifacts: entry.artifacts,
+      })
     }
     return records
   }
@@ -293,8 +335,9 @@ export class DemandEngine {
     const entry = this.#registry.get(id)
     if (entry === undefined) throw new Error(`[stack] 内部错误：模块未注册：${id}`)
     if (entry.final !== null) return entry.final
+    const kind = entry.kind
     const raw = await this.#loading.loadForLifecycle(id)
-    const stripped = await this.#loading.strip(id, raw)
+    const stripped = await this.#loading.strip(id, raw, kind)
     let artifacts: Artifact[] = [{ code: stripped }]
     for (const hook of this.moduleLowerHooks) {
       const ctx = this.lowerContext(id, hook.name)
@@ -311,7 +354,7 @@ export class DemandEngine {
     const deps: string[] = []
     for (const artifact of artifacts) {
       const resolved: ResolvedArtifactImport[] = []
-      for (const parsed of parseModuleImports(artifact.code)) {
+      for (const parsed of artifactImports(artifact.code, kind)) {
         const resolution = await this.resolveDemand(parsed.source, id)
         const resolvedId = resolution.kind === 'module' ? resolution.id : null
         resolved.push({
@@ -333,6 +376,7 @@ export class DemandEngine {
     }
     const final: FinalModule = {
       id,
+      kind,
       code: artifacts.map((artifact) => artifact.code).join('\n'),
       deps,
       imports,
@@ -351,6 +395,7 @@ export class DemandEngine {
     this.#registry.set(merged.id, {
       id: merged.id,
       pathAnchor,
+      kind: 'module',
       promise: null,
       final: merged,
       artifacts,

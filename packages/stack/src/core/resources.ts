@@ -1,3 +1,4 @@
+import type { StackInputKind } from './config.ts'
 import type { CycleDetector } from './cycle.ts'
 import type { RenderArtifact } from './engine-types.ts'
 import type { FinalModule, ImportRef, Resolution } from './hooks.ts'
@@ -8,6 +9,7 @@ export interface ResourceRuntime {
   ensureLifecycle(id: string): Promise<FinalModule>
   resolveDemand(rawSource: string, importer: string): Promise<Resolution>
   followRedirects(id: string): string
+  kindOf(id: string): StackInputKind
   loading: Loading
   detector: CycleDetector
   commitMerge(
@@ -64,6 +66,9 @@ export async function mergeFrom(
       throw new Error(`[stack] merge 不能合并 external 说明符："${specifier}"`)
     }
     const target = rt.followRedirects(resolution.id)
+    if (rt.kindOf(target) !== 'module') {
+      throw new Error(`[stack] merge 仅支持 module 类型模块："${specifier}"（${target}）`)
+    }
     if (!ids.includes(target)) ids.push(target)
   }
   if (ids.length === 0) throw new Error('[stack] merge 需要至少一个可解析的模块说明符')
@@ -71,7 +76,7 @@ export async function mergeFrom(
   const parts: CleanedPart[] = []
   for (const id of ids) {
     const raw = await rt.loading.loadForLifecycle(id)
-    const stripped = await rt.loading.strip(id, raw)
+    const stripped = await rt.loading.strip(id, raw, 'module')
     const cleaned = await rt.loading.removeImportsInto(stripped, id, new Set(ids), rt.resolveDemand)
     parts.push({ code: cleaned, baseId: id })
   }
@@ -110,7 +115,7 @@ export async function mergeFrom(
     }
     mergedCode = `${mergedCode}${part.code}\n`
   }
-  const merged: FinalModule = { id: mergedId, code: mergedCode, deps, imports }
+  const merged: FinalModule = { id: mergedId, kind: 'module', code: mergedCode, deps, imports }
   rt.commitMerge(merged, ids[0], ids, [{ code: mergedCode, imports: resolvedImports }])
   return merged
 }

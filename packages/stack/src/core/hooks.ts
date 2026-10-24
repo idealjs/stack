@@ -1,4 +1,4 @@
-import type { LoadContext } from './config.ts'
+import type { LoadContext, StackInputKind } from './config.ts'
 import type { ParsedImport } from './parse.ts'
 
 export interface EmittedFile {
@@ -25,6 +25,7 @@ export interface ImportRef {
 
 export interface FinalModule {
   id: string
+  kind: StackInputKind
   code: string
   deps: string[]
   imports: ImportRef[]

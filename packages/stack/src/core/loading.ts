@@ -1,5 +1,5 @@
 import { transform } from 'esbuild-wasm'
-import type { StackLoader } from './config.ts'
+import type { StackInputKind, StackLoader } from './config.ts'
 import type { ReadOnlyFs } from './hooks.ts'
 import { parseModuleImports, parseTopLevelNames } from './parse.ts'
 
@@ -52,7 +52,8 @@ export function createLoading(runtime: { fs: ReadOnlyFs; load?: StackLoader }) {
       loaded.set(id, content)
       return content
     },
-    async strip(id: string, code: string): Promise<string> {
+    async strip(id: string, code: string, kind: StackInputKind): Promise<string> {
+      if (kind !== 'module') return code
       const cached = stripped.get(id)
       if (cached !== undefined) return cached
       const result = await transform(code, {

@@ -49,6 +49,32 @@ export default defineConfig({
 - **fs 与 load 都是配置级注入**：平台绑定收拢在宿主编写配置的那一刻，core 与 hooks
   全程平台无关。
 
+## 输入类型：module / html / css
+
+`Input` 增可选 `type?: 'html' | 'css' | 'module'`，缺省按扩展名推断（`.html` → html、
+`.css` → css、其余 → module），显式 type 覆盖推断。kind 只分流模块相生命周期的内容
+处理；resolve 链、lower 链与产出相对三种 kind 一视同仁——插件按 id 自筛，引擎不
+special-case 插件行为：
+
+- **module**：现状不变——load 后 esbuild 剥类型 → acorn 解析 import 长图 → 终态工件
+  落位 `.ts/.tsx → .js`；
+- **html**：load 后**不走剥类型**；`parseHtmlAssets`（web-standard 正则＋属性值区间
+  offset，无 HTML AST 依赖）提取两类引用作为图边——`<script src>`（→模块需求）与
+  `<link rel="stylesheet" href>`（→css 需求）；引用 specifier 走正常 resolve 链
+  （alias/扩展名补全生效），未命中相对路径照常报错、裸说明符 external 保留原文
+  （CDN 直写因此天然可用）；终态＝原文＋引用按最终产物路径重写——重写发生在
+  render/materialize，属性值区间 offset 随 `FinalModule.imports` 保留（与 merge 的
+  offset 语义同构）；html 工件不进 SCC/bundle 闭包：bundle 对 html 入口取其 script
+  引用闭包，css/html 永不 wrapped；
+- **css**：load 后透传内容（不走 esbuild js strip）；**终态工件**——不产图边
+  （`@import` 不支持，MVP 记录）；可被 `ctx.demand` 拉取（`FinalModule.code` 即 css
+  文本）；materialize 按相对结构 emit，扩展名自然保留。
+
+工程边界如实记录：merge 仅适用 module kind（load 结果的 import 清理与顶层名分析都是
+js 语义）；html 解析是正则级属性扫描，无完整 HTML AST、畸形 HTML 不保证。配套地，
+minify 内置 hook 对 watch 到的产出做**完整文件集**——`.js` minify、`.css` minify
+（esbuild css loader）、其余文件（html）原样复制——min 产出即完整可部署文件集。
+
 ## 模块相：resolve → load → lower
 
 ```mermaid

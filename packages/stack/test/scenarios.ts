@@ -104,6 +104,18 @@ const closureFiles: Record<string, string> = {
   'src/d.ts': "import ext from 'ext-pkg'\nexport const d = ext + 1\n",
 }
 
+const htmlPage = (body: string): string =>
+  `<!doctype html>\n<html lang="zh-CN">\n  <head>\n    <meta charset="UTF-8" />\n    <title>page</title>\n  </head>\n  <body>\n${body}\n  </body>\n</html>\n`
+
+const htmlPageFiles: Record<string, string> = {
+  'src/index.html': htmlPage(
+    '    <link rel="stylesheet" href="./theme/main.css" />\n    <script type="module" src="./entry/main"></script>',
+  ),
+  'src/entry/main.ts': "import { label } from '../label'\nconsole.log(label)\n",
+  'src/label.ts': "export const label = 'page'\n",
+  'src/theme/main.css': 'body { margin: 0 auto }\n',
+}
+
 let capturedOutputFn: ((spec: EmittedOutput) => void) | undefined
 
 export const SCENARIOS: Scenario[] = [
@@ -720,6 +732,138 @@ export const SCENARIOS: Scenario[] = [
           ? []
           : [`错误信息应包含 "构建会话已结束"，实际：${message}`]
       }
+    },
+  },
+  {
+    name: 'html 入口：script/link 引用长出模块图，default 重写为最终相对路径',
+    files: htmlPageFiles,
+    config: {
+      inputs: [{ name: 'page', path: 'src/index.html' }],
+      dist: 'dist/page',
+    },
+    expected: {
+      moduleCount: 4,
+      outputs: [
+        {
+          name: 'default',
+          dir: 'dist/page',
+          filePaths: ['entry/main.js', 'index.html', 'label.js', 'theme/main.css'],
+          files: [
+            {
+              path: 'index.html',
+              includes: ['src="./entry/main.js"', 'href="./theme/main.css"'],
+              notIncludes: ['src="./entry/main"', './entry/main.ts'],
+            },
+            { path: 'entry/main.js', includes: ['"../label.js"'], notIncludes: [': string'] },
+            { path: 'theme/main.css', includes: ['body { margin: 0 auto }'] },
+          ],
+        },
+      ],
+    },
+  },
+  {
+    name: 'css 入口：显式 type 透传为终态工件，min 以 css loader 压缩成完整文件集',
+    files: {
+      'src/site.css':
+        '/* 主题变量：仅开发时可见 */\nbody {\n  margin: 0 auto;\n  color: #ff0000;\n}\n',
+    },
+    config: {
+      inputs: [{ name: 'site', path: 'src/site.css', type: 'css' }],
+      hooks: [minify({ dir: 'dist/min' })],
+    },
+    expected: {
+      moduleCount: 1,
+      outputs: [
+        {
+          name: 'default',
+          dir: 'dist',
+          filePaths: ['site.css'],
+          files: [{ path: 'site.css', includes: ['仅开发时可见', 'color: #ff0000'] }],
+        },
+        {
+          name: 'min',
+          dir: 'dist/min',
+          filePaths: ['site.css'],
+          files: [
+            {
+              path: 'site.css',
+              notIncludes: ['仅开发时可见', 'margin: 0 auto'],
+              shorterThanSamePathInOutput: 'default',
+            },
+          ],
+        },
+      ],
+    },
+  },
+  {
+    name: '三类输入共存：module／html／css 同图调度，css 独立入口与 html 引用共享同 id',
+    files: {
+      'src/app.ts': "import { assist } from './assist'\nconsole.log(assist)\n",
+      'src/assist.ts': "export const assist = 'assist'\n",
+      'src/page.html': htmlPage(
+        '    <link rel="stylesheet" href="./style.css" />\n    <script type="module" src="./app.ts"></script>',
+      ),
+      'src/style.css': 'h1 { color: #111 }\n',
+    },
+    config: {
+      inputs: [
+        { name: 'app', path: 'src/app.ts' },
+        { name: 'page', path: 'src/page.html' },
+        { name: 'style', path: 'src/style.css' },
+      ],
+    },
+    expected: {
+      moduleCount: 4,
+      outputs: [
+        {
+          name: 'default',
+          dir: 'dist',
+          filePaths: ['app.js', 'assist.js', 'page.html', 'style.css'],
+          files: [
+            {
+              path: 'page.html',
+              includes: ['href="./style.css"', 'src="./app.js"'],
+              notIncludes: ['src="./app.ts"'],
+            },
+            { path: 'app.js', includes: ['"./assist.js"'] },
+          ],
+        },
+      ],
+    },
+  },
+  {
+    name: 'html 引用缺失：script src 未命中 resolve 链即构建失败',
+    files: {
+      'src/index.html': htmlPage('    <script type="module" src="./missing.ts"></script>'),
+    },
+    config: {
+      inputs: [{ name: 'page', path: 'src/index.html' }],
+    },
+    expected: { error: '无法解析导入 "./missing.ts"' },
+  },
+  {
+    name: 'html 内 script src 走 alias：重写指向 alias 解析后的最终落位',
+    files: {
+      'src/index.html': htmlPage('    <script type="module" src="@/boot"></script>'),
+      'src/boot.ts': "console.log('boot')\n",
+    },
+    config: {
+      inputs: [{ name: 'page', path: 'src/index.html' }],
+      alias: { '@/': 'src/' },
+    },
+    expected: {
+      moduleCount: 2,
+      outputs: [
+        {
+          name: 'default',
+          dir: 'dist',
+          filePaths: ['boot.js', 'index.html'],
+          files: [
+            { path: 'index.html', includes: ['src="./boot.js"'], notIncludes: ['@/boot'] },
+            { path: 'boot.js', includes: ['console.log("boot")'] },
+          ],
+        },
+      ],
     },
   },
 ]

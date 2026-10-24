@@ -1,8 +1,18 @@
 import type { StackHook } from './hooks.ts'
 
+export type StackInputKind = 'html' | 'css' | 'module'
+
 export interface StackInput {
   name: string
   path: string
+  type?: StackInputKind
+}
+
+export const inputKindOf = (path: string, explicit?: StackInputKind): StackInputKind => {
+  if (explicit !== undefined) return explicit
+  if (path.endsWith('.html')) return 'html'
+  if (path.endsWith('.css')) return 'css'
+  return 'module'
 }
 
 export interface StackFs {

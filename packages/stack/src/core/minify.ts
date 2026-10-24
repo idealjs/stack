@@ -17,17 +17,25 @@ export function minify(options: MinifyOptions): StackHook {
     async lower(ctx, output) {
       const files = []
       for (const file of output.files) {
-        if (!file.path.endsWith('.js')) {
-          files.push(file)
+        if (file.path.endsWith('.js')) {
+          const result = await transform(file.code, {
+            loader: 'js',
+            format: 'esm',
+            target: 'esnext',
+            minify: true,
+          })
+          files.push({ path: file.path, code: result.code })
           continue
         }
-        const result = await transform(file.code, {
-          loader: 'js',
-          format: 'esm',
-          target: 'esnext',
-          minify: true,
-        })
-        files.push({ path: file.path, code: result.code })
+        if (file.path.endsWith('.css')) {
+          const result = await transform(file.code, {
+            loader: 'css',
+            minify: true,
+          })
+          files.push({ path: file.path, code: result.code })
+          continue
+        }
+        files.push(file)
       }
       ctx.output({ name, dir: options.dir, files })
     },

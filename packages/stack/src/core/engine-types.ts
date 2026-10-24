@@ -1,3 +1,4 @@
+import type { StackInputKind } from './config.ts'
 import type { FinalModule } from './hooks.ts'
 
 export interface ResolvedArtifactImport {
@@ -18,6 +19,7 @@ export interface RenderArtifact {
 export interface ModuleEntry {
   id: string
   pathAnchor: string
+  kind: StackInputKind
   promise: Promise<FinalModule> | null
   final: FinalModule | null
   artifacts: RenderArtifact[]

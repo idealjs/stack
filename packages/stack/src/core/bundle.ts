@@ -203,7 +203,7 @@ const collectClosure = (modules: FinalModule[], entryId: string): FinalModule[] 
     const mod = byId.get(id)
     if (mod === undefined) return
     for (const dep of mod.deps) visit(dep)
-    closure.push(mod)
+    if (mod.kind === 'module') closure.push(mod)
   }
   visit(entryId)
   return closure
@@ -256,7 +256,15 @@ export function bundle(options: BundleOptions): StackHook {
       const hoists = [...externals].map(
         ([specifier, varName]) => `import * as ${varName} from ${JSON.stringify(specifier)};`,
       )
-      const boot = wrapped.has(entry.id) ? `\n__require(${JSON.stringify(entry.id)});\n` : '\n'
+      const entryModule = ctx.modules.find((mod) => mod.id === entry.id)
+      const bootTargets =
+        entryModule === undefined || entryModule.kind === 'module'
+          ? [entry.id]
+          : entryModule.deps.filter((dep) => closureIds.has(dep))
+      const boots = bootTargets
+        .filter((id) => wrapped.has(id))
+        .map((id) => `__require(${JSON.stringify(id)});`)
+      const boot = boots.length > 0 ? `\n${boots.join('\n')}\n` : '\n'
       const code = [options.runtime ?? moduleRuntime, ...hoists, ...parts].join('\n') + boot
       ctx.output({ name, dir: options.dir, files: [{ path: 'bundle.js', code }] })
     },

@@ -50,6 +50,11 @@ export default defineConfig({
 ```
 
 - `Input[]` 是唯一的入口声明；`Output[]` 不是配置——由 hook 机制经 `ctx.output` 涌现；
+- **输入类型**：每项可带 `type?: 'html' | 'css' | 'module'`，缺省按扩展名推断
+  （`.html`/`.css`/其余 → module），显式 type 覆盖推断。module 走 esbuild 剥类型＋acorn
+  长图；html 的 `script src`／`link rel=stylesheet href` 引用走 resolve 链长图、终态重写
+  为最终产物相对路径（不剥类型、不进 SCC/bundle 闭包）；css 透传为终态工件、不产图边、
+  可被 demand 拉取——三种 kind 的生命周期差异见 protocol-v2「输入类型」；
 - `fs: StackFs`（`readFile`/`writeFile`）；根导出 `memoryFs(files?)`（纯 Map，测试与浏览器
   用）；`load` 未配置时缺省 `ctx.fs.readFile`，候选探测（`.ts/.tsx/.js/.jsx/.mjs/index`）
   由引擎经同一注入 fs 完成；
@@ -120,8 +125,9 @@ interface LowerContext {
 
 策略与协议分离：根 API 只留协议面，内置能力在 builtins 子路径。
 
-- `minify({ from?, name?, dir })`：`watch: [from ?? 'default']`，.js 走 esbuild-wasm 异步
-  minify，登记 `{ name: name ?? 'min', dir }`——「按产出订阅」的范本；
+- `minify({ from?, name?, dir })`：`watch: [from ?? 'default']`，对产出做完整文件集——
+  .js 走 esbuild-wasm 异步 minify、.css 走 css loader minify、其余文件（html）原样复制，
+  登记 `{ name: name ?? 'min', dir }`——min 产出即完整可部署文件集，「按产出订阅」的范本；
 - `bundle({ entry, dir, name?, runtime? })`：derive 图根。Tarjan SCC 分解（声明序
   tie-break）→ 表示切换：单点分量拼接（剥内部 import、external 保留）、多点分量 wrapped
   （`__define(id, fn)` 惰性函数＋import 改写 `const { x } = __require('id')` 解构近似＋入口
@@ -131,9 +137,10 @@ interface LowerContext {
 
 ## 产物布局（preserve-ESM）
 
-- 以全部入口 id 的公共祖先目录为基，每模块按相对结构落位，扩展名 `.ts/.tsx → .js`；
-  lower 产物可自带显式 path（如 bundle.js）；
+- 以全部入口 id 的公共祖先目录为基，每模块按相对结构落位，module 扩展名 `.ts/.tsx → .js`，
+  html/css 保留自身扩展名；lower 产物可自带显式 path（如 bundle.js）；
 - import/export 说明符按新位置重写为相对路径（含动态 import 字符串字面量），external 不动；
+  html 入口的 script/link 引用按属性值区间 offset 重写为最终相对路径，原文其余部分不动；
 - merge 重定向后的模块以首个成员的落位路径呈现，引用方重写指向它；
 - `EmittedOutput.files` 内 `{ path, code }` 的 path 相对该产出自己的 dir。
 
@@ -155,9 +162,10 @@ harness（vite dev 直接 serve TS 源），`yarn test:browser`（Playwright，w
 
 ## 测试（双层）
 
-- `yarn test`：node 侧——parse 说明符收集、循环检测器单测（`test/cycle.spec.ts`）、共享
-  场景套件（含 await 环三种出路、bundle 环结构、watch 环断路）、CLI 端到端（mini 与
-  cycle 夹具，后者断言单文件 bundle 产物 node 可执行）、零 node: 断言；
+- `yarn test`：node 侧——parse 说明符收集与 html 资产解析、循环检测器单测
+  （`test/cycle.spec.ts`）、共享场景套件（含 await 环三种出路、bundle 环结构、watch 环
+  断路、html/css 入口三种 kind 生命周期）、CLI 端到端（mini 与 cycle 夹具，后者断言单文件
+  bundle 产物 node 可执行）、零 node: 断言；
 - `yarn test:browser`：Playwright 断言 data-state=passed、用例数与场景数一致、零
   console error / pageerror；
 - 场景单一事实源在 `test/scenarios.ts`：memoryFs 驱动 SDK build 全流程，node 的
@@ -186,6 +194,7 @@ packages/stack/
 │   │   ├── minify.ts          压缩内置 hook
 │   │   ├── memoryFs.ts        内存 fs（测试与浏览器）
 │   │   ├── parse.ts           acorn import/export/顶层名收集
+│   │   ├── parseHtml.ts       web-standard 正则提取 html 资产引用（script src／link stylesheet href，带值区间 offset）
 │   │   └── pathUtil.ts        抽象路径运算与候选探测
 │   └── node/
 │       ├── fs.ts              nodeFs()
@@ -200,7 +209,9 @@ packages/stack/
 
 - scope hoisting、code splitting、sourcemap；
 - bare specifier 的 node_modules 解析（一律 external）；
-- CSS / 资产 / HTML 入口与 token 晚绑定（协议已留演进方向）；
+- img 等二进制资产与 token 晚绑定（协议已留演进方向；html/css 入口已支持）；
+- html 解析是 web-standard 正则＋属性值区间，无完整 HTML AST、畸形 HTML 不保证；
+  css 的 `@import` 不展开、不产图边；merge 仅适用 module kind；
 - 缓存与增量构建（watch 是防抖全量重建）；
 - bundle wrapped 表示的标识符级 scope 分析（解构近似，边界见 recipe-single-file）；
 - 无限产出链以 quiescence 不达暴露（MVP 不设上限）。
