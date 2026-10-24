@@ -1,5 +1,5 @@
 import { transform } from 'esbuild-wasm'
-import type { EmittedOutput, StackPlugin } from './plugin.ts'
+import type { StackPlugin } from './plugin.ts'
 
 export interface MinifyOptions {
   from?: string
@@ -14,13 +14,7 @@ export function minify(options: MinifyOptions): StackPlugin {
   return {
     name: `minify:${name}`,
     async buildEnd(ctx) {
-      const source = ctx.outputs.find((output: EmittedOutput) => output.name === from)
-      if (source === undefined) {
-        const known = ctx.outputs.map((output: EmittedOutput) => output.name).join('、') || '（无）'
-        throw new Error(
-          `[stack] minify 插件找不到来源产出 "${from}"，现有产出：${known}——产出只对声明顺序在后的插件可见，请检查插件声明顺序`,
-        )
-      }
+      const source = ctx.requireOutput(from)
       const files = []
       for (const file of source.files) {
         if (!file.path.endsWith('.js')) {

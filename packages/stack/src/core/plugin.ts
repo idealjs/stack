@@ -22,6 +22,7 @@ export type TransformHook = (
 
 export interface BuildEndContext {
   outputs: readonly EmittedOutput[]
+  requireOutput(name: string): EmittedOutput
   output: (spec: EmittedOutput) => void
 }
 
@@ -81,6 +82,20 @@ export function createOutputChannel(): OutputChannel {
 export function createBuildEndContext(channel: OutputChannel, producer: string): BuildEndContext {
   return {
     outputs: channel.view(),
+    requireOutput(name: string): EmittedOutput {
+      const found = channel.view().find((output) => output.name === name)
+      if (found === undefined) {
+        const known =
+          channel
+            .view()
+            .map((output) => output.name)
+            .join('、') || '（无）'
+        throw new Error(
+          `[stack] ${producer} 找不到来源产出 "${name}"，现有产出：${known}——产出只对声明顺序在后的插件可见，请检查插件声明顺序`,
+        )
+      }
+      return found
+    },
     output: (spec) => channel.produce(spec, producer),
   }
 }

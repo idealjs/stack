@@ -213,6 +213,31 @@ export const SCENARIOS: Scenario[] = [
     },
   },
   {
+    name: '前置插件要求后序产出：requireOutput 响亮报错并提示声明顺序',
+    files: { 'src/main.ts': 'console.log(41)\n' },
+    config: {
+      inputs: [{ name: 'main', path: 'src/main.ts' }],
+      plugins: [
+        {
+          name: 'early-reader',
+          buildEnd(ctx) {
+            ctx.requireOutput('late')
+          },
+        },
+        {
+          name: 'late-emitter',
+          buildEnd(ctx) {
+            ctx.output({ name: 'late', dir: 'dist/late', files: [{ path: 'late.txt', code: '' }] })
+          },
+        },
+      ],
+    },
+    expected: {
+      error:
+        '插件 "early-reader" 找不到来源产出 "late"，现有产出：default——产出只对声明顺序在后的插件可见',
+    },
+  },
+  {
     name: '未解析的相对导入使构建失败',
     files: {
       'src/main.ts': "import { missing } from './missing'\nconsole.log(missing)\n",

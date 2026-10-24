@@ -49,6 +49,12 @@ export default defineConfig({
 3. **写盘滞后于全部产出**：所有插件跑完后宿主主循环才统一写盘——任何时刻「我输出了」
    都为真，default 与 min 最终并存落盘（`dist/` 与 `dist/min/`）。
 
+**顺序错误必须响亮**：读先前产出一律走 `ctx.requireOutput(name)`——找不到即抛错，列出
+全部现有产出并提示检查声明顺序（调度器为每个插件构造归属自身名字的 ctx，错误自带来源
+插件名）。`ctx.outputs` 裸 `find` 后静默跳过是插件作者的刻意选择而非默认路径。前置插件
+要求后序产出（如 A 取片段、C 通用解析而 A 声明在前）被允许——声明顺序即管线，协议不判
+定语义；代价由报错承担，修正方式就是调换声明。
+
 ## 范本插件：minify
 
 内置 `minify({ from?, name?, dir })` 是「以前产出为输入、登记衍生产出」的完整范本：
@@ -59,8 +65,7 @@ export function minify(options: { from?: string; name?: string; dir: string } = 
   return {
     name: 'minify',
     async buildEnd(ctx) {
-      const source = ctx.outputs.find((o) => o.name === from) // 只读引用
-      if (!source) throw new Error(`minify: 找不到产出「${from}」`)
+      const source = ctx.requireOutput(from) // 标准查询：找不到即响亮报错（列现有产出＋顺序提示）
       const files = await Promise.all(
         source.files.map(async (f) =>
           f.path.endsWith('.js') ? { path: f.path, code: await transformMinify(f.code) } : f,
@@ -156,5 +161,5 @@ stack 的产出 append-only、登记后不可变，没有需要收敛的可变�
 ## 测试对照
 
 场景单一事实源 `test/scenarios.ts` 中与本文对应的守卫：插件 `ctx.output` 登记生效、
-重名抛错带来源插件名、transform 阶段产出被拒、async 插件（load 与 buildEnd 的
-await 路径）在 node 与浏览器双层同测。改协议先改场景，再改实现。
+重名抛错带来源插件名、transform 阶段产出被拒、`requireOutput` 对前置插件响亮报错、
+async 插件（load 与 buildEnd 的 await 路径）在 node 与浏览器双层同测。改协议先改场景，再改实现。
