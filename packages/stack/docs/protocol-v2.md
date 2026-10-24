@@ -22,112 +22,109 @@ v2 的立场：**静态分析决定流程，不决定规模**——图的规模�
 - **模块需求**：「路径 P 指向的模块的最终形态」；
 - **产出需求**：「产出 O 的工件集」。
 
-插件是**能力的注册表**，不是链上的位置：组合＝能力并集；preset＝能力集合；插入无
+hook 是**能力的注册表**，不是链上的位置：组合＝能力并集；preset＝能力集合；插入无
 意义；无声明顺序概念。
 
-## 两相两入口
-
-### 模块相（内容从无到有）
-
-入口＝resolve demand。状态机：
-
-```mermaid
-flowchart LR
-    A["resolve"] -->|"命中"| L["load（适配层）"]
-    A -->|"内联供料"| F
-    A -->|"未命中·裸说明符"| X["external 终态"]
-    A -->|"未命中·相对路径"| E["报错"]
-    L --> F["fission"]
-    F -->|"0..n 工件（带内容）"| A
-```
-
-- `resolve(specifier, importer)`：链式 first-non-null。返回 `{ id }`；可**内联供料**
-  返回 `{ id, content }`（纯数据，虚拟模块的替代形态——不碰平台 I/O，锁不住平台）。
-  身份归一是 resolve 存在的理由：N 个 specifier 归一一个 id，图去重、环检测、落位
-  全以稳定 id 为键。
-- `load`：引擎驱动的生命周期一步，**走注入 fs**（`fs.readFile`），不是插件钩子。
-  仅对无内联内容的 demand 执行（resolve 内联供料与 fission 产物自带内容，跳过）。
-- `fission(id, artifact)`：链式产物集累积（每插件拿前一环产物集、返回新产物集），
-  一化为 0..n 工件；0＝消费终结（过滤），恒等合法。产物带内容作为新 demand 回到
-  resolve——**图在 fission 处分叉、在 import 处增长**，全程需求递归，无全局循环。
-  插件按 id 自筛目标（rollup transform 同款纪律：非目标恒等返回）。
-
-### 产出相（内容已存在的派生）
-
-入口＝derive 声明，非 resolve：
-
-- `derive({ from: OutputName[], name, dir, fn })`：`from` 声明依赖产出名，引擎按其
-  拓扑调度（来源产出登记完成即就绪）；`fn(来源工件集, 模块集)` 登记新产出。
-- `from` 成环 → 拒绝；产出名唯一 → 冲突报错并带两个来源。
-- 分层卫生：derive 是模块集上的**纯函数**，不得再产模块需求——内容从无到有只属于
-  模块相；真需要就下一轮构建（SDK 两次构建零负担）。
-
-## 平台 I/O 只经注入 fs（定律）
-
-`defineConfig` 定义 fs 实现——**简化的 fs 接口**由宿主注入，load 与落盘全部经它：
+## 配置形态：inputs / fs / load / hooks
 
 ```ts
-interface StackFs {
-  readFile(path: string): Promise<string>
-  writeFile(path: string, content: string): Promise<void>
-}
+// stack.config.ts
+import { defineConfig, nodeFs } from '@idealjs/stack/node'
 
-defineConfig({
+export default defineConfig({
   inputs: [{ name: 'app', path: 'src/app.ts' }],
-  fs: nodeFs(),          // 平台实现：node CLI 默认注入；浏览器宿主注入内存/OPFS 实现
-  hooks: [minify({ dir: 'dist/min' })],
+  fs: nodeFs(),                 // 简化 fs：宿主注入（浏览器宿主注入内存/OPFS 实现）
+  load: async (ctx, id) => {    // 自定义通用加载器——配置级唯一 load，非 hook 链成员
+    return ctx.fs.readFile(id)  // 必须经 ctx.fs；禁止直接 import fs（见「纯度分类」）
+  },
+  hooks: [
+    { name: 'md', resolve: ..., lower: ... },
+    minify({ dir: 'dist/min' }),
+  ],
 })
 ```
 
-- **load 流程保留**：引擎驱动的生命周期一步——对无内联内容的 demand 调
-  `fs.readFile`；resolve 内联供料与 fission 产物自带内容，跳过物理读取。
-- **插件做 I/O 的唯一合法形态是打到注入 fs 上**：钩子 ctx 暴露只读面（`readFile`），
-  resolve 的扩展名候选探测、fission 读伴生文件都走它；直接 import 平台 API
-  （`node:fs`、裸 fetch）是协议违例。
-- **写盘只归宿主**：`BuildResult` 交宿主经 `fs.writeFile` 落盘，插件不直接写——
-  append-only 与产出通道不破。
-- 锁定与合并的论证升级：v1 是「插件摸平台 → 锁定」；v2 是「插件只打注入 fs → 跨平台
-  仅需换 fs 注入」，合并＝能力并集＋同一家 fs，无冲突面。
-- 缺省规则：`fs` 未定义时由入口注入默认实现（node CLI → node 实现；浏览器 harness →
-  内存实现）；SDK 使用方显式传入，或取用 `@idealjs/stack/node` 的 `nodeFs()`。
+- `Input[]` 是配置里唯一的入口声明（初始模块需求）；`Output[]` 不是配置——由 hook
+  机制经 `ctx.output` 涌现；
+- **fs 与 load 都是配置级注入**：平台绑定收拢在宿主编写配置的那一刻，core 与 hooks
+  全程平台无关。
 
-## 不可变与声明资源
+## 模块相：resolve → load → lower
 
-- 产出**登记即冻结**（append-only 日志：内容快照＋Object.freeze），derive 的输入是
-  稳定身份；
-- **修正前人产出被无条件拒绝**：「final」是全称命题，开放链上不可证实（webpack
+```mermaid
+flowchart LR
+    A["resolve"] -->|"命中"| L["load（ctx.fs）"]
+    A -->|"内联供料"| F
+    A -->|"未命中·裸说明符"| X["external 终态"]
+    A -->|"未命中·相对路径"| E["报错"]
+    L --> F["lower"]
+    F -->|"0..n 工件（带内容）"| A
+```
+
+- `resolve(specifier, importer, ctx)`：**纯函数**。链式 first-non-null；返回 load
+  所需的数据（`{ id }`）；可**内联供料**返回 `{ id, content }`（纯数据，虚拟模块的
+  替代形态）。身份归一是 resolve 存在的理由：N 个 specifier 归一一个 id，图去重、
+  环检测、落位全以稳定 id 为键。resolve→load 分立的理由因此成立：身份与来源正交，
+  平台差异全部收拢在 load 的 `ctx.fs` 后面。
+- `load(ctx, id)`：**配置级自定义通用加载器**，不是 hook 链成员——全局一个，所有
+  无内联内容的 demand 都经它。**必须使用 ctx 提供的 fs 接口**；文档显式标注：
+  **不建议在 load 里直接 `import fs`**——直接平台 API 是平台锁定与合并冲突的源头
+  （带平台假设的 load 无法跨宿主复用），注入 fs 下跨平台仅需换 `fs` 实现。
+- `lower(id, artifact, ctx)`：**非纯函数**。链式产物集累积（每 hook 拿前一环产物集、
+  返回新产物集），一化为 0..n 工件；0＝消费终结，恒等合法。**lower 会调用 ctx 的
+  输出函数（ctx.output）把转化结果存储进产出**；产物带内容作为新 demand 回到
+  resolve——图在 lower 处分叉、在 import 处增长，全程需求递归，无全局循环。
+  插件按 id 自筛目标（rollup transform 同款纪律：非目标恒等返回）。
+
+命名定案：**lower**（裂变语义；compiler lowering 行话——高级结构降为多个低级结构，
+一化多的最精确行业词）。弃选记录：transform（1:1 整形）、expand（技术填充味）、
+spawn（孵化义准但让位）、generate/emit（产出层撞车）、decompose（部分和＝整体）。
+
+## 产出相：output 即事件，hook 按资源订阅
+
+`ctx.output({ name, dir, files })` 登记产出——**登记同时是一次事件广播**：监听了
+对应资源的 hook 被触发。因此 output 通道设计为 **hook 可注册的形式**：
+
+```ts
+{
+  name: 'css-processor',
+  watch: ['css'],                 // 订阅的资源名（产出名）
+  lower: (ctx, output) => {       // 对应产出登记时被触发，可再登记新产出
+    ctx.output({ name: 'css-min', dir: 'dist/css', files: ... })
+  },
+}
+```
+
+- 模块相排干后，产出相按订阅关系调度（声明依赖取代运行时断言，v1 的 requireOutput
+  退场）；订阅成环 → 拒绝；
+- 产出**登记即冻结**（append-only 日志，内容快照＋冻结）：订阅者拿到的是稳定身份；
+  **修正前人产出被无条件拒绝**——「final」是全称命题，开放链上不可证实（webpack
   stage 数字军备竞赛即生态招供）；修正＝登记新产出；
-- **跨回合互指环走 token 晚绑定**：输出内容允许按产出名的引用 token，宿主写盘期
-  唯一一次展开——引用与兑现分离，永远不需要 B 的内容来引用 B；
-- **终态只属于构建会话**（模块需求排干 → derive 拓扑排干 → seal），它是引擎的，
-  不是任何插件的。
+- **互指环走 token 晚绑定**：输出内容允许按产出名的引用 token，宿主写盘期唯一一次
+  展开——引用与兑现分离，永远不需要 B 的内容来引用 B；
+- 无限产出链（订阅链不断登记新名字）属插件 bug，协议以 quiescence 不达暴露之。
 
-## 迭代策略
+## 纯度分类
 
-数据依赖环（derive.from 成环）拒绝；内容互指环 token 晚绑定；真需要不动点迭代的，
-由能力**自声明** `iterate` 策略（until/max）——循环从全局隐式行为变为局部显式策略。
+| 钩子 | 纯度 | I/O |
+|---|---|---|
+| resolve | 纯函数 | 无 |
+| load | 非纯 | **只经 ctx.fs**（注入 fs）；禁止直接 import fs |
+| lower | 非纯 | 无 I/O；副作用唯一形态是 ctx.output 登记（登记即冻结） |
 
-## 命名表
+直接 import 平台 API（`node:fs`、裸 fetch）是协议违例：平台绑定只允许发生在
+`defineConfig` 的 `fs` 注入处——**跨平台仅需换 fs 注入**，hook 层零平台动词。
 
-| 名 | 层 | 语义 | 弃选记录 |
-|---|---|---|---|
-| resolve | 模块相 | 身份归一（N:1）＋可选内联供料 | — |
-| load | 引擎 · fs 注入 | 物理读取兜底（非插件钩子，走注入 fs） | 插件链 load → 平台锁定与合并困惑，收编为注入式接口 |
-| fission | 模块相 | 裂变：一化为 0..n 工件 | transform（1:1 整形）、expand（技术填充味）、spawn（孵化义准但选裂变）、lower（lowering 精确但小众，记为行话别名）、generate/emit（产出层撞车）、decompose（部分和＝整体，不能新增材料） |
-| derive | 产出相 | 从来源产出派生新产出 | — |
-| output(spec) | 产出相通道 | 登记产出（登记即冻结，重名报双来源） | — |
+## 明确拒绝（记录在案）
+
+enforce/优先级数字、逆序 preset、惰性挂起调度（worklist 重试）、finalize 覆盖（重名
+登记即报错，append-only 是天然的环断路器）、stage 军备竞赛、双轨产出、插件链 load、
+load 直接 import fs。
 
 ## v1 → v2 映射
 
 - 模块层语义不变：parse/graph/alias/external/preserve-ESM 落位与说明符重写原样；
-- **buildEnd 顺序链退场** → derive 注册表（依赖声明取代运行时断言，requireOutput
-  随链退场）；
-- 冻结存活且更重要（derive 输入必须稳定）；token 晚绑定存活（正交机制）；
-- 场景单一事实源改写为 v2 场景；双层测试（node＋chromium）架构不变；
-- `nodeHooks`（v1 插件形态的 fs）→ `nodeFs()`（v2 fs 注入）；测试/浏览器的内存
-  fs 场景由 `memoryFs()` 承担。
-
-## 明确拒绝（记录在案）
-
-enforce/优先级数字、逆序 preset、惰性挂起调度（worklist 重试）、finalize 覆盖、
-stage 军备竞赛、双轨产出、插件链 load。
+- **buildEnd 顺序链退场** → lower 链（模块相）＋ watch 订阅（产出相）；
+- requireOutput 退场（产出订阅取代运行时断言）；冻结存活且更重要；
+- `nodeFsPlugin` → `nodeFs()`（配置级 fs 注入）；`memoryFs()` 承担测试/浏览器场景；
+- 场景单一事实源改写为 v2 场景；双层测试（node＋chromium）架构不变。
