@@ -1,94 +1,58 @@
 import type { StackConfig } from './config.ts'
-import { buildModuleGraph, type ModuleGraph, type ModuleInfo } from './graph.ts'
-import type { EmittedOutput } from './hooks.ts'
-import { CORE_PRODUCER, createHookScheduler, createOutputChannel } from './hooks.ts'
-import { dirnamePath, relativePath, replaceExtension, toSpecifier } from './pathUtil.ts'
+import { DemandEngine } from './engine.ts'
+import type { BuildResult } from './hooks.ts'
+import { CORE_PRODUCER } from './hooks.ts'
+import { DEFAULT_DIST, renderPreserveEsm } from './render.ts'
 
-export interface EmittedFile {
-  path: string
-  code: string
-}
-
-export interface BuildResult {
-  outputs: EmittedOutput[]
-  moduleCount: number
-  durationMs: number
-}
-
-export const DEFAULT_DIST = 'dist'
-
-const commonDirectory = (paths: string[]): string => {
-  if (paths.length === 0) return '.'
-  const segmentLists = paths.map((path) => dirnamePath(path).split('/'))
-  let shared = segmentLists[0]
-  for (const segments of segmentLists.slice(1)) {
-    let kept = 0
-    while (kept < shared.length && kept < segments.length && shared[kept] === segments[kept]) {
-      kept += 1
-    }
-    shared = shared.slice(0, kept)
-  }
-  return shared.join('/') || '/'
-}
-
-const outputPathOf = (id: string, baseDir: string): string =>
-  replaceExtension(relativePath(baseDir, id), '.js')
-
-const rewriteImports = (moduleInfo: ModuleInfo, baseDir: string, outputPath: string): string => {
-  const rewrites = moduleInfo.imports.flatMap((declaration) => {
-    if (declaration.resolvedId === null) return []
-    const targetPath = outputPathOf(declaration.resolvedId, baseDir)
-    return [
-      {
-        start: declaration.start,
-        end: declaration.end,
-        specifier: toSpecifier(dirnamePath(outputPath), targetPath),
-      },
-    ]
-  })
-  rewrites.sort((left, right) => right.start - left.start)
-  let code = moduleInfo.code
-  for (const rewrite of rewrites) {
-    code =
-      code.slice(0, rewrite.start) + JSON.stringify(rewrite.specifier) + code.slice(rewrite.end)
-  }
-  return code
-}
-
-function renderGraph(graph: ModuleGraph): EmittedFile[] {
-  const baseDir = commonDirectory(graph.entries.map((entry) => entry.id))
-  const files: EmittedFile[] = []
-  for (const moduleInfo of [...graph.modules.values()].sort((left, right) =>
-    left.id.localeCompare(right.id),
-  )) {
-    files.push({
-      path: outputPathOf(moduleInfo.id, baseDir),
-      code: rewriteImports(moduleInfo, baseDir, outputPathOf(moduleInfo.id, baseDir)),
-    })
-  }
-  files.sort((left, right) => left.path.localeCompare(right.path))
-  return files
-}
+export type { BuildResult }
+export { DEFAULT_DIST }
 
 export async function build(config: StackConfig): Promise<BuildResult> {
+  if (config.fs === undefined) {
+    throw new Error(
+      '[stack] 需要注入 fs：node 宿主用 nodeFs()（@idealjs/stack/node），浏览器/测试用 memoryFs()',
+    )
+  }
   if ((config.inputs ?? []).length === 0) throw new Error('[stack] config.inputs 至少需要一个入口')
   const startedAt = Date.now()
-  const scheduler = createHookScheduler(config.hooks)
-  const graph = await buildModuleGraph(
-    { root: config.root ?? '.', inputs: config.inputs, alias: config.alias },
-    scheduler,
-  )
-  const channel = createOutputChannel()
-  channel.beginBuildEnd()
-  channel.produce(
-    { name: 'default', dir: config.dist ?? DEFAULT_DIST, files: renderGraph(graph) },
+  const engine = new DemandEngine(config)
+  try {
+    for (const input of config.inputs) {
+      await engine.resolveEntry(input)
+    }
+  } catch (error) {
+    engine.fail(error)
+    await engine.waitIdle()
+    throw error
+  }
+  await engine.waitIdle()
+  const failure = engine.failure()
+  if (failure !== undefined && failure !== null) throw failure
+  engine.channel.register(
+    {
+      name: 'default',
+      dir: config.dist ?? DEFAULT_DIST,
+      files: renderPreserveEsm({
+        records: engine.renderRecords(),
+        entryIds: engine.entryIds(),
+        redirects: engine.redirects(),
+      }),
+    },
     CORE_PRODUCER,
   )
-  await scheduler.buildEnd(channel)
-  channel.seal()
+  await engine.channel.drain()
+  const channelFailure = engine.failure()
+  if (channelFailure !== undefined && channelFailure !== null) throw channelFailure
+  for (const hook of engine.deriveHooks) {
+    await hook.derive(engine.outputContext(hook.name))
+    await engine.channel.drain()
+    const deriveFailure = engine.failure()
+    if (deriveFailure !== undefined && deriveFailure !== null) throw deriveFailure
+  }
+  engine.channel.seal()
   return {
-    outputs: channel.snapshot(),
-    moduleCount: graph.modules.size,
+    outputs: engine.channel.snapshot(),
+    moduleCount: engine.moduleCount(),
     durationMs: Date.now() - startedAt,
   }
 }

@@ -1,4 +1,10 @@
-import type { EmittedFile } from './build.ts'
+import type { LoadContext } from './config.ts'
+import type { ParsedImport } from './parse.ts'
+
+export interface EmittedFile {
+  path: string
+  code: string
+}
 
 export interface EmittedOutput {
   readonly name: string
@@ -6,141 +12,94 @@ export interface EmittedOutput {
   readonly files: readonly EmittedFile[]
 }
 
-export type ResolveIdHook = (
-  source: string,
+export interface BuildResult {
+  outputs: EmittedOutput[]
+  moduleCount: number
+  durationMs: number
+}
+
+export interface ImportRef {
+  specifier: string
+  id: string | null
+}
+
+export interface FinalModule {
+  id: string
+  code: string
+  deps: string[]
+  imports: ImportRef[]
+}
+
+export interface Artifact {
+  path?: string
+  code: string
+}
+
+export interface ResolveResult {
+  id: string
+  content?: string
+}
+
+export interface ResolveContext {
+  readonly root: string
+}
+
+export type ResolveHook = (
+  specifier: string,
   importer: string,
-) => string | null | undefined | Promise<string | null | undefined>
+  ctx: ResolveContext,
+) => ResolveResult | null | undefined | Promise<ResolveResult | null | undefined>
 
-export type LoadHook = (
-  id: string,
-) => string | null | undefined | Promise<string | null | undefined>
+export type Resolution = { kind: 'module'; id: string } | { kind: 'external'; specifier: string }
 
-export type TransformHook = (
-  id: string,
-  code: string,
-) => string | null | undefined | Promise<string | null | undefined>
+export interface ReadOnlyFs {
+  readFile(path: string): Promise<string>
+}
 
-export interface BuildEndContext {
-  outputs: readonly EmittedOutput[]
-  requireOutput(name: string): EmittedOutput
+export interface LowerContext {
+  fs: ReadOnlyFs
   output: (spec: EmittedOutput) => void
+  lowerImport: (code: string) => string[]
+  demand: (specifiers: string[]) => Promise<FinalModule[]>
+  merge: (specifiers: string[], name?: string) => Promise<FinalModule>
 }
 
-export type BuildEndHook = (ctx: BuildEndContext) => void | Promise<void>
+export type ModuleLowerHook = (
+  id: string,
+  artifacts: Artifact[],
+  ctx: LowerContext,
+) => Artifact[] | Promise<Artifact[]>
 
-export interface StackHook {
+export interface OutputContext extends LoadContext {
+  output: (spec: EmittedOutput) => void
+  modules: FinalModule[]
+  inputs: { name: string; id: string }[]
+}
+
+export type OutputLowerHook = (ctx: OutputContext, output: EmittedOutput) => void | Promise<void>
+
+export type DeriveHook = (ctx: OutputContext) => void | Promise<void>
+
+export interface ModuleHook {
   name: string
-  resolveId?: ResolveIdHook
-  load?: LoadHook
-  transform?: TransformHook
-  buildEnd?: BuildEndHook
+  watch?: undefined
+  resolve?: ResolveHook
+  lower?: ModuleLowerHook
+  derive?: DeriveHook
 }
+
+export interface WatchHook {
+  name: string
+  watch: string[]
+  resolve?: ResolveHook
+  lower?: OutputLowerHook
+  derive?: DeriveHook
+}
+
+export type StackHook = ModuleHook | WatchHook
 
 export const CORE_PRODUCER = '核心规范产物'
-export const MODULE_STAGE_ERROR = '只能在 buildEnd 阶段产出'
 
-export interface OutputChannel {
-  beginBuildEnd(): void
-  seal(): void
-  produce(spec: EmittedOutput, producer: string): void
-  view(): readonly EmittedOutput[]
-  snapshot(): EmittedOutput[]
-}
+export const hookProducer = (name: string): string => `插件 "${name}"`
 
-export function createOutputChannel(): OutputChannel {
-  const outputs: EmittedOutput[] = []
-  const producers: string[] = []
-  let stage: 'module' | 'buildEnd' | 'sealed' = 'module'
-  return {
-    beginBuildEnd() {
-      stage = 'buildEnd'
-    },
-    seal() {
-      stage = 'sealed'
-    },
-    produce(spec, producer) {
-      if (stage === 'module') throw new Error(`[stack] ${MODULE_STAGE_ERROR}（当前处于模块阶段）`)
-      if (stage === 'sealed') throw new Error(`[stack] 构建会话已结束，${MODULE_STAGE_ERROR}`)
-      const index = outputs.findIndex((output) => output.name === spec.name)
-      if (index !== -1) {
-        throw new Error(
-          `[stack] 产出重名 "${spec.name}"：${producers[index]} 已产出同名产出，${producer} 再次产出`,
-        )
-      }
-      outputs.push(
-        Object.freeze({
-          name: spec.name,
-          dir: spec.dir,
-          files: Object.freeze(spec.files.map((file) => Object.freeze({ ...file }))),
-        }),
-      )
-      producers.push(producer)
-    },
-    view() {
-      return Object.freeze([...outputs])
-    },
-    snapshot() {
-      return [...outputs]
-    },
-  }
-}
-
-export function createBuildEndContext(channel: OutputChannel, producer: string): BuildEndContext {
-  return {
-    outputs: channel.view(),
-    requireOutput(name: string): EmittedOutput {
-      const found = channel.view().find((output) => output.name === name)
-      if (found === undefined) {
-        const known =
-          channel
-            .view()
-            .map((output) => output.name)
-            .join('、') || '（无）'
-        throw new Error(
-          `[stack] ${producer} 找不到来源产出 "${name}"，现有产出：${known}——产出只对声明顺序在后的插件可见，请检查插件声明顺序`,
-        )
-      }
-      return found
-    },
-    output: (spec) => channel.produce(spec, producer),
-  }
-}
-
-export interface HookScheduler {
-  resolveId(source: string, importer: string): Promise<string | null>
-  load(id: string): Promise<string | null>
-  transform(id: string, code: string): Promise<string | null>
-  buildEnd(channel: OutputChannel): Promise<void>
-}
-
-const callFirst = async <T>(
-  hooks: T[],
-  call: (hook: T) => string | null | undefined | Promise<string | null | undefined>,
-): Promise<string | null> => {
-  for (const hook of hooks) {
-    const value = await call(hook)
-    if (value != null) return value
-  }
-  return null
-}
-
-export function createHookScheduler(hooks: readonly StackHook[] = []): HookScheduler {
-  const list = [...hooks]
-  return {
-    resolveId(source, importer) {
-      return callFirst(list, (plugin) => plugin.resolveId?.(source, importer))
-    },
-    load(id) {
-      return callFirst(list, (plugin) => plugin.load?.(id))
-    },
-    transform(id, code) {
-      return callFirst(list, (plugin) => plugin.transform?.(id, code))
-    },
-    async buildEnd(channel) {
-      for (const plugin of list) {
-        if (plugin.buildEnd === undefined) continue
-        await plugin.buildEnd(createBuildEndContext(channel, `插件 "${plugin.name}"`))
-      }
-    },
-  }
-}
+export type { LoadContext, ParsedImport }

@@ -1,15 +1,32 @@
-export { type BuildResult, build, DEFAULT_DIST, type EmittedFile } from './core/build.ts'
-export { defineConfig, type StackConfig } from './core/config.ts'
-export type { ModuleGraph, ModuleInfo, ResolvedImport } from './core/graph.ts'
+export { type BuildResult, build, DEFAULT_DIST } from './core/build.ts'
+export {
+  defineConfig,
+  type LoadContext,
+  type StackConfig,
+  type StackFs,
+  type StackInput,
+  type StackLoader,
+} from './core/config.ts'
+export { memoryFs } from './core/memoryFs.ts'
+export { CycleError } from './core/cycle.ts'
 export type {
-  BuildEndContext,
-  BuildEndHook,
+  Artifact,
+  DeriveHook,
+  EmittedFile,
   EmittedOutput,
-  HookScheduler,
-  LoadHook,
-  ResolveIdHook,
+  FinalModule,
+  ImportRef,
+  LowerContext,
+  ModuleHook,
+  ModuleLowerHook,
+  OutputContext,
+  OutputLowerHook,
+  ReadOnlyFs,
+  Resolution,
+  ResolveContext,
+  ResolveHook,
+  ResolveResult,
   StackHook,
-  TransformHook,
+  WatchHook,
 } from './core/hooks.ts'
-export { type MinifyOptions, minify } from './core/minify.ts'
-export type { ParsedImport } from './core/parse.ts'
+export type { ParsedExport, ParsedImport, ParsedImportName } from './core/parse.ts'
