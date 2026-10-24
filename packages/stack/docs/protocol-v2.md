@@ -151,9 +151,33 @@ spawn（孵化义准但让位）、generate/emit（产出层撞车）、decompos
   bootstrap、rollup cyclic chunk 同此原理）；包装属于产出相 derive（需整闭包知识，
   集合级重组）。
 
-用户侧三条出路（随 await 环错误信息给出）：① 不拉取——只需要「它存在」不需要
-「它的内容」时保留 import 交给运行时；② **重构解环**——共享部分抽到第三个模块
-（教程场景首选，循环依赖本来就该修）；③ 运行时包装范本（随实现提供）。
+用户侧三条出路（随 await 环错误信息给出）：
+
+① 不拉取——只需要「它存在」不需要「它的内容」时保留 import 交给运行时；
+② **重构解环**——共享部分抽到第三个模块（教程场景首选，循环依赖本来就该修）；
+③ **环上的打包放错相了，改放产出相 derive**：lower ＋ await demand 的组合契约是
+「返回终态」，只适用于 DAG；derive 触发时所有 lower 已完成、无 await 挂起，环只在
+依赖边（数据）不在等待链（控制）里，死锁条件消失——包装之：
+
+```ts
+{
+  name: 'bundle-with-cycle',
+  derive(ctx) {
+    const closure = collectClosure(ctx.modules, ctx.inputs) // 环在依赖边里，无害
+    const body = closure
+      .map((m) => `__define('${m.id}', (exports, require) => {\n${stripImports(m.code)}\n})`)
+      .join('\n')
+    ctx.output({
+      name: 'bundle',
+      dir: 'dist',
+      files: [{ path: 'bundle.js', code: `${RUNTIME}\n${body}\n__require('${entry}')` }],
+    })
+  },
+}
+```
+
+包装把环从「编译期求值顺序问题」转化为「运行时惰性问题」：每模块是惰性函数，
+`__require` 调用时取用，活性经 exports 对象保持。
 
 ## 纯度分类
 
