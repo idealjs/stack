@@ -102,7 +102,11 @@ spawn（孵化义准但让位）、generate/emit（产出层撞车）、decompos
   stage 数字军备竞赛即生态招供）；修正＝登记新产出；
 - **互指环走 token 晚绑定**：输出内容允许按产出名的引用 token，宿主写盘期唯一一次
   展开——引用与兑现分离，永远不需要 B 的内容来引用 B；
-- 无限产出链（订阅链不断登记新名字）属插件 bug，协议以 quiescence 不达暴露之。
+- 无限产出链（订阅链不断登记新名字）属插件 bug，协议以 quiescence 不达暴露之；
+- 产出相 hook 的两种调度来源：`derive(ctx)`（图根派生——模块集排干触发，ctx 含终态
+  模块集与依赖边）与 `watch` ＋ `lower`（产出触发——监听的产出登记即触发）。应用
+  范本见 [recipe-single-file.md](./recipe-single-file.md)（A import B, C → 单文件
+  脚本：打包是产出相的一次派生，不是引擎职责）。
 
 ## 纯度分类
 
