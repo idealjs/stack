@@ -58,16 +58,15 @@ export function minify(options: { from?: string; name?: string; dir: string } = 
   const from = options.from ?? 'default'
   return {
     name: 'minify',
-    buildEnd(ctx) {
+    async buildEnd(ctx) {
       const source = ctx.outputs.find((o) => o.name === from) // 只读引用
       if (!source) throw new Error(`minify: 找不到产出「${from}」`)
-      ctx.output({
-        name: options.name ?? 'min',
-        dir: options.dir,
-        files: source.files.map((f) =>
-          f.path.endsWith('.js') ? { path: f.path, code: minified(f.code) } : f,
+      const files = await Promise.all(
+        source.files.map(async (f) =>
+          f.path.endsWith('.js') ? { path: f.path, code: await transformMinify(f.code) } : f,
         ),
-      })
+      )
+      ctx.output({ name: options.name ?? 'min', dir: options.dir, files })
     },
   }
 }
