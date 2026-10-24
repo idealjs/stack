@@ -63,15 +63,16 @@ special-case 插件行为：
   `<link rel="stylesheet" href>`（→css 需求）；引用 specifier 走正常 resolve 链
   （alias/扩展名补全生效），未命中相对路径照常报错、裸说明符 external 保留原文
   （CDN 直写因此天然可用）；终态＝原文＋引用按最终产物路径重写——重写发生在
-  render/materialize，属性值区间 offset 随 `FinalModule.imports` 保留（与 merge 的
-  offset 语义同构）；html 工件不进 SCC/bundle 闭包：bundle 对 html 入口取其 script
-  引用闭包，css/html 永不 wrapped；
+  render/materialize，属性值区间 offset 随工件 `imports` 元数据保留（引用重写的唯一
+  数据来源，引擎与渲染都不解析内容）；html 工件不进 SCC/bundle 闭包：bundle 对 html
+  入口取其 script 引用闭包，css/html 永不 wrapped；
 - **css**：load 后透传内容（不走 esbuild js strip）；**终态工件**——不产图边
   （`@import` 不支持，MVP 记录）；可被 `ctx.loweringImport` 拉取（`FinalModule.code` 即 css
   文本）；materialize 按相对结构 emit，扩展名自然保留。
 
-工程边界如实记录：merge 仅适用 module kind（load 结果的 import 清理与顶层名分析都是
-js 语义）；html 解析是正则级属性扫描，无完整 HTML AST、畸形 HTML 不保证。配套地，
+工程边界如实记录：环绑定的内容处理仅适用 module kind（import 清理与顶层名分析都是
+js 语义，且归插件流程而非引擎）；html 解析是正则级属性扫描，无完整 HTML AST、畸形
+HTML 不保证。配套地，
 minify 内置 hook 对 watch 到的产出做**完整文件集**——`.js` minify、`.css` minify
 （esbuild css loader）、其余文件（html）原样复制——min 产出即完整可部署文件集。
 
@@ -93,13 +94,13 @@ flowchart LR
   环检测、落位全以稳定 id 为键。resolve→load 分立的理由因此成立：身份与来源正交，
   平台差异全部收拢在 load 的 `ctx.fs` 后面。
 - `load(ctx, id)`：**配置级自定义通用加载器**，不是 hook 链成员——全局一个，所有
-  无内联内容的 demand 都经它。**必须使用 ctx 提供的 fs 接口**；文档显式标注：
+  无内联内容的模块需求都经它。**必须使用 ctx 提供的 fs 接口**；文档显式标注：
   **不建议在 load 里直接 `import fs`**——直接平台 API 是平台锁定与合并冲突的源头
   （带平台假设的 load 无法跨宿主复用），注入 fs 下跨平台仅需换 `fs` 实现。
 - `lower(id, artifacts, ctx)`：**非纯函数**。链式产物集累积（每 hook 拿前一环产物集、
   返回新产物集），一化为 0..n 工件；0＝消费终结，恒等合法。**lower 会调用 ctx 的
-  输出函数（ctx.output）把转化结果存储进产出**；产物带内容作为新 demand 回到
-  resolve——图在 lower 处分叉、在 import 处增长，全程需求递归，无全局循环。
+  输出函数（ctx.output）把转化结果存储进产出**；lower 返回的工件即终态（引擎零解析），
+  依赖图在 lower 内经 `ctx.loweringImport` 声明式涌现，全程需求递归，无全局循环。
   插件按 id 自筛目标（rollup transform 同款纪律：非目标恒等返回）。
 
 lower 的 ctx API——**依赖图由此唯一构成**：引擎不解析工件内容（流程由插件声明，
@@ -112,7 +113,7 @@ interface LowerContext {
   fs: { readFile(path: string): Promise<string> }        // 注入 fs 只读面
   output(spec: EmittedOutput): void                      // 唯一副作用：登记产出（登记即冻结）
   lowerImport(code: string): Specifier[]                 // 工具：acorn 封装（静态＋动态字面量）
-  loweringImport(id: string): Promise<FinalModule>       // await 即声明依赖边＋拉取终态（环抛可捕获 CycleError）
+  loweringImport(id: string): Promise<FinalModule | null>  // await 即声明依赖边＋拉取终态（external 返回 null，环抛可捕获 CycleError）
   loweringBindImport(ids: string[]): Promise<void>       // 环解法：绑定为同一单元，后续命中绑定缓存
 }
 ```
@@ -175,11 +176,12 @@ spawn（孵化义准但让位）、generate/emit（产出层撞车）、decompos
   「B 已在访问中，入图即止」（注册表按 id 去重）。不 pull 的环原样交给运行时——
   ESM 原生以 live binding（绑定是引用不是值拷贝）＋函数提升处理环；preserve-ESM
   默认输出正是这种形态。
-- **pull 层（demand 终态）——环抛 `CycleError`，可捕获、由插件决定处理**。机制：
-  A 的 lower await demand(B) 挂起 → 引擎调度 B → B 的 lower await demand(A) →
-  环检测命中（A 已在等待链上）→ 抛 `CycleError` 给新边发起者。语义上「B 的终态」
-  依赖「A 的终态」依赖「B 的终态」——环上不存在终态全序，demand「返回终态」的承诺
-  不可满足，因此只能以异常退出。**协议认可的正解是 catch 后 `ctx.loweringBindImport` 绑定解环**（见
+- **pull 层（loweringImport 终态）——环抛 `CycleError`，可捕获、由插件决定处理**。机制：
+  A 的 lower await loweringImport(B) 挂起 → 引擎调度 B → B 的 lower await
+  loweringImport(A) → 环检测命中（A 已在等待链上）→ 抛 `CycleError` 给新边发起者。
+  语义上「B 的终态」依赖「A 的终态」依赖「B 的终态」——环上不存在终态全序，
+  loweringImport「返回终态」的承诺不可满足，因此只能以异常退出。
+  **协议认可的正解是 catch 后 `ctx.loweringBindImport` 绑定解环**（见
   下节），不拉取/重构/derive 包装保留为同等合法出口。
 - **产出层（拼接打包）——环需要模块运行时包装，唯一保语义的解**。拼接是「值快照」
   （把 B 的绑定以拼接时的值内联），而环的语义恰是绑定活性（B 导出的函数被调用时
@@ -193,7 +195,7 @@ spawn（孵化义准但让位）、generate/emit（产出层撞车）、decompos
 
 ① 不拉取——只需要「它存在」不需要「它的内容」时保留 import 交给运行时；
 ② **重构解环**——共享部分抽到第三个模块（教程场景首选，循环依赖本来就该修）；
-③ **环上的打包放错相了，改放产出相 derive**：lower ＋ await demand 的组合契约是
+③ **环上的打包放错相了，改放产出相 derive**：lower ＋ await loweringImport 的组合契约是
 「返回终态」，只适用于 DAG；derive 触发时所有 lower 已完成、无 await 挂起，环只在
 依赖边（数据）不在等待链（控制）里，死锁条件消失——包装之：
 
@@ -225,31 +227,35 @@ spawn（孵化义准但让位）、generate/emit（产出层撞车）、decompos
 
 **循环检测器**（`core/cycle.ts`，独立叶子、纯计算、无 I/O）：增量维护依赖图，每次
 加边做一次环检查（「加 u→v 是否成环」等价于「v 可达 u」），用可达性 memo 加速。
-memo 的 sound 条件是「图只增」——**merge 的注册表重定向是节点收缩，打破该条件**，
-因此 merge 完成后必须调用检测器的收缩更新：
+memo 的 sound 条件是「图只增」——**loweringBindImport 的注册表重定向是节点收缩，打破
+该条件**，因此绑定完成后必须调用检测器的收缩更新：
 
-- `contract(ids, into)`：① 别名归一——后续指向 a/b 的边与查询规范化到 merged；
+- `contract(ids, into)`：① 别名归一——后续指向 a/b 的边与查询规范化到绑定单元；
   ② 可达性 memo 整体重建（O(V+E)，bitset）——收缩改变可达性结构，增量失效不如
   重建可靠；
-- 成本分账：`addEdge`（每次 demand 的热路径）保持 memo 加速；`contract`（仅环消解
-  时发生）重建——冷事件的重建造价可接受。
+- 成本分账：`addEdge`（每次 loweringImport 的热路径）保持 memo 加速；`contract`
+  （仅环消解时发生）重建——冷事件的重建造价可接受。
 
-命中即抛 `CycleError`（`path: string[]` 环路径；可捕获，`instanceof` 判型）。
+命中即抛 `CycleError`（`path: string[]` 环路径；可捕获，`instanceof` 判型；附带发起边
+`edge: { from, to }`——声明 hook 据此辨认「环由自己那条加边闭合」并降级为边数据）。
 
-**`ctx.loweringBindImport(ids)` 绑定解环**（引擎工具，插件在 CycleError 的 catch 里调用；绑定只做注册表重定向与缓存共享，内容处理归插件流程）：
+**`ctx.loweringBindImport(ids)` 绑定解环**（引擎工具，插件在 CycleError 的 catch 里调用；
+绑定只做注册表重定向与缓存共享，内容处理归插件流程）：
 
-1. 取环内模块的 **load 结果**（load 先于 lower 完成，与死锁无关）；
-2. **精确 import 清理**：移除环内互指的 import 声明（按解析后的 id 判定，非正则），
-   external 保留；
-3. 拼接为一份内容，**注册为新模块**（name 缺省 `merged:a+b` 形态），注册表将 A、B
-   **重定向**到合并体；
-4. 重定向**同时解除环上全体挂起**——pending 的 demand 命中缓存拿到合并体，挂起的
-   lower 恢复执行。环上双方任一方 catch 并 merge，即解全体；
-5. **同步循环检测器 `contract`**：a、b 收缩到合并节点（别名归一＋memo 重建）——
+1. ids 归一为环上成员（含当前模块；已注册按 id 直取，否则按说明符走一次 resolve 链）；
+2. **注册表重定向**：把 ids 的注册表条目与重定向表统一指向当前模块——其终态 Promise
+   即绑定单元的共享终态；
+3. 重定向**同时解除环上全体挂起**——挂起的等待方在各自生命周期收尾处命中重定向，
+   拿到绑定单元终态；后续 loweringImport 命中绑定缓存（重定向后归一到当前模块，
+   返回其终态），环上任一方 catch 并绑定，即解全体；
+4. **同步循环检测器 `contract`**：ids 收缩到当前模块（别名归一＋memo 重建）——
    检测器的图与真实依赖图保持一致，后续加边的环检查在新结构上进行。
 
-语义边界如实记录：merge 以 **load 结果**为原料，原 lower 不再对合并体执行（合并即
-替代）；顶层标识符冲突需处理（MVP：检测到即报错，scope 分析改名为升级路径）。
+绑定后的内容处理是插件流程：当前模块在自己的 lower 里一次性读取环上模块的内容
+（经 ctx.fs 等既有通道）并完成清理拼接，其终态即绑定单元终态；绑定单元自身的
+lower 内不要再 loweringImport 自己的成员——绑定单元的终态尚未存在，等待自身即
+自锁；顶层标识符冲突的处理随之归属插件（MVP 不做引擎级检测，scope 分析改名为
+升级路径）。
 
 ## 纯度分类
 

@@ -70,13 +70,13 @@ const rewriteArtifact = (
   kind: StackInputKind,
 ): string => {
   const rewrites: { start: number; end: number; specifier: string }[] = []
-  for (const resolved of artifact.imports) {
-    if (resolved.resolvedId === null) continue
-    const targetPath = targetPaths.get(resolved.resolvedId)
+  for (const ref of artifact.imports) {
+    if (ref.id === null) continue
+    const targetPath = targetPaths.get(ref.id)
     if (targetPath === undefined) continue
     rewrites.push({
-      start: resolved.start,
-      end: resolved.end,
+      start: ref.valueStart,
+      end: ref.valueEnd,
       specifier: toSpecifier(dirnamePath(artifactPath), targetPath),
     })
   }

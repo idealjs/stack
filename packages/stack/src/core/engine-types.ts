@@ -1,19 +1,10 @@
 import type { StackInputKind } from './config.ts'
-import type { FinalModule } from './hooks.ts'
-
-export interface ResolvedArtifactImport {
-  specifier: string
-  start: number
-  end: number
-  declarationStart: number
-  declarationEnd: number
-  resolvedId: string | null
-}
+import type { ArtifactImport, FinalModule } from './hooks.ts'
 
 export interface RenderArtifact {
   path?: string
   code: string
-  imports: ResolvedArtifactImport[]
+  imports: ArtifactImport[]
 }
 
 export interface ModuleEntry {
@@ -23,6 +14,7 @@ export interface ModuleEntry {
   promise: Promise<FinalModule> | null
   final: FinalModule | null
   artifacts: RenderArtifact[]
+  declared: string[]
   redirect: string | null
 }
 
@@ -30,9 +22,4 @@ export interface QueueTask {
   id: string
   resolve: (module: FinalModule) => void
   reject: (error: unknown) => void
-}
-
-export interface CleanedPart {
-  code: string
-  baseId: string
 }

@@ -1,10 +1,17 @@
+export interface CycleEdge {
+  from: string
+  to: string
+}
+
 export class CycleError extends Error {
   readonly path: string[]
+  readonly edge: CycleEdge | null
 
-  constructor(path: string[]) {
+  constructor(path: string[], edge: CycleEdge | null = null) {
     super(`[stack] 循环依赖：${path.join(' → ')}`)
     this.name = 'CycleError'
     this.path = path
+    this.edge = edge
   }
 }
 
@@ -61,10 +68,11 @@ export class CycleDetector {
   addEdge(from: string, to: string): void {
     const fromNode = this.#normalize(from)
     const toNode = this.#normalize(to)
-    if (fromNode === toNode) throw new CycleError([fromNode, fromNode])
+    const edge: CycleEdge = { from: fromNode, to: toNode }
+    if (fromNode === toNode) throw new CycleError([fromNode, fromNode], edge)
     if (this.#reach.get(toNode)?.has(fromNode) === true) {
       const path = shortestPath(this.#edges, toNode, fromNode) ?? [toNode, fromNode]
-      throw new CycleError([...path, toNode])
+      throw new CycleError([...path, toNode], edge)
     }
     if (this.#reach.get(fromNode)?.has(toNode) === true) return
     if (this.#edges.get(fromNode)?.has(toNode) === true) return

@@ -12,6 +12,7 @@ export {
 export { CycleError } from './core/cycle.ts'
 export type {
   Artifact,
+  ArtifactImport,
   DeriveHook,
   EmittedFile,
   EmittedOutput,

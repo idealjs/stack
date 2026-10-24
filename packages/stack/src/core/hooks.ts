@@ -31,9 +31,17 @@ export interface FinalModule {
   imports: ImportRef[]
 }
 
+export interface ArtifactImport {
+  specifier: string
+  id: string | null
+  valueStart: number
+  valueEnd: number
+}
+
 export interface Artifact {
   path?: string
   code: string
+  imports?: ArtifactImport[]
 }
 
 export interface ResolveResult {
@@ -61,8 +69,8 @@ export interface LowerContext {
   fs: ReadOnlyFs
   output: (spec: EmittedOutput) => void
   lowerImport: (code: string) => string[]
-  demand: (specifiers: string[]) => Promise<FinalModule[]>
-  merge: (specifiers: string[], name?: string) => Promise<FinalModule>
+  loweringImport: (id: string) => Promise<FinalModule | null>
+  loweringBindImport: (ids: string[]) => Promise<void>
 }
 
 export type ModuleLowerHook = (

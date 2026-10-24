@@ -2,12 +2,7 @@ import { OutputChannel } from './channel.ts'
 import type { StackConfig, StackFs, StackInput, StackInputKind } from './config.ts'
 import { inputKindOf } from './config.ts'
 import { CycleDetector } from './cycle.ts'
-import type {
-  ModuleEntry,
-  QueueTask,
-  RenderArtifact,
-  ResolvedArtifactImport,
-} from './engine-types.ts'
+import type { ModuleEntry, QueueTask, RenderArtifact } from './engine-types.ts'
 import type {
   Artifact,
   DeriveHook,
@@ -25,9 +20,8 @@ import type {
   WatchHook,
 } from './hooks.ts'
 import { hookProducer } from './hooks.ts'
-import { createLoading, type Loading } from './loading.ts'
-import { type ParsedImport, parseModuleImports } from './parse.ts'
-import { parseHtmlAssets } from './parseHtml.ts'
+import { createLoading } from './loading.ts'
+import { parseModuleImports } from './parse.ts'
 import {
   dirnamePath,
   isRelativeSpecifier,
@@ -37,8 +31,8 @@ import {
 } from './pathUtil.ts'
 import {
   type ResourceRuntime,
-  demandFrom as resourcesDemandFrom,
-  mergeFrom as resourcesMergeFrom,
+  loweringBindImportFrom as resourcesBindImports,
+  loweringImportFrom as resourcesLoweringImport,
 } from './resources.ts'
 
 const applyAlias = (
@@ -52,23 +46,6 @@ const applyAlias = (
     }
   }
   return { source, aliased: false }
-}
-
-const artifactImports = (code: string, kind: StackInputKind): ParsedImport[] => {
-  if (kind === 'css') return []
-  if (kind === 'html') {
-    return parseHtmlAssets(code).map((asset) => ({
-      source: asset.specifier,
-      start: asset.start,
-      end: asset.end,
-      declarationStart: asset.start,
-      declarationEnd: asset.end,
-      defaultName: null,
-      namespaceName: null,
-      named: [],
-    }))
-  }
-  return parseModuleImports(code)
 }
 
 export class DemandEngine {
@@ -85,7 +62,7 @@ export class DemandEngine {
   readonly #registry = new Map<string, ModuleEntry>()
   readonly #redirects = new Map<string, string>()
   readonly #kindOverrides = new Map<string, StackInputKind>()
-  readonly #loading: Loading
+  readonly #loading: ReturnType<typeof createLoading>
   readonly #runtime: ResourceRuntime
   readonly #queue: QueueTask[] = []
   readonly #idleWaiters: (() => void)[] = []
@@ -117,11 +94,9 @@ export class DemandEngine {
       ensureLifecycle: (id) => this.ensureLifecycle(id),
       resolveDemand: (source, importer) => this.resolveDemand(source, importer),
       followRedirects: (id) => this.followRedirects(id),
-      kindOf: (id) => this.kindOf(id),
-      loading: this.#loading,
       detector: this.detector,
-      commitMerge: (merged, pathAnchor, ids, artifacts) =>
-        this.#commitMerge(merged, pathAnchor, ids, artifacts),
+      knownModule: (id) => this.#registry.has(id),
+      bindModule: (id, into) => this.#bindModule(id, into),
     }
     this.#resolveContext = { root: this.root }
     this.channel = new OutputChannel({
@@ -199,6 +174,7 @@ export class DemandEngine {
       promise: null,
       final: null,
       artifacts: [],
+      declared: [],
       redirect: null,
     }
     this.#registry.set(target, created)
@@ -215,12 +191,18 @@ export class DemandEngine {
     return current
   }
 
-  demandFrom(requester: string, specifiers: string[]): Promise<FinalModule[]> {
-    return resourcesDemandFrom(this.#runtime, requester, specifiers)
+  async loweringImport(moduleId: string, id: string): Promise<FinalModule | null> {
+    const final = await resourcesLoweringImport(this.#runtime, moduleId, id)
+    if (final === null) return null
+    const entry = this.#registry.get(this.followRedirects(moduleId))
+    if (entry !== undefined && !entry.declared.includes(final.id)) {
+      entry.declared.push(final.id)
+    }
+    return final
   }
 
-  mergeFrom(requester: string, specifiers: string[], name?: string): Promise<FinalModule> {
-    return resourcesMergeFrom(this.#runtime, requester, specifiers, name)
+  loweringBindImport(moduleId: string, ids: string[]): Promise<void> {
+    return resourcesBindImports(this.#runtime, moduleId, ids)
   }
 
   lowerContext(moduleId: string, hookName: string): LowerContext {
@@ -228,8 +210,8 @@ export class DemandEngine {
       fs: this.readOnlyFs,
       output: (spec) => this.channel.register(spec, hookProducer(hookName)),
       lowerImport: (code) => parseModuleImports(code).map((parsed) => parsed.source),
-      demand: (specifiers) => this.demandFrom(moduleId, specifiers),
-      merge: (specifiers, name) => this.mergeFrom(moduleId, specifiers, name),
+      loweringImport: (id) => this.loweringImport(moduleId, id),
+      loweringBindImport: (ids) => this.loweringBindImport(moduleId, ids),
     }
   }
 
@@ -346,33 +328,27 @@ export class DemandEngine {
     }
     const redirectTarget = this.followRedirects(id)
     if (redirectTarget !== id) {
-      const merged = this.#registry.get(redirectTarget)
-      if (merged !== undefined && merged.final !== null) return merged.final
+      const bound = this.#registry.get(redirectTarget)
+      if (bound !== undefined && bound.final !== null) return bound.final
     }
-    const renderArtifacts: RenderArtifact[] = []
+    const renderArtifacts: RenderArtifact[] = artifacts.map((artifact) => ({
+      path: artifact.path,
+      code: artifact.code,
+      imports: artifact.imports ?? [],
+    }))
     const imports: ImportRef[] = []
     const deps: string[] = []
-    for (const artifact of artifacts) {
-      const resolved: ResolvedArtifactImport[] = []
-      for (const parsed of artifactImports(artifact.code, kind)) {
-        const resolution = await this.resolveDemand(parsed.source, id)
-        const resolvedId = resolution.kind === 'module' ? resolution.id : null
-        resolved.push({
-          specifier: parsed.source,
-          start: parsed.start,
-          end: parsed.end,
-          declarationStart: parsed.declarationStart,
-          declarationEnd: parsed.declarationEnd,
-          resolvedId,
-        })
-        if (resolvedId === null) continue
-        imports.push({ specifier: parsed.source, id: resolvedId })
-        if (!deps.includes(resolvedId)) deps.push(resolvedId)
-        if (!this.#registry.has(this.followRedirects(resolvedId))) {
-          await this.ensureLifecycle(resolvedId)
+    for (const artifact of renderArtifacts) {
+      for (const ref of artifact.imports) {
+        if (!imports.some((existing) => existing.specifier === ref.specifier)) {
+          imports.push({ specifier: ref.specifier, id: ref.id })
         }
+        if (ref.id !== null && !deps.includes(ref.id)) deps.push(ref.id)
       }
-      renderArtifacts.push({ path: artifact.path, code: artifact.code, imports: resolved })
+    }
+    for (const target of entry.declared) {
+      const normalized = this.followRedirects(target)
+      if (normalized !== id && !deps.includes(normalized)) deps.push(normalized)
     }
     const final: FinalModule = {
       id,
@@ -386,30 +362,10 @@ export class DemandEngine {
     return final
   }
 
-  #commitMerge(
-    merged: FinalModule,
-    pathAnchor: string,
-    ids: string[],
-    artifacts: RenderArtifact[],
-  ): void {
-    this.#registry.set(merged.id, {
-      id: merged.id,
-      pathAnchor,
-      kind: 'module',
-      promise: null,
-      final: merged,
-      artifacts,
-      redirect: null,
-    })
-    for (const id of ids) {
-      const entry = this.#registry.get(id)
-      if (entry !== undefined) {
-        entry.final = merged
-        entry.redirect = merged.id
-      }
-      this.#redirects.set(id, merged.id)
-    }
-    this.detector.contract(ids, merged.id)
+  #bindModule(id: string, into: string): void {
+    const entry = this.#registry.get(id)
+    if (entry !== undefined) entry.redirect = into
+    this.#redirects.set(id, into)
   }
 
   #requireFs(): StackFs {
