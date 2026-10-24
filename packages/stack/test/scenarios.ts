@@ -1,4 +1,4 @@
-import { bundle, inlineScript, minify } from '../src/builtins.ts'
+import { bundle, imports, inlineScript, minify } from '../src/builtins.ts'
 import { memoryFs } from '../src/core/memoryFs.ts'
 import { parseModuleImports } from '../src/core/parse.ts'
 import {
@@ -14,6 +14,7 @@ import {
   CycleError,
   type EmittedFile,
   type EmittedOutput,
+  type FinalModule,
   type ModuleHook,
   type StackConfig,
   type WatchHook,
@@ -58,7 +59,9 @@ const pullImports = (name: string, target?: string): ModuleHook => ({
   name,
   lower: async (id, artifacts, ctx) => {
     if (target !== undefined && id !== target) return artifacts
-    await ctx.demand(ctx.lowerImport(artifacts[0].code))
+    for (const specifier of ctx.lowerImport(artifacts[0].code)) {
+      await ctx.loweringImport(specifier)
+    }
     return artifacts
   },
 })
@@ -104,6 +107,12 @@ const closureFiles: Record<string, string> = {
   'src/d.ts': "import ext from 'ext-pkg'\nexport const d = ext + 1\n",
 }
 
+const bindCycleFiles: Record<string, string> = {
+  'src/a.ts': "import { bHelper } from './b'\nexport const aVal = 'a+' + bHelper\n",
+  'src/b.ts': "import { aVal } from './a'\nexport const bHelper = 'b(' + aVal + ')'\n",
+  'src/c.ts': "import { bHelper } from './b'\nexport const cReport = 'c(' + bHelper + ')'\n",
+}
+
 const htmlPage = (body: string): string =>
   `<!doctype html>\n<html lang="zh-CN">\n  <head>\n    <meta charset="UTF-8" />\n    <title>page</title>\n  </head>\n  <body>\n${body}\n  </body>\n</html>\n`
 
@@ -129,7 +138,7 @@ export const SCENARIOS: Scenario[] = [
       ],
       dist: 'dist/esm',
       alias: { '@/': 'src/' },
-      hooks: [minify({ dir: 'dist/min' })],
+      hooks: [imports(), minify({ dir: 'dist/min' })],
     },
     expected: {
       moduleCount: 4,
@@ -170,6 +179,7 @@ export const SCENARIOS: Scenario[] = [
     },
     config: {
       inputs: [{ name: 'main', path: 'src/main.ts' }],
+      hooks: [imports()],
     },
     expected: {
       moduleCount: 2,
@@ -231,17 +241,19 @@ export const SCENARIOS: Scenario[] = [
     },
     config: {
       inputs: [{ name: 'main', path: 'src/main.ts' }],
+      hooks: [imports()],
     },
     expected: { error: '无法解析导入 "./missing"' },
   },
   {
-    name: '循环依赖入图即止（图层环无害），双向说明符重写',
+    name: 'imports() 声明的 A↔B 图环：自身闭环捕获降级为边数据，双向说明符重写',
     files: {
       'src/a.ts': "import { b } from './b'\nexport const a = 'a'\nconsole.log(b)\n",
       'src/b.ts': "import { a } from './a'\nexport const b = a + '-b'\n",
     },
     config: {
       inputs: [{ name: 'a', path: 'src/a.ts' }],
+      hooks: [imports()],
     },
     expected: {
       moduleCount: 2,
@@ -313,6 +325,7 @@ export const SCENARIOS: Scenario[] = [
     config: {
       inputs: [{ name: 'main', path: 'src/main.ts' }],
       hooks: [
+        imports(),
         {
           name: 'feed-generated',
           resolve: (specifier) =>
@@ -338,17 +351,29 @@ export const SCENARIOS: Scenario[] = [
     },
   },
   {
-    name: 'demand 传递闭包＋依赖先行＋external 跳过：单文件打包范本',
+    name: 'imports() 默认闭包＋loweringImport 收集：单文件打包范本',
     files: closureFiles,
     config: {
       inputs: [{ name: 'main', path: 'src/main.ts' }],
       hooks: [
+        imports(),
         {
           name: 'single-file',
           lower: async (id, artifacts, ctx) => {
             if (id !== 'src/main.ts') return artifacts
-            const deps = await ctx.demand(ctx.lowerImport(artifacts[0].code))
-            const parts = deps.map((mod) => stripInternalImports(mod.code, mod.id, closureFiles))
+            const seen = new Set<string>()
+            const order: FinalModule[] = []
+            const walk = async (target: string): Promise<void> => {
+              const mod = await ctx.loweringImport(target)
+              if (mod === null || seen.has(mod.id)) return
+              seen.add(mod.id)
+              for (const ref of mod.imports) {
+                if (ref.id !== null) await walk(ref.id)
+              }
+              order.push(mod)
+            }
+            for (const specifier of ctx.lowerImport(artifacts[0].code)) await walk(specifier)
+            const parts = order.map((mod) => stripInternalImports(mod.code, mod.id, closureFiles))
             parts.push(stripInternalImports(artifacts[0].code, id, closureFiles))
             return [{ path: 'bundle.js', code: parts.join('\n') }]
           },
@@ -406,39 +431,50 @@ export const SCENARIOS: Scenario[] = [
     expected: { error: ['循环依赖', 'src/a.ts', 'src/b.ts'] },
   },
   {
-    name: 'await 环捕获后 merge 解环：合并体替代双模块，第三方 demand 命中缓存',
-    files: {
-      'src/a.ts': "import { bHelper } from './b'\nexport const aVal = 'a+' + bHelper\n",
-      'src/b.ts': "import { aVal } from './a'\nexport const bHelper = 'b(' + aVal + ')'\n",
-      'src/c.ts': "import { aVal } from './a'\nexport const cReport = 'c(' + aVal + ')'\n",
-    },
+    name: 'await 环捕获后 loweringBindImport 解环：绑定缓存命中返回 A 终态',
+    files: bindCycleFiles,
     config: {
       inputs: [{ name: 'c', path: 'src/c.ts' }],
       hooks: [
         {
-          name: 'merge-on-cycle',
+          name: 'bind-on-cycle',
           lower: async (id, artifacts, ctx) => {
             if (id !== 'src/a.ts') return artifacts
             try {
-              await ctx.demand(ctx.lowerImport(artifacts[0].code))
+              await ctx.loweringImport('./b')
               return artifacts
             } catch (error) {
               if (!(error instanceof CycleError)) throw error
-              await ctx.merge(['./a', './b'])
-              return []
+              const members: string[] = []
+              for (const member of error.path) {
+                if (!members.includes(member)) members.push(member)
+              }
+              await ctx.loweringBindImport(members)
+              const rawB = await ctx.fs.readFile('src/b.ts')
+              const aClean = stripInternalImports(artifacts[0].code, id, bindCycleFiles)
+              const bClean = stripInternalImports(rawB, 'src/b.ts', bindCycleFiles)
+              return [{ code: `${aClean}\n${bClean}` }]
             }
           },
         } satisfies ModuleHook,
+        imports(),
         {
           name: 'collector',
           lower: async (id, artifacts, ctx) => {
             if (id !== 'src/c.ts') return artifacts
-            const deps = await ctx.demand(['./a'])
-            const merged = deps[0]
-            const marker = `demand-a-got-merged:${
-              merged.code.includes('aVal') && merged.code.includes('bHelper')
+            const bound = await ctx.loweringImport('./b')
+            const marker = `bind-cache:${
+              bound !== null &&
+              bound.id === 'src/a.ts' &&
+              bound.code.includes('aVal') &&
+              bound.code.includes('bHelper')
             }`
-            return [{ code: `${artifacts[0].code}\nconsole.log(${JSON.stringify(marker)})\n` }]
+            return [
+              {
+                ...artifacts[0],
+                code: `${artifacts[0].code}\nconsole.log(${JSON.stringify(marker)})\n`,
+              },
+            ]
           },
         } satisfies ModuleHook,
       ],
@@ -456,7 +492,7 @@ export const SCENARIOS: Scenario[] = [
               includes: ['const aVal =', 'const bHelper ='],
               notIncludes: ['from "./b"', 'from "./a"'],
             },
-            { path: 'c.js', includes: ['demand-a-got-merged:true', './a.js'] },
+            { path: 'c.js', includes: ['bind-cache:true', './a.js'] },
           ],
         },
       ],
@@ -488,7 +524,7 @@ export const SCENARIOS: Scenario[] = [
     },
     config: {
       inputs: [{ name: 'main', path: 'src/main.ts' }],
-      hooks: [bundle({ entry: 'main', dir: 'dist' })],
+      hooks: [imports(), bundle({ entry: 'main', dir: 'dist' })],
     },
     expected: {
       moduleCount: 3,
@@ -578,6 +614,7 @@ export const SCENARIOS: Scenario[] = [
         return ctx.fs.readFile(id)
       },
       hooks: [
+        imports(),
         {
           name: 'async-supplier',
           async resolve(source) {
@@ -640,6 +677,7 @@ export const SCENARIOS: Scenario[] = [
     config: {
       inputs: [{ name: 'main', path: 'src/main.ts' }],
       hooks: [
+        imports(),
         {
           name: 'aggregator',
           derive: (ctx) => {
@@ -740,6 +778,7 @@ export const SCENARIOS: Scenario[] = [
     config: {
       inputs: [{ name: 'page', path: 'src/index.html' }],
       dist: 'dist/page',
+      hooks: [imports()],
     },
     expected: {
       moduleCount: 4,
@@ -811,6 +850,7 @@ export const SCENARIOS: Scenario[] = [
         { name: 'page', path: 'src/page.html' },
         { name: 'style', path: 'src/style.css' },
       ],
+      hooks: [imports()],
     },
     expected: {
       moduleCount: 4,
@@ -838,6 +878,7 @@ export const SCENARIOS: Scenario[] = [
     },
     config: {
       inputs: [{ name: 'page', path: 'src/index.html' }],
+      hooks: [imports()],
     },
     expected: { error: '无法解析导入 "./missing.ts"' },
   },
@@ -850,6 +891,7 @@ export const SCENARIOS: Scenario[] = [
     config: {
       inputs: [{ name: 'page', path: 'src/index.html' }],
       alias: { '@/': 'src/' },
+      hooks: [imports()],
     },
     expected: {
       moduleCount: 2,
@@ -875,7 +917,7 @@ export const SCENARIOS: Scenario[] = [
     },
     config: {
       inputs: [{ name: 'page', path: 'index.html' }],
-      hooks: [inlineScript()],
+      hooks: [imports(), inlineScript()],
     },
     expected: {
       outputs: [
