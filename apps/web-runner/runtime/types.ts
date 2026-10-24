@@ -1,4 +1,4 @@
-export const PROTOCOL_VERSION = 1
+export const PROTOCOL_VERSION = 2
 
 export type RuntimeOutbound =
   | { type: 'ready'; origin: string; parentBlocked: boolean }
@@ -6,4 +6,16 @@ export type RuntimeOutbound =
   | { type: 'error'; text: string }
   | { type: 'done' }
 
-export type RuntimeInbound = null | { v?: number; type?: string; code?: unknown; html?: unknown }
+export interface DemoFile {
+  name: string
+  code: string
+}
+
+export type RuntimeInbound = null | {
+  v?: number
+  type?: string
+  files?: unknown
+  entry?: unknown
+  html?: unknown
+  define?: unknown
+}

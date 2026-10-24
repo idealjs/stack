@@ -35,7 +35,7 @@ function parseArgs(argv: string[]): CliOptions {
   return { configPath, watchMode }
 }
 
-async function loadConfig(configPath: string): Promise<StackConfig> {
+export async function loadConfig(configPath: string): Promise<StackConfig> {
   const absolute = resolvePath(process.cwd(), configPath)
   if (!existsSync(absolute)) throw new Error(`找不到配置文件：${absolute}`)
   const module = await import(pathToFileURL(absolute).href)

@@ -1,14 +1,14 @@
 import runtimeDoc from 'virtual:web-runner-doc'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { ShadowButton } from '../design-system'
-import { buildProject } from './build'
 import { CONFIG_FILE_NAME, CONFIG_TEMPLATE, parseBuildConfig } from './config'
+import { extractHtmlBody } from './htmlBody'
 import { type OutputLine, OutputPanel } from './OutputPanel'
 import { isRuntimeMessage, PROTOCOL_VERSION } from './protocol'
 
 const RUNTIME_ORIGIN: string = import.meta.env.VITE_WEB_RUNNER_ORIGIN ?? ''
 
-const MAIN_TS = `// 沙箱工程入口：TypeScript 直写，点「运行」先经 esbuild-wasm 构建再进沙箱执行。
+const MAIN_TS = `// 沙箱工程入口：TypeScript 直写，点「运行」送进沙箱，由内嵌 stack 引擎构建后执行。
 const greeting: string = 'hello, playground'
 console.log(greeting)
 `
@@ -122,27 +122,43 @@ export function Playground({ initialFiles = INITIAL_FILES }: PlaygroundProps) {
         setLines([{ level: 'error', stage: 'build', text: parsed.error }])
         return
       }
-      const outcome = await buildProject(files, parsed.config)
-      const problemLines: OutputLine[] = outcome.problems.map((p) => ({
-        level: p.level,
-        stage: 'build',
-        text: p.text,
-      }))
-      if (!outcome.ok || outcome.code === null) {
-        setLines(problemLines)
+      if (!files.some((f) => f.name === parsed.config.entry)) {
+        setLines([
+          {
+            level: 'error',
+            stage: 'build',
+            text: `入口文件不存在：${parsed.config.entry}（entry 必须是工程内的文件名）`,
+          },
+        ])
         return
       }
-      setLines(problemLines)
+      let html: string | null = null
+      if (parsed.config.html !== null) {
+        const doc = files.find((f) => f.name === parsed.config.html)
+        if (doc === undefined) {
+          setLines([
+            {
+              level: 'error',
+              stage: 'build',
+              text: `入口文档不存在：${parsed.config.html}（html 必须是工程内的文件名）`,
+            },
+          ])
+          return
+        }
+        html = extractHtmlBody(doc.code)
+      }
       iframeRef.current?.contentWindow?.postMessage(
         {
           v: PROTOCOL_VERSION,
           type: 'run',
-          code: outcome.code,
-          ...(outcome.html !== null ? { html: outcome.html } : {}),
+          files,
+          entry: parsed.config.entry,
+          define: parsed.config.define,
+          ...(html !== null ? { html } : {}),
         },
         '*',
       )
-      setPreview(outcome.html !== null)
+      setPreview(html !== null)
     } finally {
       setBuilding(false)
     }
@@ -254,8 +270,8 @@ export function Playground({ initialFiles = INITIAL_FILES }: PlaygroundProps) {
         </ShadowButton>
         <span className="t-small-mute">
           {building
-            ? 'esbuild-wasm 构建中…'
-            : `「${active.name}」经 esbuild-wasm 构建后送进沙箱：Blob URL + import()`}
+            ? 'stack 构建中（沙箱内）…'
+            : `「${active.name}」源码直送沙箱：内嵌 stack（内存 FS）构建 → Blob URL + import()`}
         </span>
       </div>
 
