@@ -189,9 +189,17 @@ spawn（孵化义准但让位）、generate/emit（产出层撞车）、decompos
 ## 循环检测器（独立纯模块）与 merge 解环
 
 **循环检测器**（`core/cycle.ts`，独立叶子、纯计算、无 I/O）：增量维护依赖图，每次
-加边做一次环检查（「加 u→v 是否成环」等价于「v 可达 u」），用可达性 memo 加速——
-图 append-only（边只增不减），memo 恒 sound、无需失效。命中即抛 `CycleError`
-（`path: string[]` 环路径；可捕获，`instanceof` 判型）。
+加边做一次环检查（「加 u→v 是否成环」等价于「v 可达 u」），用可达性 memo 加速。
+memo 的 sound 条件是「图只增」——**merge 的注册表重定向是节点收缩，打破该条件**，
+因此 merge 完成后必须调用检测器的收缩更新：
+
+- `contract(ids, into)`：① 别名归一——后续指向 a/b 的边与查询规范化到 merged；
+  ② 可达性 memo 整体重建（O(V+E)，bitset）——收缩改变可达性结构，增量失效不如
+  重建可靠；
+- 成本分账：`addEdge`（每次 demand 的热路径）保持 memo 加速；`contract`（仅环消解
+  时发生）重建——冷事件的重建造价可接受。
+
+命中即抛 `CycleError`（`path: string[]` 环路径；可捕获，`instanceof` 判型）。
 
 **`ctx.merge(specifiers, name?)` 解环**（引擎工具，插件在 CycleError 的 catch 里调用）：
 
@@ -201,7 +209,9 @@ spawn（孵化义准但让位）、generate/emit（产出层撞车）、decompos
 3. 拼接为一份内容，**注册为新模块**（name 缺省 `merged:a+b` 形态），注册表将 A、B
    **重定向**到合并体；
 4. 重定向**同时解除环上全体挂起**——pending 的 demand 命中缓存拿到合并体，挂起的
-   lower 恢复执行。环上双方任一方 catch 并 merge，即解全体。
+   lower 恢复执行。环上双方任一方 catch 并 merge，即解全体；
+5. **同步循环检测器 `contract`**：a、b 收缩到合并节点（别名归一＋memo 重建）——
+   检测器的图与真实依赖图保持一致，后续加边的环检查在新结构上进行。
 
 语义边界如实记录：merge 以 **load 结果**为原料，原 lower 不再对合并体执行（合并即
 替代）；顶层标识符冲突需处理（MVP：检测到即报错，scope 分析改名为升级路径）。
