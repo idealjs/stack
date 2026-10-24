@@ -1,3 +1,5 @@
+import { memoryFs } from '../src/core/memoryFs.ts'
+import { parseModuleImports } from '../src/core/parse.ts'
 import {
   dirnamePath,
   isRelativeSpecifier,
@@ -5,24 +7,18 @@ import {
   moduleCandidates,
   normalizePath,
 } from '../src/core/pathUtil.ts'
-import type { BuildResult, EmittedOutput, StackConfig, StackHook } from '../src/index.ts'
-import { build, minify } from '../src/index.ts'
-
-export const memoryFsPlugin = (files: Record<string, string>): StackHook => ({
-  name: 'memory-fs',
-  resolveId(source, importer) {
-    const base = isRelativeSpecifier(source)
-      ? joinPath(dirnamePath(importer), source)
-      : joinPath('.', source)
-    return (
-      moduleCandidates(normalizePath(base)).find((candidate) => files[candidate] !== undefined) ??
-      null
-    )
-  },
-  load(id) {
-    return files[id] ?? null
-  },
-})
+import {
+  type BuildResult,
+  build,
+  bundle,
+  CycleError,
+  type EmittedFile,
+  type EmittedOutput,
+  type ModuleHook,
+  minify,
+  type StackConfig,
+  type WatchHook,
+} from '../src/index.ts'
 
 export interface FileExpectation {
   path: string
@@ -47,13 +43,9 @@ export interface ScenarioExpected {
 export interface Scenario {
   name: string
   files: Record<string, string>
-  config: StackConfig
+  config: Omit<StackConfig, 'fs' | 'root'>
   expected: ScenarioExpected
   verify?: (result: BuildResult) => string[]
-  rebuild?: {
-    config: StackConfig
-    expectedError: string
-  }
 }
 
 export interface ScenarioReport {
@@ -61,63 +53,38 @@ export interface ScenarioReport {
   failures: string[]
 }
 
-const failuresForError = (message: string, expected: string | string[]): string[] => {
-  const needles = Array.isArray(expected) ? expected : [expected]
-  return needles
-    .filter((needle) => !message.includes(needle))
-    .map((needle) => `错误信息应包含 "${needle}"，实际：${message}`)
-}
+const tick = (): Promise<void> => new Promise((resolve) => setTimeout(resolve, 0))
 
-const checkOutput = (
-  result: BuildResult,
-  expectation: OutputExpectation,
-  index: number,
-): string[] => {
-  const output = result.outputs[index]
-  if (output === undefined) return [`缺少产出 #${index}（${expectation.name}）`]
-  const failures: string[] = []
-  const label = `${expectation.name}（${expectation.dir}）`
-  if (output.name !== expectation.name) {
-    failures.push(`产出 #${index} 名称：期望 ${expectation.name}，实际 ${output.name}`)
+const pullImports = (name: string, target?: string): ModuleHook => ({
+  name,
+  lower: async (id, artifacts, ctx) => {
+    if (target !== undefined && id !== target) return artifacts
+    await ctx.demand(ctx.lowerImport(artifacts[0].code))
+    return artifacts
+  },
+})
+
+const stripInternalImports = (
+  code: string,
+  importer: string,
+  files: Record<string, string>,
+): string => {
+  const parsed = parseModuleImports(code)
+  const doomed: { start: number; end: number }[] = []
+  for (const entry of parsed) {
+    if (entry.declarationStart === entry.start && entry.declarationEnd === entry.end) continue
+    const base = isRelativeSpecifier(entry.source)
+      ? joinPath(dirnamePath(importer), entry.source)
+      : entry.source
+    const exists = moduleCandidates(normalizePath(base)).some(
+      (candidate) => files[candidate] !== undefined,
+    )
+    if (exists) doomed.push({ start: entry.declarationStart, end: entry.declarationEnd })
   }
-  if (output.dir !== expectation.dir) {
-    failures.push(`产出 ${output.name} 目录：期望 ${expectation.dir}，实际 ${output.dir}`)
-  }
-  if (expectation.filePaths !== undefined) {
-    const actual = JSON.stringify(output.files.map((file) => file.path))
-    const expected = JSON.stringify(expectation.filePaths)
-    if (actual !== expected) {
-      failures.push(`${label} 产物清单：期望 ${expected}，实际 ${actual}`)
-    }
-  }
-  for (const fileExpectation of expectation.files ?? []) {
-    const file = output.files.find((candidate) => candidate.path === fileExpectation.path)
-    if (file === undefined) {
-      failures.push(`${label} 缺少产物 ${fileExpectation.path}`)
-      continue
-    }
-    const fileLabel = `${label}/${fileExpectation.path}`
-    for (const needle of fileExpectation.includes ?? []) {
-      if (!file.code.includes(needle)) failures.push(`${fileLabel} 应包含 "${needle}"`)
-    }
-    for (const banned of fileExpectation.notIncludes ?? []) {
-      if (file.code.includes(banned)) failures.push(`${fileLabel} 不应包含 "${banned}"`)
-    }
-    if (fileExpectation.shorterThanSamePathInOutput !== undefined) {
-      const other = result.outputs
-        .find(
-          (candidate: EmittedOutput) =>
-            candidate.name === fileExpectation.shorterThanSamePathInOutput,
-        )
-        ?.files.find((candidate) => candidate.path === fileExpectation.path)
-      if (other === undefined || other.code.length <= file.code.length) {
-        failures.push(
-          `${fileLabel} 应比产出 ${fileExpectation.shorterThanSamePathInOutput} 的同路径产物更短`,
-        )
-      }
-    }
-  }
-  return failures
+  doomed.sort((left, right) => right.start - left.start)
+  let result = code
+  for (const range of doomed) result = result.slice(0, range.start) + result.slice(range.end)
+  return result
 }
 
 const cartesianFiles: Record<string, string> = {
@@ -131,25 +98,18 @@ const cartesianFiles: Record<string, string> = {
   'src/info.ts': "export const APP_INFO = { name: 'demo' }\n",
 }
 
-const capturedOutputs: string[] = []
-let capturedOutputFn: ((spec: EmittedOutput) => void) | undefined
-
-const tick = (): Promise<void> => new Promise((resolve) => setTimeout(resolve, 0))
-
-const lateProducer: StackHook = {
-  name: 'late-producer',
-  transform(_id, code) {
-    capturedOutputFn?.({ name: 'late', dir: 'dist/late', files: [] })
-    return code
-  },
-  buildEnd(ctx) {
-    capturedOutputFn = ctx.output
-  },
+const closureFiles: Record<string, string> = {
+  'src/main.ts': "import { b } from './b'\nimport { c } from './c'\nconsole.log(b, c)\n",
+  'src/b.ts': "import { d } from './d'\nexport const b = d + 1\n",
+  'src/c.ts': 'export const c = 3\n',
+  'src/d.ts': "import ext from 'ext-pkg'\nexport const d = ext + 1\n",
 }
+
+let capturedOutputFn: ((spec: EmittedOutput) => void) | undefined
 
 export const SCENARIOS: Scenario[] = [
   {
-    name: '一次构建产出两份：default 规范产物＋minify 插件衍生产物',
+    name: '一次构建产出两份：default 规范产物＋minify watch 衍生产物',
     files: cartesianFiles,
     config: {
       inputs: [
@@ -213,26 +173,23 @@ export const SCENARIOS: Scenario[] = [
     },
   },
   {
-    name: '产出视图运行时冻结：登记后篡改被拒并可捕获',
+    name: '产出冻结：watch 订阅者拿到稳定身份，篡改被拒并可捕获',
     files: { 'src/main.ts': 'console.log(1)\n' },
     config: {
       inputs: [{ name: 'main', path: 'src/main.ts' }],
       hooks: [
         {
           name: 'mutator',
-          buildEnd(ctx) {
+          watch: ['default'],
+          lower: (ctx, output) => {
             const notes: string[] = []
             try {
-              ;(ctx.outputs as EmittedOutput[]).push({
-                name: 'injected',
-                dir: 'dist/injected',
-                files: [],
-              })
+              ;(output.files as EmittedFile[]).push({ path: 'x.js', code: '' })
             } catch {
               notes.push('push-blocked')
             }
             try {
-              ;(ctx.outputs[0] as { name: string }).name = 'hijacked'
+              ;(output as { name: string }).name = 'hijacked'
             } catch {
               notes.push('assign-blocked')
             }
@@ -242,7 +199,7 @@ export const SCENARIOS: Scenario[] = [
               files: [{ path: 'audit.txt', code: notes.join(',') }],
             })
           },
-        },
+        } satisfies WatchHook,
       ],
     },
     expected: {
@@ -257,31 +214,6 @@ export const SCENARIOS: Scenario[] = [
     },
   },
   {
-    name: '前置插件要求后序产出：requireOutput 响亮报错并提示声明顺序',
-    files: { 'src/main.ts': 'console.log(41)\n' },
-    config: {
-      inputs: [{ name: 'main', path: 'src/main.ts' }],
-      hooks: [
-        {
-          name: 'early-reader',
-          buildEnd(ctx) {
-            ctx.requireOutput('late')
-          },
-        },
-        {
-          name: 'late-emitter',
-          buildEnd(ctx) {
-            ctx.output({ name: 'late', dir: 'dist/late', files: [{ path: 'late.txt', code: '' }] })
-          },
-        },
-      ],
-    },
-    expected: {
-      error:
-        '插件 "early-reader" 找不到来源产出 "late"，现有产出：default——产出只对声明顺序在后的插件可见',
-    },
-  },
-  {
     name: '未解析的相对导入使构建失败',
     files: {
       'src/main.ts': "import { missing } from './missing'\nconsole.log(missing)\n",
@@ -292,7 +224,7 @@ export const SCENARIOS: Scenario[] = [
     expected: { error: '无法解析导入 "./missing"' },
   },
   {
-    name: '循环依赖入图即止，双向说明符重写',
+    name: '循环依赖入图即止（图层环无害），双向说明符重写',
     files: {
       'src/a.ts': "import { b } from './b'\nexport const a = 'a'\nconsole.log(b)\n",
       'src/b.ts': "import { a } from './a'\nexport const b = a + '-b'\n",
@@ -315,66 +247,353 @@ export const SCENARIOS: Scenario[] = [
     },
   },
   {
-    name: 'transform 链 first-non-null 在类型剥离前生效',
+    name: 'lower 链：重命名生效、恒等合法、0 工件消费终结（模块计数保留）',
     files: {
-      'src/main.ts': 'export const value: number = 1\n',
+      'src/main.ts': 'const value: number = 1\nexport const use = (): number => value\n',
+      'src/sink.ts': 'export const consumed = true\n',
     },
     config: {
-      inputs: [{ name: 'main', path: 'src/main.ts' }],
+      inputs: [
+        { name: 'main', path: 'src/main.ts' },
+        { name: 'sink', path: 'src/sink.ts' },
+      ],
       hooks: [
         {
-          name: 'renaming',
-          transform(id, code) {
-            if (id === 'src/main.ts') return code.replace('value', 'renamed')
-            return null
-          },
+          name: 'renamer',
+          lower: (id, artifacts) =>
+            id === 'src/main.ts'
+              ? artifacts.map((artifact) => ({
+                  ...artifact,
+                  code: artifact.code.replaceAll('value', 'renamed'),
+                }))
+              : artifacts,
         },
+        {
+          name: 'identity',
+          lower: (_id, artifacts) => artifacts,
+        },
+        {
+          name: 'sink',
+          lower: (id, artifacts) => (id === 'src/sink.ts' ? [] : artifacts),
+        } satisfies ModuleHook,
       ],
     },
     expected: {
+      moduleCount: 2,
       outputs: [
         {
           name: 'default',
           dir: 'dist',
-          files: [{ path: 'main.js', includes: ['renamed'], notIncludes: [': number'] }],
+          filePaths: ['main.js'],
+          files: [
+            {
+              path: 'main.js',
+              includes: ['const renamed = 1', 'const use = () => renamed'],
+              notIncludes: [': number'],
+            },
+          ],
         },
       ],
     },
   },
   {
-    name: 'async 钩子全链路：resolveId/load/transform/buildEnd 异步供给与登记',
+    name: 'resolve 内联供料：无 fs 文件的虚拟模块进入完整生命周期',
+    files: { 'src/main.ts': "import { generated } from './generated'\nconsole.log(generated)\n" },
+    config: {
+      inputs: [{ name: 'main', path: 'src/main.ts' }],
+      hooks: [
+        {
+          name: 'feed-generated',
+          resolve: (specifier) =>
+            specifier === './generated'
+              ? { id: 'src/generated.ts', content: 'export const generated = 7\n' }
+              : null,
+        },
+      ],
+    },
+    expected: {
+      moduleCount: 2,
+      outputs: [
+        {
+          name: 'default',
+          dir: 'dist',
+          filePaths: ['generated.js', 'main.js'],
+          files: [
+            { path: 'generated.js', includes: ['const generated = 7', 'export {'] },
+            { path: 'main.js', includes: ['./generated.js'] },
+          ],
+        },
+      ],
+    },
+  },
+  {
+    name: 'demand 传递闭包＋依赖先行＋external 跳过：单文件打包范本',
+    files: closureFiles,
+    config: {
+      inputs: [{ name: 'main', path: 'src/main.ts' }],
+      hooks: [
+        {
+          name: 'single-file',
+          lower: async (id, artifacts, ctx) => {
+            if (id !== 'src/main.ts') return artifacts
+            const deps = await ctx.demand(ctx.lowerImport(artifacts[0].code))
+            const parts = deps.map((mod) => stripInternalImports(mod.code, mod.id, closureFiles))
+            parts.push(stripInternalImports(artifacts[0].code, id, closureFiles))
+            return [{ path: 'bundle.js', code: parts.join('\n') }]
+          },
+        } satisfies ModuleHook,
+      ],
+    },
+    expected: {
+      moduleCount: 4,
+      outputs: [
+        {
+          name: 'default',
+          dir: 'dist',
+          filePaths: ['b.js', 'bundle.js', 'c.js', 'd.js'],
+          files: [
+            {
+              path: 'bundle.js',
+              includes: ['ext-pkg', 'const c = 3', 'import ext from'],
+              notIncludes: ['from "./b"', 'from "./d"', 'from "./c"'],
+            },
+          ],
+        },
+      ],
+    },
+    verify: (result) => {
+      const bundle = result.outputs[0].files.find((file) => file.path === 'bundle.js')
+      if (bundle === undefined) return ['缺少 bundle.js']
+      const positionOf = (needle: string): number => {
+        const index = bundle.code.indexOf(needle)
+        return index === -1 ? Number.POSITIVE_INFINITY : index
+      }
+      const order = [
+        positionOf('const d ='),
+        positionOf('const b ='),
+        positionOf('const c ='),
+        positionOf('console.log(b, c)'),
+      ]
+      return order.every(
+        (value, index) =>
+          value !== Number.POSITIVE_INFINITY && (index === 0 || value > order[index - 1]),
+      )
+        ? []
+        : [`bundle.js 依赖先行顺序不成立：d→b→c→入口，实际位置 ${JSON.stringify(order)}`]
+    },
+  },
+  {
+    name: 'await 环未捕获：构建失败且错误含环路径（A↔B）',
+    files: {
+      'src/a.ts': "import { b } from './b'\nexport const a = 'a'\nconsole.log(b)\n",
+      'src/b.ts': "import { a } from './a'\nexport const b = a + '-b'\n",
+    },
+    config: {
+      inputs: [{ name: 'a', path: 'src/a.ts' }],
+      hooks: [pullImports('pull')],
+    },
+    expected: { error: ['循环依赖', 'src/a.ts', 'src/b.ts'] },
+  },
+  {
+    name: 'await 环捕获后 merge 解环：合并体替代双模块，第三方 demand 命中缓存',
+    files: {
+      'src/a.ts': "import { bHelper } from './b'\nexport const aVal = 'a+' + bHelper\n",
+      'src/b.ts': "import { aVal } from './a'\nexport const bHelper = 'b(' + aVal + ')'\n",
+      'src/c.ts': "import { aVal } from './a'\nexport const cReport = 'c(' + aVal + ')'\n",
+    },
+    config: {
+      inputs: [{ name: 'c', path: 'src/c.ts' }],
+      hooks: [
+        {
+          name: 'merge-on-cycle',
+          lower: async (id, artifacts, ctx) => {
+            if (id !== 'src/a.ts') return artifacts
+            try {
+              await ctx.demand(ctx.lowerImport(artifacts[0].code))
+              return artifacts
+            } catch (error) {
+              if (!(error instanceof CycleError)) throw error
+              await ctx.merge(['./a', './b'])
+              return []
+            }
+          },
+        } satisfies ModuleHook,
+        {
+          name: 'collector',
+          lower: async (id, artifacts, ctx) => {
+            if (id !== 'src/c.ts') return artifacts
+            const deps = await ctx.demand(['./a'])
+            const merged = deps[0]
+            const marker = `demand-a-got-merged:${
+              merged.code.includes('aVal') && merged.code.includes('bHelper')
+            }`
+            return [{ code: `${artifacts[0].code}\nconsole.log(${JSON.stringify(marker)})\n` }]
+          },
+        } satisfies ModuleHook,
+      ],
+    },
+    expected: {
+      moduleCount: 2,
+      outputs: [
+        {
+          name: 'default',
+          dir: 'dist',
+          filePaths: ['a.js', 'c.js'],
+          files: [
+            {
+              path: 'a.js',
+              includes: ['const aVal =', 'const bHelper ='],
+              notIncludes: ['from "./b"', 'from "./a"'],
+            },
+            { path: 'c.js', includes: ['demand-a-got-merged:true', './a.js'] },
+          ],
+        },
+      ],
+    },
+  },
+  {
+    name: '三模块 await 环：环路径保持加边顺序',
+    files: {
+      'src/a.ts': "import { b } from './b'\nexport const a = 1\nconsole.log(b)\n",
+      'src/b.ts': "import { c } from './c'\nexport const b = 2\nconsole.log(c)\n",
+      'src/c.ts': "import { a } from './a'\nexport const c = 3\nconsole.log(a)\n",
+    },
+    config: {
+      inputs: [{ name: 'a', path: 'src/a.ts' }],
+      hooks: [pullImports('pull')],
+    },
+    expected: { error: '循环依赖：src/a.ts → src/b.ts → src/c.ts → src/a.ts' },
+  },
+  {
+    name: 'bundle 内置 hook 对 A↔B 环：单文件 __define/__require 结构',
+    files: {
+      'src/main.ts': "import { fromA } from './a'\nconsole.log(fromA('x'))\n",
+      'src/a.ts':
+        "import { fromB } from './b'\nexport const fromA = (x: string): string => `[a:$" +
+        '{fromB(x)}]`\n',
+      'src/b.ts':
+        "import { fromA } from './a'\nexport const unusedRef = typeof fromA\nexport const fromB = (x: string): string => `[b:$" +
+        '{x}]`\n',
+    },
+    config: {
+      inputs: [{ name: 'main', path: 'src/main.ts' }],
+      hooks: [bundle({ entry: 'main', dir: 'dist' })],
+    },
+    expected: {
+      moduleCount: 3,
+      outputs: [
+        {
+          name: 'default',
+          dir: 'dist',
+          filePaths: ['a.js', 'b.js', 'main.js'],
+        },
+        {
+          name: 'bundle',
+          dir: 'dist',
+          filePaths: ['bundle.js'],
+          files: [
+            {
+              path: 'bundle.js',
+              includes: [
+                '__define(',
+                '__require(',
+                '__require("src/main.ts")',
+                'exports["fromA"]',
+                'exports["fromB"]',
+              ],
+              notIncludes: ['from "./a"', 'from "./b"'],
+            },
+          ],
+        },
+      ],
+    },
+  },
+  {
+    name: 'watch 订阅成环：重名登记即报错（append-only 环断路器）',
+    files: { 'src/main.ts': 'console.log(1)\n' },
+    config: {
+      inputs: [{ name: 'main', path: 'src/main.ts' }],
+      hooks: [
+        {
+          name: 'seed-a',
+          lower: (_id, artifacts, ctx) => {
+            ctx.output({
+              name: 'a',
+              dir: 'dist/a',
+              files: [{ path: 'a.txt', code: 'a' }],
+            })
+            return artifacts
+          },
+        } satisfies ModuleHook,
+        {
+          name: 'watch-a',
+          watch: ['a'],
+          lower: (ctx) => {
+            ctx.output({
+              name: 'b',
+              dir: 'dist/b',
+              files: [{ path: 'b.txt', code: 'b' }],
+            })
+          },
+        } satisfies WatchHook,
+        {
+          name: 'watch-b',
+          watch: ['b'],
+          lower: (ctx) => {
+            ctx.output({
+              name: 'a',
+              dir: 'dist/a2',
+              files: [{ path: 'a2.txt', code: 'a2' }],
+            })
+          },
+        } satisfies WatchHook,
+      ],
+    },
+    expected: {
+      error: ['产出重名 "a"', '插件 "seed-a"', '插件 "watch-b"'],
+    },
+  },
+  {
+    name: 'async 全链路：resolve/load/lower/derive/watch 全异步',
     files: {
       'src/main.ts': "import { extra } from './extra'\nconsole.log(extra)\n",
+      'src/extra.ts': 'export const extra = 41 + 1\n',
     },
     config: {
       inputs: [{ name: 'main', path: 'src/main.ts' }],
       dist: 'dist/async',
+      load: async (ctx, id) => {
+        await tick()
+        return ctx.fs.readFile(id)
+      },
       hooks: [
         {
           name: 'async-supplier',
-          async resolveId(source) {
+          async resolve(source) {
             await tick()
-            return source === './extra' ? 'src/extra.ts' : null
+            return source === './extra' ? { id: 'src/extra.ts' } : null
           },
-          async load(id) {
+        },
+        {
+          name: 'async-lower',
+          lower: async (id, artifacts) => {
             await tick()
-            return id === 'src/extra.ts' ? 'export const extra = 41 + 1\n' : null
+            if (id !== 'src/extra.ts') return artifacts
+            return artifacts.map((artifact) => ({
+              ...artifact,
+              code: artifact.code.replace('41 + 1', '41 + 2'),
+            }))
           },
-          async transform(id, code) {
-            await tick()
-            return id === 'src/extra.ts' ? code.replace('41 + 1', '41 + 2') : null
-          },
-          async buildEnd(ctx) {
+        } satisfies ModuleHook,
+        minify({ dir: 'dist/min' }),
+        {
+          name: 'async-derive',
+          derive: async (ctx) => {
             await tick()
             ctx.output({
-              name: 'async-report',
-              dir: 'dist/async-report',
-              files: [
-                {
-                  path: 'report.txt',
-                  code: `js:${ctx.outputs[0].files.filter((file) => file.path.endsWith('.js')).length}`,
-                },
-              ],
+              name: 'report',
+              dir: 'dist/report',
+              files: [{ path: 'report.txt', code: `modules:${ctx.modules.length}` }],
             })
           },
         },
@@ -392,34 +611,37 @@ export const SCENARIOS: Scenario[] = [
             { path: 'main.js', includes: ['./extra.js'] },
           ],
         },
+        { name: 'min', dir: 'dist/min' },
         {
-          name: 'async-report',
-          dir: 'dist/async-report',
-          files: [{ path: 'report.txt', includes: ['js:2'] }],
+          name: 'report',
+          dir: 'dist/report',
+          files: [{ path: 'report.txt', includes: ['modules:2'] }],
         },
       ],
     },
   },
   {
-    name: '插件经 ctx.output 追加产出，且只读可见 default 与先序产出',
+    name: 'derive 图根派生：终态模块集登记 manifest，顺序在 default 之后',
     files: {
-      'src/main.ts': "console.log('ok')\n",
+      'src/main.ts': "import { util } from './util'\nconsole.log(util)\n",
+      'src/util.ts': 'export const util = 1\n',
     },
     config: {
       inputs: [{ name: 'main', path: 'src/main.ts' }],
-      dist: 'dist/site',
       hooks: [
         {
-          name: 'manifest-maker',
-          buildEnd(ctx) {
-            capturedOutputs.push(...ctx.outputs.map((output) => output.name))
+          name: 'aggregator',
+          derive: (ctx) => {
             ctx.output({
               name: 'manifest',
               dir: 'dist/meta',
               files: [
                 {
                   path: 'manifest.json',
-                  code: JSON.stringify(ctx.outputs.map((output) => `${output.name}:${output.dir}`)),
+                  code: JSON.stringify({
+                    inputs: ctx.inputs.length,
+                    modules: ctx.modules.map((mod) => mod.id),
+                  }),
                 },
               ],
             })
@@ -428,41 +650,42 @@ export const SCENARIOS: Scenario[] = [
       ],
     },
     expected: {
-      moduleCount: 1,
+      moduleCount: 2,
       outputs: [
-        { name: 'default', dir: 'dist/site', filePaths: ['main.js'] },
+        { name: 'default', dir: 'dist', filePaths: ['main.js', 'util.js'] },
         {
           name: 'manifest',
           dir: 'dist/meta',
-          files: [{ path: 'manifest.json', includes: ['default:dist/site'] }],
+          files: [
+            {
+              path: 'manifest.json',
+              includes: ['"inputs":1', 'src/main.ts', 'src/util.ts'],
+            },
+          ],
         },
       ],
     },
-    verify: () =>
-      capturedOutputs.length === 1 && capturedOutputs[0] === 'default'
-        ? []
-        : [`buildEnd 应只见 default 一个产出，实际 ${JSON.stringify(capturedOutputs)}`],
   },
   {
-    name: '产出重名被拒，错误信息带两个来源插件名',
-    files: {
-      'src/main.ts': "console.log('ok')\n",
-    },
+    name: '产出重名被拒：错误信息带两个来源插件名',
+    files: { 'src/main.ts': 'console.log(1)\n' },
     config: {
       inputs: [{ name: 'main', path: 'src/main.ts' }],
       hooks: [
         {
           name: 'alpha-maker',
-          buildEnd(ctx) {
+          watch: ['default'],
+          lower: (ctx) => {
             ctx.output({ name: 'bundle', dir: 'dist/a', files: [] })
           },
-        },
+        } satisfies WatchHook,
         {
           name: 'beta-maker',
-          buildEnd(ctx) {
+          watch: ['default'],
+          lower: (ctx) => {
             ctx.output({ name: 'bundle', dir: 'dist/b', files: [] })
           },
-        },
+        } satisfies WatchHook,
       ],
     },
     expected: {
@@ -470,33 +693,104 @@ export const SCENARIOS: Scenario[] = [
     },
   },
   {
-    name: 'ctx.output 在模块阶段被拒：捕获后于下次构建的 transform 调用必须抛错',
-    files: {
-      'src/main.ts': "console.log('ok')\n",
-    },
+    name: 'seal 之后 ctx.output 被拒：终态只属于构建会话',
+    files: { 'src/main.ts': 'console.log(1)\n' },
     config: {
       inputs: [{ name: 'main', path: 'src/main.ts' }],
-      hooks: [lateProducer],
+      hooks: [
+        {
+          name: 'late',
+          lower: (_id, artifacts, ctx) => {
+            capturedOutputFn = ctx.output
+            return artifacts
+          },
+        } satisfies ModuleHook,
+      ],
     },
     expected: {
       outputs: [{ name: 'default', dir: 'dist', filePaths: ['main.js'] }],
     },
-    rebuild: {
-      config: {
-        inputs: [{ name: 'main', path: 'src/main.ts' }],
-        hooks: [lateProducer],
-      },
-      expectedError: '只能在 buildEnd 阶段产出',
+    verify: () => {
+      if (capturedOutputFn === undefined) return ['lower 应已捕获 ctx.output']
+      try {
+        capturedOutputFn({ name: 'late', dir: 'dist/late', files: [] })
+        return ['seal 之后 ctx.output 应被拒绝']
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error)
+        return message.includes('构建会话已结束')
+          ? []
+          : [`错误信息应包含 "构建会话已结束"，实际：${message}`]
+      }
     },
   },
 ]
 
+const failuresForError = (message: string, expected: string | string[]): string[] => {
+  const needles = Array.isArray(expected) ? expected : [expected]
+  return needles
+    .filter((needle) => !message.includes(needle))
+    .map((needle) => `错误信息应包含 "${needle}"，实际：${message}`)
+}
+
+const checkOutput = (
+  result: BuildResult,
+  expectation: OutputExpectation,
+  index: number,
+): string[] => {
+  const output = result.outputs[index]
+  if (output === undefined) return [`缺少产出 #${index}（${expectation.name}）`]
+  const failures: string[] = []
+  const label = `${expectation.name}（${expectation.dir}）`
+  if (output.name !== expectation.name) {
+    failures.push(`产出 #${index} 名称：期望 ${expectation.name}，实际 ${output.name}`)
+  }
+  if (output.dir !== expectation.dir) {
+    failures.push(`产出 ${output.name} 目录：期望 ${expectation.dir}，实际 ${output.dir}`)
+  }
+  if (expectation.filePaths !== undefined) {
+    const actual = JSON.stringify(output.files.map((file) => file.path))
+    const expected = JSON.stringify(expectation.filePaths)
+    if (actual !== expected) {
+      failures.push(`${label} 产物清单：期望 ${expected}，实际 ${actual}`)
+    }
+  }
+  for (const fileExpectation of expectation.files ?? []) {
+    const file = output.files.find((candidate) => candidate.path === fileExpectation.path)
+    if (file === undefined) {
+      failures.push(`${label} 缺少产物 ${fileExpectation.path}`)
+      continue
+    }
+    const fileLabel = `${label}/${fileExpectation.path}`
+    for (const needle of fileExpectation.includes ?? []) {
+      if (!file.code.includes(needle)) failures.push(`${fileLabel} 应包含 "${needle}"`)
+    }
+    for (const banned of fileExpectation.notIncludes ?? []) {
+      if (file.code.includes(banned)) failures.push(`${fileLabel} 不应包含 "${banned}"`)
+    }
+    if (fileExpectation.shorterThanSamePathInOutput !== undefined) {
+      const other = result.outputs
+        .find(
+          (candidate: EmittedOutput) =>
+            candidate.name === fileExpectation.shorterThanSamePathInOutput,
+        )
+        ?.files.find((candidate) => candidate.path === fileExpectation.path)
+      if (other === undefined || other.code.length <= file.code.length) {
+        failures.push(
+          `${fileLabel} 应比产出 ${fileExpectation.shorterThanSamePathInOutput} 的同路径产物更短`,
+        )
+      }
+    }
+  }
+  return failures
+}
+
 const withMemoryFs = (
   scenario: { files: Record<string, string> },
-  config: StackConfig,
+  config: Omit<StackConfig, 'fs' | 'root'>,
 ): StackConfig => ({
   ...config,
-  hooks: [memoryFsPlugin(scenario.files), ...(config.hooks ?? [])],
+  root: '.',
+  fs: memoryFs(scenario.files),
 })
 
 export async function runScenario(scenario: Scenario): Promise<ScenarioReport> {
@@ -504,7 +798,7 @@ export async function runScenario(scenario: Scenario): Promise<ScenarioReport> {
   try {
     const result = await build(withMemoryFs(scenario, scenario.config))
     if (scenario.expected.error !== undefined) {
-      failures.push(`期望抛出错误，实际构建成功`)
+      failures.push('期望抛出错误，实际构建成功')
       return { name: scenario.name, failures }
     }
     if (
@@ -530,19 +824,6 @@ export async function runScenario(scenario: Scenario): Promise<ScenarioReport> {
       failures.push(`意外抛错：${message}`)
     } else {
       failures.push(...failuresForError(message, scenario.expected.error))
-    }
-  }
-  if (failures.length === 0 && scenario.rebuild !== undefined) {
-    try {
-      await build(withMemoryFs(scenario, scenario.rebuild.config))
-      failures.push(`rebuild 期望抛错（${scenario.rebuild.expectedError}），实际成功`)
-    } catch (error) {
-      const message = error instanceof Error ? error.message : String(error)
-      if (!message.includes(scenario.rebuild.expectedError)) {
-        failures.push(
-          `rebuild 错误信息应包含 "${scenario.rebuild.expectedError}"，实际：${message}`,
-        )
-      }
     }
   }
   return { name: scenario.name, failures }
