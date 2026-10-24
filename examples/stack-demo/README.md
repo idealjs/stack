@@ -1,12 +1,16 @@
 # stack-demo
 
-`stack` 构建工具的最小示例（v2 需求引擎形态）：一个入口一次构建，核心经唯一产出通道
-登记 `default` 规范产物，`minify` 以 watch 订阅 default 派生压缩产物，`bundle` 在 derive
-相把入口闭包打成单文件——验证需求引擎、alias 解析、preserve-ESM 产物与内置 hooks。
+`stack` 构建工具的最小示例（v2 需求引擎形态）：html＋module 两类入口一次构建，核心经唯一
+产出通道登记 `default` 规范产物（即完整可开页面：html＋js＋css），`minify` 以 watch 订阅
+default 派生完整可部署文件集（js/css 压缩、html 原样复制），`bundle` 在 derive 相把 js
+入口闭包打成单文件——验证需求引擎、输入类型分流、alias 解析、preserve-ESM 产物与内置 hooks。
 
 ```
 src/
-├── app.ts            入口：相对导入 common/utils + alias 导入 @/info
+├── pages/
+│   └── index.html    html 入口：script 引 ../app.ts、link 引 ../site.css
+├── site.css          页面样式（css 输入：load 后透传，终态工件不产图边）
+├── app.ts            js 入口：相对导入 common/utils + alias 导入 @/info
 ├── info.ts           经 alias（@/ → src/）引用的模块
 └── common/
     └── utils.ts      TS 接口 / 泛型函数（证明类型剥离转译）
@@ -14,11 +18,15 @@ src/
 
 配置形态（v2 四件套：inputs / fs / load / hooks）：
 
-- `inputs` 是唯一的入口声明——「路径 P 的模块的最终形态」是引擎的初始模块需求；
+- `inputs` 是唯一的入口声明——「路径 P 的模块的最终形态」是引擎的初始模块需求；kind
+  缺省按扩展名推断（`.html` → html、`.css` → css、其余 → module），可用 `type` 显式覆盖；
+  html 的 `script src`／`link rel=stylesheet href` 引用走正常 resolve 链长出模块图，
+  终态把引用重写为最终产物相对路径（`../app.ts` → `../app.js`）；
 - `fs: nodeFs()` 平台注入在宿主写配置的那一刻完成，core 与 hooks 全程平台无关；
 - `load` 是配置级唯一加载器，必须经 `ctx.fs`（缺省即 `ctx.fs.readFile`）；
 - `hooks` 是能力注册表：`minify` 声明 `watch: ['default']`，产出登记即触发；
-  `bundle` 声明 `derive`，模块集排干后按终态模块集＋依赖边做 SCC 分解与单文件打包。
+  `bundle` 声明 `derive`，模块集排干后按终态模块集＋依赖边做 SCC 分解与单文件打包
+  （闭包只含 js 模块，html/css 不进包装）。
 
 ## CLI 用法
 
@@ -27,6 +35,7 @@ yarn install
 yarn workspace stack-demo build        # 产出 default（dist/esm）、min（dist/min）、bundle（dist/bundle）
 node dist/esm/app.js                   # preserve-ESM 产物直接执行
 node dist/bundle/bundle.js             # 单文件打包产物直接执行
+npx serve dist/esm                     # 任一静态服务器指向 dist/esm，打开 pages/index.html 即完整页面
 yarn workspace stack-demo dev          # stack --watch：防抖全量重建
 ```
 

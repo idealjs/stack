@@ -6,7 +6,10 @@ import { nodeFs } from '@idealjs/stack/node'
 
 const root = process.cwd()
 const config = defineConfig({
-  inputs: [{ name: 'app', path: 'src/app.ts' }],
+  inputs: [
+    { name: 'page', path: 'src/pages/index.html' },
+    { name: 'app', path: 'src/app.ts' },
+  ],
   dist: 'dist/sdk',
   alias: { '@/': 'src/' },
   fs: nodeFs(),

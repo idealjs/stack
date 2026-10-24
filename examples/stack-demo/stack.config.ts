@@ -3,7 +3,10 @@ import { bundle, minify } from '@idealjs/stack/builtins'
 import { nodeFs } from '@idealjs/stack/node'
 
 export default defineConfig({
-  inputs: [{ name: 'app', path: 'src/app.ts' }],
+  inputs: [
+    { name: 'page', path: 'src/pages/index.html' },
+    { name: 'app', path: 'src/app.ts' },
+  ],
   dist: 'dist/esm',
   alias: {
     '@/': 'src/',
