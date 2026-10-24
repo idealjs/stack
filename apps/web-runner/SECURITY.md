@@ -8,7 +8,7 @@
 - iframe 只有 `sandbox="allow-scripts"`。严禁 `allow-same-origin`（把框内文档拉回宿主源，
   DOM 遍历即击穿全部隔离）、`allow-top-navigation`、`allow-popups`、`allow-forms`、
   `allow-modals`——沙箱里的代码只许算与说，不许动宿主。
-- 宿主 ↔ 运行时唯一通道是 postMessage。消息显式构造、带版本字段 `{ v: 1, type: ... }`；
+- 宿主 ↔ 运行时唯一通道是 postMessage。消息显式构造、带版本字段 `{ v: 2, type: ... }`；
   宿主对每条消息双重校验——来源（`event.source` 对上当前 iframe 的 contentWindow）与
   结构（`isRuntimeMessage`），不认识的一律丢弃。
 - 运行时文档必须与宿主**特意分开、非同源部署**：iframe 若与宿主同源，框内用户代码一旦
@@ -17,7 +17,7 @@
   拿不到宿主任何数据、存储全禁；读 `parent.location` 抛 SecurityError 是自证，ready
   消息带 `parentBlocked`）；第二道是跨源 src 本身：将来 sandbox 属性若被误删或放宽，
   浏览器同源策略仍把框内文档挡在宿主源之外——同源部署则两道一起丢。独立源 dev 为
-  第二端口 5174（`vite.runtime.config.ts`），生产为另一域名静态托管；宿主以
+  第二端口 5174（`scripts/serve.mjs` 静态服务器），生产为另一域名静态托管；宿主以
   `VITE_WEB_RUNNER_ORIGIN` 指向它。
 
 ## 外部访问：code-server 反向代理下的双入口形态
@@ -32,30 +32,33 @@
   第二道防线在该入口不存在，隔离只剩 sandbox 剥源一道（opaque origin 仍成立，框内
   代码依旧拿不到宿主数据）。此入口是为远程开发便利而设，**不是**跨源能力的验证场所；
   验证跨源请走端口子域名入口。
-- 沙箱运行时：`https://code.idealjs.com/absproxy/5174/`（src 形态）。dev:runtime 经
-  `transformIndexHtml`（order post、整文替换）返回现场组装产物——`/@vite/client` 注入与
-  script 外置被同一钩子的整文替换一并消灭，路径匹配/base 处理交还 vite 原生
-  （`/` 302 到 base）（注入 `/@vite/client` 与外置 script 恰是
-  鉴权链下沙箱内子资源 401 的根源，见下），文档自包含、唯一网络请求是 iframe 文档导航
-  （父页面发起、cookie 可达）；改运行时文档刷新即生效（mtime 缓存，无需重构建）。**经 code-server 鉴权链时必须如此**：
-  `sandbox="allow-scripts"` 把运行时文档剥成 opaque origin，浏览器 SameSite 规则下
-  opaque origin 文档发起的子资源请求不带 SameSite=Lax cookie（code-server 会话正是
-  Lax），任何外部子资源必 401；而 iframe 文档导航由父页面发起、cookie 可达，故
-  「文档能加载、子资源全挂」（2026-10 带密码实例复现实测：宿主上下文 fetch 同一 URL
-  200、沙箱内 401；原文直出后 src 形态全通——握手、隔离自证、esbuild 构建、html 预览）。
+- 沙箱运行时：`https://code.idealjs.com/absproxy/5174/`（src 形态）。运行时文档由
+  stack 构建＋inlineScript 内联为自包含单文件（`dist-runtime/index.html`，零工具注入、
+  零外置 script），`scripts/serve.mjs` 静态直出——路径匹配/base 处理不存在（文档只认
+  根路径），改运行时源文件由 `stack --watch` 重建、刷新即生效。**经 code-server 鉴权链时
+  仍须保持文档自包含**：`sandbox="allow-scripts"` 把运行时文档剥成 opaque origin，浏览器
+  SameSite 规则下 opaque origin 文档发起的子资源请求不带 SameSite=Lax cookie（code-server
+  会话正是 Lax），任何外部子资源必 401；而 iframe 文档导航由父页面发起、cookie 可达。
+  **wasm 是自包含边界的唯一例外**：esbuild-wasm 二进制无法内联进文本 doc，运行时初始化时
+  fetch 同源 `/esbuild.wasm`——此请求同样受 opaque-origin 无 cookie 约束，在 code-server
+  鉴权链的运行时位（absproxy 与端口子域名的 5174）会 401，demo 构建将响亮报错（输出面板
+  可见）；不受影响的位：e2e（localhost:5175，无鉴权）、生产（独立域名静态托管，wasm 由
+  `build:runtime` 复制进 dist）、srcdoc（wasm 走教程源，见下）。恢复路径：给运行时静态
+  服务器挂无鉴权域，或 wasm 以同源匿名可读位部署。
   该入口下运行时与宿主同源（origin 不含路径），同源告警如实亮红，隔离只剩 sandbox
   一道——与 srcdoc 等强度。跨源 src ＋ 子资源形态只在无 cookie 鉴权的运行时位成立：
-  e2e（localhost:5175，同为现场组装）、生产（独立域名静态托管 `dist-runtime/` 单文件，
-  `build.ts` SSG 直产、与 dev 组装同构）。srcdoc（`VITE_WEB_RUNNER_ORIGIN` 置空）保留为
-  零网络兜底。
+  e2e（localhost:5175）、生产（独立域名静态托管 `dist-runtime/`）。srcdoc
+  （`VITE_WEB_RUNNER_ORIGIN` 置空）保留为兜底——doc 本体零网络，但沙箱内构建仍需
+  教程源提供 `/esbuild.wasm`（教程 vite 中间件映射，CORS 全开）。
 
 教程站站内链接一律相对形态（`./xxx.html`）：根部署（本地、子域名、SSG 生产）与前缀
 部署（absproxy）双兼容；`e2e/pages.spec.ts` 的 href 选择器同步为相对形态。
 
 配置接缝：`apps/tutorial/.env.development` 的 `VITE_WEB_RUNNER_ORIGIN`（置空 =
-srcdoc；设运行时位 = 跨源 src，仅限无 cookie 鉴权的位）与根 `package.json` dev 脚本注入的
-`TUTORIAL_BASE=/absproxy/5173`、`WEB_RUNNER_BASE=/absproxy/5174`（运行时 vite
-base）。教程站与运行时的 `allowedHosts` 均含 `code.idealjs.com`（代理透传保留 Host）。
+srcdoc；设运行时位 = 跨源 src，仅限无 cookie 鉴权的位）、根 `package.json` dev 脚本注入的
+`TUTORIAL_BASE=/absproxy/5173` 与运行时静态服务器端口（默认 5174，`--port` 覆盖）。
+教程站 `allowedHosts` 含 `code.idealjs.com`（代理透传保留 Host）；运行时是自持静态
+服务器，无 Host 假设。
 e2e 栈（5175）不设这些 env，base 默认 `/`、运行时位构建时注入，契约不受影响。
 
 ## 持久化 XSS——存储放宽阶段（allow-same-origin）的头号风险
@@ -100,37 +103,40 @@ no-store`，作为「宿主页将来若开 COEP」的嵌入保险——当前教
 作用，2026-10 移除。**将来回补提示**：若某宿主页启用 `COEP: require-corp`（如重启
 WebContainer 路线），跨源嵌入要求框内文档自身也带 COEP require-corp（仅 CORP 不够），
 缺头浏览器以 `ERR_BLOCKED_BY_RESPONSE` 拒装（框成 chrome-error 页、协议静默死）——届时
-在 `vite.config.ts` 的 dev 组装钩子与 preview/生产托管处加回同名头即可；
+在 `scripts/serve.mjs` 的响应头与生产静态托管处加回同名头即可；
 `no-store` 则防 304 沿用旧缓存条目的响应头（修头后老标签页依旧拿旧头被拒）。
+serve.mjs 现带 `Cache-Control: no-store`（watch 热更即时可见）。
 
 ## 运行时文档「一份原文、两条路」
 
-web-runner 包（`apps/web-runner/`，无 React 依赖）＝纯运行时应用：根 `index.html`（`<script src="./runtime/main.ts">` 入口标签即组装锚点——composeRuntimeDoc 对已知标签做精确串替换为内联产物（无正则、标签缺失即抛错）——esbuild 无 HTML 入口能力、亦无现成单文件工具，精确串替换是不引入重型依赖下的最小组装原语）＋ `runtime/` 侧枝（`main.ts` 主干两行引导：装监听→报到；
-`types.ts` 协议常量与消息类型、`outbound.ts` 出站通道、`format.ts` 值→文本、
-`execute.ts` 执行核心、`listeners.ts` 挂接装置集中）。原文不是自包含单文件——两条路各自现场把它 bundle 成
-自包含文档：
+web-runner 包（`apps/web-runner/`，无 React 依赖）＝纯运行时应用：根 `index.html`
+（`<script src="./runtime/main.ts">` 入口标签）＋ `runtime/` 侧枝（`main.ts` 主干两行
+引导：装监听→报到；`types.ts` 协议常量与消息类型、`outbound.ts` 出站通道、`format.ts`
+值→文本、`execute.ts` 执行核心、`project.ts` demo 构建引擎（内嵌 stack SDK 驱动）、
+`sdk.ts` SDK 桥接面、`listeners.ts` 挂接装置集中）。供给层由 stack 承担
+（`stack.config.ts`：html 入口＋`sdkEmbed()`/`imports()`/`inlineScript()`）：
+imports 声明 runtime 闭包、inlineScript 把闭包内联为单个 module script、sdkEmbed 把
+stack SDK 浏览器面（`runtime/sdk-entry.ts` 经 esbuild-wasm 打包，零外部依赖）内联在
+runtime 之前——产物 `dist-runtime/index.html` 即自包含单文件 doc（无任何 src= 外链
+script），两条路消费同一份产物：
 
-- **src 路（主形态）**：`dev:runtime` 的 `dev 组装钩子` 中间件在 dev 服务器侧用
-  esbuild-wasm 构建 `main.ts` 并把产物内联回 HTML（mtime 缓存，改文件刷新即生效），
-  跳过 vite dev 的 HTML 转换——`/@vite/client` 注入与 script 外置正是鉴权链下沙箱内
-  子资源 401 的根源，自包含后唯一网络请求是 iframe 文档导航（父页面发起、cookie
-`build:runtime` = `vite build`：`emitComposedDoc` 插件在 generateBundle（enforce post，
-  最后执行）清空 rollup 产物、直发 `composeRuntimeDoc` 单文件到 `dist-runtime/index.html`，
-  与 dev 现场组装字节级同构；rollup 一趟的打包结果被弃用属可接受成本（5 模块、亚秒级），
-  换取标准命令面与 preview 复活。
-  独立域名。
-- **srcdoc 路（兜底）**：宿主经 `@stack/web-runner/vite` 插件的 virtual module（`virtual:web-runner-doc`）
-  拿到同一份现场 bundle 的自包含文档字符串再赋 `srcDoc`——零网络；这也是宿主消费
-  web-runner 的唯一显式接缝（跨包不裸引文件路径）。
+- **src 路（主形态）**：`scripts/serve.mjs`（node:http 零依赖静态服务器）直出
+  `dist-runtime/`，`/` → index.html、`/esbuild.wasm` → node_modules 映射（watch 重建
+  清掉复制件时的兜底）；`stack --watch` 重建后刷新即生效。自包含 doc 的唯一常规网络
+  请求是 iframe 文档导航（父页面发起、cookie 可达）；wasm 例外与鉴权链边界见上节。
+- **srcdoc 路（兜底）**：宿主经 tutorial vite 配置内的 virtual module
+  （`virtual:web-runner-doc`）fs 读同一份 `dist-runtime/index.html` 赋 `srcDoc`——
+  doc 本体零网络（wasm 走教程源中间件）；文件缺失回退占位 doc 并 console.warn。
+  stack --watch 重建触发 vite watcher → 失效虚拟模块＋整页刷新。
 
-执行核心同为 Blob URL＋动态 `import()`（`@vite-ignore` 指令已随重构退场：main.ts 不再经
-vite dev 的 import-analysis，无任何工具需要它）。
+执行核心同为 Blob URL＋动态 `import()`。
 
-**暂定与后向接缝**：组装现存两处字符串操作——占位标记定点替换内联 script、virtual
-module 的 `export default ${JSON.stringify(...)}`——是「不引重型依赖」约束下的最小原语，
-暂定接受。后续方向：HTML 解析为可操作的 AST 数据结构（parse5 / node-html-parser 一类，
-树上节点替换取代字符串拼接、virtual module 走正规代码生成），待运行时文档结构复杂到
-字符串操作开始失控时再引入；当下引入属超前依赖。
+**暂定与后向接缝**：两处字符串操作——sdkEmbed 的入口标签定点替换（无正则、标签缺失
+即抛错）、virtual module 的 `export default ${JSON.stringify(...)}`——是「不引重型
+依赖」约束下的最小原语，暂定接受。后续方向：HTML 解析为可操作的 AST 数据结构
+（parse5 / node-html-parser 一类，树上节点替换取代字符串拼接、virtual module 走正规
+代码生成），待运行时文档结构复杂到字符串操作开始失控时再引入；当下引入属超前依赖。
+vite 供给层已退役（`vite.config.ts`/`vite-plugin.ts` 删除，本包不再依赖 vite）。
 
 ## 文件管理边界
 
@@ -138,32 +144,35 @@ module 的 `export default ${JSON.stringify(...)}`——是「不引重型依赖
 保证扁平工程、无目录；`esbuild.config.json` 是固定配置位，不可删，保证「运行」永远
 有配置可读（删除守卫＋新建重名检查双保险）。
 
-## 构建管线（esbuild-wasm）
+## 构建管线（沙箱内嵌 stack 引擎）
 
-「运行」的执行语义是「工程打包产物」：点击运行先在组件侧（`apps/tutorial/src/playground/`（宿主组件，React）内
-`build.ts`）用 esbuild-wasm 把整个工程构建成单份 JS，产物仍只经 run 消息 → Blob URL +
-`import()` 唯一通道进沙箱——执行通道唯一纪律不变，运行时文档保持零依赖纯执行器
-（不装 wasm、不做转译，「一份原文两条路」原样）。
+「运行」的执行语义是「工程打包产物」：run 消息（协议 v2）携带 demo **源文件**＋入口＋
+define（esbuild.config.json 的 entry/html 字段宿主校验后直传），沙箱内的 runtime 用
+**内嵌的 stack SDK**（`runtime/project.ts`）完成构建：`memoryFs(demo files)` →
+`build({ inputs, fs, hooks: [imports(), bundle()] })` → 单文件 wrapped bundle → 既有
+执行核心（Blob URL + `import()`）——执行通道唯一纪律不变。esbuild-wasm 初始化走
+`initStack('/esbuild.wasm')`（wasm 由运行时所在源提供，鉴权链边界见上节）。
 
-构建放在组件侧而非沙箱内，理由三条：① srcdoc 退化路不需要运行时源服务器常驻
-（沙箱内构建必须先 fetch esbuild 产物，零常驻进程的 e2e 性质随之外失）；② 构建诊断
-（配置校验错、esbuild 错误/警告）由宿主直接渲染，协议 v1 零新增消息；③ 宿主侧校验
-发生在任何代码进入沙箱之前，拒绝路径零执行成本。
+宿主仍保留的是**配置校验与拒绝**（发生在任何代码进入沙箱之前，拒绝路径零执行成本）：
+解析＋字段白名单（entry/target/format/minify/define）＋入口/入口文档存在性检查；
+配置内容永不进任何求值通道——它不是代码，也不允许变成代码。
 
-配置文件 `esbuild.config.json` 是声明式 JSON，遵守读取即不可信：解析＋字段白名单
-（entry/target/format/minify/define）校验通过后才喂 `esbuild.build`，配置内容永不进
-任何求值通道——它不是代码，也不允许变成代码（要可执行配置就得在沙箱里求值再回传，
-那条路线被此设计排除）。
+语义变化如实记录：构建从宿主 esbuild-wasm 虚拟 FS 打包改为沙箱内 stack 引擎
+（preserve-ESM＋wrapped 单文件）；config 的 `target`/`format`/`minify` 在 stack 引擎下
+失效（保留白名单兼容、不生效）；`define` 降级为**整词文本替换**（标识符边界的正则
+近似——字符串与属性名里的同名标识符会被误替换；原 esbuild 语义是构建期表达式替换），
+由 runtime 在喂 memoryFs 前应用。构建诊断经既有 error 消息回传（协议零新增消息）。
 
-本轮明确不支持的边界（构建期直接报错，不静默）：裸说明符导入（react 等外部依赖）、
-JSX 语法；相对导入由虚拟 FS 插件解析（扁平工程、可省略扩展名）。
+本轮明确不支持的边界（响亮报错，不静默）：裸说明符导入（stack 判 external，wrapped
+bundle 里的原生 import 在 Blob 执行时失败并回传）；相对导入由 stack 内存 FS 解析
+（扁平工程、可省略扩展名，alias 不适用）。
 
 ## 入口文档预览（config 的 html 字段）
 
 `html` 字段声明入口文档（如 index.html）：宿主侧 DOMParser 解析该文件、剥掉全部
 `<script>` 元素，把 body 注入沙箱文档的 body——用户 HTML 只在沙箱文档内生效，宿主
 DOM 接触不到它。剥 script 是「执行通道唯一」在文档侧的延伸：页面里的脚本只许经
-esbuild 构建通道进沙箱；内联事件属性（onclick 等）保留——即便触发也仍在沙箱 origin
+stack 构建通道进沙箱；内联事件属性（onclick 等）保留——即便触发也仍在沙箱 origin
 内执行，出不了框。每轮执行先重置沙箱 body（有则注入、无则清空），每次运行都是全新
 文档；html 模式下沙箱 iframe 本体即为预览框（同一个文档同时承担 DOM 渲染与
 console/异常回传），非 html 模式保持 0×0 退场。
