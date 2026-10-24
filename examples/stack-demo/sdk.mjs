@@ -1,14 +1,16 @@
 import { mkdirSync, writeFileSync } from 'node:fs'
 import { dirname, resolve } from 'node:path'
-import { build, defineConfig, minify } from '@idealjs/stack'
-import { nodeHooks } from '@idealjs/stack/node'
+import { build, bundle, defineConfig, minify } from '@idealjs/stack'
+import { nodeFs } from '@idealjs/stack/node'
 
 const root = process.cwd()
 const config = defineConfig({
-  inputs: { app: 'src/app.ts', tool: 'src/tool.ts' },
+  inputs: [{ name: 'app', path: 'src/app.ts' }],
   dist: 'dist/sdk',
   alias: { '@/': 'src/' },
-  hooks: [nodeHooks(root), minify({ dir: 'dist/sdk-min' })],
+  fs: nodeFs(),
+  load: async (ctx, id) => ctx.fs.readFile(id),
+  hooks: [minify({ dir: 'dist/sdk-min' }), bundle({ entry: 'app', dir: 'dist/sdk-bundle' })],
 })
 
 const result = await build(config)

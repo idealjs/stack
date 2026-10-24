@@ -70,7 +70,7 @@ flowchart LR
   无内联内容的 demand 都经它。**必须使用 ctx 提供的 fs 接口**；文档显式标注：
   **不建议在 load 里直接 `import fs`**——直接平台 API 是平台锁定与合并冲突的源头
   （带平台假设的 load 无法跨宿主复用），注入 fs 下跨平台仅需换 `fs` 实现。
-- `lower(id, artifact, ctx)`：**非纯函数**。链式产物集累积（每 hook 拿前一环产物集、
+- `lower(id, artifacts, ctx)`：**非纯函数**。链式产物集累积（每 hook 拿前一环产物集、
   返回新产物集），一化为 0..n 工件；0＝消费终结，恒等合法。**lower 会调用 ctx 的
   输出函数（ctx.output）把转化结果存储进产出**；产物带内容作为新 demand 回到
   resolve——图在 lower 处分叉、在 import 处增长，全程需求递归，无全局循环。

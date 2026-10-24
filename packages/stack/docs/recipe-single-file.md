@@ -12,11 +12,11 @@ js 脚本**——他的 hook 应该长什么样？流程是什么？
 ```ts
 {
   name: 'single-file',
-  lower: async (ctx, id, artifact) => {
-    if (id !== entryId) return [artifact]          // 非入口恒等返回（按 id 自筛纪律）
-    const imports = ctx.lowerImport(artifact.code) // ['./b', './c']（external 由 demand 跳过）
+  lower: async (id, artifacts, ctx) => {
+    if (id !== entryId) return artifacts           // 非入口恒等返回（按 id 自筛纪律）
+    const imports = ctx.lowerImport(artifacts[0].code) // ['./b', './c']（external 由 demand 跳过）
     const deps = await ctx.demand(imports)          // 传递闭包终态：依赖先行、按 id 去重
-    const code = [...deps, artifact]                // 依赖先行，入口最后
+    const code = [...deps, artifacts[0]]              // 依赖先行，入口最后
       .map((m) => stripLocalImports(m.code))        // 剥内部 import；external 保留
       .join('\n')
     return [{ path: 'bundle.js', code }]            // 覆盖入口终态为合并体（一化为一）
