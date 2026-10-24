@@ -1,7 +1,12 @@
-import { transform } from 'esbuild-wasm'
 import { OutputChannel } from './channel.ts'
 import type { StackConfig, StackFs } from './config.ts'
 import { CycleDetector } from './cycle.ts'
+import type {
+  ModuleEntry,
+  QueueTask,
+  RenderArtifact,
+  ResolvedArtifactImport,
+} from './engine-types.ts'
 import type {
   Artifact,
   DeriveHook,
@@ -19,7 +24,8 @@ import type {
   WatchHook,
 } from './hooks.ts'
 import { hookProducer } from './hooks.ts'
-import { parseModuleImports, parseTopLevelNames } from './parse.ts'
+import { createLoading, type Loading } from './loading.ts'
+import { parseModuleImports } from './parse.ts'
 import {
   dirnamePath,
   isRelativeSpecifier,
@@ -27,41 +33,11 @@ import {
   moduleCandidates,
   normalizePath,
 } from './pathUtil.ts'
-
-export interface ResolvedArtifactImport {
-  specifier: string
-  start: number
-  end: number
-  declarationStart: number
-  declarationEnd: number
-  resolvedId: string | null
-}
-
-export interface RenderArtifact {
-  path?: string
-  code: string
-  imports: ResolvedArtifactImport[]
-}
-
-export interface ModuleEntry {
-  id: string
-  pathAnchor: string
-  promise: Promise<FinalModule> | null
-  final: FinalModule | null
-  artifacts: RenderArtifact[]
-  redirect: string | null
-}
-
-interface QueueTask {
-  id: string
-  resolve: (module: FinalModule) => void
-  reject: (error: unknown) => void
-}
-
-interface CleanedPart {
-  code: string
-  baseId: string
-}
+import {
+  type ResourceRuntime,
+  demandFrom as resourcesDemandFrom,
+  mergeFrom as resourcesMergeFrom,
+} from './resources.ts'
 
 const applyAlias = (
   source: string,
@@ -74,13 +50,6 @@ const applyAlias = (
     }
   }
   return { source, aliased: false }
-}
-
-const loaderForId = (id: string): 'ts' | 'tsx' | 'js' | 'jsx' => {
-  if (id.endsWith('.tsx')) return 'tsx'
-  if (id.endsWith('.jsx')) return 'jsx'
-  if (id.endsWith('.ts') || id.endsWith('.mts')) return 'ts'
-  return 'js'
 }
 
 export class DemandEngine {
@@ -96,8 +65,8 @@ export class DemandEngine {
   readonly #config: StackConfig
   readonly #registry = new Map<string, ModuleEntry>()
   readonly #redirects = new Map<string, string>()
-  readonly #loaded = new Map<string, string>()
-  readonly #stripped = new Map<string, string>()
+  readonly #loading: Loading
+  readonly #runtime: ResourceRuntime
   readonly #queue: QueueTask[] = []
   readonly #idleWaiters: (() => void)[] = []
   readonly #resolveContext: ResolveContext
@@ -123,6 +92,16 @@ export class DemandEngine {
       (hook): hook is StackHook & { derive: DeriveHook } => hook.derive !== undefined,
     )
     this.readOnlyFs = { readFile: (path) => this.#requireFs().readFile(path) }
+    this.#loading = createLoading({ fs: this.readOnlyFs, load: this.#config.load })
+    this.#runtime = {
+      ensureLifecycle: (id) => this.ensureLifecycle(id),
+      resolveDemand: (source, importer) => this.resolveDemand(source, importer),
+      followRedirects: (id) => this.followRedirects(id),
+      loading: this.#loading,
+      detector: this.detector,
+      commitMerge: (merged, pathAnchor, ids, artifacts) =>
+        this.#commitMerge(merged, pathAnchor, ids, artifacts),
+    }
     this.#resolveContext = { root: this.root }
     this.channel = new OutputChannel({
       watchHooks: this.watchHooks,
@@ -159,9 +138,7 @@ export class DemandEngine {
     for (const hook of this.resolveHooks) {
       const result = await hook.resolve(source, importer, this.#resolveContext)
       if (result != null) {
-        if (result.content !== undefined && !this.#loaded.has(result.id)) {
-          this.#loaded.set(result.id, result.content)
-        }
+        if (result.content !== undefined) this.#loading.seed(result.id, result.content)
         return { kind: 'module', id: result.id }
       }
     }
@@ -169,11 +146,11 @@ export class DemandEngine {
       const base = rawSource.startsWith('/')
         ? rawSource
         : joinPath(dirnamePath(importer), rawSource)
-      const id = await this.#probe(moduleCandidates(base))
+      const id = await this.#loading.probe(moduleCandidates(base))
       if (id !== null) return { kind: 'module', id }
       throw new Error(`[stack] 无法解析导入 "${rawSource}"（来自 ${importer}）`)
     }
-    const rootRelative = await this.#probe(moduleCandidates(joinPath(this.root, source)))
+    const rootRelative = await this.#loading.probe(moduleCandidates(joinPath(this.root, source)))
     if (rootRelative !== null) return { kind: 'module', id: rootRelative }
     if (options.entry === true || aliased) {
       throw new Error(`[stack] 无法解析导入 "${rawSource}"（来自 ${importer}，root=${this.root}）`)
@@ -211,97 +188,12 @@ export class DemandEngine {
     return current
   }
 
-  async demandFrom(requester: string, specifiers: string[]): Promise<FinalModule[]> {
-    const emitted = new Set<string>()
-    const order: FinalModule[] = []
-    const walk = async (id: string): Promise<void> => {
-      const mod = await this.ensureLifecycle(id)
-      for (const ref of mod.imports) {
-        if (ref.id === null) continue
-        this.detector.addEdge(mod.id, ref.id)
-        if (!emitted.has(ref.id)) await walk(ref.id)
-      }
-      if (!emitted.has(mod.id)) {
-        emitted.add(mod.id)
-        order.push(mod)
-      }
-    }
-    for (const specifier of specifiers) {
-      const resolution = await this.resolveDemand(specifier, requester)
-      if (resolution.kind === 'external') continue
-      this.detector.addEdge(requester, resolution.id)
-      if (!emitted.has(resolution.id)) await walk(resolution.id)
-    }
-    return order
+  demandFrom(requester: string, specifiers: string[]): Promise<FinalModule[]> {
+    return resourcesDemandFrom(this.#runtime, requester, specifiers)
   }
 
-  async mergeFrom(requester: string, specifiers: string[], name?: string): Promise<FinalModule> {
-    const ids: string[] = []
-    for (const specifier of specifiers) {
-      const resolution = await this.resolveDemand(specifier, requester)
-      if (resolution.kind === 'external') {
-        throw new Error(`[stack] merge 不能合并 external 说明符："${specifier}"`)
-      }
-      const target = this.followRedirects(resolution.id)
-      if (!ids.includes(target)) ids.push(target)
-    }
-    if (ids.length === 0) throw new Error('[stack] merge 需要至少一个可解析的模块说明符')
-    const mergedId = name ?? `merged:${ids.join('+')}`
-    const parts: CleanedPart[] = []
-    for (const id of ids) {
-      const raw = await this.#loadForLifecycle(id)
-      const stripped = await this.#strip(id, raw)
-      const cleaned = await this.#removeImportsInto(stripped, id, new Set(ids))
-      parts.push({ code: cleaned, baseId: id })
-    }
-    const collision = this.#topLevelCollision(parts.map((part) => part.code))
-    if (collision !== null) {
-      throw new Error(
-        `[stack] merge 顶层标识符冲突："${collision}"（${mergedId}）——请先重构去重或显式改名`,
-      )
-    }
-    let mergedCode = ''
-    const imports: ImportRef[] = []
-    const deps: string[] = []
-    const resolvedImports: ResolvedArtifactImport[] = []
-    for (const part of parts) {
-      const offset = mergedCode.length
-      for (const parsed of parseModuleImports(part.code)) {
-        const resolution = await this.resolveDemand(parsed.source, part.baseId)
-        const resolvedId = resolution.kind === 'module' ? resolution.id : null
-        resolvedImports.push({
-          specifier: parsed.source,
-          start: parsed.start + offset,
-          end: parsed.end + offset,
-          declarationStart: parsed.declarationStart + offset,
-          declarationEnd: parsed.declarationEnd + offset,
-          resolvedId,
-        })
-        if (resolvedId !== null && !deps.includes(resolvedId)) deps.push(resolvedId)
-        imports.push({ specifier: parsed.source, id: resolvedId })
-      }
-      mergedCode = `${mergedCode}${part.code}\n`
-    }
-    const merged: FinalModule = { id: mergedId, code: mergedCode, deps, imports }
-    const mergedEntry: ModuleEntry = {
-      id: mergedId,
-      pathAnchor: ids[0],
-      promise: null,
-      final: merged,
-      artifacts: [{ code: mergedCode, imports: resolvedImports }],
-      redirect: null,
-    }
-    this.#registry.set(mergedId, mergedEntry)
-    for (const id of ids) {
-      const entry = this.#registry.get(id)
-      if (entry !== undefined) {
-        entry.final = merged
-        entry.redirect = mergedId
-      }
-      this.#redirects.set(id, mergedId)
-    }
-    this.detector.contract(ids, mergedId)
-    return merged
+  mergeFrom(requester: string, specifiers: string[], name?: string): Promise<FinalModule> {
+    return resourcesMergeFrom(this.#runtime, requester, specifiers, name)
   }
 
   lowerContext(moduleId: string, hookName: string): LowerContext {
@@ -401,8 +293,8 @@ export class DemandEngine {
     const entry = this.#registry.get(id)
     if (entry === undefined) throw new Error(`[stack] 内部错误：模块未注册：${id}`)
     if (entry.final !== null) return entry.final
-    const raw = await this.#loadForLifecycle(id)
-    const stripped = await this.#strip(id, raw)
+    const raw = await this.#loading.loadForLifecycle(id)
+    const stripped = await this.#loading.strip(id, raw)
     let artifacts: Artifact[] = [{ code: stripped }]
     for (const hook of this.moduleLowerHooks) {
       const ctx = this.lowerContext(id, hook.name)
@@ -450,83 +342,29 @@ export class DemandEngine {
     return final
   }
 
-  async #probe(candidates: string[]): Promise<string | null> {
-    for (const candidate of candidates) {
-      let content: string | null | undefined = null
-      try {
-        content = await this.#loadViaLoader(candidate)
-      } catch {
-        content = null
-      }
-      if (typeof content === 'string') {
-        if (!this.#loaded.has(candidate)) this.#loaded.set(candidate, content)
-        return candidate
-      }
-    }
-    return null
-  }
-
-  #loadViaLoader(id: string): string | null | undefined | Promise<string | null | undefined> {
-    const loader = this.#config.load
-    if (loader !== undefined) return loader({ fs: this.readOnlyFs }, id)
-    return this.readOnlyFs.readFile(id)
-  }
-
-  async #loadForLifecycle(id: string): Promise<string> {
-    const cached = this.#loaded.get(id)
-    if (cached !== undefined) return cached
-    let content: string | null | undefined
-    try {
-      content = await this.#loadViaLoader(id)
-    } catch {
-      throw new Error(`[stack] 无法加载模块：${id}`)
-    }
-    if (typeof content !== 'string') throw new Error(`[stack] 无法加载模块：${id}`)
-    this.#loaded.set(id, content)
-    return content
-  }
-
-  async #strip(id: string, code: string): Promise<string> {
-    const cached = this.#stripped.get(id)
-    if (cached !== undefined) return cached
-    const result = await transform(code, {
-      loader: loaderForId(id),
-      format: 'esm',
-      target: 'esnext',
+  #commitMerge(
+    merged: FinalModule,
+    pathAnchor: string,
+    ids: string[],
+    artifacts: RenderArtifact[],
+  ): void {
+    this.#registry.set(merged.id, {
+      id: merged.id,
+      pathAnchor,
+      promise: null,
+      final: merged,
+      artifacts,
+      redirect: null,
     })
-    this.#stripped.set(id, result.code)
-    return result.code
-  }
-
-  async #removeImportsInto(code: string, baseId: string, ids: Set<string>): Promise<string> {
-    const parsed = parseModuleImports(code)
-    const doomed: { start: number; end: number }[] = []
-    for (const entry of parsed) {
-      if (entry.declarationStart === entry.start && entry.declarationEnd === entry.end) continue
-      const resolution = await this.resolveDemand(entry.source, baseId)
-      if (resolution.kind !== 'module') continue
-      if (!ids.has(this.followRedirects(resolution.id))) continue
-      doomed.push({ start: entry.declarationStart, end: entry.declarationEnd })
-    }
-    doomed.sort((left, right) => right.start - left.start)
-    let cleaned = code
-    for (const range of doomed) {
-      cleaned = cleaned.slice(0, range.start) + cleaned.slice(range.end)
-    }
-    return cleaned
-  }
-
-  #topLevelCollision(parts: string[]): string | null {
-    const seen = new Map<string, number>()
-    for (const part of parts) {
-      for (const name of new Set(parseTopLevelNames(part))) {
-        seen.set(name, (seen.get(name) ?? 0) + 1)
+    for (const id of ids) {
+      const entry = this.#registry.get(id)
+      if (entry !== undefined) {
+        entry.final = merged
+        entry.redirect = merged.id
       }
+      this.#redirects.set(id, merged.id)
     }
-    for (const [name, count] of seen) {
-      if (count > 1) return name
-    }
-    return null
+    this.detector.contract(ids, merged.id)
   }
 
   #requireFs(): StackFs {

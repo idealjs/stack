@@ -1,4 +1,4 @@
-import type { RenderArtifact } from './engine.ts'
+import type { RenderArtifact } from './engine-types.ts'
 import type { EmittedFile } from './hooks.ts'
 import { dirnamePath, relativePath, replaceExtension, toSpecifier } from './pathUtil.ts'
 
