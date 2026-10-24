@@ -1,5 +1,5 @@
 import { transform } from 'esbuild-wasm'
-import type { StackHook } from './hooks.ts'
+import type { StackHook, WatchHook } from './hooks.ts'
 
 export interface MinifyOptions {
   from?: string
@@ -11,12 +11,12 @@ export function minify(options: MinifyOptions): StackHook {
   const from = options.from ?? 'default'
   const name = options.name ?? 'min'
   if (options.dir === undefined) throw new Error('[stack] minify 插件需要 dir 指定产物目录')
-  return {
+  const hook: WatchHook = {
     name: `minify:${name}`,
-    async buildEnd(ctx) {
-      const source = ctx.requireOutput(from)
+    watch: [from],
+    async lower(ctx, output) {
       const files = []
-      for (const file of source.files) {
+      for (const file of output.files) {
         if (!file.path.endsWith('.js')) {
           files.push(file)
           continue
@@ -32,4 +32,5 @@ export function minify(options: MinifyOptions): StackHook {
       ctx.output({ name, dir: options.dir, files })
     },
   }
+  return hook
 }

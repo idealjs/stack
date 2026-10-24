@@ -8,6 +8,8 @@ export {
   type StackLoader,
 } from './core/config.ts'
 export { memoryFs } from './core/memoryFs.ts'
+export { type MinifyOptions, minify } from './core/minify.ts'
+export { type BundleOptions, bundle, moduleRuntime, stronglyConnected } from './core/bundle.ts'
 export { CycleError } from './core/cycle.ts'
 export type {
   Artifact,

@@ -1,10 +1,10 @@
-import { existsSync, type FSWatcher, mkdirSync, rmSync, watch, writeFileSync } from 'node:fs'
-import { dirname as nodeDirname, resolve as resolvePath } from 'node:path'
+import { existsSync, type FSWatcher, rmSync, watch } from 'node:fs'
+import { resolve as resolvePath } from 'node:path'
 import { pathToFileURL } from 'node:url'
 import { type BuildResult, build, type StackConfig } from '../index.ts'
-import { nodeHooks } from './fsPlugin.ts'
+import { nodeFs } from './fs.ts'
 
-const VERSION = '0.1.0'
+const VERSION = '0.2.0'
 const WATCH_DEBOUNCE_MS = 150
 const IGNORED_WATCH_SEGMENTS = new Set(['node_modules', 'dist', '.git'])
 
@@ -45,13 +45,14 @@ async function loadConfig(configPath: string): Promise<StackConfig> {
   return config
 }
 
-const withNodeHooks = (config: StackConfig): StackConfig => ({
+const withNodeFs = (config: StackConfig): StackConfig => ({
   ...config,
-  hooks: [nodeHooks(config.root ?? '.'), ...(config.hooks ?? [])],
+  fs: config.fs ?? nodeFs(),
 })
 
-function writeOutputs(root: string, result: BuildResult): void {
-  const rootAbsolute = resolvePath(root)
+async function writeOutputs(config: StackConfig, result: BuildResult): Promise<void> {
+  const fs = config.fs ?? nodeFs()
+  const rootAbsolute = resolvePath(config.root ?? '.')
   for (const output of result.outputs) {
     const outputRoot = resolvePath(rootAbsolute, output.dir)
     if (outputRoot === rootAbsolute) {
@@ -59,30 +60,30 @@ function writeOutputs(root: string, result: BuildResult): void {
     }
     rmSync(outputRoot, { recursive: true, force: true })
     for (const file of output.files) {
-      const target = resolvePath(outputRoot, file.path)
-      mkdirSync(nodeDirname(target), { recursive: true })
-      writeFileSync(target, file.code)
+      await fs.writeFile(resolvePath(outputRoot, file.path), file.code)
     }
   }
 }
 
 const byteLength = (code: string): number => new TextEncoder().encode(code).length
 
-function printSummary(result: BuildResult): void {
+function printSummary(config: StackConfig, result: BuildResult): void {
   const lines = result.outputs.map(
     (output) =>
       `${output.name} → ${output.dir}（${output.files.length} 个文件，${(
         output.files.reduce((total, file) => total + byteLength(file.code), 0) / 1000
       ).toFixed(2)} kB）`,
   )
-  lines.push(`构建完成：${result.moduleCount} 个模块，用时 ${result.durationMs}ms`)
+  lines.push(
+    `构建完成：${config.inputs.length} 个输入，${result.moduleCount} 个模块，用时 ${result.durationMs}ms`,
+  )
   console.log(lines.join('\n'))
 }
 
 async function buildOnce(config: StackConfig): Promise<void> {
-  const result = await build(withNodeHooks(config))
-  writeOutputs(config.root ?? '.', result)
-  printSummary(result)
+  const result = await build(withNodeFs(config))
+  await writeOutputs(config, result)
+  printSummary(config, result)
 }
 
 async function runWatch(config: StackConfig): Promise<void> {
@@ -135,7 +136,7 @@ export async function runCLI(argv: string[]): Promise<void> {
     root: resolvePath(process.cwd(), userConfig.root ?? '.'),
   }
   console.log(
-    `stack v${VERSION}：${config.inputs.length} 个输入，规范产物 → ${config.dist ?? 'dist'}（插件可在 buildEnd 追加产出）`,
+    `stack v${VERSION}：${config.inputs.length} 个输入，规范产物 → ${config.dist ?? 'dist'}`,
   )
   if (options.watchMode) {
     await runWatch(config)
