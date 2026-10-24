@@ -1,6 +1,6 @@
 # 产出模型与插件循环
 
-`@idealjs/stack` 的产出协议权威记录。改 `core/build.ts`、`core/plugin.ts` 或任何钩子
+`@idealjs/stack` 的产出协议权威记录。改 `core/build.ts`、`core/hooks.ts` 或任何钩子
 语义前先读这份；本文与实现不一致时，先修实现或先修文档，不允许带着分歧合并。
 
 ## 单产出通道
@@ -30,7 +30,7 @@ export default defineConfig({
   ],
   dist: 'dist',
   alias: { '@/': 'src/' },
-  plugins: [minify({ dir: 'dist/min' })],
+  hooks: [minify({ dir: 'dist/min' })],
 })
 ```
 
@@ -49,18 +49,44 @@ export default defineConfig({
 3. **写盘滞后于全部产出**：所有插件跑完后宿主主循环才统一写盘——任何时刻「我输出了」
    都为真，default 与 min 最终并存落盘（`dist/` 与 `dist/min/`）。
 
-**顺序错误必须响亮**：读先前产出一律走 `ctx.requireOutput(name)`——找不到即抛错，列出
-全部现有产出并提示检查声明顺序（调度器为每个插件构造归属自身名字的 ctx，错误自带来源
-插件名）。`ctx.outputs` 裸 `find` 后静默跳过是插件作者的刻意选择而非默认路径。前置插件
-要求后序产出（如 A 取片段、C 通用解析而 A 声明在前）被允许——声明顺序即管线，协议不判
-定语义；代价由报错承担，修正方式就是调换声明。
+## 「修正前人产出」被无条件拒绝：最终步骤不可承诺
+
+允许后序插件覆盖先序产出（finalize 模式）的提议看似只需「派生追踪」保安全，实则
+败于语义：「final」是全称命题——「之后没有人再改」在开放链上永远无法证实。任何
+「我是最后一步」的标记都只是邀请下一个插件「我是最后最后一步」；webpack
+`processAssets` 的 stage 数字军备竞赛（插件互相 `±1` 插队）正是生态对「final 不可
+声明」的公开招供——谁也不敢声明终点，只能声明相对偏移。
+
+因此协议不做「有条件的覆盖」，而是无条件拒绝，且无逃生门：**修正前人产出的唯一
+合法形式是登记一份新产出**——修产出源重建（SDK 两次构建零负担），或以新名字登记
+衍生品并让消费者改引用。引用可以声明、兑现可以推迟（见声明资源的晚绑定），但已
+兑现的东西永不改变。**终态只属于构建会话：`seal()` 是全协议唯一的终态，它是引擎
+的，不是任何插件的。**
+
+## 声明资源
+
+插件与产出之间的关系是**声明**而非过程调用：声明「我需要 X」（`ctx.requireOutput`）、
+声明「我产出 Y」（`ctx.output`），引擎负责 join 与诊断。
+
+- **同步回合内**：读先前产出一律走 `ctx.requireOutput(name)`——资源缺失不是静默空读，
+  而是引擎诊断：列出全部现有产出、报出来源插件名、提示检查声明顺序（产出只对声明顺序
+  在后的插件可见）。前置插件声明后序产出（如 A 取片段、C 通用解析而 A 声明在前）被
+  允许——声明顺序即管线，协议不判定语义，代价由显式诊断承担，修正方式就是调换声明。
+  `ctx.outputs` 裸 `find` 后静默跳过是刻意选择而非默认路径。
+- **跨回合晚绑定（演进方向，未实现）**：「JS 产出需要引用 CSS 产出的 hash 文件名、CSS
+  又派生自 JS」这类互指环，靠符号引用拆解——输出内容允许按产出名的引用 token（如
+  `@@css`），JS 在模块期写入 token，CSS 插件照常登记产出，宿主写盘期做唯一一次
+  token→实际路径的展开（rollup 的 `emitFile` 句柄＋`getFileName`、webpack 的
+  `[contenthash]`＋manifest 同为此原理：引用与兑现分离，永远不需要 B 的内容来引用
+  B）。append-only 不破，环退化为声明＋兑现两步。触发条件：资产管线（CSS/HTML 入口）
+  启动时随协议扩展实现。
 
 ## 范本插件：minify
 
 内置 `minify({ from?, name?, dir })` 是「以前产出为输入、登记衍生产出」的完整范本：
 
 ```ts
-export function minify(options: { from?: string; name?: string; dir: string } = {}): StackPlugin {
+export function minify(options: { from?: string; name?: string; dir: string } = {}): StackHook {
   const from = options.from ?? 'default'
   return {
     name: 'minify',

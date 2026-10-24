@@ -1,4 +1,4 @@
-import type { StackPlugin } from './plugin.ts'
+import type { StackHook } from './hooks.ts'
 
 export interface StackInput {
   name: string
@@ -10,7 +10,7 @@ export interface StackConfig {
   inputs: StackInput[]
   dist?: string
   alias?: Record<string, string>
-  plugins?: StackPlugin[]
+  hooks?: StackHook[]
 }
 
 export function defineConfig<T extends StackConfig>(config: T): T {

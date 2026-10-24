@@ -5,10 +5,10 @@ import {
   moduleCandidates,
   normalizePath,
 } from '../src/core/pathUtil.ts'
-import type { BuildResult, EmittedOutput, StackConfig, StackPlugin } from '../src/index.ts'
+import type { BuildResult, EmittedOutput, StackConfig, StackHook } from '../src/index.ts'
 import { build, minify } from '../src/index.ts'
 
-export const memoryFsPlugin = (files: Record<string, string>): StackPlugin => ({
+export const memoryFsPlugin = (files: Record<string, string>): StackHook => ({
   name: 'memory-fs',
   resolveId(source, importer) {
     const base = isRelativeSpecifier(source)
@@ -136,7 +136,7 @@ let capturedOutputFn: ((spec: EmittedOutput) => void) | undefined
 
 const tick = (): Promise<void> => new Promise((resolve) => setTimeout(resolve, 0))
 
-const lateProducer: StackPlugin = {
+const lateProducer: StackHook = {
   name: 'late-producer',
   transform(_id, code) {
     capturedOutputFn?.({ name: 'late', dir: 'dist/late', files: [] })
@@ -158,7 +158,7 @@ export const SCENARIOS: Scenario[] = [
       ],
       dist: 'dist/esm',
       alias: { '@/': 'src/' },
-      plugins: [minify({ dir: 'dist/min' })],
+      hooks: [minify({ dir: 'dist/min' })],
     },
     expected: {
       moduleCount: 4,
@@ -213,11 +213,55 @@ export const SCENARIOS: Scenario[] = [
     },
   },
   {
+    name: '产出视图运行时冻结：登记后篡改被拒并可捕获',
+    files: { 'src/main.ts': 'console.log(1)\n' },
+    config: {
+      inputs: [{ name: 'main', path: 'src/main.ts' }],
+      hooks: [
+        {
+          name: 'mutator',
+          buildEnd(ctx) {
+            const notes: string[] = []
+            try {
+              ;(ctx.outputs as EmittedOutput[]).push({
+                name: 'injected',
+                dir: 'dist/injected',
+                files: [],
+              })
+            } catch {
+              notes.push('push-blocked')
+            }
+            try {
+              ;(ctx.outputs[0] as { name: string }).name = 'hijacked'
+            } catch {
+              notes.push('assign-blocked')
+            }
+            ctx.output({
+              name: 'audit',
+              dir: 'dist/audit',
+              files: [{ path: 'audit.txt', code: notes.join(',') }],
+            })
+          },
+        },
+      ],
+    },
+    expected: {
+      outputs: [
+        { name: 'default', dir: 'dist' },
+        {
+          name: 'audit',
+          dir: 'dist/audit',
+          files: [{ path: 'audit.txt', includes: ['push-blocked', 'assign-blocked'] }],
+        },
+      ],
+    },
+  },
+  {
     name: '前置插件要求后序产出：requireOutput 响亮报错并提示声明顺序',
     files: { 'src/main.ts': 'console.log(41)\n' },
     config: {
       inputs: [{ name: 'main', path: 'src/main.ts' }],
-      plugins: [
+      hooks: [
         {
           name: 'early-reader',
           buildEnd(ctx) {
@@ -277,7 +321,7 @@ export const SCENARIOS: Scenario[] = [
     },
     config: {
       inputs: [{ name: 'main', path: 'src/main.ts' }],
-      plugins: [
+      hooks: [
         {
           name: 'renaming',
           transform(id, code) {
@@ -305,7 +349,7 @@ export const SCENARIOS: Scenario[] = [
     config: {
       inputs: [{ name: 'main', path: 'src/main.ts' }],
       dist: 'dist/async',
-      plugins: [
+      hooks: [
         {
           name: 'async-supplier',
           async resolveId(source) {
@@ -364,7 +408,7 @@ export const SCENARIOS: Scenario[] = [
     config: {
       inputs: [{ name: 'main', path: 'src/main.ts' }],
       dist: 'dist/site',
-      plugins: [
+      hooks: [
         {
           name: 'manifest-maker',
           buildEnd(ctx) {
@@ -406,7 +450,7 @@ export const SCENARIOS: Scenario[] = [
     },
     config: {
       inputs: [{ name: 'main', path: 'src/main.ts' }],
-      plugins: [
+      hooks: [
         {
           name: 'alpha-maker',
           buildEnd(ctx) {
@@ -432,7 +476,7 @@ export const SCENARIOS: Scenario[] = [
     },
     config: {
       inputs: [{ name: 'main', path: 'src/main.ts' }],
-      plugins: [lateProducer],
+      hooks: [lateProducer],
     },
     expected: {
       outputs: [{ name: 'default', dir: 'dist', filePaths: ['main.js'] }],
@@ -440,7 +484,7 @@ export const SCENARIOS: Scenario[] = [
     rebuild: {
       config: {
         inputs: [{ name: 'main', path: 'src/main.ts' }],
-        plugins: [lateProducer],
+        hooks: [lateProducer],
       },
       expectedError: '只能在 buildEnd 阶段产出',
     },
@@ -452,7 +496,7 @@ const withMemoryFs = (
   config: StackConfig,
 ): StackConfig => ({
   ...config,
-  plugins: [memoryFsPlugin(scenario.files), ...(config.plugins ?? [])],
+  hooks: [memoryFsPlugin(scenario.files), ...(config.hooks ?? [])],
 })
 
 export async function runScenario(scenario: Scenario): Promise<ScenarioReport> {

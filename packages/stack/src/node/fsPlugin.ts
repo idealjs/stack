@@ -1,4 +1,5 @@
 import { existsSync, readFileSync } from 'node:fs'
+import type { StackHook } from '../core/hooks.ts'
 import {
   dirnamePath,
   isRelativeSpecifier,
@@ -6,9 +7,8 @@ import {
   moduleCandidates,
   normalizePath,
 } from '../core/pathUtil.ts'
-import type { StackPlugin } from '../core/plugin.ts'
 
-export function nodeFsPlugin(root: string): StackPlugin {
+export function nodeHooks(root: string): StackHook {
   const rootDir = normalizePath(root)
   return {
     name: 'node-fs',

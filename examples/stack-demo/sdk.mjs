@@ -1,14 +1,14 @@
 import { mkdirSync, writeFileSync } from 'node:fs'
 import { dirname, resolve } from 'node:path'
 import { build, defineConfig, minify } from '@idealjs/stack'
-import { nodeFsPlugin } from '@idealjs/stack/node'
+import { nodeHooks } from '@idealjs/stack/node'
 
 const root = process.cwd()
 const config = defineConfig({
   inputs: { app: 'src/app.ts', tool: 'src/tool.ts' },
   dist: 'dist/sdk',
   alias: { '@/': 'src/' },
-  plugins: [nodeFsPlugin(root), minify({ dir: 'dist/sdk-min' })],
+  hooks: [nodeHooks(root), minify({ dir: 'dist/sdk-min' })],
 })
 
 const result = await build(config)

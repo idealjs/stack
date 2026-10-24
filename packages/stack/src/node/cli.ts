@@ -2,7 +2,7 @@ import { existsSync, type FSWatcher, mkdirSync, rmSync, watch, writeFileSync } f
 import { dirname as nodeDirname, resolve as resolvePath } from 'node:path'
 import { pathToFileURL } from 'node:url'
 import { type BuildResult, build, type StackConfig } from '../index.ts'
-import { nodeFsPlugin } from './fsPlugin.ts'
+import { nodeHooks } from './fsPlugin.ts'
 
 const VERSION = '0.1.0'
 const WATCH_DEBOUNCE_MS = 150
@@ -45,9 +45,9 @@ async function loadConfig(configPath: string): Promise<StackConfig> {
   return config
 }
 
-const withNodePlugins = (config: StackConfig): StackConfig => ({
+const withNodeHooks = (config: StackConfig): StackConfig => ({
   ...config,
-  plugins: [nodeFsPlugin(config.root ?? '.'), ...(config.plugins ?? [])],
+  hooks: [nodeHooks(config.root ?? '.'), ...(config.hooks ?? [])],
 })
 
 function writeOutputs(root: string, result: BuildResult): void {
@@ -80,7 +80,7 @@ function printSummary(result: BuildResult): void {
 }
 
 async function buildOnce(config: StackConfig): Promise<void> {
-  const result = await build(withNodePlugins(config))
+  const result = await build(withNodeHooks(config))
   writeOutputs(config.root ?? '.', result)
   printSummary(result)
 }

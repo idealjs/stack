@@ -5,7 +5,7 @@
 ## 产品定位
 
 - **CLI 是 SDK 的薄壳**：包主导出（`.`）提供 `build(config): Promise<BuildResult>` 与全部类型，CLI（`bin/stack`）只是「读配置 → 组装 node 插件 → 调 build → 写盘打印」的宿主之一。程序化调用与 CLI 调用走完全同一条链路。
-- **核心是 web standard 的**：`src/core/` 与 SDK 入口零 `node:` 导入（有测试断言）。文件读写、路径解析全部经插件钩子注入——rollup 的「核心不碰 fs」模式。node 侧能力（`nodeFsPlugin`、`runCLI`）在 `./node` 子路径导出下，浏览器宿主不得引入。
+- **核心是 web standard 的**：`src/core/` 与 SDK 入口零 `node:` 导入（有测试断言）。文件读写、路径解析全部经插件钩子注入——rollup 的「核心不碰 fs」模式。node 侧能力（`nodeHooks`、`runCLI`）在 `./node` 子路径导出下，浏览器宿主不得引入。
 - **静态解析而非 import hook**：用 acorn 从 `Program.body` 收集静态 import/export 说明符与动态 import 字符串字面量构建依赖图，不做运行时拦截。确定性更强、无启动成本，代价是动态拼接的说明符不可见（MVP 边界）。
 - **产出单通道**：输入定义构建什么；产物由唯一产出通道定义——核心先产出 `default` 规范产物，插件在 buildEnd 经 `ctx.output` 追加衍生产物。rollup 的 output 配置＋插件 emitFile 双轨制就此收敛为单轨。
 
@@ -22,7 +22,7 @@ export default defineConfig({
   ],
   dist: 'dist/esm',                     // 可选，规范产物落位目录，默认 'dist'
   alias: { '@/': 'src/' },              // 前缀替换，target 是 root 相对路径
-  plugins: [minify({ dir: 'dist/min' })],
+  hooks: [minify({ dir: 'dist/min' })],
 })
 ```
 
@@ -39,10 +39,10 @@ alias 语义：source 命中前缀（或整串等于 key）即替换为 target +
 ## 钩子协议
 
 产出通道语义、三条不变量与插件循环全景见 [docs/plugin-loop.md](./docs/plugin-loop.md)
-（改 `core/build.ts` / `core/plugin.ts` 前先读）。
+（改 `core/build.ts` / `core/hooks.ts` 前先读）。
 
 ```ts
-interface StackPlugin {
+interface StackHook {
   name: string
   resolveId?(source, importer): string | null   // source → 模块 id
   load?(id): string | null                        // id → 源码
@@ -51,7 +51,7 @@ interface StackPlugin {
 }
 ```
 
-- 调度语义：**链式 first-non-null**——按 plugins 声明顺序依次调用，第一个返回非 null 的结果生效；buildEnd 按声明顺序串行执行，每个插件看到「default＋先序插件」的产出，也以自己的名字为产出归属。
+- 调度语义：**链式 first-non-null**——按 hooks 声明顺序依次调用，第一个返回非 null 的结果生效；buildEnd 按声明顺序串行执行，每个插件看到「default＋先序插件」的产出，也以自己的名字为产出归属。
 - **异步纪律**：四个钩子一律可返回 `T | Promise<T>`，调度器顺序 `await`、**绝不并行**——同一构建的钩子调用序恒定；buildEnd「只看到排在前面的产出」的不变量依赖顺序性。`ctx.output()` 本身是同步 void：异步的是登记之前的加工（await 加工完成再登记，登记动作立即入缓存）。这由宿主现实倒逼：esbuild-wasm 的 JS API 只有异步形态，浏览器文件读取（fetch/OPFS）天然返回 Promise——协议不支持 async 钩子，浏览器宿主就停在纸面。
 - id 契约：resolveId 返回的 id 应是 POSIX 规范化路径形态（node 宿主为绝对路径，内存/浏览器宿主可为任意稳定字符串）。
 - 解析失败规则：相对说明符、alias 命中、绝对路径解析失败即抛错；裸说明符（npm 包名）解析失败视为 external，产物原样保留。

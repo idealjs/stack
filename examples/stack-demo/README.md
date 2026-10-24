@@ -11,7 +11,7 @@ src/
     └── utils.ts      TS 接口 / 泛型函数（证明类型剥离转译）
 ```
 
-配置形态：`inputs`（对象数组，name ＋ path）定义构建什么、`dist` 定义规范产物落位（`dist/esm`），`plugins: [minify({ dir: 'dist/min' })]` 定义衍生产物——多份输出的乘法不是配置运算，而是插件组合。
+配置形态：`inputs`（对象数组，name ＋ path）定义构建什么、`dist` 定义规范产物落位（`dist/esm`），`hooks: [minify({ dir: 'dist/min' })]` 定义衍生产物——多份输出的乘法不是配置运算，而是插件组合。
 
 ## CLI 用法
 
@@ -29,7 +29,7 @@ yarn workspace stack-demo dev          # stack --watch：防抖全量重建
 yarn workspace stack-demo build:sdk    # 运行 sdk.mjs
 ```
 
-`sdk.mjs` 直接 `import { build, defineConfig, minify } from '@idealjs/stack'`，注入 node 宿主的 `nodeFsPlugin`（来自 `@idealjs/stack/node`）后拿到 `BuildResult` 并自行写盘——核心不含任何 node 依赖，文件系统永远由宿主以插件形式注入。
+`sdk.mjs` 直接 `import { build, defineConfig, minify } from '@idealjs/stack'`，注入 node 宿主的 `nodeHooks`（来自 `@idealjs/stack/node`）后拿到 `BuildResult` 并自行写盘——核心不含任何 node 依赖，文件系统永远由宿主以插件形式注入。
 
 ## 与 vite 的差异
 

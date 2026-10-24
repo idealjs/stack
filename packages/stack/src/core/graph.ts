@@ -1,8 +1,8 @@
 import { transform } from 'esbuild-wasm'
 import type { StackInput } from './config.ts'
+import type { HookScheduler } from './hooks.ts'
 import { parseModuleImports } from './parse.ts'
 import { isRelativeSpecifier, normalizePath } from './pathUtil.ts'
-import type { PluginScheduler } from './plugin.ts'
 
 export interface ResolvedImport {
   source: string
@@ -50,7 +50,7 @@ const applyAlias = (
 
 export async function buildModuleGraph(
   input: GraphInput,
-  scheduler: PluginScheduler,
+  scheduler: HookScheduler,
 ): Promise<ModuleGraph> {
   const root = normalizePath(input.root)
   const rootImporter = `${root}/`

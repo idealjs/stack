@@ -1,5 +1,5 @@
 import { transform } from 'esbuild-wasm'
-import type { StackPlugin } from './plugin.ts'
+import type { StackHook } from './hooks.ts'
 
 export interface MinifyOptions {
   from?: string
@@ -7,7 +7,7 @@ export interface MinifyOptions {
   dir: string
 }
 
-export function minify(options: MinifyOptions): StackPlugin {
+export function minify(options: MinifyOptions): StackHook {
   const from = options.from ?? 'default'
   const name = options.name ?? 'min'
   if (options.dir === undefined) throw new Error('[stack] minify 插件需要 dir 指定产物目录')

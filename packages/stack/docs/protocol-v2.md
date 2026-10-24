@@ -75,7 +75,7 @@ interface StackFs {
 defineConfig({
   inputs: [{ name: 'app', path: 'src/app.ts' }],
   fs: nodeFs(),          // 平台实现：node CLI 默认注入；浏览器宿主注入内存/OPFS 实现
-  plugins: [minify({ dir: 'dist/min' })],
+  hooks: [minify({ dir: 'dist/min' })],
 })
 ```
 
@@ -124,7 +124,7 @@ defineConfig({
   随链退场）；
 - 冻结存活且更重要（derive 输入必须稳定）；token 晚绑定存活（正交机制）；
 - 场景单一事实源改写为 v2 场景；双层测试（node＋chromium）架构不变；
-- `nodeFsPlugin`（v1 插件形态的 fs）→ `nodeFs()`（v2 fs 注入）；测试/浏览器的内存
+- `nodeHooks`（v1 插件形态的 fs）→ `nodeFs()`（v2 fs 注入）；测试/浏览器的内存
   fs 场景由 `memoryFs()` 承担。
 
 ## 明确拒绝（记录在案）

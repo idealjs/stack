@@ -1,8 +1,8 @@
 import type { StackConfig } from './config.ts'
 import { buildModuleGraph, type ModuleGraph, type ModuleInfo } from './graph.ts'
+import type { EmittedOutput } from './hooks.ts'
+import { CORE_PRODUCER, createHookScheduler, createOutputChannel } from './hooks.ts'
 import { dirnamePath, relativePath, replaceExtension, toSpecifier } from './pathUtil.ts'
-import type { EmittedOutput } from './plugin.ts'
-import { CORE_PRODUCER, createOutputChannel, createPluginScheduler } from './plugin.ts'
 
 export interface EmittedFile {
   path: string
@@ -73,7 +73,7 @@ function renderGraph(graph: ModuleGraph): EmittedFile[] {
 export async function build(config: StackConfig): Promise<BuildResult> {
   if ((config.inputs ?? []).length === 0) throw new Error('[stack] config.inputs 至少需要一个入口')
   const startedAt = Date.now()
-  const scheduler = createPluginScheduler(config.plugins)
+  const scheduler = createHookScheduler(config.hooks)
   const graph = await buildModuleGraph(
     { root: config.root ?? '.', inputs: config.inputs, alias: config.alias },
     scheduler,

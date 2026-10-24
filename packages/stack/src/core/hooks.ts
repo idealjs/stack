@@ -1,9 +1,9 @@
 import type { EmittedFile } from './build.ts'
 
 export interface EmittedOutput {
-  name: string
-  dir: string
-  files: EmittedFile[]
+  readonly name: string
+  readonly dir: string
+  readonly files: readonly EmittedFile[]
 }
 
 export type ResolveIdHook = (
@@ -28,7 +28,7 @@ export interface BuildEndContext {
 
 export type BuildEndHook = (ctx: BuildEndContext) => void | Promise<void>
 
-export interface StackPlugin {
+export interface StackHook {
   name: string
   resolveId?: ResolveIdHook
   load?: LoadHook
@@ -67,11 +67,17 @@ export function createOutputChannel(): OutputChannel {
           `[stack] 产出重名 "${spec.name}"：${producers[index]} 已产出同名产出，${producer} 再次产出`,
         )
       }
-      outputs.push({ name: spec.name, dir: spec.dir, files: spec.files })
+      outputs.push(
+        Object.freeze({
+          name: spec.name,
+          dir: spec.dir,
+          files: Object.freeze(spec.files.map((file) => Object.freeze({ ...file }))),
+        }),
+      )
       producers.push(producer)
     },
     view() {
-      return outputs
+      return Object.freeze([...outputs])
     },
     snapshot() {
       return [...outputs]
@@ -100,7 +106,7 @@ export function createBuildEndContext(channel: OutputChannel, producer: string):
   }
 }
 
-export interface PluginScheduler {
+export interface HookScheduler {
   resolveId(source: string, importer: string): Promise<string | null>
   load(id: string): Promise<string | null>
   transform(id: string, code: string): Promise<string | null>
@@ -118,8 +124,8 @@ const callFirst = async <T>(
   return null
 }
 
-export function createPluginScheduler(plugins: readonly StackPlugin[] = []): PluginScheduler {
-  const list = [...plugins]
+export function createHookScheduler(hooks: readonly StackHook[] = []): HookScheduler {
+  const list = [...hooks]
   return {
     resolveId(source, importer) {
       return callFirst(list, (plugin) => plugin.resolveId?.(source, importer))

@@ -9,5 +9,5 @@ export default defineConfig({
   alias: {
     '@/': 'src/',
   },
-  plugins: [minify({ dir: 'dist/min' })],
+  hooks: [minify({ dir: 'dist/min' })],
 })
