@@ -124,9 +124,15 @@ interface LowerContext {
   模块的完整生命周期、resolve 终态。**用户插件直接不管依赖也是合法的**：不 await
   就没有边，一次在当前流程处理完毕是插件的选择权。await 链成环 → 抛可捕获
   `CycleError`（带环路径），catch 后由插件决定（见 loweringBindImport）；
-- **`ctx.loweringBindImport(ids)`**：环的解法。catch 后把环上模块（含当前）绑定为
-  同一单元：注册表重定向＋挂起恢复＋循环检测器 contract；**后续 loweringImport 直接
-  命中绑定缓存**（返回单元终态）。绑定只管缓存重定向，内容处理归插件流程。
+- **`ctx.loweringBindImport(ids)`**：环的解法，**全协议唯一修改依赖图的原语**。
+  catch 后把环上模块（含当前）绑定为同一单元：注册表重定向＋挂起恢复＋循环检测器
+  contract（收缩＋别名归一）——**依赖图结构随绑定改变**，后续声明与检测都在新图上
+  进行；**后续 loweringImport 直接命中绑定缓存**（返回单元终态）。绑定只管缓存重
+  定向，内容处理归插件流程。
+
+图的可变性边界（全协议仅两种合法变更）：**增边**——loweringImport 声明（图只增）；
+**收缩**——loweringBindImport 绑定（检测器 contract＋别名归一）。除此外图不可变：
+无删边、无原地改写、无重排。
 
 ### 内置 `imports()` 声明 hook（默认闭包载体）
 
