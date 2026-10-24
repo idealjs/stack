@@ -7,7 +7,7 @@
   ],
   "packageManager": "yarn@4.9.2",
   "scripts": {
-    "dev": "concurrently -k -n tutorial,runtime \"TUTORIAL_BASE=/absproxy/5173 yarn workspace @stack/tutorial dev\" \"WEB_RUNNER_BASE=/absproxy/5174 yarn workspace @stack/web-runner dev:runtime\"",
+    "dev": "concurrently -k -n tutorial,runtime \"TUTORIAL_BASE=/absproxy/5173 yarn workspace @stack/tutorial dev\" \"yarn workspace @stack/web-runner dev:runtime\"",
     "format": "biome format --write .",
     "format:check": "biome format ."
   },
