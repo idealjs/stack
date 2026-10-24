@@ -177,7 +177,11 @@ spawn（孵化义准但让位）、generate/emit（产出层撞车）、decompos
 ```
 
 包装把环从「编译期求值顺序问题」转化为「运行时惰性问题」：每模块是惰性函数，
-`__require` 调用时取用，活性经 exports 对象保持。
+`__require` 调用时取用，活性经 exports 对象保持。通用形态是内置 hook
+`bundle()`（与 minify 同位）：SCC 分解（Tarjan）→ 表示切换（单点分量拼接、多点
+分量 wrapped）→ import 改写为 `__require` 解构 → 单文件登记；支撑结构
+（依赖边暴露、`stronglyConnected`、`moduleRuntime`）见
+[recipe-single-file.md](./recipe-single-file.md)。
 
 ## 纯度分类
 

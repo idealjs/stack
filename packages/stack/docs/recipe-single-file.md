@@ -63,6 +63,39 @@ flowchart TD
 | await 环响亮报错（带环路径）；同 id 并发共享同一 Promise | 环的处理：报错即修依赖；运行时包装为升级路径 |
 | 登记即冻结；重名报双来源 | 派生是纯函数式重组：不改来源，只返回新工件 |
 
+## 依赖有环：SCC 分解与运行时包装（bundle 内置 hook）
+
+上一节范本对环报错。但 rollup/esbuild/webpack 都能打有环的图——它们的方法是
+**表示切换**，不是魔法：
+
+1. **SCC 分解**（Tarjan）：依赖图按强连通分量缩点，每个「互相成环的模块组」一个
+   分量，缩点后的图必为 DAG，拓扑序重新成立；
+2. **两种表示共存**：单点分量（无环）保持拼接表示、import 直接剥；多点分量（真环
+   组）整组降级为惰性函数＋注册表——`__define(id, fn)` ＋ `__require(id)`，环在
+   调用时自解；
+3. **import 改写**：wrapped 模块内 `import { x } from './b'` →
+   `const { x } = __require('b')`——绑定 exports 对象（身份稳定），`x.foo` 属性
+   访问发生在使用时，活性保持（解构近似：函数绑定正确；const 值绑定且先于初始化
+   访问会失真——精确语义需标识符级 scope 分析改写，属引擎级工程量）；
+4. **小运行时**：`__define/__require` 引导，可覆写。
+
+于是「(A+B) − import 单文件、A↔B 有环」的插件形态退化为一行：
+
+```ts
+hooks: [bundle({ entry: 'app', dir: 'dist' })]
+```
+
+`bundle()` 为内置 hook（与 minify 同位）。流程与无环版唯一的差别在第 5 步：derive
+触发后先 SCC 分解——{A, B} 成环组走 wrapped 表示（`__define` 惰性函数＋import 改写
+为 `__require`），入口 `__require('app')` 启动；产物仍是单文件，环语义由运行时保持。
+**全程无死锁**：模块相 A、B 各自走完生命周期（lower 不 await），环只出现在产出相
+的依赖边里，由 SCC 分解与表示切换消化。
+
+**支撑结构清单**（手写 derive 而非用内置时需要的四件，引擎/包内工具提供）：
+`ctx.modules` 暴露依赖边（`{ id, code, deps: id[] }`，已设计）；SCC 工具
+（`stronglyConnected`，声明序 tie-break）；运行时模板（`moduleRuntime`，可覆写）；
+import 改写规则（解构近似，边界如实记录）。
+
 ## 边界与升级路径
 
 - **循环依赖**：await 环被引擎拒绝。范本报错；升级路径是模块运行时包装
