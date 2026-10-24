@@ -84,7 +84,8 @@ interface LowerContext {
   fs: { readFile(path: string): Promise<string> }   // 注入 fs 只读面
   output(spec: EmittedOutput): void                  // 唯一副作用：登记产出（登记即冻结）
   parseImports(code: string): Specifier[]            // 工具：acorn 封装（静态＋动态字面量）
-  demand(specifiers: string[]): Promise<FinalModule[]>  // 递归需求：拉取依赖终态
+  demand(specifiers: string[]): Promise<FinalModule[]>  // 递归需求：拉取依赖终态（环时抛可捕获 CycleError）
+  merge(specifiers: string[], name?: string): Promise<FinalModule>  // 环解法：load 结果精确清理→合并→注册新模块
 }
 ```
 
@@ -94,8 +95,9 @@ interface LowerContext {
   链（相对当前 id，alias 生效）→ 完整生命周期（load→lower）→ 最终形态；语义四条：
   传递闭包（依赖的依赖一并拉取）、依赖先行排序（声明序 tie-break）、按 id 去重
   （并发/重复 demand 共享同一 Promise）、external 跳过（保留为 import 语句）；
-  **await 链成环 → 响亮报错并带环路径**（A 等 B、B 等 A 无解，修法是重构依赖）。
-  工程纪律：merge 是插件侧 join，协议只供 parseImports＋demand 两个工具；
+  **await 链成环 → 抛可捕获的 `CycleError`（带环路径）**——默认响亮（未捕获即构建
+  失败），捕获后由插件决定如何处理（见「循环检测器与 merge 解环」）。
+  工程纪律：merge/join 是插件侧组合动作，协议供 parseImports＋demand＋merge 三个工具；
 - 被 demand 的模块仍留在注册表：materialize 类产出自行筛选（如仅入口），避免双份。
 
 命名定案：**lower**（裂变语义；compiler lowering 行话——高级结构降为多个低级结构，
@@ -138,11 +140,12 @@ spawn（孵化义准但让位）、generate/emit（产出层撞车）、decompos
   「B 已在访问中，入图即止」（注册表按 id 去重）。不 pull 的环原样交给运行时——
   ESM 原生以 live binding（绑定是引用不是值拷贝）＋函数提升处理环；preserve-ESM
   默认输出正是这种形态。
-- **pull 层（demand 终态）——环被拒绝，且必须拒绝**。机制：A 的 lower await
-  demand(B) 挂起 → 引擎调度 B → B 的 lower await demand(A) 挂起 → A 的终态永不
-  完成，await 死锁；引擎追踪 await 链，同一 id 链上重复出现即抛错并带环路径。
-  语义上这是数学事实：「B 的终态」依赖「A 的终态」依赖「B 的终态」——环上不存在
-  终态全序，demand「返回终态」的承诺逻辑上不可满足。
+- **pull 层（demand 终态）——环抛 `CycleError`，可捕获、由插件决定处理**。机制：
+  A 的 lower await demand(B) 挂起 → 引擎调度 B → B 的 lower await demand(A) →
+  环检测命中（A 已在等待链上）→ 抛 `CycleError` 给新边发起者。语义上「B 的终态」
+  依赖「A 的终态」依赖「B 的终态」——环上不存在终态全序，demand「返回终态」的承诺
+  不可满足，因此只能以异常退出。**协议认可的正解是 catch 后 `ctx.merge` 解环**（见
+  下节），不拉取/重构/derive 包装保留为同等合法出口。
 - **产出层（拼接打包）——环需要模块运行时包装，唯一保语义的解**。拼接是「值快照」
   （把 B 的绑定以拼接时的值内联），而环的语义恰是绑定活性（B 导出的函数被调用时
   可能引用 A 后来才初始化的变量），快照直接破坏它（TDZ/undefined）。包装把「求值
@@ -182,6 +185,26 @@ spawn（孵化义准但让位）、generate/emit（产出层撞车）、decompos
 分量 wrapped）→ import 改写为 `__require` 解构 → 单文件登记；支撑结构
 （依赖边暴露、`stronglyConnected`、`moduleRuntime`）见
 [recipe-single-file.md](./recipe-single-file.md)。
+
+## 循环检测器（独立纯模块）与 merge 解环
+
+**循环检测器**（`core/cycle.ts`，独立叶子、纯计算、无 I/O）：增量维护依赖图，每次
+加边做一次环检查（「加 u→v 是否成环」等价于「v 可达 u」），用可达性 memo 加速——
+图 append-only（边只增不减），memo 恒 sound、无需失效。命中即抛 `CycleError`
+（`path: string[]` 环路径；可捕获，`instanceof` 判型）。
+
+**`ctx.merge(specifiers, name?)` 解环**（引擎工具，插件在 CycleError 的 catch 里调用）：
+
+1. 取环内模块的 **load 结果**（load 先于 lower 完成，与死锁无关）；
+2. **精确 import 清理**：移除环内互指的 import 声明（按解析后的 id 判定，非正则），
+   external 保留；
+3. 拼接为一份内容，**注册为新模块**（name 缺省 `merged:a+b` 形态），注册表将 A、B
+   **重定向**到合并体；
+4. 重定向**同时解除环上全体挂起**——pending 的 demand 命中缓存拿到合并体，挂起的
+   lower 恢复执行。环上双方任一方 catch 并 merge，即解全体。
+
+语义边界如实记录：merge 以 **load 结果**为原料，原 lower 不再对合并体执行（合并即
+替代）；顶层标识符冲突需处理（MVP：检测到即报错，scope 分析改名为升级路径）。
 
 ## 纯度分类
 
