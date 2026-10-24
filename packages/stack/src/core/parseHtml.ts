@@ -3,6 +3,8 @@ export interface ParsedHtmlAsset {
   specifier: string
   start: number
   end: number
+  tagStart: number
+  tagEnd: number
 }
 
 const TAG_PATTERN = /<(script|link)\b([^>]*)>/gi
@@ -32,14 +34,32 @@ export function parseHtmlAssets(code: string): ParsedHtmlAsset[] {
     if (name === 'script') {
       const src = found.get('src')
       if (src !== undefined) {
-        assets.push({ kind: 'script', specifier: src.value, start: src.start, end: src.end })
+        const tagStart = tag.index ?? 0
+        let tagEnd = tagStart + tag[0].length
+        const closing = code.indexOf('</' + 'script>', tagEnd)
+        if (closing !== -1) tagEnd = closing + 9
+        assets.push({
+          kind: 'script',
+          specifier: src.value,
+          start: src.start,
+          end: src.end,
+          tagStart,
+          tagEnd,
+        })
       }
     }
     if (name === 'link') {
       const rel = found.get('rel')
       const href = found.get('href')
       if (rel !== undefined && rel.value.toLowerCase() === 'stylesheet' && href !== undefined) {
-        assets.push({ kind: 'stylesheet', specifier: href.value, start: href.start, end: href.end })
+        assets.push({
+          kind: 'stylesheet',
+          specifier: href.value,
+          start: href.start,
+          end: href.end,
+          tagStart: tag.index ?? 0,
+          tagEnd: (tag.index ?? 0) + tag[0].length,
+        })
       }
     }
   }

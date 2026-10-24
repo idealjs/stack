@@ -1,4 +1,4 @@
-import { bundle, minify } from '../src/builtins.ts'
+import { bundle, inlineScript, minify } from '../src/builtins.ts'
 import { memoryFs } from '../src/core/memoryFs.ts'
 import { parseModuleImports } from '../src/core/parse.ts'
 import {
@@ -861,6 +861,41 @@ export const SCENARIOS: Scenario[] = [
           files: [
             { path: 'index.html', includes: ['src="./boot.js"'], notIncludes: ['@/boot'] },
             { path: 'boot.js', includes: ['console.log("boot")'] },
+          ],
+        },
+      ],
+    },
+  },
+  {
+    name: 'html script src 改写为内联 script：闭包包装嵌入，产出自包含页面',
+    files: {
+      'index.html': '<html><body><script type="module" src="./main"></script></body></html>',
+      'main.ts': "import { utils } from './utils'\nconsole.log(utils())\n",
+      'utils.ts': "export function utils(): string { return 'inline-ok' }\n",
+    },
+    config: {
+      inputs: [{ name: 'page', path: 'index.html' }],
+      hooks: [inlineScript()],
+    },
+    expected: {
+      outputs: [
+        {
+          name: 'default',
+          dir: 'dist',
+          files: [
+            { path: 'index.html', includes: ['src="./main.js"'] },
+            { path: 'main.js', includes: ['./utils.js'] },
+          ],
+        },
+        {
+          name: 'default-inline',
+          dir: 'dist',
+          files: [
+            {
+              path: 'index.html',
+              includes: ['<script type="module">', '__define(', '__require(', 'inline-ok'],
+              notIncludes: ['src="./main.js"', './utils.js'],
+            },
           ],
         },
       ],

@@ -95,7 +95,7 @@ const externalStatement = (parsed: ParsedImport, varName: string): string => {
   return assignments.join(' ')
 }
 
-const wrapModule = (
+export const wrapModule = (
   mod: FinalModule,
   closureIds: Set<string>,
   externals: Map<string, string>,
