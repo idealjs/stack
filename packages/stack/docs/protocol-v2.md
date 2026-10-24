@@ -67,7 +67,7 @@ special-case 插件行为：
   offset 语义同构）；html 工件不进 SCC/bundle 闭包：bundle 对 html 入口取其 script
   引用闭包，css/html 永不 wrapped；
 - **css**：load 后透传内容（不走 esbuild js strip）；**终态工件**——不产图边
-  （`@import` 不支持，MVP 记录）；可被 `ctx.demand` 拉取（`FinalModule.code` 即 css
+  （`@import` 不支持，MVP 记录）；可被 `ctx.loweringImport` 拉取（`FinalModule.code` 即 css
   文本）；materialize 按相对结构 emit，扩展名自然保留。
 
 工程边界如实记录：merge 仅适用 module kind（load 结果的 import 清理与顶层名分析都是
@@ -102,29 +102,38 @@ flowchart LR
   resolve——图在 lower 处分叉、在 import 处增长，全程需求递归，无全局循环。
   插件按 id 自筛目标（rollup transform 同款纪律：非目标恒等返回）。
 
-lower 的 ctx API——细粒度资源等待（lower 可以拉取依赖模块的终态，单文件打包因此
-能在模块相完成，无须等模块集排干）：
+lower 的 ctx API——**依赖图由此唯一构成**：引擎不解析工件内容（流程由插件声明，
+静态分析只定流程不定量），每条依赖边都是 lower 内一次 `await ctx.loweringImport(id)`
+的产物；工件可携带 `imports` 元数据（值区间＋解析 id）供渲染期引用重写，不携带则
+不重写。内置 `imports()` hook 承担默认声明（见下）：
 
 ```ts
 interface LowerContext {
-  fs: { readFile(path: string): Promise<string> }   // 注入 fs 只读面
-  output(spec: EmittedOutput): void                  // 唯一副作用：登记产出（登记即冻结）
-  lowerImport(code: string): Specifier[]            // 工具：acorn 封装（静态＋动态字面量）
-  demand(specifiers: string[]): Promise<FinalModule[]>  // 递归需求：拉取依赖终态（环时抛可捕获 CycleError）
-  merge(specifiers: string[], name?: string): Promise<FinalModule>  // 环解法：load 结果精确清理→合并→注册新模块
+  fs: { readFile(path: string): Promise<string> }        // 注入 fs 只读面
+  output(spec: EmittedOutput): void                      // 唯一副作用：登记产出（登记即冻结）
+  lowerImport(code: string): Specifier[]                 // 工具：acorn 封装（静态＋动态字面量）
+  loweringImport(id: string): Promise<FinalModule>       // await 即声明依赖边＋拉取终态（环抛可捕获 CycleError）
+  loweringBindImport(ids: string[]): Promise<void>       // 环解法：绑定为同一单元，后续命中绑定缓存
 }
 ```
 
-- `ctx.lowerImport`：供 lower 分析自身输入（引擎对 lower 返回的工件必再解析以长图，
-  工具与引擎共用同一解析器，双解析可按内容缓存）；
-- **`ctx.demand(specifiers)`**：拉取依赖的**传递闭包终态**——每个 specifier 经 resolve
-  链（相对当前 id，alias 生效）→ 完整生命周期（load→lower）→ 最终形态；语义四条：
-  传递闭包（依赖的依赖一并拉取）、依赖先行排序（声明序 tie-break）、按 id 去重
-  （并发/重复 demand 共享同一 Promise）、external 跳过（保留为 import 语句）；
-  **await 链成环 → 抛可捕获的 `CycleError`（带环路径）**——默认响亮（未捕获即构建
-  失败），捕获后由插件决定如何处理（见「循环检测器与 merge 解环」）。
-  工程纪律：merge/join 是插件侧组合动作，协议供 lowerImport＋demand＋merge 三个工具；
-- 被 demand 的模块仍留在注册表：materialize 类产出自行筛选（如仅入口），避免双份。
+- `ctx.lowerImport`：分析工具（acorn 封装），供 lower 自查引用——**引擎不解析**，
+  该工具与潜在的声明 hook 共用同一解析器；
+- **`ctx.loweringImport(id)`**：声明「当前工件依赖该模块」——引擎登记依赖边、调度该
+  模块的完整生命周期、resolve 终态。**用户插件直接不管依赖也是合法的**：不 await
+  就没有边，一次在当前流程处理完毕是插件的选择权。await 链成环 → 抛可捕获
+  `CycleError`（带环路径），catch 后由插件决定（见 loweringBindImport）；
+- **`ctx.loweringBindImport(ids)`**：环的解法。catch 后把环上模块（含当前）绑定为
+  同一单元：注册表重定向＋挂起恢复＋循环检测器 contract；**后续 loweringImport 直接
+  命中绑定缓存**（返回单元终态）。绑定只管缓存重定向，内容处理归插件流程。
+
+### 内置 `imports()` 声明 hook（默认闭包载体）
+
+引擎零解析后，默认闭包由内置 hook 声明：对每个工件按 kind 提取引用并逐个
+`loweringImport`——module kind 用 `lowerImport`、html kind 用 parseHtmlAssets
+（script/link）、css 透传不声明；声明后把引用的 value-offset 作为工件 `imports`
+元数据随工件携带（渲染期重写消费）。CLI 与示例默认注入；不注入则图完全由显式
+await 构成（引擎不欠闭包）。
 
 命名定案：**lower**（裂变语义；compiler lowering 行话——高级结构降为多个低级结构，
 一化多的最精确行业词）。弃选记录：transform（1:1 整形）、expand（技术填充味）、
@@ -170,7 +179,7 @@ spawn（孵化义准但让位）、generate/emit（产出层撞车）、decompos
   A 的 lower await demand(B) 挂起 → 引擎调度 B → B 的 lower await demand(A) →
   环检测命中（A 已在等待链上）→ 抛 `CycleError` 给新边发起者。语义上「B 的终态」
   依赖「A 的终态」依赖「B 的终态」——环上不存在终态全序，demand「返回终态」的承诺
-  不可满足，因此只能以异常退出。**协议认可的正解是 catch 后 `ctx.merge` 解环**（见
+  不可满足，因此只能以异常退出。**协议认可的正解是 catch 后 `ctx.loweringBindImport` 绑定解环**（见
   下节），不拉取/重构/derive 包装保留为同等合法出口。
 - **产出层（拼接打包）——环需要模块运行时包装，唯一保语义的解**。拼接是「值快照」
   （把 B 的绑定以拼接时的值内联），而环的语义恰是绑定活性（B 导出的函数被调用时
@@ -212,7 +221,7 @@ spawn（孵化义准但让位）、generate/emit（产出层撞车）、decompos
 （依赖边暴露、`stronglyConnected`、`moduleRuntime`）见
 [recipe-single-file.md](./recipe-single-file.md)。
 
-## 循环检测器（独立纯模块）与 merge 解环
+## 循环检测器（独立纯模块）与 loweringBindImport 解环
 
 **循环检测器**（`core/cycle.ts`，独立叶子、纯计算、无 I/O）：增量维护依赖图，每次
 加边做一次环检查（「加 u→v 是否成环」等价于「v 可达 u」），用可达性 memo 加速。
@@ -227,7 +236,7 @@ memo 的 sound 条件是「图只增」——**merge 的注册表重定向是节
 
 命中即抛 `CycleError`（`path: string[]` 环路径；可捕获，`instanceof` 判型）。
 
-**`ctx.merge(specifiers, name?)` 解环**（引擎工具，插件在 CycleError 的 catch 里调用）：
+**`ctx.loweringBindImport(ids)` 绑定解环**（引擎工具，插件在 CycleError 的 catch 里调用；绑定只做注册表重定向与缓存共享，内容处理归插件流程）：
 
 1. 取环内模块的 **load 结果**（load 先于 lower 完成，与死锁无关）；
 2. **精确 import 清理**：移除环内互指的 import 声明（按解析后的 id 判定，非正则），
