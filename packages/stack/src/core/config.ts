@@ -1,14 +1,9 @@
 import type { StackPlugin } from './plugin.ts'
 
-export interface StackOutput {
-  dir: string
-  minify?: boolean
-}
-
 export interface StackConfig {
   root?: string
   inputs: Record<string, string>
-  outputs: StackOutput[]
+  dist?: string
   alias?: Record<string, string>
   plugins?: StackPlugin[]
 }

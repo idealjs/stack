@@ -5,8 +5,8 @@ import {
   moduleCandidates,
   normalizePath,
 } from '../src/core/pathUtil.ts'
-import type { BuildResult, StackConfig, StackPlugin } from '../src/index.ts'
-import { build } from '../src/index.ts'
+import type { BuildResult, EmittedOutput, StackConfig, StackPlugin } from '../src/index.ts'
+import { build, minify } from '../src/index.ts'
 
 export const memoryFsPlugin = (files: Record<string, string>): StackPlugin => ({
   name: 'memory-fs',
@@ -28,13 +28,12 @@ export interface FileExpectation {
   path: string
   includes?: string[]
   notIncludes?: string[]
-  shorterThanSamePathInOutput?: number
+  shorterThanSamePathInOutput?: string
 }
 
 export interface OutputExpectation {
+  name: string
   dir: string
-  minify?: boolean
-  entryPaths?: Record<string, string>
   filePaths?: string[]
   files?: FileExpectation[]
 }
@@ -42,7 +41,7 @@ export interface OutputExpectation {
 export interface ScenarioExpected {
   moduleCount?: number
   outputs?: OutputExpectation[]
-  error?: string
+  error?: string | string[]
 }
 
 export interface Scenario {
@@ -51,6 +50,10 @@ export interface Scenario {
   config: StackConfig
   expected: ScenarioExpected
   verify?: (result: BuildResult) => string[]
+  rebuild?: {
+    config: StackConfig
+    expectedError: string
+  }
 }
 
 export interface ScenarioReport {
@@ -58,32 +61,106 @@ export interface ScenarioReport {
   failures: string[]
 }
 
-const buildEndSeen = { count: 0, outputs: 0 }
+const failuresForError = (message: string, expected: string | string[]): string[] => {
+  const needles = Array.isArray(expected) ? expected : [expected]
+  return needles
+    .filter((needle) => !message.includes(needle))
+    .map((needle) => `错误信息应包含 "${needle}"，实际：${message}`)
+}
+
+const checkOutput = (
+  result: BuildResult,
+  expectation: OutputExpectation,
+  index: number,
+): string[] => {
+  const output = result.outputs[index]
+  if (output === undefined) return [`缺少产出 #${index}（${expectation.name}）`]
+  const failures: string[] = []
+  const label = `${expectation.name}（${expectation.dir}）`
+  if (output.name !== expectation.name) {
+    failures.push(`产出 #${index} 名称：期望 ${expectation.name}，实际 ${output.name}`)
+  }
+  if (output.dir !== expectation.dir) {
+    failures.push(`产出 ${output.name} 目录：期望 ${expectation.dir}，实际 ${output.dir}`)
+  }
+  if (expectation.filePaths !== undefined) {
+    const actual = JSON.stringify(output.files.map((file) => file.path))
+    const expected = JSON.stringify(expectation.filePaths)
+    if (actual !== expected) {
+      failures.push(`${label} 产物清单：期望 ${expected}，实际 ${actual}`)
+    }
+  }
+  for (const fileExpectation of expectation.files ?? []) {
+    const file = output.files.find((candidate) => candidate.path === fileExpectation.path)
+    if (file === undefined) {
+      failures.push(`${label} 缺少产物 ${fileExpectation.path}`)
+      continue
+    }
+    const fileLabel = `${label}/${fileExpectation.path}`
+    for (const needle of fileExpectation.includes ?? []) {
+      if (!file.code.includes(needle)) failures.push(`${fileLabel} 应包含 "${needle}"`)
+    }
+    for (const banned of fileExpectation.notIncludes ?? []) {
+      if (file.code.includes(banned)) failures.push(`${fileLabel} 不应包含 "${banned}"`)
+    }
+    if (fileExpectation.shorterThanSamePathInOutput !== undefined) {
+      const other = result.outputs
+        .find(
+          (candidate: EmittedOutput) =>
+            candidate.name === fileExpectation.shorterThanSamePathInOutput,
+        )
+        ?.files.find((candidate) => candidate.path === fileExpectation.path)
+      if (other === undefined || other.code.length <= file.code.length) {
+        failures.push(
+          `${fileLabel} 应比产出 ${fileExpectation.shorterThanSamePathInOutput} 的同路径产物更短`,
+        )
+      }
+    }
+  }
+  return failures
+}
+
+const cartesianFiles: Record<string, string> = {
+  'src/app.ts':
+    "import { greet } from './common/utils'\nimport { APP_INFO } from '@/info'\nconsole.log(greet(APP_INFO.name))\n",
+  'src/tool.ts':
+    "import { pickBy } from './common/utils'\nconsole.log(pickBy([1, 2, 3], (n) => n > 1))\n",
+  'src/common/utils.ts':
+    'export interface Box<T> { value: T }\nexport const greet = (name: string): string => `hi $' +
+    '{name}`\nexport function pickBy<T>(items: T[], keep: (item: T) => boolean): T[] {\n  return items.filter(keep)\n}\n',
+  'src/info.ts': "export const APP_INFO = { name: 'demo' }\n",
+}
+
+const capturedOutputs: string[] = []
+let capturedOutputFn: ((spec: EmittedOutput) => void) | undefined
+
+const lateProducer: StackPlugin = {
+  name: 'late-producer',
+  transform(_id, code) {
+    capturedOutputFn?.({ name: 'late', dir: 'dist/late', files: [] })
+    return code
+  },
+  buildEnd(ctx) {
+    capturedOutputFn = ctx.output
+  },
+}
 
 export const SCENARIOS: Scenario[] = [
   {
-    name: 'n×m 笛卡尔积：2 入口 × 2 输出，alias 与类型剥离同时生效',
-    files: {
-      'src/app.ts':
-        "import { greet } from './common/utils'\nimport { APP_INFO } from '@/info'\nconsole.log(greet(APP_INFO.name))\n",
-      'src/tool.ts':
-        "import { pickBy } from './common/utils'\nconsole.log(pickBy([1, 2, 3], (n) => n > 1))\n",
-      'src/common/utils.ts':
-        'export interface Box<T> { value: T }\nexport const greet = (name: string): string => `hi $' +
-        '{name}`\nexport function pickBy<T>(items: T[], keep: (item: T) => boolean): T[] {\n  return items.filter(keep)\n}\n',
-      'src/info.ts': "export const APP_INFO = { name: 'demo' }\n",
-    },
+    name: '一次构建产出两份：default 规范产物＋minify 插件衍生产物',
+    files: cartesianFiles,
     config: {
       inputs: { app: 'src/app.ts', tool: 'src/tool.ts' },
-      outputs: [{ dir: 'dist/esm' }, { dir: 'dist/min', minify: true }],
+      dist: 'dist/esm',
       alias: { '@/': 'src/' },
+      plugins: [minify({ dir: 'dist/min' })],
     },
     expected: {
       moduleCount: 4,
       outputs: [
         {
+          name: 'default',
           dir: 'dist/esm',
-          entryPaths: { app: 'app.js', tool: 'tool.js' },
           filePaths: ['app.js', 'common/utils.js', 'info.js', 'tool.js'],
           files: [
             {
@@ -94,14 +171,14 @@ export const SCENARIOS: Scenario[] = [
           ],
         },
         {
+          name: 'min',
           dir: 'dist/min',
-          minify: true,
-          entryPaths: { app: 'app.js', tool: 'tool.js' },
+          filePaths: ['app.js', 'common/utils.js', 'info.js', 'tool.js'],
           files: [
             {
               path: 'app.js',
               includes: ['./common/utils.js'],
-              shorterThanSamePathInOutput: 0,
+              shorterThanSamePathInOutput: 'default',
             },
           ],
         },
@@ -117,12 +194,12 @@ export const SCENARIOS: Scenario[] = [
     },
     config: {
       inputs: { main: 'src/main.ts' },
-      outputs: [{ dir: 'dist' }],
     },
     expected: {
       moduleCount: 2,
       outputs: [
         {
+          name: 'default',
           dir: 'dist',
           filePaths: ['lazy.js', 'main.js'],
           files: [{ path: 'main.js', includes: ['some-pkg', './lazy.js'] }],
@@ -137,7 +214,6 @@ export const SCENARIOS: Scenario[] = [
     },
     config: {
       inputs: { main: 'src/main.ts' },
-      outputs: [{ dir: 'dist' }],
     },
     expected: { error: '无法解析导入 "./missing"' },
   },
@@ -149,12 +225,12 @@ export const SCENARIOS: Scenario[] = [
     },
     config: {
       inputs: { a: 'src/a.ts' },
-      outputs: [{ dir: 'dist' }],
     },
     expected: {
       moduleCount: 2,
       outputs: [
         {
+          name: 'default',
           dir: 'dist',
           files: [
             { path: 'a.js', includes: ['./b.js'] },
@@ -171,7 +247,6 @@ export const SCENARIOS: Scenario[] = [
     },
     config: {
       inputs: { main: 'src/main.ts' },
-      outputs: [{ dir: 'dist' }],
       plugins: [
         {
           name: 'renaming',
@@ -185,6 +260,7 @@ export const SCENARIOS: Scenario[] = [
     expected: {
       outputs: [
         {
+          name: 'default',
           dir: 'dist',
           files: [{ path: 'main.js', includes: ['renamed'], notIncludes: [': number'] }],
         },
@@ -192,110 +268,110 @@ export const SCENARIOS: Scenario[] = [
     },
   },
   {
-    name: 'buildEnd 钩子在构建完成时收到完整结果',
+    name: '插件经 ctx.output 追加产出，且只读可见 default 与先序产出',
     files: {
       'src/main.ts': "console.log('ok')\n",
     },
     config: {
       inputs: { main: 'src/main.ts' },
-      outputs: [{ dir: 'dist/a' }, { dir: 'dist/b' }],
+      dist: 'dist/site',
       plugins: [
         {
-          name: 'observer',
+          name: 'manifest-maker',
           buildEnd(ctx) {
-            buildEndSeen.count += 1
-            buildEndSeen.outputs = ctx.result.outputs.length
+            capturedOutputs.push(...ctx.outputs.map((output) => output.name))
+            ctx.output({
+              name: 'manifest',
+              dir: 'dist/meta',
+              files: [
+                {
+                  path: 'manifest.json',
+                  code: JSON.stringify(ctx.outputs.map((output) => `${output.name}:${output.dir}`)),
+                },
+              ],
+            })
           },
         },
       ],
     },
-    expected: { moduleCount: 1 },
+    expected: {
+      moduleCount: 1,
+      outputs: [
+        { name: 'default', dir: 'dist/site', filePaths: ['main.js'] },
+        {
+          name: 'manifest',
+          dir: 'dist/meta',
+          files: [{ path: 'manifest.json', includes: ['default:dist/site'] }],
+        },
+      ],
+    },
     verify: () =>
-      buildEndSeen.count === 1 && buildEndSeen.outputs === 2
+      capturedOutputs.length === 1 && capturedOutputs[0] === 'default'
         ? []
-        : [
-            `buildEnd 应恰好触发一次且携带 2 个输出，实际 ${buildEndSeen.count} 次 / ${buildEndSeen.outputs} 个`,
-          ],
+        : [`buildEnd 应只见 default 一个产出，实际 ${JSON.stringify(capturedOutputs)}`],
+  },
+  {
+    name: '产出重名被拒，错误信息带两个来源插件名',
+    files: {
+      'src/main.ts': "console.log('ok')\n",
+    },
+    config: {
+      inputs: { main: 'src/main.ts' },
+      plugins: [
+        {
+          name: 'alpha-maker',
+          buildEnd(ctx) {
+            ctx.output({ name: 'bundle', dir: 'dist/a', files: [] })
+          },
+        },
+        {
+          name: 'beta-maker',
+          buildEnd(ctx) {
+            ctx.output({ name: 'bundle', dir: 'dist/b', files: [] })
+          },
+        },
+      ],
+    },
+    expected: {
+      error: ['产出重名 "bundle"', '插件 "alpha-maker"', '插件 "beta-maker"'],
+    },
+  },
+  {
+    name: 'ctx.output 在模块阶段被拒：捕获后于下次构建的 transform 调用必须抛错',
+    files: {
+      'src/main.ts': "console.log('ok')\n",
+    },
+    config: {
+      inputs: { main: 'src/main.ts' },
+      plugins: [lateProducer],
+    },
+    expected: {
+      outputs: [{ name: 'default', dir: 'dist', filePaths: ['main.js'] }],
+    },
+    rebuild: {
+      config: {
+        inputs: { main: 'src/main.ts' },
+        plugins: [lateProducer],
+      },
+      expectedError: '只能在 buildEnd 阶段产出',
+    },
   },
 ]
 
-const encodeRecord = (record: Record<string, string>): string =>
-  Object.keys(record)
-    .sort()
-    .map((key) => `${key}=${record[key]}`)
-    .join(',')
-
-const recordMismatches = (
-  actual: Record<string, string>,
-  expected: Record<string, string>,
-  label: string,
-): string[] =>
-  encodeRecord(actual) === encodeRecord(expected)
-    ? []
-    : [`${label}：期望 ${encodeRecord(expected)}，实际 ${encodeRecord(actual)}`]
-
-const checkOutput = (
-  result: BuildResult,
-  expectation: OutputExpectation,
-  index: number,
-): string[] => {
-  const output = result.outputs[index]
-  if (output === undefined) return [`缺少输出 #${index}（${expectation.dir}）`]
-  const failures: string[] = []
-  if (output.dir !== expectation.dir) {
-    failures.push(`输出 #${index} 目录：期望 ${expectation.dir}，实际 ${output.dir}`)
-  }
-  if (output.minify !== (expectation.minify ?? false)) {
-    failures.push(
-      `${expectation.dir} minify：期望 ${expectation.minify ?? false}，实际 ${output.minify}`,
-    )
-  }
-  if (expectation.entryPaths !== undefined) {
-    failures.push(
-      ...recordMismatches(output.entryPaths, expectation.entryPaths, `${expectation.dir} 入口表`),
-    )
-  }
-  if (expectation.filePaths !== undefined) {
-    const actual = JSON.stringify(output.files.map((file) => file.path))
-    const expected = JSON.stringify(expectation.filePaths)
-    if (actual !== expected) {
-      failures.push(`${expectation.dir} 产物清单：期望 ${expected}，实际 ${actual}`)
-    }
-  }
-  for (const fileExpectation of expectation.files ?? []) {
-    const file = output.files.find((candidate) => candidate.path === fileExpectation.path)
-    if (file === undefined) {
-      failures.push(`${expectation.dir} 缺少产物 ${fileExpectation.path}`)
-      continue
-    }
-    const label = `${expectation.dir}/${fileExpectation.path}`
-    for (const needle of fileExpectation.includes ?? []) {
-      if (!file.code.includes(needle)) failures.push(`${label} 应包含 "${needle}"`)
-    }
-    for (const banned of fileExpectation.notIncludes ?? []) {
-      if (file.code.includes(banned)) failures.push(`${label} 不应包含 "${banned}"`)
-    }
-    if (fileExpectation.shorterThanSamePathInOutput !== undefined) {
-      const other = result.outputs[fileExpectation.shorterThanSamePathInOutput]?.files.find(
-        (candidate) => candidate.path === fileExpectation.path,
-      )
-      if (other === undefined || other.code.length <= file.code.length) {
-        failures.push(`${label} 应比对应产物更短`)
-      }
-    }
-  }
-  return failures
-}
+const withMemoryFs = (
+  scenario: { files: Record<string, string> },
+  config: StackConfig,
+): StackConfig => ({
+  ...config,
+  plugins: [memoryFsPlugin(scenario.files), ...(config.plugins ?? [])],
+})
 
 export async function runScenario(scenario: Scenario): Promise<ScenarioReport> {
   const failures: string[] = []
   try {
-    const result = await build({
-      ...scenario.config,
-      plugins: [memoryFsPlugin(scenario.files), ...(scenario.config.plugins ?? [])],
-    })
+    const result = await build(withMemoryFs(scenario, scenario.config))
     if (scenario.expected.error !== undefined) {
-      failures.push(`期望抛出错误（${scenario.expected.error}），实际构建成功`)
+      failures.push(`期望抛出错误，实际构建成功`)
       return { name: scenario.name, failures }
     }
     if (
@@ -304,16 +380,36 @@ export async function runScenario(scenario: Scenario): Promise<ScenarioReport> {
     ) {
       failures.push(`模块数：期望 ${scenario.expected.moduleCount}，实际 ${result.moduleCount}`)
     }
-    scenario.expected.outputs?.forEach((expectation, index) => {
-      failures.push(...checkOutput(result, expectation, index))
-    })
+    if (scenario.expected.outputs !== undefined) {
+      if (result.outputs.length !== scenario.expected.outputs.length) {
+        failures.push(
+          `产出数：期望 ${scenario.expected.outputs.length}，实际 ${result.outputs.length}`,
+        )
+      }
+      scenario.expected.outputs.forEach((expectation, index) => {
+        failures.push(...checkOutput(result, expectation, index))
+      })
+    }
     failures.push(...(scenario.verify?.(result) ?? []))
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error)
     if (scenario.expected.error === undefined) {
       failures.push(`意外抛错：${message}`)
-    } else if (!message.includes(scenario.expected.error)) {
-      failures.push(`错误信息应包含 "${scenario.expected.error}"，实际：${message}`)
+    } else {
+      failures.push(...failuresForError(message, scenario.expected.error))
+    }
+  }
+  if (failures.length === 0 && scenario.rebuild !== undefined) {
+    try {
+      await build(withMemoryFs(scenario, scenario.rebuild.config))
+      failures.push(`rebuild 期望抛错（${scenario.rebuild.expectedError}），实际成功`)
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error)
+      if (!message.includes(scenario.rebuild.expectedError)) {
+        failures.push(
+          `rebuild 错误信息应包含 "${scenario.rebuild.expectedError}"，实际：${message}`,
+        )
+      }
     }
   }
   return { name: scenario.name, failures }

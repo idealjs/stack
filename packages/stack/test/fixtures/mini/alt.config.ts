@@ -2,7 +2,7 @@ export default {
   inputs: {
     main: 'src/main.ts',
   },
-  outputs: [{ dir: 'dist/alt' }],
+  dist: 'dist/alt',
   alias: {
     '@/': 'src/',
   },

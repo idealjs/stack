@@ -69,16 +69,12 @@ function writeOutputs(root: string, result: BuildResult): void {
 const byteLength = (code: string): number => new TextEncoder().encode(code).length
 
 function printSummary(result: BuildResult): void {
-  const lines: string[] = []
-  for (const output of result.outputs) {
-    lines.push(`${output.dir}${output.minify ? '（minify）' : ''}`)
-    for (const file of output.files) {
-      lines.push(`  ${file.path}  ${(byteLength(file.code) / 1000).toFixed(2)} kB`)
-    }
-    for (const [name, path] of Object.entries(output.entryPaths)) {
-      lines.push(`  入口 ${name} → ${path}`)
-    }
-  }
+  const lines = result.outputs.map(
+    (output) =>
+      `${output.name} → ${output.dir}（${output.files.length} 个文件，${(
+        output.files.reduce((total, file) => total + byteLength(file.code), 0) / 1000
+      ).toFixed(2)} kB）`,
+  )
   lines.push(`构建完成：${result.moduleCount} 个模块，用时 ${result.durationMs}ms`)
   console.log(lines.join('\n'))
 }
@@ -139,7 +135,7 @@ export async function runCLI(argv: string[]): Promise<void> {
     root: resolvePath(process.cwd(), userConfig.root ?? '.'),
   }
   console.log(
-    `stack v${VERSION}：${Object.keys(config.inputs).length} 个输入 × ${config.outputs.length} 个输出`,
+    `stack v${VERSION}：${Object.keys(config.inputs).length} 个输入，规范产物 → ${config.dist ?? 'dist'}（插件可在 buildEnd 追加产出）`,
   )
   if (options.watchMode) {
     await runWatch(config)

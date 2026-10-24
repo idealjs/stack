@@ -1,27 +1,21 @@
-import { transform } from 'esbuild-wasm'
-import type { StackConfig, StackOutput } from './config.ts'
+import type { StackConfig } from './config.ts'
 import { buildModuleGraph, type ModuleGraph, type ModuleInfo } from './graph.ts'
 import { dirnamePath, relativePath, replaceExtension, toSpecifier } from './pathUtil.ts'
-import { createPluginScheduler } from './plugin.ts'
+import type { EmittedOutput } from './plugin.ts'
+import { CORE_PRODUCER, createOutputChannel, createPluginScheduler } from './plugin.ts'
 
 export interface EmittedFile {
   path: string
   code: string
 }
 
-export interface OutputResult {
-  dir: string
-  minify: boolean
-  entryPaths: Record<string, string>
-  files: EmittedFile[]
-  durationMs: number
-}
-
 export interface BuildResult {
-  outputs: OutputResult[]
+  outputs: EmittedOutput[]
   moduleCount: number
   durationMs: number
 }
+
+export const DEFAULT_DIST = 'dist'
 
 const commonDirectory = (paths: string[]): string => {
   if (paths.length === 0) return '.'
@@ -61,54 +55,41 @@ const rewriteImports = (moduleInfo: ModuleInfo, baseDir: string, outputPath: str
   return code
 }
 
-async function buildOutput(graph: ModuleGraph, output: StackOutput): Promise<OutputResult> {
-  const startedAt = Date.now()
+function renderGraph(graph: ModuleGraph): EmittedFile[] {
   const baseDir = commonDirectory(graph.entries.map((entry) => entry.id))
-  const minify = output.minify === true
   const files: EmittedFile[] = []
   for (const moduleInfo of [...graph.modules.values()].sort((left, right) =>
     left.id.localeCompare(right.id),
   )) {
-    let code = rewriteImports(moduleInfo, baseDir, outputPathOf(moduleInfo.id, baseDir))
-    if (minify) {
-      const result = await transform(code, {
-        loader: 'js',
-        format: 'esm',
-        target: 'esnext',
-        minify: true,
-      })
-      code = result.code
-    }
-    files.push({ path: outputPathOf(moduleInfo.id, baseDir), code })
-  }
-  const entryPaths: Record<string, string> = {}
-  for (const entry of graph.entries) {
-    entryPaths[entry.name] = outputPathOf(entry.id, baseDir)
+    files.push({
+      path: outputPathOf(moduleInfo.id, baseDir),
+      code: rewriteImports(moduleInfo, baseDir, outputPathOf(moduleInfo.id, baseDir)),
+    })
   }
   files.sort((left, right) => left.path.localeCompare(right.path))
-  return { dir: output.dir, minify, entryPaths, files, durationMs: Date.now() - startedAt }
+  return files
 }
 
 export async function build(config: StackConfig): Promise<BuildResult> {
   const inputNames = Object.keys(config.inputs ?? {})
   if (inputNames.length === 0) throw new Error('[stack] config.inputs 至少需要一个入口')
-  if ((config.outputs ?? []).length === 0)
-    throw new Error('[stack] config.outputs 至少需要一个输出')
   const startedAt = Date.now()
   const scheduler = createPluginScheduler(config.plugins)
   const graph = await buildModuleGraph(
     { root: config.root ?? '.', inputs: config.inputs, alias: config.alias },
     scheduler,
   )
-  const outputs: OutputResult[] = []
-  for (const output of config.outputs) {
-    outputs.push(await buildOutput(graph, output))
-  }
-  const result: BuildResult = {
-    outputs,
+  const channel = createOutputChannel()
+  channel.beginBuildEnd()
+  channel.produce(
+    { name: 'default', dir: config.dist ?? DEFAULT_DIST, files: renderGraph(graph) },
+    CORE_PRODUCER,
+  )
+  await scheduler.buildEnd(channel)
+  channel.seal()
+  return {
+    outputs: channel.snapshot(),
     moduleCount: graph.modules.size,
     durationMs: Date.now() - startedAt,
   }
-  await scheduler.buildEnd({ result })
-  return result
 }
