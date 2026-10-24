@@ -133,7 +133,13 @@ interface LowerContext {
   （`__define(id, fn)` 惰性函数＋import 改写 `const { x } = __require('id')` 解构近似＋入口
   `__require(entryId)` 启动，运行时模板 `runtime` 可覆写）。环语义由运行时保持，全程无
   await 无死锁。低层工具 `stronglyConnected`/`moduleRuntime` 同子路径导出（手写 derive 用）。
-  行为规格见 [docs/recipe-single-file.md](./docs/recipe-single-file.md)。
+  行为规格见 [docs/recipe-single-file.md](./docs/recipe-single-file.md)；
+- `inlineScript({ from?, name? })`：`watch: [from ?? 'default']`，对产出内的 html 做
+  **script 内联**——文件级闭包拉齐（script 引用→同产出 js→相对 import 递归），复用
+  wrapModule/moduleRuntime 做 wrap-all 包装，`<script src>` 整标签替换为单个内联
+  `<script type="module">`，入口按原标签序 `__require`；登记 `{ name: name ??
+  `${from}-inline`, dir }` 新产出（append-only，原产出不动）——产出自包含 html 页面的
+  终点站（css 仍外链）。
 
 ## 产物布局（preserve-ESM）
 
@@ -150,9 +156,11 @@ interface LowerContext {
 stack [--config stack.config.ts] [--watch]
 ```
 
-摘要按产出顺序逐行打印 `name → dir（N 个文件，大小）`，末行报输入数/模块数/用时。
-`--watch` 用 `fs.watch` 递归监听（忽略 node_modules/dist/.git），150ms 防抖全量重建；
-配置文件本身的热重载不在 MVP 内（改配置需重启）。
+- 配置文件为 TS（node 24 type stripping 直载）；`fs` 未定义时 CLI 默认注入 `nodeFs()`；
+- 摘要按产出顺序逐行打印 `name → dir（N 个文件，大小）`，末行报输入数/模块数/用时；
+- `--watch` 用 `fs.watch` 递归监听（忽略 node_modules/dist/.git），150ms 防抖全量重建；
+  配置文件本身的热重载不在 MVP 内（改配置需重启）；
+- 产出写盘经注入 fs 的 `writeFile`——`dist` 未定义时默认 `dist`。
 
 ## 浏览器路线
 
