@@ -7,11 +7,14 @@
 ## 产品定位
 
 - **CLI 是 SDK 的薄壳**：包主导出（`.`）提供 `build(config): Promise<BuildResult>` 与全部
-  类型，CLI（`bin/stack`）只是「读配置 → 补缺省 fs → 调 build → 写盘打印」的宿主之一；
+  类型，CLI（`bin/stack`）只是「读配置 → 补缺省 fs → 前置注入 imports() → 调 build →
+  写盘打印」的宿主之一；
 - **核心是 web standard 的**：`src/core/` 与 SDK 入口零 `node:` 导入（有测试断言）；平台
   I/O 只经注入 fs，跨平台仅需换 fs 注入。node 侧能力在 `./node` 子路径；
-- **静态解析而非运行时拦截**：acorn 顶层扫描收集静态 import/export 说明符与动态 import
-  字符串字面量；引擎对 lower 返回的工件必再解析以长图（动态拼接的说明符不可见，MVP 边界）；
+- **引擎零解析**：lower 返回的工件即终态，引擎不看内容；依赖图的唯一构成是 lower 内
+  `await ctx.loweringImport(id)`（每次 await 登记边＋调度完整生命周期）；默认闭包由内置
+  `imports()` 声明 hook 承担，工件可携带 imports 元数据（值区间＋解析 id）供渲染期引用
+  重写，不携带则不重写；
 - **单产出通道**：引擎登记第一份 `default` 规范产物（非特权产出方，只是第一个产出者），
   hook 经 `ctx.output` 追加衍生产物。登记即冻结（append-only）、登记即广播（watch 订阅）、
   重名报双来源（天然环断路器）。
@@ -54,7 +57,7 @@ export default defineConfig({
   （`.html`/`.css`/其余 → module），显式 type 覆盖推断。module 走 esbuild 剥类型＋acorn
   长图；html 的 `script src`／`link rel=stylesheet href` 引用走 resolve 链长图、终态重写
   为最终产物相对路径（不剥类型、不进 SCC/bundle 闭包）；css 透传为终态工件、不产图边、
-  可被 demand 拉取——三种 kind 的生命周期差异见 protocol-v2「输入类型」；
+  可被 loweringImport 拉取——三种 kind 的生命周期差异见 protocol-v2「输入类型」；
 - `fs: StackFs`（`readFile`/`writeFile`）；根导出 `memoryFs(files?)`（纯 Map，测试与浏览器
   用）；`load` 未配置时缺省 `ctx.fs.readFile`，候选探测（`.ts/.tsx/.js/.jsx/.mjs/index`）
   由引擎经同一注入 fs 完成；
@@ -72,10 +75,10 @@ flowchart LR
     F -->|"0..n 工件（带内容）"| A
 ```
 
-- **模块相**（内容从无到有）：resolve demand → resolve 链（纯函数、first-non-null、可内联
+- **模块相**（内容从无到有）：resolve 模块需求 → resolve 链（纯函数、first-non-null、可内联
   供料 `{ id, content }`；全部未命中时裸说明符＝external 保留、相对/绝对路径＝报错）→
-  load → lower 链（产物集累积，一化 0..n；0＝消费终结、恒等合法）→ 产物带内容作为新
-  demand 回到 resolve。图在 lower 处分叉、在 import 处增长，全程需求递归无全局循环；
+  load → lower 链（产物集累积，一化 0..n；0＝消费终结、恒等合法）→ 依赖图在 lower 内经
+  `ctx.loweringImport` 声明式涌现，引擎零解析（工件即终态）；
 - **产出相**（内容已存在的派生）：模块需求排干 → 引擎登记 `default`（preserve-ESM：入口
   公共祖先落位、说明符重写 `.ts→.js`、alias 与动态 import 字面量重写、external 保留）→
   derive hooks 按注册序触发 → 产出事件驱动 watch 命中的 lower → quiescence → seal →
@@ -101,14 +104,18 @@ interface LowerContext {
   fs: { readFile(path: string): Promise<string> }        // 注入 fs 只读面
   output(spec: EmittedOutput): void                      // 唯一副作用：登记产出（登记即冻结）
   lowerImport(code: string): string[]                    // acorn 封装：静态＋动态 import 字面量
-  demand(specifiers: string[]): Promise<FinalModule[]>   // 递归需求：环时抛可捕获 CycleError
-  merge(specifiers: string[], name?: string): Promise<FinalModule>  // 环解法
+  loweringImport(id: string): Promise<FinalModule | null>  // await 即声明依赖边＋拉取终态（external 返回 null）
+  loweringBindImport(ids: string[]): Promise<void>       // 环解法：绑定为同一单元，后续命中绑定缓存
 }
 ```
 
-- **声明资源**：demand 拉取依赖的传递闭包终态（依赖先行、按 id 去重共享 Promise、
-  external 跳过）；`CycleError` 可捕获（带环路径），catch 后 `ctx.merge` 解环（load 结果
-  精确清理→拼接→注册新模块→注册表重定向→解除全体挂起→同步循环检测器 contract）；
+- **声明依赖图**：`loweringImport` 登记边（detector.addEdge）→ resolve → ensureLifecycle
+  完整生命周期 → 返回 FinalModule；被 await 模块的 lower 同样声明自己的依赖（递归
+  await），传递闭包由声明链涌现。用户插件直接不管依赖也是合法的：不 await 就没有边；
+  await 链成环 → 抛可捕获 `CycleError`（带环路径），catch 后 `ctx.loweringBindImport`
+  解环（注册表把环上 ids 重定向到当前模块的终态 Promise＋挂起恢复＋循环检测器
+  contract；绑定只做缓存重定向，内容处理归插件流程，后续 loweringImport 命中绑定缓存
+  返回绑定单元终态）；
 - **修正前人产出被无条件拒绝**：「final」是全称命题，开放链上不可证实（webpack stage
   数字军备竞赛即生态招供）；修正＝登记新产出；`seal()` 是全协议唯一的终态；
 - 互指环走 token 晚绑定（演进方向，未实现，见 protocol-v2）。
@@ -117,14 +124,21 @@ interface LowerContext {
 
 | 层 | 环的处理 |
 |---|---|
-| 图层（不拉取终态） | 无害——入图即止，preserve-ESM 交给 ESM live binding 原生处理 |
-| pull 层（demand 终态） | `CycleError` 响亮报错（环上不存在终态全序，await 死锁）；正解 catch＋merge |
+| 图层（不拉取终态） | 无害——不 await 就没有边，preserve-ESM 交给 ESM live binding 原生处理 |
+| pull 层（loweringImport 终态） | `CycleError` 响亮报错（环上不存在终态全序，await 死锁）；正解 catch＋loweringBindImport |
 | 产出层（拼接打包） | SCC 分解＋运行时包装（`__define/__require` 惰性函数），环在调用时自解 |
 
 ## 内置 hooks（`@idealjs/stack/builtins`）
 
 策略与协议分离：根 API 只留协议面，内置能力在 builtins 子路径。
 
+- `imports({ name? })`：**默认闭包载体**（模块相 lower）。对每个工件按 kind 提取引用并
+  逐个 `await ctx.loweringImport`——module 用 lowerImport（静态＋动态字面量）、html 用
+  parseHtmlAssets（script src／link stylesheet href）、css 透传不声明；声明完成后把引用
+  值区间＋解析 id 作为工件 imports 元数据随工件返回，渲染期据此重写。自身闭环的
+  CycleError 被捕获降级为边数据（环只在依赖边不在等待链，bundle 的 SCC 因此照常成立），
+  他人抛来的环照常上抛。CLI 与示例默认注入；SDK 不自动注入——纯手动模式图完全由显式
+  await 构成；
 - `minify({ from?, name?, dir })`：`watch: [from ?? 'default']`，对产出做完整文件集——
   .js 走 esbuild-wasm 异步 minify、.css 走 css loader minify、其余文件（html）原样复制，
   登记 `{ name: name ?? 'min', dir }`——min 产出即完整可部署文件集，「按产出订阅」的范本；
@@ -145,9 +159,9 @@ interface LowerContext {
 
 - 以全部入口 id 的公共祖先目录为基，每模块按相对结构落位，module 扩展名 `.ts/.tsx → .js`，
   html/css 保留自身扩展名；lower 产物可自带显式 path（如 bundle.js）；
-- import/export 说明符按新位置重写为相对路径（含动态 import 字符串字面量），external 不动；
-  html 入口的 script/link 引用按属性值区间 offset 重写为最终相对路径，原文其余部分不动；
-- merge 重定向后的模块以首个成员的落位路径呈现，引用方重写指向它；
+- 引用重写由工件 imports 元数据驱动：携带者按值区间把引用重写为最终相对路径（js 与
+  html 同机制），不携带则不重写；external 不动；
+- loweringBindImport 重定向后的模块以绑定单元（当前模块）的落位路径呈现，引用方重写指向它；
 - `EmittedOutput.files` 内 `{ path, code }` 的 path 相对该产出自己的 dir。
 
 ## CLI
@@ -157,6 +171,7 @@ stack [--config stack.config.ts] [--watch]
 ```
 
 - 配置文件为 TS（node 24 type stripping 直载）；`fs` 未定义时 CLI 默认注入 `nodeFs()`；
+  hooks 未含 imports() 时前置注入（默认闭包行为与 SDK 手动模式的差异见内置 hooks 节）；
 - 摘要按产出顺序逐行打印 `name → dir（N 个文件，大小）`，末行报输入数/模块数/用时；
 - `--watch` 用 `fs.watch` 递归监听（忽略 node_modules/dist/.git），150ms 防抖全量重建；
   配置文件本身的热重载不在 MVP 内（改配置需重启）；
@@ -171,8 +186,9 @@ harness（vite dev 直接 serve TS 源），`yarn test:browser`（Playwright，w
 ## 测试（双层）
 
 - `yarn test`：node 侧——parse 说明符收集与 html 资产解析、循环检测器单测
-  （`test/cycle.spec.ts`）、共享场景套件（含 await 环三种出路、bundle 环结构、watch 环
-  断路、html/css 入口三种 kind 生命周期）、CLI 端到端（mini 与 cycle 夹具，后者断言单文件
+  （`test/cycle.spec.ts`）、共享场景套件（含 await 环出路矩阵：未捕获响亮报错、
+  loweringBindImport 绑定解环、imports() 闭环降级、bundle 环结构、watch 环断路、
+  html/css 入口三种 kind 生命周期）、CLI 端到端（mini 与 cycle 夹具，后者断言单文件
   bundle 产物 node 可执行）、零 node: 断言；
 - `yarn test:browser`：Playwright 断言 data-state=passed、用例数与场景数一致、零
   console error / pageerror；
@@ -186,17 +202,18 @@ packages/stack/
 ├── bin/stack.mjs              #! 壳：读参数 → runCLI
 ├── src/
 │   ├── index.ts               SDK 协议面出口（build/defineConfig/memoryFs/CycleError/类型）
-│   ├── builtins.ts            策略出口（minify/bundle/stronglyConnected/moduleRuntime）
+│   ├── builtins.ts            策略出口（imports/minify/bundle/inlineScript/stronglyConnected/moduleRuntime）
 │   ├── core/
 │   │   ├── config.ts          defineConfig 与 StackConfig/StackFs/StackInput 类型
 │   │   ├── hooks.ts           StackHook 形态与各相 ctx 类型（纯度分类的载体）
-│   │   ├── engine.ts          模块相引擎主干：DemandEngine（生命周期/调度/lower 链/merge 委托）
+│   │   ├── engine.ts          模块相引擎主干：DemandEngine（生命周期/调度/lower 链/loweringImport 委托，零解析）
 │   │   ├── engine-types.ts    模块相数据形状（工件/注册表条目/队列任务）
-│   │   ├── resources.ts       资源声明叶子：demandFrom（传递闭包拉取）/mergeFrom（合并注册）
+│   │   ├── resources.ts       资源声明叶子：loweringImportFrom（声明边＋拉终态）/loweringBindImportFrom（绑定解环）
 │   │   ├── loading.ts         装载转译叶子：probe/loadForLifecycle/strip/import 清理/顶层冲突
 │   │   ├── cycle.ts           循环检测器叶子：addEdge 环检查＋可达性 memo＋contract＋CycleError
 │   │   ├── channel.ts         产出通道：登记即冻结＋watch 广播＋重名双来源
-│   │   ├── render.ts          default 规范产物渲染（preserve-ESM 落位与说明符重写）
+│   │   ├── render.ts          default 规范产物渲染（imports 元数据驱动的落位与引用重写）
+│   │   ├── imports.ts         imports() 内置声明 hook：按 kind 提取引用逐个声明边并附元数据
 │   │   ├── bundle.ts          SCC 分解＋双表示打包（hoisted 拼接/wrapped 运行时）
 │   │   ├── scc.ts             强连通分量（Tarjan，声明序 tie-break）
 │   │   ├── minify.ts          压缩内置 hook
@@ -219,7 +236,8 @@ packages/stack/
 - bare specifier 的 node_modules 解析（一律 external）；
 - img 等二进制资产与 token 晚绑定（协议已留演进方向；html/css 入口已支持）；
 - html 解析是 web-standard 正则＋属性值区间，无完整 HTML AST、畸形 HTML 不保证；
-  css 的 `@import` 不展开、不产图边；merge 仅适用 module kind；
+  css 的 `@import` 不展开、不产图边；loweringBindImport 仅适用 module kind（绑定单元的
+  内容处理是 js 语义，归插件流程）；
 - 缓存与增量构建（watch 是防抖全量重建）；
 - bundle wrapped 表示的标识符级 scope 分析（解构近似，边界见 recipe-single-file）；
 - 无限产出链以 quiescence 不达暴露（MVP 不设上限）。

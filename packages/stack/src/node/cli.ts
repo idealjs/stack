@@ -1,7 +1,8 @@
 import { existsSync, type FSWatcher, rmSync, watch } from 'node:fs'
 import { resolve as resolvePath } from 'node:path'
 import { pathToFileURL } from 'node:url'
-import { type BuildResult, build, type StackConfig } from '../index.ts'
+import { imports } from '../builtins.ts'
+import { type BuildResult, build, type StackConfig, type StackHook } from '../index.ts'
 import { nodeFs } from './fs.ts'
 
 const VERSION = '0.2.0'
@@ -45,9 +46,13 @@ async function loadConfig(configPath: string): Promise<StackConfig> {
   return config
 }
 
-const withNodeFs = (config: StackConfig): StackConfig => ({
+const hasImportsHook = (hooks: StackHook[] | undefined): boolean =>
+  (hooks ?? []).some((hook) => hook.name.startsWith('imports:'))
+
+const withDefaults = (config: StackConfig): StackConfig => ({
   ...config,
   fs: config.fs ?? nodeFs(),
+  hooks: hasImportsHook(config.hooks) ? (config.hooks ?? []) : [imports(), ...(config.hooks ?? [])],
 })
 
 async function writeOutputs(config: StackConfig, result: BuildResult): Promise<void> {
@@ -81,7 +86,7 @@ function printSummary(config: StackConfig, result: BuildResult): void {
 }
 
 async function buildOnce(config: StackConfig): Promise<void> {
-  const result = await build(withNodeFs(config))
+  const result = await build(withDefaults(config))
   await writeOutputs(config, result)
   printSummary(config, result)
 }
