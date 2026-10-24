@@ -5,29 +5,29 @@ js 脚本**——他的 hook 应该长什么样？流程是什么？
 
 ## 结论
 
-插件形态是**产出相的图根派生**（`derive`）——不是模块相的 lower：
+插件形态是**模块相 lower ＋ 细粒度资源等待**：lower 里 `await ctx.demand(imports)`
+拉取依赖的终态，就地合并，入口工件的终态即单文件脚本——无须等模块集排干，无须
+产出相参与：
 
 ```ts
 {
   name: 'single-file',
-  derive(ctx) {
-    // ctx.modules：终态模块集（全部模块已完成 resolve→load→lower，含依赖边）
-    // ctx.inputs：入口清单
-    const closure = collectClosure(ctx.modules, ctx.inputs) // 从各入口走依赖闭包
-    if (hasCycle(closure)) throw new Error('闭包存在循环依赖：单文件拼接拒绝（运行时包装为升级路径）')
-    const ordered = postOrder(closure)                      // 依赖先行，后序 DFS
-    const code = ordered
-      .map((m) => stripLocalImports(m.code))                // 剥内部 import；external 保留
+  lower: async (ctx, id, artifact) => {
+    if (id !== entryId) return [artifact]          // 非入口恒等返回（按 id 自筛纪律）
+    const imports = ctx.parseImports(artifact.code) // ['./b', './c']（external 由 demand 跳过）
+    const deps = await ctx.demand(imports)          // 传递闭包终态：依赖先行、按 id 去重
+    const code = [...deps, artifact]                // 依赖先行，入口最后
+      .map((m) => stripLocalImports(m.code))        // 剥内部 import；external 保留
       .join('\n')
-    ctx.output({ name: 'bundle', dir: 'dist', files: [{ path: 'bundle.js', code }] })
+    return [{ path: 'bundle.js', code }]            // 覆盖入口终态为合并体（一化为一）
   },
 }
 ```
 
-模块相**零参与**：lower 每次只见一个工件，天然拿不到兄弟模块的终态内容——跨模块的
-集合级重组（合并、拆 chunk）属于产出相。这条边界就是范本的全部结构：**打包不是引擎
-的职责，而是终态模块图上的一次派生**；引擎是需求图编译器，「能不能打成一个文件」
-只是这个派生自己的业务逻辑。
+`await ctx.demand(['./b', './c'])` 的语义：每个 specifier 经 resolve 链（相对当前
+id，alias 生效）走**完整生命周期**（load → lower），返回**传递闭包**的终态——依赖
+先行、按 id 去重、external 跳过。await 链成环（A 等 B、B 等 A）→ 引擎响亮报错并带
+环路径；同 id 并发 demand 共享同一 Promise。
 
 ## 流程时间线
 
@@ -36,46 +36,43 @@ js 脚本**——他的 hook 应该长什么样？流程是什么？
 ```mermaid
 flowchart TD
     D1["需求 A"] --> P1["解析 A"]
-    P1 --> D2["需求 B"] --> P2["解析 B"]
-    P1 --> D3["需求 C"] --> P3["解析 C"]
-    P2 --> Q["模块集排干"]
-    P3 --> Q
-    Q --> T["产出相：bundle 派生"]
-    T --> W["宿主写盘 dist/bundle.js"]
+    P1 --> L1["lower A<br/>parseImports → demand B、C"]
+    L1 --> D2["需求 B"] --> P2["解析 B（终态）"]
+    L1 --> D3["需求 C"] --> P3["解析 C（终态）"]
+    P2 --> R["恢复 lower A<br/>合并 B＋C＋A → bundle.js"]
+    P3 --> R
+    R --> W["宿主写盘 dist/bundle.js"]
 ```
 
 各步职责：
 
 1. **需求 A 入队**——config `inputs` 的初始模块需求；
-2. **解析 A**——resolve（纯）定位 id；load（ctx.fs）读源码；lower 链过一遍（纯 js
-   恒等）；parse 发现 `import B`、`import C` → **两个新模块需求入队**；
-3. **需求 B、C 各自走完生命周期**——B、C 无 import，解析后即终态；
-4. **模块集排干（quiescence）**——需求队列为空，{A, B, C} 全部冻结为终态；
-5. **产出相调度**——graph-rooted 的 derive 触发：插件拿到终态模块集（含依赖边），
-   走入口闭包 → 后序排序 `[B, C, A]` → 剥内部 import（external 如 `import x from
-   'react'` **原样保留**）→ 拼接 → `ctx.output` 登记 `bundle`；
-6. **（可选）下游派生**——`watch: ['bundle']` 的压缩 hook 被触发，登记 `bundle-min`；
-7. **seal → 宿主写盘**——`dist/bundle.js` 单文件落地。
+2. **resolve → load**——定位 id、读源码；
+3. **lower A**——`parseImports` 拿到 `['./b', './c']`，`await ctx.demand(...)` 挂起；
+4. **引擎调度 B、C**——各自 resolve → load → lower 至终态（若 B 的 lower 也 pull，
+   递归同法）；
+5. **恢复 lower A**——拿到 B、C 终态，依赖先行剥 import 拼接，返回 `bundle.js`
+   作为 A 的终态（一化为一）；
+6. **seal → 宿主写盘**。
 
 ## 引擎保证与插件责任
 
 | 引擎保证 | 插件责任 |
 |---|---|
-| derive 触发时模块集已排干——闭包内每个模块都是 lower 后的终态 | 闭包收集、排序、剥 import、拼接全是插件逻辑 |
-| 模块注册表按 id 去重（别名/扩展名归一），环检测有记录 | 环的处理：范本选择报错；运行时包装为升级路径 |
-| external（裸说明符）在模块边上已标注 | 剥 import 时保留 external |
-| 登记即冻结，重名报双来源 | 派生是纯函数：不改来源，只登记新产出 |
+| demand 返回传递闭包终态（依赖先行、去重、external 跳过） | 入口筛选（非入口恒等）、剥 import、拼接 |
+| await 环响亮报错（带环路径）；同 id 并发共享同一 Promise | 环的处理：报错即修依赖；运行时包装为升级路径 |
+| 登记即冻结；重名报双来源 | 派生是纯函数式重组：不改来源，只返回新工件 |
 
 ## 边界与升级路径
 
-- **循环依赖**：后序排序在环上无定义。范本报错；升级路径是模块运行时包装
-  （`__register`/`__require` 小型注册表，webpack bootstrap 同思路）——那是另一份
-  范本，不混入本篇；
-- **共享模块**：多入口各自成 bundle 时，共享模块默认**每 bundle 各内联一份**（复制
-  语义）；去重共享（抽公共 chunk）是 code splitting 特性，属引擎级特性而非范本能
-  表达，超出 MVP；
+- **循环依赖**：await 环被引擎拒绝。范本报错；升级路径是模块运行时包装
+  （`__register`/`__require` 小型注册表）——另一份范本，不混入本篇；
+- **materialize 并存**：被 demand 的模块（B、C）仍留在注册表——若同时使用
+  「物化全部模块」的产出会得到 bundle＋散装双份；物化类产出自行筛选（如仅入口）；
 - **ESM 精确语义**：直接拼接是语义近似（未处理提升、live binding）；精确语义需要
   模块运行时包装，同上属升级路径；
+- **对照：产出相图根派生**（`derive(ctx)`，模块集排干后触发）——多入口聚合、基于
+  产出内容的后处理（压缩、manifest）属于那个形态；**单入口闭包内联用 pull，
+  跨入口/跨产出用 derive** 是选择口径。
 - **对照默认形态**：不写这个 hook，同一份输入得到的是 preserve-ESM 三文件
-  （a.js/b.js/c.js，引用已重写）——引擎默认给「图的原样物化」，单文件与否完全是
-  产出相插件的选择。
+  （a.js/b.js/c.js，引用已重写）——单文件与否完全是 hook 的选择。

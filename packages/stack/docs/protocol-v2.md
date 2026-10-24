@@ -76,6 +76,28 @@ flowchart LR
   resolve——图在 lower 处分叉、在 import 处增长，全程需求递归，无全局循环。
   插件按 id 自筛目标（rollup transform 同款纪律：非目标恒等返回）。
 
+lower 的 ctx API——细粒度资源等待（lower 可以拉取依赖模块的终态，单文件打包因此
+能在模块相完成，无须等模块集排干）：
+
+```ts
+interface LowerContext {
+  fs: { readFile(path: string): Promise<string> }   // 注入 fs 只读面
+  output(spec: EmittedOutput): void                  // 唯一副作用：登记产出（登记即冻结）
+  parseImports(code: string): Specifier[]            // 工具：acorn 封装（静态＋动态字面量）
+  demand(specifiers: string[]): Promise<FinalModule[]>  // 递归需求：拉取依赖终态
+}
+```
+
+- `ctx.parseImports`：供 lower 分析自身输入（引擎对 lower 返回的工件必再解析以长图，
+  工具与引擎共用同一解析器，双解析可按内容缓存）；
+- **`ctx.demand(specifiers)`**：拉取依赖的**传递闭包终态**——每个 specifier 经 resolve
+  链（相对当前 id，alias 生效）→ 完整生命周期（load→lower）→ 最终形态；语义四条：
+  传递闭包（依赖的依赖一并拉取）、依赖先行排序（声明序 tie-break）、按 id 去重
+  （并发/重复 demand 共享同一 Promise）、external 跳过（保留为 import 语句）；
+  **await 链成环 → 响亮报错并带环路径**（A 等 B、B 等 A 无解，修法是重构依赖）。
+  工程纪律：merge 是插件侧 join，协议只供 parseImports＋demand 两个工具；
+- 被 demand 的模块仍留在注册表：materialize 类产出自行筛选（如仅入口），避免双份。
+
 命名定案：**lower**（裂变语义；compiler lowering 行话——高级结构降为多个低级结构，
 一化多的最精确行业词）。弃选记录：transform（1:1 整形）、expand（技术填充味）、
 spawn（孵化义准但让位）、generate/emit（产出层撞车）、decompose（部分和＝整体）。
