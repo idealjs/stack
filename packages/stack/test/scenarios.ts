@@ -134,6 +134,8 @@ const cartesianFiles: Record<string, string> = {
 const capturedOutputs: string[] = []
 let capturedOutputFn: ((spec: EmittedOutput) => void) | undefined
 
+const tick = (): Promise<void> => new Promise((resolve) => setTimeout(resolve, 0))
+
 const lateProducer: StackPlugin = {
   name: 'late-producer',
   transform(_id, code) {
@@ -263,6 +265,65 @@ export const SCENARIOS: Scenario[] = [
           name: 'default',
           dir: 'dist',
           files: [{ path: 'main.js', includes: ['renamed'], notIncludes: [': number'] }],
+        },
+      ],
+    },
+  },
+  {
+    name: 'async 钩子全链路：resolveId/load/transform/buildEnd 异步供给与登记',
+    files: {
+      'src/main.ts': "import { extra } from './extra'\nconsole.log(extra)\n",
+    },
+    config: {
+      inputs: { main: 'src/main.ts' },
+      dist: 'dist/async',
+      plugins: [
+        {
+          name: 'async-supplier',
+          async resolveId(source) {
+            await tick()
+            return source === './extra' ? 'src/extra.ts' : null
+          },
+          async load(id) {
+            await tick()
+            return id === 'src/extra.ts' ? 'export const extra = 41 + 1\n' : null
+          },
+          async transform(id, code) {
+            await tick()
+            return id === 'src/extra.ts' ? code.replace('41 + 1', '41 + 2') : null
+          },
+          async buildEnd(ctx) {
+            await tick()
+            ctx.output({
+              name: 'async-report',
+              dir: 'dist/async-report',
+              files: [
+                {
+                  path: 'report.txt',
+                  code: `js:${ctx.outputs[0].files.filter((file) => file.path.endsWith('.js')).length}`,
+                },
+              ],
+            })
+          },
+        },
+      ],
+    },
+    expected: {
+      moduleCount: 2,
+      outputs: [
+        {
+          name: 'default',
+          dir: 'dist/async',
+          filePaths: ['extra.js', 'main.js'],
+          files: [
+            { path: 'extra.js', includes: ['41 + 2'], notIncludes: ['41 + 1'] },
+            { path: 'main.js', includes: ['./extra.js'] },
+          ],
+        },
+        {
+          name: 'async-report',
+          dir: 'dist/async-report',
+          files: [{ path: 'report.txt', includes: ['js:2'] }],
         },
       ],
     },

@@ -46,6 +46,7 @@ interface StackPlugin {
 ```
 
 - 调度语义：**链式 first-non-null**——按 plugins 声明顺序依次调用，第一个返回非 null 的结果生效；buildEnd 按声明顺序串行执行，每个插件看到「default＋先序插件」的产出，也以自己的名字为产出归属。
+- **异步纪律**：四个钩子一律可返回 `T | Promise<T>`，调度器顺序 `await`、**绝不并行**——同一构建的钩子调用序恒定；buildEnd「只看到排在前面的产出」的不变量依赖顺序性。`ctx.output()` 本身是同步 void：异步的是登记之前的加工（await 加工完成再登记，登记动作立即入缓存）。这由宿主现实倒逼：esbuild-wasm 的 JS API 只有异步形态，浏览器文件读取（fetch/OPFS）天然返回 Promise——协议不支持 async 钩子，浏览器宿主就停在纸面。
 - id 契约：resolveId 返回的 id 应是 POSIX 规范化路径形态（node 宿主为绝对路径，内存/浏览器宿主可为任意稳定字符串）。
 - 解析失败规则：相对说明符、alias 命中、绝对路径解析失败即抛错；裸说明符（npm 包名）解析失败视为 external，产物原样保留。
 - 转译管线：load → 用户 transform 链 → 核心 esbuild-wasm 按 id 扩展名剥类型（ts/tsx/jsx）→ acorn 收集说明符。
