@@ -45,8 +45,8 @@ flowchart LR
   返回 `{ id, content }`（纯数据，虚拟模块的替代形态——不碰平台 I/O，锁不住平台）。
   身份归一是 resolve 存在的理由：N 个 specifier 归一一个 id，图去重、环检测、落位
   全以稳定 id 为键。
-- `load`：**适配层专属，不是插件钩子**（见「插件层零 I/O」）。仅对无内联内容的
-  demand 兜底物理读取。
+- `load`：引擎驱动的生命周期一步，**走注入 fs**（`fs.readFile`），不是插件钩子。
+  仅对无内联内容的 demand 执行（resolve 内联供料与 fission 产物自带内容，跳过）。
 - `fission(id, artifact)`：链式产物集累积（每插件拿前一环产物集、返回新产物集），
   一化为 0..n 工件；0＝消费终结（过滤），恒等合法。产物带内容作为新 demand 回到
   resolve——**图在 fission 处分叉、在 import 处增长**，全程需求递归，无全局循环。
@@ -62,15 +62,34 @@ flowchart LR
 - 分层卫生：derive 是模块集上的**纯函数**，不得再产模块需求——内容从无到有只属于
   模块相；真需要就下一轮构建（SDK 两次构建零负担）。
 
-## 插件层零 I/O（定律）
+## 平台 I/O 只经注入 fs（定律）
 
-插件钩子（resolve/fission/derive）全是纯函数：无 I/O、无平台动词。I/O 只属于适配层：
+`defineConfig` 定义 fs 实现——**简化的 fs 接口**由宿主注入，load 与落盘全部经它：
 
-- `load(id)`：物理读取兜底——node fs / 浏览器内存 Map·fetch·OPFS；
-- `write(outputs)`：落盘——node fs / OPFS / zip 下载。
+```ts
+interface StackFs {
+  readFile(path: string): Promise<string>
+  writeFile(path: string, content: string): Promise<void>
+}
 
-平台锁定被结构排除：带平台假设的插件不存在；合并＝纯能力并集，无平台冲突、无 load
-顺序敏感——v1 的合并困惑（load 插件摸平台导致跨平台即冲突）就此消失于结构。
+defineConfig({
+  inputs: [{ name: 'app', path: 'src/app.ts' }],
+  fs: nodeFs(),          // 平台实现：node CLI 默认注入；浏览器宿主注入内存/OPFS 实现
+  plugins: [minify({ dir: 'dist/min' })],
+})
+```
+
+- **load 流程保留**：引擎驱动的生命周期一步——对无内联内容的 demand 调
+  `fs.readFile`；resolve 内联供料与 fission 产物自带内容，跳过物理读取。
+- **插件做 I/O 的唯一合法形态是打到注入 fs 上**：钩子 ctx 暴露只读面（`readFile`），
+  resolve 的扩展名候选探测、fission 读伴生文件都走它；直接 import 平台 API
+  （`node:fs`、裸 fetch）是协议违例。
+- **写盘只归宿主**：`BuildResult` 交宿主经 `fs.writeFile` 落盘，插件不直接写——
+  append-only 与产出通道不破。
+- 锁定与合并的论证升级：v1 是「插件摸平台 → 锁定」；v2 是「插件只打注入 fs → 跨平台
+  仅需换 fs 注入」，合并＝能力并集＋同一家 fs，无冲突面。
+- 缺省规则：`fs` 未定义时由入口注入默认实现（node CLI → node 实现；浏览器 harness →
+  内存实现）；SDK 使用方显式传入，或取用 `@idealjs/stack/node` 的 `nodeFs()`。
 
 ## 不可变与声明资源
 
@@ -93,7 +112,7 @@ flowchart LR
 | 名 | 层 | 语义 | 弃选记录 |
 |---|---|---|---|
 | resolve | 模块相 | 身份归一（N:1）＋可选内联供料 | — |
-| load | 适配层 | 物理读取兜底（非插件钩子） | 插件链 load→平台锁定与合并困惑，移除 |
+| load | 引擎 · fs 注入 | 物理读取兜底（非插件钩子，走注入 fs） | 插件链 load → 平台锁定与合并困惑，收编为注入式接口 |
 | fission | 模块相 | 裂变：一化为 0..n 工件 | transform（1:1 整形）、expand（技术填充味）、spawn（孵化义准但选裂变）、lower（lowering 精确但小众，记为行话别名）、generate/emit（产出层撞车）、decompose（部分和＝整体，不能新增材料） |
 | derive | 产出相 | 从来源产出派生新产出 | — |
 | output(spec) | 产出相通道 | 登记产出（登记即冻结，重名报双来源） | — |
@@ -104,7 +123,9 @@ flowchart LR
 - **buildEnd 顺序链退场** → derive 注册表（依赖声明取代运行时断言，requireOutput
   随链退场）；
 - 冻结存活且更重要（derive 输入必须稳定）；token 晚绑定存活（正交机制）；
-- 场景单一事实源改写为 v2 场景；双层测试（node＋chromium）架构不变。
+- 场景单一事实源改写为 v2 场景；双层测试（node＋chromium）架构不变；
+- `nodeFsPlugin`（v1 插件形态的 fs）→ `nodeFs()`（v2 fs 注入）；测试/浏览器的内存
+  fs 场景由 `memoryFs()` 承担。
 
 ## 明确拒绝（记录在案）
 
