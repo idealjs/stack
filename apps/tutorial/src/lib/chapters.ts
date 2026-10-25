@@ -391,7 +391,7 @@ export const CONTENT: Record<ChapterId, ChapterContent> = {
       {
         title: '在沙箱里跑 template',
         kind: 'value',
-        what: '下面的实验室预置了 template 的全部文件：点「运行」，esbuild 构建 main.ts，index.html 的身体装进沙箱文档。',
+        what: '下面的实验室预置了 template 的全部文件：点「运行」，沙箱内的 stack 引擎按 index.html 的 script src 拉起依赖闭包，入口文档的身体装进沙箱文档。',
         accept: '预览框长出 hello, template，输出面板同时有 console 回传。',
       },
       {
@@ -421,6 +421,6 @@ export const CONTENT: Record<ChapterId, ChapterContent> = {
         family: '同族是 SSR 直出；客户端挂载用挂载点，首屏直出交给 SSR',
       },
     ],
-    base: 'esbuild.config.json 里的 html 字段是沙箱的接缝：宿主把入口文档的身体装进沙箱、剥掉其中的 <script>——页面里的脚本永远只走构建通道。',
+    base: 'index.html 就是沙箱的接缝：引擎按它的 script src 拉起依赖闭包、把入口文档的身体装进沙箱、剥掉其中的 <script>——页面里的脚本永远只走构建通道。',
   },
 }

@@ -25,7 +25,7 @@ test('切换文件：两份代码互不串', async ({ page }) => {
   await expect(page.getByLabel('模块代码')).toHaveValue('export const one = 1')
 })
 
-test('删除文件：删活跃文件后切到首个剩余文件，配置文件固定不可删', async ({ page }) => {
+test('删除文件：删活跃文件后切到首个剩余文件，最后一份不可再删', async ({ page }) => {
   await page.goto('/practice.html')
   await addFile(page, 'utils.js')
   await page.getByRole('button', { name: '删除 utils.js' }).click()
@@ -41,12 +41,7 @@ test('删除文件：删活跃文件后切到首个剩余文件，配置文件�
     'aria-current',
     'true',
   )
-  await page.getByRole('button', { name: '删除 main.ts' }).click()
-  await expect(page.getByRole('button', { name: 'main.ts', exact: true })).toHaveCount(0)
-  await expect(
-    page.getByRole('button', { name: 'esbuild.config.json', exact: true }),
-  ).toHaveAttribute('aria-current', 'true')
-  await expect(page.getByRole('button', { name: '删除 esbuild.config.json' })).toHaveCount(0)
+  await expect(page.getByRole('button', { name: '删除 main.ts' })).toHaveCount(0)
 })
 
 test('文件名白名单：路径与非法字符被拒并提示', async ({ page }) => {

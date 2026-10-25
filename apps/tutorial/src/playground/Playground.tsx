@@ -1,7 +1,6 @@
 import runtimeDoc from 'virtual:web-runner-doc'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { ShadowButton } from '../design-system'
-import { CONFIG_FILE_NAME, CONFIG_TEMPLATE, parseBuildConfig } from './config'
 import { extractHtmlBody } from './htmlBody'
 import { type OutputLine, OutputPanel } from './OutputPanel'
 import { isRuntimeMessage, PROTOCOL_VERSION } from './protocol'
@@ -18,10 +17,7 @@ interface ProjectFile {
   code: string
 }
 
-const INITIAL_FILES: ProjectFile[] = [
-  { name: 'main.ts', code: MAIN_TS },
-  { name: CONFIG_FILE_NAME, code: CONFIG_TEMPLATE },
-]
+const INITIAL_FILES: ProjectFile[] = [{ name: 'main.ts', code: MAIN_TS }]
 
 export interface PlaygroundProps {
   initialFiles?: ProjectFile[]
@@ -76,7 +72,7 @@ export function Playground({ initialFiles = INITIAL_FILES }: PlaygroundProps) {
   }
 
   const removeFile = (name: string) => {
-    if (name === CONFIG_FILE_NAME || files.length <= 1) return
+    if (files.length <= 1) return
     const next = files.filter((f) => f.name !== name)
     setFiles(next)
     if (name === active.name) setActiveName(next[0].name)
@@ -116,49 +112,38 @@ export function Playground({ initialFiles = INITIAL_FILES }: PlaygroundProps) {
     setSameOriginAlert(false)
     setBuilding(true)
     try {
-      const configFile = files.find((f) => f.name === CONFIG_FILE_NAME)
-      const parsed = parseBuildConfig(configFile?.code ?? '')
-      if (!parsed.ok) {
-        setLines([{ level: 'error', stage: 'build', text: parsed.error }])
+      const doc = files.find((f) => f.name === 'index.html')
+      if (doc === undefined) {
+        setLines([{ level: 'error', stage: 'build', text: '入口文档不存在：index.html' }])
         return
       }
-      if (!files.some((f) => f.name === parsed.config.entry)) {
+      const entry = /<script\b[^>]*\ssrc="([^"]+)"/i.exec(doc.code)?.[1]?.replace(/^\.\//, '')
+      if (entry === undefined || !files.some((f) => f.name === entry)) {
         setLines([
           {
             level: 'error',
             stage: 'build',
-            text: `入口文件不存在：${parsed.config.entry}（entry 必须是工程内的文件名）`,
+            text:
+              entry === undefined
+                ? 'index.html 缺少 <script src>——无法确定入口'
+                : `入口文件不存在：${entry}（index.html 的 script src 必须指向工程内文件）`,
           },
         ])
         return
       }
-      let html: string | null = null
-      if (parsed.config.html !== null) {
-        const doc = files.find((f) => f.name === parsed.config.html)
-        if (doc === undefined) {
-          setLines([
-            {
-              level: 'error',
-              stage: 'build',
-              text: `入口文档不存在：${parsed.config.html}（html 必须是工程内的文件名）`,
-            },
-          ])
-          return
-        }
-        html = extractHtmlBody(doc.code)
-      }
+      const html = extractHtmlBody(doc.code)
       iframeRef.current?.contentWindow?.postMessage(
         {
           v: PROTOCOL_VERSION,
           type: 'run',
           files,
-          entry: parsed.config.entry,
-          define: parsed.config.define,
-          ...(html !== null ? { html } : {}),
+          entry,
+          define: {},
+          html,
         },
         '*',
       )
-      setPreview(html !== null)
+      setPreview(true)
     } finally {
       setBuilding(false)
     }
@@ -185,8 +170,8 @@ export function Playground({ initialFiles = INITIAL_FILES }: PlaygroundProps) {
         )}
       </p>
 
-      {/* 项目文件：切换＝按钮置灰当前项；删除＝×（至少保留一份，esbuild.config.json 是
-       * 构建配置位，永不删）；新建＝白名单校验后入列。文件名是用户输入，渲染永远走文本节点。 */}
+      {/* 项目文件：切换＝按钮置灰当前项；删除＝×（至少保留一份）；新建＝白名单校验后入列。
+       * 入口由 index.html 的 script src 推导（stack 驱动）。文件名是用户输入，渲染永远走文本节点。 */}
       {/* biome-ignore lint/a11y/useSemanticElements: 文件切换按钮集合，fieldset 表单语义不符 */}
       <div className="mb-2 flex flex-wrap items-center gap-1.5" role="group" aria-label="项目文件">
         {files.map((f) => (
@@ -204,7 +189,7 @@ export function Playground({ initialFiles = INITIAL_FILES }: PlaygroundProps) {
             >
               {f.name}
             </button>
-            {files.length > 1 && f.name !== CONFIG_FILE_NAME && (
+            {files.length > 1 && (
               <button
                 type="button"
                 onClick={() => removeFile(f.name)}
