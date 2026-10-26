@@ -1,18 +1,9 @@
+import { execute } from './execute'
 import { format } from './format'
 import { post, reportReady } from './outbound'
-import { runProject } from './project'
-import { type DemoFile, PROTOCOL_VERSION, type RuntimeInbound } from './types'
+import { PROTOCOL_VERSION, type RuntimeInbound } from './types'
 
 const CONSOLE_LEVELS = ['log', 'info', 'warn', 'error'] as const
-
-const isDemoFile = (value: unknown): value is DemoFile =>
-  typeof value === 'object' &&
-  value !== null &&
-  typeof (value as DemoFile).name === 'string' &&
-  typeof (value as DemoFile).code === 'string'
-
-const isDefine = (value: unknown): value is Record<string, string> =>
-  typeof value === 'object' && value !== null && !Array.isArray(value)
 
 export function installListeners() {
   wrapConsole()
@@ -27,15 +18,9 @@ export function installListeners() {
     const msg = event.data as RuntimeInbound
     if (!msg || msg.v !== PROTOCOL_VERSION) return
     if (msg.type === 'ping') return reportReady()
-    if (msg.type === 'run' && Array.isArray(msg.files) && msg.files.every(isDemoFile)) {
-      const entry = typeof msg.entry === 'string' ? msg.entry : ''
+    if (msg.type === 'run' && typeof msg.code === 'string') {
       const html = typeof msg.html === 'string' ? msg.html : undefined
-      const define = isDefine(msg.define)
-        ? Object.fromEntries(
-            Object.entries(msg.define).filter(([, value]) => typeof value === 'string'),
-          )
-        : {}
-      void runProject(msg.files, entry, html, define)
+      void execute(msg.code, html)
     }
   })
 }

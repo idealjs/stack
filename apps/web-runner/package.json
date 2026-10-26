@@ -5,12 +5,11 @@
   "type": "module",
   "scripts": {
     "dev:runtime": "stack dev --port 5174",
-    "build:runtime": "stack && node scripts/copy-wasm.mjs",
+    "build:runtime": "stack",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@idealjs/stack": "workspace:*",
-    "esbuild-wasm": "^0.25.12"
+    "@idealjs/stack": "workspace:*"
   },
   "devDependencies": {
     "typescript": "~5.6.2"

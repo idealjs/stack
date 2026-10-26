@@ -16,5 +16,5 @@
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true
   },
-  "include": ["stack.config.ts", "sdk-embed.ts", "runtime"]
+  "include": ["stack.config.ts", "runtime"]
 }
