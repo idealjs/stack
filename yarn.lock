@@ -3072,14 +3072,25 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@hono/node-server@npm:^2.1.5":
+  version: 2.1.5
+  resolution: "@hono/node-server@npm:2.1.5"
+  peerDependencies:
+    hono: ^4 || ^5.0.0-0
+  checksum: 10/4b6f21fe37f956a61856b6f517f91543962f32466a88477d362e8cff77272e541ea6388b8026275e1a2a1976d098c9bf4c3e1d8f8087505e8eac777f0f872901
+  languageName: node
+  linkType: hard
+
 "@idealjs/stack@workspace:*, @idealjs/stack@workspace:packages/stack":
   version: 0.0.0-use.local
   resolution: "@idealjs/stack@workspace:packages/stack"
   dependencies:
+    "@hono/node-server": "npm:^2.1.5"
     "@playwright/test": "npm:1.63.0"
     "@types/node": "npm:^26.2.0"
     acorn: "npm:^8.18.0"
     esbuild-wasm: "npm:^0.25.12"
+    hono: "npm:^4.13.14"
     typescript: "npm:~5.6.2"
     vite: "npm:^6.0.0"
   bin:
@@ -7556,6 +7567,13 @@ __metadata:
   dependencies:
     react-is: "npm:^16.7.0"
   checksum: 10/1acbe85f33e5a39f90c822ad4d28b24daeb60f71c545279431dc98c312cd28a54f8d64788e477fe21dc502b0e3cf58589ebe5c1ad22af27245370391c2d24ea6
+  languageName: node
+  linkType: hard
+
+"hono@npm:^4.13.14":
+  version: 4.13.14
+  resolution: "hono@npm:4.13.14"
+  checksum: 10/1eb7c4d358d071d208b09f62d803ac7e1674d209f23e4f9d3c666cd7107da40937d5e9a78cc44f8abc4a23050e849ec531293c4b834696862d3673e1d4942172
   languageName: node
   linkType: hard
 

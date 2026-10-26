@@ -16,8 +16,10 @@
     "test:all": "yarn test && yarn test:browser"
   },
   "dependencies": {
+    "@hono/node-server": "^2.1.5",
     "acorn": "^8.18.0",
-    "esbuild-wasm": "^0.25.12"
+    "esbuild-wasm": "^0.25.12",
+    "hono": "^4.13.14"
   },
   "devDependencies": {
     "@playwright/test": "1.63.0",

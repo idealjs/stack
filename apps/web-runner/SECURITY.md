@@ -54,9 +54,12 @@
 教程站站内链接一律相对形态（`./xxx.html`）：根部署（本地、子域名、SSG 生产）与前缀
 部署（absproxy）双兼容；`e2e/pages.spec.ts` 的 href 选择器同步为相对形态。
 
-配置接缝：`apps/tutorial/.env.development` 的 `VITE_WEB_RUNNER_ORIGIN`（置空 =
-srcdoc；设运行时位 = 跨源 src，仅限无 cookie 鉴权的位）、根 `package.json` dev 脚本注入的
-`TUTORIAL_BASE=/absproxy/5173` 与运行时静态服务器端口（默认 5174，`--port` 覆盖）。
+配置接缝：`apps/tutorial/.env.development` 的 `VITE_WEB_RUNNER_ORIGIN`（默认
+`http://localhost:5174`＝本地 dev 的运行时位；置空 = srcdoc；设远程位 = 跨源 src，仅限
+无 cookie 鉴权问题的位）、根 `package.json` dev 脚本只并行拉起 tutorial dev 与 web-runner
+的 `stack dev`；教程侧 `TUTORIAL_BASE=/absproxy/5173` 仅为远程 absproxy 场景的**可选
+注入**（默认启动指令不携带——教程的 301 重定向会被浏览器永久缓存，撤环境后仍阴魂
+不散，已改 302）；运行时静态服务器端口默认 5174（`--port` 覆盖）。
 教程站 `allowedHosts` 含 `code.idealjs.com`（代理透传保留 Host）；运行时是自持静态
 服务器，无 Host 假设。
 e2e 栈（5175）不设这些 env，base 默认 `/`、运行时位构建时注入，契约不受影响。

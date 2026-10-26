@@ -14,7 +14,7 @@ const baseSlashRedirect = (): Plugin => ({
       const base = server.config.base.replace(/\/$/, '')
       const [path, query] = (req.url ?? '').split('?')
       if (base && path === base) {
-        res.writeHead(301, { Location: `${base}/${query ? `?${query}` : ''}` })
+        res.writeHead(302, { Location: `${base}/${query ? `?${query}` : ''}` })
         res.end()
         return
       }

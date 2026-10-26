@@ -3,6 +3,7 @@ import { resolve as resolvePath } from 'node:path'
 import { pathToFileURL } from 'node:url'
 import { imports } from '../builtins.ts'
 import { type BuildResult, build, type StackConfig, type StackHook } from '../index.ts'
+import { startDevServer } from './dev.ts'
 import { nodeFs } from './fs.ts'
 
 const VERSION = '0.2.0'
@@ -10,16 +11,22 @@ const WATCH_DEBOUNCE_MS = 150
 const IGNORED_WATCH_SEGMENTS = new Set(['node_modules', 'dist', '.git'])
 
 interface CliOptions {
+  mode: 'build' | 'watch' | 'dev'
   configPath: string
-  watchMode: boolean
+  port: number
+  assets: Record<string, string>
 }
 
 function parseArgs(argv: string[]): CliOptions {
+  let mode: CliOptions['mode'] = 'build'
   let configPath = 'stack.config.ts'
-  let watchMode = false
+  let port = 3000
+  const assets: Record<string, string> = {}
   for (let i = 0; i < argv.length; i += 1) {
     const arg = argv[i]
-    if (arg === '--config') {
+    if (arg === 'dev') {
+      mode = 'dev'
+    } else if (arg === '--config') {
       const value = argv[i + 1]
       if (value === undefined) throw new Error('--config 需要一个配置文件路径')
       configPath = value
@@ -27,12 +34,30 @@ function parseArgs(argv: string[]): CliOptions {
     } else if (arg.startsWith('--config=')) {
       configPath = arg.slice('--config='.length)
     } else if (arg === '--watch' || arg === '-w') {
-      watchMode = true
+      mode = 'watch'
+    } else if (arg === '--port') {
+      const value = argv[i + 1]
+      if (value === undefined) throw new Error('--port 需要一个端口号')
+      port = Number(value)
+      i += 1
+    } else if (arg.startsWith('--port=')) {
+      port = Number(arg.slice('--port='.length))
+    } else if (arg === '--asset') {
+      const value = argv[i + 1]
+      if (value === undefined) throw new Error('--asset 需要 <路由>=<文件路径>')
+      const [route, filePath] = value.split('=')
+      if (route === undefined || filePath === undefined) throw new Error('--asset 需要 <路由>=<文件路径>')
+      assets[route] = filePath
+      i += 1
+    } else if (arg.startsWith('--asset=')) {
+      const [route, filePath] = arg.slice('--asset='.length).split('=')
+      if (route === undefined || filePath === undefined) throw new Error('--asset 需要 <路由>=<文件路径>')
+      assets[route] = filePath
     } else {
       throw new Error(`未知参数：${arg}`)
     }
   }
-  return { configPath, watchMode }
+  return { mode, configPath, port, assets }
 }
 
 export async function loadConfig(configPath: string): Promise<StackConfig> {
@@ -143,7 +168,10 @@ export async function runCLI(argv: string[]): Promise<void> {
   console.log(
     `stack v${VERSION}：${config.inputs.length} 个输入，规范产物 → ${config.dist ?? 'dist'}`,
   )
-  if (options.watchMode) {
+  if (options.mode === 'watch' || options.mode === 'dev') {
+    if (options.mode === 'dev') {
+      await startDevServer(config, { port: options.port, assets: options.assets })
+    }
     await runWatch(config)
     return
   }

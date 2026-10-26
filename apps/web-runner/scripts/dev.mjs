@@ -17,22 +17,11 @@ const readPort = (argv) => {
 }
 
 const port = readPort(process.argv.slice(2))
+const wasmPath = require.resolve('esbuild-wasm/esbuild.wasm')
 
-const children = [
-  spawn(process.execPath, [resolve(here, 'serve.mjs'), `--port=${port}`], { stdio: 'inherit' }),
-  spawn(process.execPath, [stackBin, '--watch'], { stdio: 'inherit' }),
-]
-
-const stop = () => {
-  for (const child of children) child.kill('SIGINT')
-  process.exit(0)
-}
-
-process.on('SIGINT', stop)
-process.on('SIGTERM', stop)
-
-for (const child of children) {
-  child.on('exit', (code) => {
-    if (code !== null && code !== 0) process.exitCode = code
-  })
-}
+const child = spawn(
+  process.execPath,
+  [stackBin, 'dev', '--port', port, '--asset', `/esbuild.wasm=${wasmPath}`],
+  { stdio: 'inherit' },
+)
+child.on('exit', (code) => process.exit(code ?? 0))
