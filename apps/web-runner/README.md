@@ -8,7 +8,7 @@ playground 沙箱运行时（无 React 依赖）。供给层与运行引擎都�
 
 ```bash
 yarn workspace @stack/web-runner build:runtime   # stack 构建 + esbuild.wasm 复制进产物
-yarn workspace @stack/web-runner dev:runtime     # scripts/dev.mjs：stack --watch + 静态服务器（5174）
+yarn workspace @stack/web-runner dev:runtime     # stack dev --port 5174：watch 重建 + hono 伺服（/esbuild.wasm 约定路由自带）
 ```
 
 `stack.config.ts`：html 入口 `index.html`（script src `./runtime/main.ts`）＋

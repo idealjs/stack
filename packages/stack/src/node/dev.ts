@@ -1,8 +1,8 @@
 import { readFile } from 'node:fs/promises'
-import { resolve } from 'node:path'
-import { extname, join, relative } from 'node:path'
+import { createRequire } from 'node:module'
+import { extname, join, relative, resolve } from 'node:path'
+import { type ServerType, serve } from '@hono/node-server'
 import { Hono } from 'hono'
-import { serve, type ServerType } from '@hono/node-server'
 import type { StackConfig } from '../index.ts'
 
 const MIME: Record<string, string> = {
@@ -35,6 +35,21 @@ export async function startDevServer(
       })
     })
   }
+  
+  
+  try {
+    const stackRequire = createRequire(import.meta.url)
+    const wasmPath = stackRequire.resolve('esbuild-wasm/esbuild.wasm')
+    app.get('/esbuild.wasm', async (c) => {
+      const body = await readFile(wasmPath)
+      return c.body(new Uint8Array(body), 200, {
+        'Content-Type': 'application/wasm',
+        'Cache-Control': 'no-store',
+      })
+    })
+  } catch {
+    // stack 自身未携带 esbuild-wasm 时不提供该约定路由
+  }
   app.get('*', async (c) => {
     const requestPath = decodeURIComponent(new URL(c.req.url).pathname)
     for (const candidate of [requestPath, join(requestPath, 'index.html')]) {
@@ -46,9 +61,7 @@ export async function startDevServer(
           'Content-Type': MIME[extname(safe)] ?? 'application/octet-stream',
           'Cache-Control': 'no-store',
         })
-      } catch {
-        continue
-      }
+      } catch {}
     }
     return c.text('Not Found', 404)
   })

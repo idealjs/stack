@@ -167,10 +167,14 @@ interface LowerContext {
 ## CLI
 
 ```bash
-stack [--config stack.config.ts] [--watch]
+stack [--config stack.config.ts] [--watch]          # 构建 / watch 重建循环
+stack dev [--port 3000] [--asset 路由=文件]...       # watch ＋ hono dev server（伺服 default 产物目录）
 ```
 
 - 配置文件为 TS（node 24 type stripping 直载）；`fs` 未定义时 CLI 默认注入 `nodeFs()`；
+- `stack dev` 自带约定路由 `/esbuild.wasm` → stack 自带的 esbuild-wasm 副本（浏览器内
+  stack 的 `initialize({ wasmURL: '/esbuild.wasm' })` 零配置可用；显式 `--asset` 同名路由
+  优先）；额外静态路由用 `--asset 路由=文件` 注入；
   hooks 未含 imports() 时前置注入（默认闭包行为与 SDK 手动模式的差异见内置 hooks 节）；
 - 摘要按产出顺序逐行打印 `name → dir（N 个文件，大小）`，末行报输入数/模块数/用时；
 - `--watch` 用 `fs.watch` 递归监听（忽略 node_modules/dist/.git），150ms 防抖全量重建；

@@ -46,12 +46,14 @@ function parseArgs(argv: string[]): CliOptions {
       const value = argv[i + 1]
       if (value === undefined) throw new Error('--asset 需要 <路由>=<文件路径>')
       const [route, filePath] = value.split('=')
-      if (route === undefined || filePath === undefined) throw new Error('--asset 需要 <路由>=<文件路径>')
+      if (route === undefined || filePath === undefined)
+        throw new Error('--asset 需要 <路由>=<文件路径>')
       assets[route] = filePath
       i += 1
     } else if (arg.startsWith('--asset=')) {
       const [route, filePath] = arg.slice('--asset='.length).split('=')
-      if (route === undefined || filePath === undefined) throw new Error('--asset 需要 <路由>=<文件路径>')
+      if (route === undefined || filePath === undefined)
+        throw new Error('--asset 需要 <路由>=<文件路径>')
       assets[route] = filePath
     } else {
       throw new Error(`未知参数：${arg}`)
