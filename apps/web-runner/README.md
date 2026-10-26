@@ -46,3 +46,30 @@ Blob URL ＋ 动态 `import()`、`default.init()` 钩子、console 四级捕获�
 整页刷新）；文件缺失回退占位 doc 并 console.warn。srcdoc 与跨源 src 双路消费同一份
 产物；沙箱对 `/esbuild.wasm` 已无任何请求——wasm 现为宿主页面的同源资源（tutorial
 vite dev/preview 中间件伺服，供宿主侧 stack 初始化）。
+
+## 远程访问（环境变量与同域）
+
+三个部署位，各自的环境变量与注意点：
+
+- **本地 dev（默认形态，零额外注入）**：无环境变量要求——tutorial vite `base='/'`；
+  教程 `.env.development` 的 `VITE_WEB_RUNNER_ORIGIN=http://localhost:5174`（iframe
+  src 指向运行时位）；根 `package.json` 的 dev 脚本并行拉起 tutorial dev（5173）与本包
+  `stack dev --port 5174`。
+- **远程 code-server 同域场景**：教程侧注入 `TUTORIAL_BASE=/absproxy/5173`（vite
+  base，经根 dev 脚本**可选**携带——默认不注入，本地用不上；曾用 301 做前缀跳转被
+  浏览器永久缓存、撤掉环境后仍阴魂不散，已改 302 且默认不携带）；教程 env
+  `VITE_WEB_RUNNER_ORIGIN=https://code.idealjs.com/absproxy/5174`（运行时与宿主同源——
+  同源告警如实亮红，隔离只剩 sandbox 一道，与 srcdoc 等强度）。`stack dev --port`
+  与 `TUTORIAL_BASE=/absproxy/5173` 的端口数字成对，改一处必须同步另一处。
+- **生产**：`VITE_WEB_RUNNER_ORIGIN=https://<runtime-domain>`——运行时独立域静态托管
+  `dist-runtime/`，跨源 src 形态（第二道防线完整）。
+
+修改位置：教程侧 env 全部在 `apps/tutorial/.env.development`；`TUTORIAL_BASE` 只经根
+dev 脚本注入（vite 无此配置项）。e2e 栈不读这些 env——playwright webServer 构建时经
+进程 env 注入 `VITE_WEB_RUNNER_ORIGIN=http://localhost:5175` 并以 `dev:runtime --port
+5175` 起运行时位，与交互 dev 的 5173/5174 互不抢占、契约独立。
+
+注意事项：运行时 doc 零子资源后，鉴权链（code-server 的 SameSite=Lax cookie）只影响
+doc 导航本身——由父页面发起、cookie 可达；宿主页面的 `/esbuild.wasm` 是同源资源、带
+会话 cookie 读取，无跨源问题。安全论证见
+[SECURITY.md](./SECURITY.md)「外部访问」节。
