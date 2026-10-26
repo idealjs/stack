@@ -1,5 +1,6 @@
 import { readdirSync } from 'node:fs'
 import { readFile } from 'node:fs/promises'
+import { createRequire } from 'node:module'
 import { resolve } from 'node:path'
 import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
@@ -25,7 +26,9 @@ const baseSlashRedirect = (): Plugin => ({
 
 const RUNTIME_DOC_ID = '\0virtual:web-runner-doc'
 const RUNTIME_DOC_PATH = resolve(__dirname, '../web-runner/dist-runtime/index.html')
-const RUNTIME_WASM_PATH = resolve(__dirname, 'node_modules/esbuild-wasm/esbuild.wasm')
+const RUNTIME_WASM_PATH = createRequire(resolve(__dirname, 'package.json')).resolve(
+  'esbuild-wasm/esbuild.wasm',
+)
 const DOC_FALLBACK =
   '<!doctype html><html lang="zh-CN"><body><!-- web-runner 产物缺失：先跑 yarn workspace @stack/web-runner build:runtime --></body></html>'
 

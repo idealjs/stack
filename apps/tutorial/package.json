@@ -11,6 +11,7 @@
     "test:e2e:update": "playwright test --update-snapshots"
   },
   "dependencies": {
+    "@idealjs/stack": "workspace:*",
     "@stack/site-kit": "workspace:*",
     "esbuild-wasm": "^0.25.12",
     "react": "^18.3.1",

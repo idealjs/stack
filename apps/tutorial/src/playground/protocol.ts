@@ -1,23 +1,14 @@
-export const PROTOCOL_VERSION = 2
+export const PROTOCOL_VERSION = 1
 
 export interface PingMessage {
   v: typeof PROTOCOL_VERSION
   type: 'ping'
 }
 
-export interface RunnerFile {
-  name: string
-  code: string
-}
-
 export interface RunMessage {
   v: typeof PROTOCOL_VERSION
   type: 'run'
-  files: RunnerFile[]
-
-  entry: string
-
-  define: Record<string, string>
+  code: string
 
   html?: string
 }

@@ -1,13 +1,14 @@
 import runtimeDoc from 'virtual:web-runner-doc'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { ShadowButton } from '../design-system'
+import { buildDemo } from './demoBuild'
 import { extractHtmlBody } from './htmlBody'
 import { type OutputLine, OutputPanel } from './OutputPanel'
 import { isRuntimeMessage, PROTOCOL_VERSION } from './protocol'
 
 const RUNTIME_ORIGIN: string = import.meta.env.VITE_WEB_RUNNER_ORIGIN ?? ''
 
-const MAIN_TS = `// 沙箱工程入口：TypeScript 直写，点「运行」送进沙箱，由内嵌 stack 引擎构建后执行。
+const MAIN_TS = `// 沙箱工程入口：TypeScript 直写，点「运行」由宿主 stack 构建后送进沙箱执行。
 const greeting: string = 'hello, playground'
 console.log(greeting)
 `
@@ -132,18 +133,26 @@ export function Playground({ initialFiles = INITIAL_FILES }: PlaygroundProps) {
         return
       }
       const html = extractHtmlBody(doc.code)
+      const code = await buildDemo(files, entry)
       iframeRef.current?.contentWindow?.postMessage(
         {
           v: PROTOCOL_VERSION,
           type: 'run',
-          files,
-          entry,
-          define: {},
+          code,
           html,
         },
         '*',
       )
       setPreview(true)
+    } catch (error) {
+      setLines((prev) => [
+        ...prev,
+        {
+          level: 'error',
+          stage: 'build',
+          text: error instanceof Error ? error.message : String(error),
+        },
+      ])
     } finally {
       setBuilding(false)
     }
@@ -171,7 +180,8 @@ export function Playground({ initialFiles = INITIAL_FILES }: PlaygroundProps) {
       </p>
 
       {/* 项目文件：切换＝按钮置灰当前项；删除＝×（至少保留一份）；新建＝白名单校验后入列。
-       * 入口由 index.html 的 script src 推导（stack 驱动）。文件名是用户输入，渲染永远走文本节点。 */}
+       * 入口由 index.html 的 script src 推导（stack 驱动）；demo 构建在本页由 stack SDK 完成，
+       * 沙箱只执行构建产物。文件名是用户输入，渲染永远走文本节点。 */}
       {/* biome-ignore lint/a11y/useSemanticElements: 文件切换按钮集合，fieldset 表单语义不符 */}
       <div className="mb-2 flex flex-wrap items-center gap-1.5" role="group" aria-label="项目文件">
         {files.map((f) => (
@@ -255,8 +265,8 @@ export function Playground({ initialFiles = INITIAL_FILES }: PlaygroundProps) {
         </ShadowButton>
         <span className="t-small-mute">
           {building
-            ? 'stack 构建中（沙箱内）…'
-            : `「${active.name}」源码直送沙箱：内嵌 stack（内存 FS）构建 → Blob URL + import()`}
+            ? 'stack 构建中（宿主）…'
+            : `「${active.name}」宿主 stack 构建（内存 FS 闭包）→ 产物送沙箱 Blob URL + import()`}
         </span>
       </div>
 

@@ -3590,6 +3590,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@stack/tutorial@workspace:apps/tutorial"
   dependencies:
+    "@idealjs/stack": "workspace:*"
     "@playwright/test": "npm:1.63.0"
     "@stack/site-kit": "workspace:*"
     "@tailwindcss/vite": "npm:^4.1.0"
@@ -3610,7 +3611,6 @@ __metadata:
   resolution: "@stack/web-runner@workspace:apps/web-runner"
   dependencies:
     "@idealjs/stack": "workspace:*"
-    esbuild-wasm: "npm:^0.25.12"
     typescript: "npm:~5.6.2"
   languageName: unknown
   linkType: soft
