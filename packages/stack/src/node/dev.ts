@@ -54,6 +54,16 @@ export async function startDevServer(
   })
   const port = options.port ?? 3000
   const server = serve({ fetch: app.fetch, port })
+  server.on('error', (error: NodeJS.ErrnoException) => {
+    if (error.code === 'EADDRINUSE') {
+      console.error(
+        `[stack] 端口 ${port} 已被占用——可能有另一个 stack dev 在运行；停掉占用进程或换 --port 后重试`,
+      )
+    } else {
+      console.error(`[stack] dev server 错误：${error.message}`)
+    }
+    process.exit(1)
+  })
   console.log(`hono dev server → http://localhost:${port}/（伺服 ${distRelative}）`)
   return server
 }
