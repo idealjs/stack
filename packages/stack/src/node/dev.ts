@@ -35,8 +35,7 @@ export async function startDevServer(
       })
     })
   }
-  
-  
+
   try {
     const stackRequire = createRequire(import.meta.url)
     const wasmPath = stackRequire.resolve('esbuild-wasm/esbuild.wasm')
