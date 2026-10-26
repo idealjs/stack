@@ -10,6 +10,7 @@ export {
   type StackLoader,
 } from './core/config.ts'
 export { CycleError } from './core/cycle.ts'
+export { initEsbuild } from './core/esbuildRuntime.ts'
 export type {
   Artifact,
   ArtifactImport,
@@ -31,6 +32,7 @@ export type {
   StackHook,
   WatchHook,
 } from './core/hooks.ts'
+export { loadConfigFromSource, type StackSourceConfig } from './core/loadConfigSource.ts'
 export { memoryFs } from './core/memoryFs.ts'
 export type { ParsedExport, ParsedImport, ParsedImportName } from './core/parse.ts'
 export type { ParsedHtmlAsset } from './core/parseHtml.ts'

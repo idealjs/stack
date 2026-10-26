@@ -63,6 +63,23 @@ export default defineConfig({
   由引擎经同一注入 fs 完成；
 - **直接 `import fs`（平台 API）是协议违例**：平台绑定只允许发生在 `fs` 注入处。
 
+### 配置的两种加载法（node 路径 vs 源码）
+
+- **node 宿主**：`import { loadConfig } from '@idealjs/stack/node'`——传**文件路径**，
+  原生 import 走 node 24 type stripping，返回完整 `StackConfig`（defineConfig(...)）。
+- **浏览器／内存场景**（配置是一段源码字符串，如宿主内存 FS 里的 stack.config.ts）：
+  `import { loadConfigFromSource } from '@idealjs/stack'`——
+  `loadConfigFromSource(code, { wasmURL? }): Promise<StackSourceConfig>`。esbuild-wasm
+  transform 剥 TS（浏览器场景内部先 `initEsbuild(wasmURL)`，缺省 `/esbuild.wasm` 同源
+  伺服；node 场景 transform 自动可用、跳过初始化）→ 前置注入
+  `const defineConfig = (c) => c;`（配置源不 import 任何东西、纯数据导出）→ 模块求值
+  （浏览器 Blob URL 动态 import；node 降级 data: URL，其 ESM loader 不认 blob: scheme）
+  → 取 default（兼容 `config` 命名导出），非对象即响亮报错。
+- **语义边界**：返回 `StackSourceConfig`（MVP 数据面，现仅 `entry?`）而非完整
+  `StackConfig`——inputs/dist/hooks 由宿主固定（策略归宿主），配置只声明数据面；
+  `fs`/`hooks` 这类平台绑定与函数字段不经配置源跨越（内联函数拿不到 stack 的
+  builtins，写了也没有意义）。宿主拿到 entry 后自行映射 `inputs`。
+
 ## 架构总览（两相两入口）
 
 ```mermaid
@@ -205,7 +222,7 @@ harness（vite dev 直接 serve TS 源），`yarn test:browser`（Playwright，w
 packages/stack/
 ├── bin/stack.mjs              #! 壳：读参数 → runCLI
 ├── src/
-│   ├── index.ts               SDK 协议面出口（build/defineConfig/memoryFs/CycleError/类型）
+│   ├── index.ts               SDK 协议面出口（build/defineConfig/memoryFs/loadConfigFromSource/initEsbuild/CycleError/类型）
 │   ├── builtins.ts            策略出口（imports/minify/bundle/inlineScript/stronglyConnected/moduleRuntime）
 │   ├── core/
 │   │   ├── config.ts          defineConfig 与 StackConfig/StackFs/StackInput 类型
@@ -222,6 +239,8 @@ packages/stack/
 │   │   ├── scc.ts             强连通分量（Tarjan，声明序 tie-break）
 │   │   ├── minify.ts          压缩内置 hook
 │   │   ├── memoryFs.ts        内存 fs（测试与浏览器）
+│   │   ├── esbuildRuntime.ts  esbuild-wasm 浏览器初始化守卫（initEsbuild，一次守卫全宿主共享）
+│   │   ├── loadConfigSource.ts 配置源加载：transform 剥 TS＋defineConfig 注入＋动态 import
 │   │   ├── parse.ts           acorn import/export/顶层名收集
 │   │   ├── parseHtml.ts       web-standard 正则提取 html 资产引用（script src／link stylesheet href，带值区间 offset）
 │   │   └── pathUtil.ts        抽象路径运算与候选探测
