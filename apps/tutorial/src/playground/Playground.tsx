@@ -266,7 +266,7 @@ export function Playground({ initialFiles = INITIAL_FILES }: PlaygroundProps) {
         <span className="t-small-mute">
           {building
             ? 'stack 构建中（宿主）…'
-            : `「${active.name}」宿主 stack 构建（内存 FS 闭包）→ 产物送沙箱 Blob URL + import()`}
+            : `「${active.name}」宿主 stack 构建（入口按 stack.config.ts，缺省由 index.html 的 script src 推导）→ 产物送沙箱执行`}
         </span>
       </div>
 

@@ -24,13 +24,15 @@ export function TemplateLab() {
       note="预置的就是 examples/template 的真实文件——MPA 入口在 playground 里跑起来"
     >
       <p className="m-0 text-content text-body">
-        template 包的全部就是下面两个文件：index.html 是入口文档（挂载点＋一行 module script，script
-        src 指向谁谁就是入口），main.ts 是被引进来的 TS。点「运行」——宿主用 stack 构建
-        main.ts，index.html 的身体被装进沙箱文档，#app 里长出 hello, template。
+        template 包的全部就是下面三个文件：index.html 是入口文档（挂载点＋一行 module
+        script），main.ts 是被引进来的 TS，stack.config.ts 向宿主声明入口——entry
+        写谁就构建谁，不写则回退按 script src 推导。点「运行」——宿主读配置后用 stack
+        构建，index.html 的身体被装进沙箱文档，#app 里长出 hello, template。
       </p>
       <div className="mt-3 grid grid-cols-1 gap-3 md:grid-cols-2">
         <CodeCard label="index.html" code={TEMPLATE_FILES[0].code} />
         <CodeCard label="main.ts" code={TEMPLATE_FILES[1].code} />
+        <CodeCard label="stack.config.ts" code={TEMPLATE_FILES[2].code} />
       </div>
       <div className="mt-3">
         <Playground initialFiles={TEMPLATE_FILES} />

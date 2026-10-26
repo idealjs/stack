@@ -41,6 +41,9 @@ test('删除文件：删活跃文件后切到首个剩余文件，最后一份�
     'aria-current',
     'true',
   )
+
+  await page.getByRole('button', { name: '删除 stack.config.ts' }).click()
+  await expect(page.getByRole('button', { name: 'stack.config.ts', exact: true })).toHaveCount(0)
   await expect(page.getByRole('button', { name: '删除 main.ts' })).toHaveCount(0)
 })
 

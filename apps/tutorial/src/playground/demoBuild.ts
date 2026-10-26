@@ -1,31 +1,21 @@
-import { build, memoryFs } from '@idealjs/stack'
+import { build, initEsbuild, loadConfigFromSource, memoryFs } from '@idealjs/stack'
 import { bundle, imports } from '@idealjs/stack/builtins'
-import { initialize } from 'esbuild-wasm'
+
+const WASM_URL = '/esbuild.wasm'
+const CONFIG_NAME = 'stack.config.ts'
 
 export interface DemoFile {
   name: string
   code: string
 }
 
-let initializing: Promise<void> | null = null
-
-const ensureEsbuild = async (): Promise<void> => {
-  initializing ??= initialize({ wasmURL: '/esbuild.wasm', worker: false }).catch(
-    (error: unknown) => {
-      initializing = null
-      const detail = error instanceof Error ? error.message : String(error)
-      throw new Error(`[demo] esbuild-wasm 初始化失败——宿主页需同源伺服 /esbuild.wasm：${detail}`)
-    },
-  )
-  await initializing
-}
-
 export const buildDemo = async (files: readonly DemoFile[], entry: string): Promise<string> => {
-  await ensureEsbuild()
+  await initEsbuild(WASM_URL)
+  const effectiveEntry = await resolveEntry(files, entry)
   const map: Record<string, string> = {}
   for (const file of files) map[file.name] = file.code
   const result = await build({
-    inputs: [{ name: 'demo', path: entry }],
+    inputs: [{ name: 'demo', path: effectiveEntry }],
     fs: memoryFs(map),
     hooks: [imports(), bundle({ entry: 'demo', dir: 'dist' })],
   })
@@ -33,4 +23,15 @@ export const buildDemo = async (files: readonly DemoFile[], entry: string): Prom
   const code = output?.files[0]?.code
   if (code === undefined) throw new Error('[demo] 构建没有产出可执行的 JS')
   return code
+}
+
+const resolveEntry = async (files: readonly DemoFile[], entry: string): Promise<string> => {
+  const config = files.find((file) => file.name === CONFIG_NAME)
+  if (config === undefined) return entry
+  const source = await loadConfigFromSource(config.code, { wasmURL: WASM_URL })
+  const configured = source.entry ?? entry
+  if (!files.some((file) => file.name === configured)) {
+    throw new Error(`${CONFIG_NAME} 的 entry 指向不存在的文件：${configured}`)
+  }
+  return configured
 }
