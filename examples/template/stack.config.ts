@@ -1,3 +1,3 @@
 export default {
-  entry: 'main.ts',
+  inputs: [{ name: 'page', path: 'index.html' }],
 }

@@ -150,27 +150,12 @@ export function Playground({ initialFiles = INITIAL_FILES }: PlaygroundProps) {
     setSameOriginAlert(false)
     setBuilding(true)
     try {
-      const doc = files.find((f) => f.name === 'index.html')
-      if (doc === undefined) {
+      if (!files.some((f) => f.name === 'index.html')) {
         setLines([{ level: 'error', stage: 'build', text: '入口文档不存在：index.html' }])
         return
       }
-      const entry = /<script\b[^>]*\ssrc="([^"]+)"/i.exec(doc.code)?.[1]?.replace(/^\.\//, '')
-      if (entry === undefined || !files.some((f) => f.name === entry)) {
-        setLines([
-          {
-            level: 'error',
-            stage: 'build',
-            text:
-              entry === undefined
-                ? 'index.html 缺少 <script src>——无法确定入口'
-                : `入口文件不存在：${entry}（index.html 的 script src 必须指向工程内文件）`,
-          },
-        ])
-        return
-      }
-      const html = extractHtmlBody(doc.code)
-      const code = await buildDemo(files, entry)
+      const { code, htmlDoc } = await buildDemo(files)
+      const html = extractHtmlBody(htmlDoc)
       pendingRun.current = { code, html }
       reloadRuntime()
       setPreview(true)
@@ -210,7 +195,8 @@ export function Playground({ initialFiles = INITIAL_FILES }: PlaygroundProps) {
       </p>
 
       {/* 项目文件：切换＝按钮置灰当前项；删除＝×（至少保留一份）；新建＝白名单校验后入列。
-       * 入口由 index.html 的 script src 推导（stack 驱动）；demo 构建在本页由 stack SDK 完成，
+       * 入口按 stack.config.ts 的 inputs（html 输入即入口文档，引擎重写引用路径）；
+       * 无配置回退按 index.html 的 script src 推导。demo 构建在本页由 stack SDK 完成，
        * 沙箱只执行构建产物。文件名是用户输入，渲染永远走文本节点。 */}
       {/* biome-ignore lint/a11y/useSemanticElements: 文件切换按钮集合，fieldset 表单语义不符 */}
       <div className="mb-2 flex flex-wrap items-center gap-1.5" role="group" aria-label="项目文件">
@@ -296,7 +282,7 @@ export function Playground({ initialFiles = INITIAL_FILES }: PlaygroundProps) {
         <span className="t-small-mute">
           {building
             ? 'stack 构建中（宿主）…'
-            : `「${active.name}」宿主 stack 构建（入口按 stack.config.ts，缺省由 index.html 的 script src 推导）→ 产物送沙箱执行`}
+            : `「${active.name}」宿主 stack 构建（入口按 stack.config.ts 的 inputs，缺省由 index.html 的 script src 推导）→ 产物送沙箱执行`}
         </span>
       </div>
 
