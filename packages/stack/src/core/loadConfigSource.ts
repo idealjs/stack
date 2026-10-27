@@ -27,11 +27,11 @@ export const loadConfigFromSource = async (
 
 const importConfigModule = async (js: string): Promise<Record<string, unknown>> => {
   if (typeof window === 'undefined') {
-    return import(`data:text/javascript,${encodeURIComponent(js)}`)
+    return import(/* @vite-ignore */ `data:text/javascript,${encodeURIComponent(js)}`)
   }
   const url = URL.createObjectURL(new Blob([js], { type: 'text/javascript' }))
   try {
-    return await import(url)
+    return await import(/* @vite-ignore */ url)
   } finally {
     URL.revokeObjectURL(url)
   }
