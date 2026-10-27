@@ -1,6 +1,10 @@
 import runtimeDoc from 'virtual:web-runner-doc'
+import { initEsbuild } from '@idealjs/stack'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { ShadowButton } from '../design-system'
+
+const WASM_URL = 'esbuild.wasm'
+
 import { buildDemo } from './demoBuild'
 import { extractHtmlBody } from './htmlBody'
 import { type OutputLine, OutputPanel } from './OutputPanel'
@@ -86,6 +90,10 @@ export function Playground({ initialFiles = INITIAL_FILES }: PlaygroundProps) {
     if (frame === null) return
     if (RUNTIME_ORIGIN) frame.src = `${RUNTIME_ORIGIN.replace(/\/$/, '')}/?t=${Date.now()}`
     else frame.srcdoc = `${runtimeDoc}\n<!--${Date.now()}-->`
+  }, [])
+
+  useEffect(() => {
+    void initEsbuild(WASM_URL)
   }, [])
 
   const pingRuntime = useCallback(() => {
@@ -266,7 +274,7 @@ export function Playground({ initialFiles = INITIAL_FILES }: PlaygroundProps) {
         onChange={(e) => updateActiveCode(e.target.value)}
         spellCheck={false}
         rows={12}
-        className="w-full resize-y rounded-xl border-2 border-ink bg-paper p-3 font-mono text-[13px] leading-relaxed text-ink outline-none focus:bg-white"
+        className="w-full resize-y rounded-xl border-2 border-ink bg-white p-3 font-mono text-[13px] leading-relaxed text-ink outline-none selection:bg-white"
       />
 
       <div className="mt-2.5 flex items-center gap-3">
