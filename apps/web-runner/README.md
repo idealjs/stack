@@ -21,6 +21,7 @@ playground 沙箱运行时——**纯执行器**（无 React 依赖、无构建�
 ```bash
 yarn workspace @stack/web-runner build:runtime   # stack 构建
 yarn workspace @stack/web-runner dev     # stack dev --base /absproxy/5174 --port 5174：watch 重建 + hono 伺服
+yarn workspace @stack/web-runner dev:proxy      # 同 dev（显式携带 base——proxy 形态自描述）
 ```
 
 `stack.config.ts`：html 入口 `index.html`（script src `./runtime/main.ts`）＋
@@ -55,12 +56,13 @@ vite dev/preview 中间件伺服，供宿主侧 stack 初始化）。
   教程 `.env.development` 的 `VITE_STACK_RUNTIME_ORIGIN=http://localhost:5174`（iframe
   src 指向运行时位）；根 `package.json` 的 dev 脚本并行拉起 tutorial dev（5173）与本包
   `stack dev --base /absproxy/5174 --port 5174`。
-- **远程 code-server 同域场景**：教程侧注入 `TUTORIAL_BASE=/absproxy/5173`（vite
-  base，经根 dev 脚本**可选**携带——默认不注入，本地用不上；曾用 301 做前缀跳转被
-  浏览器永久缓存、撤掉环境后仍阴魂不散，已改 302 且默认不携带）；教程 env
-  `VITE_STACK_RUNTIME_ORIGIN=https://code.idealjs.com/absproxy/5174`（运行时与宿主同源——
-  同源告警如实亮红，隔离只剩 sandbox 一道，与 srcdoc 等强度）。`stack dev --port`
-  与 `TUTORIAL_BASE=/absproxy/5173` 的端口数字成对，改一处必须同步另一处。
+- **远程 code-server 同域场景**：根目录 `yarn dev:proxy` 一键启动（等价于本地 dev
+  ＋两个环境变量：教程侧 `TUTORIAL_BASE=/absproxy/5173`（vite base）与
+  `VITE_STACK_RUNTIME_ORIGIN=https://code.idealjs.com/absproxy/5174`——运行时与宿主
+  同源，同源告警如实亮红，隔离只剩 sandbox 一道，与 srcdoc 等强度）。环境变量已
+  下沉到各包的 `dev:proxy` 脚本（tutorial 的 package.json），根脚本只做编排。
+  `stack dev --port` 与 `TUTORIAL_BASE=/absproxy/5173` 的端口数字成对，改一处必须
+  同步另一处。
 - **生产**：`VITE_STACK_RUNTIME_ORIGIN=https://<runtime-domain>`——运行时独立域静态托管
   `dist-runtime/`，跨源 src 形态（第二道防线完整）。
 

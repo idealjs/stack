@@ -4,8 +4,9 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
     "build": "tsc -b && vite build && node scripts/ssg.mjs",
+    "dev": "vite",
+    "dev:proxy": "TUTORIAL_BASE=/absproxy/5173 VITE_STACK_RUNTIME_ORIGIN=https://code.idealjs.com/absproxy/5174 vite",
     "preview": "vite preview",
     "test:e2e": "playwright test",
     "test:e2e:update": "playwright test --update-snapshots"

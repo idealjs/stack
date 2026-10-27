@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "stack dev --base /absproxy/5174 --port 5174",
     "build:runtime": "stack",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "dev:proxy": "stack dev --base /absproxy/5174 --port 5174"
   },
   "dependencies": {
     "@idealjs/stack": "workspace:*"
