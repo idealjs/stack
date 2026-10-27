@@ -391,7 +391,7 @@ export const CONTENT: Record<ChapterId, ChapterContent> = {
       {
         title: '在沙箱里跑 template',
         kind: 'value',
-        what: '下面的实验室预置了 template 的全部文件：点「运行」，宿主读 stack.config.ts 的 entry（缺省按 index.html 的 script src 推导）用 stack 拉起依赖闭包，构建产物送进沙箱执行，入口文档的身体装进沙箱文档。',
+        what: '下面的实验室预置了 template 的全部文件：点「运行」，宿主读 stack.config.ts 的 inputs（index.html 即入口，html 输入；旧 entry 写法兼容，缺省按 index.html 的 script src 推导）用 stack 拉起依赖闭包，构建产物送进沙箱执行，引擎重写过的入口文档身体装进沙箱文档。',
         accept: '预览框长出 hello, template，输出面板同时有 console 回传。',
       },
       {

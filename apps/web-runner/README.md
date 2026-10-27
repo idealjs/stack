@@ -8,13 +8,18 @@ playground 沙箱运行时——**纯执行器**（无 React 依赖、无构建�
 ## 分工：宿主构建、沙箱执行
 
 - **宿主（apps/tutorial）**：`src/playground/demoBuild.ts` 用 stack SDK 完成 demo
-  构建——`memoryFs(工程文件)` ＋ `build({ inputs, hooks: [imports(), bundle()] })`，
-  在 5173 页面内跑（esbuild-wasm 由 tutorial vite 中间件同源伺服 `/esbuild.wasm`），
-  产出 wrapped 单文件 bundle；入口由 index.html 的 script src 推导、入口与入口文档
-  的存在性校验也在宿主。
+  构建——**配置驱动 inputs**：stack.config.ts 声明 `inputs: [{ name, path }]`（kind
+  由扩展名推断，index.html 即入口＝html 输入，script src 引用的模块由 imports() 拉成
+  闭包），旧 `entry` 单字段兼容（等价单条 module 输入），无配置回退按 index.html 的
+  script src 推导（module 输入＋html 输入）；`memoryFs(工程文件)` ＋
+  `build({ inputs, hooks: [imports(), bundle()] })`，在 5173 页面内跑（esbuild-wasm
+  由 tutorial vite 中间件同源伺服）。产出**双件**：wrapped 单文件 bundle（bundle 钩子
+  取 module 输入为闭包入口、纯 html 输入则取其 script 引用闭包）＋引擎重写后的
+  index.html（script/link 引用按 value-offset 重写为最终相对路径）；宿主从重写后的
+  html（而非原始文件）提取身体注入沙箱，输入路径的存在性校验在宿主、缺失即响亮报错。
 - **web-runner（本包）**：只执行。run 消息（协议 v1）携带 `{ code, html }`——code 是
-  宿主构建产物，html 是入口文档的身体；执行核心 Blob URL ＋ `import()`，console 捕获、
-  异常回传、done 不变。沙箱内零构建、零 esbuild-wasm、零子资源请求。
+  宿主构建的 bundle，html 是入口文档的身体；执行核心 Blob URL ＋ `import()`，console
+  捕获、异常回传、done 不变。沙箱内零构建、零 esbuild-wasm、零子资源请求。
 
 ## 构建：stack 单文件 doc
 
