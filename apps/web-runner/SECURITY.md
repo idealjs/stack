@@ -93,7 +93,7 @@ top-navigation/popups/forms/modals、src 源 ≠ 宿主源。
 
 e2e 栈自包含（playwright webServer 数组）：站点 `yarn build`＋preview 于 4491（构建时
 经进程 env 注入 `VITE_STACK_RUNTIME_ORIGIN=http://localhost:5175`），运行时
-`dev:runtime --port 5175`——与交互 dev 的 5173/5174 互不抢占，跨源契约不再隐式依赖
+`dev --port 5175`——与交互 dev 的 5173/5174 互不抢占，跨源契约不再隐式依赖
 「机器上恰好在跑的 dev 服务器」。
 
 ## 运行时嵌入头（已移除）

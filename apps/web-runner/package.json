@@ -4,7 +4,7 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
-    "dev:runtime": "stack dev --base /absproxy/5174 --port 5174",
+    "dev": "stack dev --base /absproxy/5174 --port 5174",
     "build:runtime": "stack",
     "typecheck": "tsc --noEmit"
   },

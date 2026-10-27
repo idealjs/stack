@@ -20,7 +20,7 @@ playground 沙箱运行时——**纯执行器**（无 React 依赖、无构建�
 
 ```bash
 yarn workspace @stack/web-runner build:runtime   # stack 构建
-yarn workspace @stack/web-runner dev:runtime     # stack dev --base /absproxy/5174 --port 5174：watch 重建 + hono 伺服
+yarn workspace @stack/web-runner dev     # stack dev --base /absproxy/5174 --port 5174：watch 重建 + hono 伺服
 ```
 
 `stack.config.ts`：html 入口 `index.html`（script src `./runtime/main.ts`）＋
@@ -66,7 +66,7 @@ vite dev/preview 中间件伺服，供宿主侧 stack 初始化）。
 
 修改位置：教程侧 env 全部在 `apps/tutorial/.env.development`；`TUTORIAL_BASE` 只经根
 dev 脚本注入（vite 无此配置项）。e2e 栈不读这些 env——playwright webServer 构建时经
-进程 env 注入 `VITE_STACK_RUNTIME_ORIGIN=http://localhost:5175` 并以 `dev:runtime --port
+进程 env 注入 `VITE_STACK_RUNTIME_ORIGIN=http://localhost:5175` 并以 `dev --port
 5175` 起运行时位，与交互 dev 的 5173/5174 互不抢占、契约独立。
 
 注意事项：运行时 doc 零子资源后，鉴权链（code-server 的 SameSite=Lax cookie）只影响

@@ -26,7 +26,7 @@ export default defineConfig({
       timeout: 180_000,
     },
     {
-      command: 'yarn workspace @stack/web-runner dev:runtime --port 5175',
+      command: 'yarn workspace @stack/web-runner dev --port 5175',
       url: 'http://localhost:5175/',
       reuseExistingServer: true,
     },

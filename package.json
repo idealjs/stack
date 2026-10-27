@@ -7,8 +7,8 @@
   ],
   "packageManager": "yarn@4.9.2",
   "scripts": {
-    "dev": "concurrently -k -n tutorial,runtime \"yarn workspace @stack/tutorial dev\" \"yarn workspace @stack/web-runner dev:runtime\"",
-    "dev:proxy": "concurrently -k -n tutorial,runtime \"TUTORIAL_BASE=/absproxy/5173 VITE_STACK_RUNTIME_ORIGIN=https://code.idealjs.com/absproxy/5174 yarn workspace @stack/tutorial dev\" \"yarn workspace @stack/web-runner dev:runtime\"",
+    "dev": "concurrently -k -n tutorial,runtime \"yarn workspace @stack/tutorial dev\" \"yarn workspace @stack/web-runner dev\"",
+    "dev:proxy": "concurrently -k -n tutorial,runtime \"TUTORIAL_BASE=/absproxy/5173 VITE_STACK_RUNTIME_ORIGIN=https://code.idealjs.com/absproxy/5174 yarn workspace @stack/tutorial dev\" \"yarn workspace @stack/web-runner dev\"",
     "format": "biome format --write .",
     "format:check": "biome format ."
   },
