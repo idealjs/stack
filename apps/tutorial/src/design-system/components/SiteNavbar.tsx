@@ -1,5 +1,5 @@
 import type { CSSProperties, ReactNode } from 'react'
-import { SHADOW_BUTTON_ACTIVE, ShadowButton, shadowButtonClasses } from './ShadowButton'
+import { SHADOW_BUTTON_ACTIVE, shadowButtonClasses } from './ShadowButton'
 
 export interface NavSectionLink {
   key: string
@@ -77,12 +77,14 @@ export function SiteNavbar({
       />
 
       <div className="flex flex-wrap items-center gap-1.5 max-lg:peer-checked:[&>span]:invisible">
-        <a
-          href={brand.href}
-          className={`mr-auto rounded-lg border-2 px-2.5 py-0.5 font-mono text-t2 font-extrabold leading-snug no-underline transition-[transform,box-shadow,background-color] duration-150 ${SHADOW_BUTTON_ACTIVE} border-ink bg-clash1b text-ink`}
-        >
-          {brand.label}
-        </a>
+        <span className="mr-auto hover-host inline-flex">
+          <a
+            href={brand.href}
+            className={`rounded-lg border-2 border-ink px-2.5 py-0.5 font-mono text-t2 font-extrabold leading-snug no-underline transition-[translate,box-shadow] duration-150 hoverable-shadow shadow-btn text-ink ${SHADOW_BUTTON_ACTIVE}`}
+          >
+            {brand.label}
+          </a>
+        </span>
         <span className="hover-host hidden max-lg:inline-flex">
           {/* biome-ignore lint/a11y/useAriaPropsSupportedByRole: 纯 CSS checkbox 开合的触发 label，aria 状态为增强语义保留 */}
           <label
@@ -106,14 +108,14 @@ export function SiteNavbar({
         className="max-lg:fixed max-lg:inset-y-0 max-lg:left-0 max-lg:z-50 max-lg:w-72 max-lg:overflow-y-auto max-lg:rounded-none max-lg:border-r-2 max-lg:border-ink max-lg:bg-paper max-lg:p-3 max-lg:shadow-[8px_0_0_0_var(--color-ink)] max-lg:invisible max-lg:-translate-x-full max-lg:transition-[transform,visibility] max-lg:duration-300 max-lg:ease-[cubic-bezier(0.32,0.72,0,1)] max-lg:motion-reduce:transition-none max-lg:peer-checked:visible max-lg:peer-checked:translate-x-0"
       >
         <div className="lg:hidden max-lg:mb-3 max-lg:flex max-lg:items-center max-lg:justify-between">
-          <ShadowButton
-            href={brand.href}
-            size="sm"
-            tone="clash1b"
-            className="font-mono"
-          >
-            {brand.label}
-          </ShadowButton>
+          <span className="hover-host inline-flex">
+            <a
+              href={brand.href}
+              className={`rounded-lg border-2 border-ink px-2.5 py-1 font-mono text-content font-bold leading-snug no-underline transition-[translate,box-shadow] duration-150 hoverable-shadow shadow-btn text-ink ${SHADOW_BUTTON_ACTIVE}`}
+            >
+              {brand.label}
+            </a>
+          </span>
           <span className="hover-host inline-flex">
             {/* biome-ignore lint/a11y/useAriaPropsSupportedByRole: 纯 CSS checkbox 开合的触发 label，aria 状态为增强语义保留 */}
             <label
