@@ -2,7 +2,7 @@ import { format } from './format'
 import { post } from './outbound'
 
 export async function execute(code: string, html: string | undefined) {
-  if (typeof html === 'string') {
+  if (html) {
     const doc = new DOMParser().parseFromString(html, 'text/html')
     document.documentElement.replaceWith(document.importNode(doc.documentElement, true))
   }
