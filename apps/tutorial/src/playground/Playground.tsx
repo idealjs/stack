@@ -6,7 +6,7 @@ import { extractHtmlBody } from './htmlBody'
 import { type OutputLine, OutputPanel } from './OutputPanel'
 import { isRuntimeMessage, PROTOCOL_VERSION } from './protocol'
 
-const RUNTIME_ORIGIN: string = import.meta.env.VITE_WEB_RUNNER_ORIGIN ?? ''
+const RUNTIME_ORIGIN: string = import.meta.env.VITE_STACK_RUNTIME_ORIGIN ?? ''
 
 const MAIN_TS = `// 沙箱工程入口：TypeScript 直写，点「运行」由宿主 stack 构建后送进沙箱执行。
 const greeting: string = 'hello, playground'

@@ -18,7 +18,7 @@
   消息带 `parentBlocked`）；第二道是跨源 src 本身：将来 sandbox 属性若被误删或放宽，
   浏览器同源策略仍把框内文档挡在宿主源之外——同源部署则两道一起丢。独立源 dev 为
   第二端口 5174（`stack dev` hono 伺服），生产为另一域名静态托管；宿主以
-  `VITE_WEB_RUNNER_ORIGIN` 指向它。
+  `VITE_STACK_RUNTIME_ORIGIN` 指向它。
 
 ## 外部访问：code-server 反向代理下的双入口形态
 
@@ -47,12 +47,12 @@
   该入口下运行时与宿主同源（origin 不含路径），同源告警如实亮红，隔离只剩 sandbox
   一道——与 srcdoc 等强度。跨源 src 形态只在无 cookie 鉴权的运行时位成立：
   e2e（localhost:5175）、生产（独立域名静态托管 `dist-runtime/`）。srcdoc
-  （`VITE_WEB_RUNNER_ORIGIN` 置空）保留为兜底——doc 本体零网络、零子资源。
+  （`VITE_STACK_RUNTIME_ORIGIN` 置空）保留为兜底——doc 本体零网络、零子资源。
 
 教程站站内链接一律相对形态（`./xxx.html`）：根部署（本地、子域名、SSG 生产）与前缀
 部署（absproxy）双兼容；`e2e/pages.spec.ts` 的 href 选择器同步为相对形态。
 
-配置接缝：`apps/tutorial/.env.development` 的 `VITE_WEB_RUNNER_ORIGIN`（默认
+配置接缝：`apps/tutorial/.env.development` 的 `VITE_STACK_RUNTIME_ORIGIN`（默认
 `http://localhost:5174`＝本地 dev 的运行时位；置空 = srcdoc；设远程位 = 跨源 src，仅限
 无 cookie 鉴权问题的位）、根 `package.json` dev 脚本只并行拉起 tutorial dev 与 web-runner
 的 `stack dev`；教程侧 `TUTORIAL_BASE=/absproxy/5173` 仅为远程 absproxy 场景的**可选
@@ -92,7 +92,7 @@ e2e 栈（5175）不设这些 env，base 默认 `/`、运行时位构建时注�
 top-navigation/popups/forms/modals、src 源 ≠ 宿主源。
 
 e2e 栈自包含（playwright webServer 数组）：站点 `yarn build`＋preview 于 4491（构建时
-经进程 env 注入 `VITE_WEB_RUNNER_ORIGIN=http://localhost:5175`），运行时
+经进程 env 注入 `VITE_STACK_RUNTIME_ORIGIN=http://localhost:5175`），运行时
 `dev:runtime --port 5175`——与交互 dev 的 5173/5174 互不抢占，跨源契约不再隐式依赖
 「机器上恰好在跑的 dev 服务器」。
 

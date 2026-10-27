@@ -20,7 +20,7 @@ export default defineConfig({
   webServer: [
     {
       command:
-        'VITE_WEB_RUNNER_ORIGIN=http://localhost:5175 yarn build && yarn preview --port 4491 --strictPort',
+        'VITE_STACK_RUNTIME_ORIGIN=http://localhost:5175 yarn build && yarn preview --port 4491 --strictPort',
       url: 'http://localhost:4491/index.html',
       reuseExistingServer: true,
       timeout: 180_000,
