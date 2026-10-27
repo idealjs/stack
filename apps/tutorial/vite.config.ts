@@ -1,4 +1,4 @@
-import { readdirSync } from 'node:fs'
+import { existsSync, readdirSync, readFileSync } from 'node:fs'
 import { readFile } from 'node:fs/promises'
 import { createRequire } from 'node:module'
 import { resolve } from 'node:path'
@@ -7,6 +7,34 @@ import react from '@vitejs/plugin-react'
 import { defineConfig, type Plugin } from 'vite'
 
 const pages = readdirSync(__dirname).filter((f) => f.endsWith('.html'))
+
+const htmlProxy = (): Plugin => ({
+  name: 'html-proxy',
+  configureServer(server) {
+    server.middlewares.use((req, res, next) => {
+      const base = server.config.base.replace(/\/$/, '')
+      const [rawPath, query] = (req.url ?? '').split('?')
+      const path = decodeURIComponent(rawPath)
+      const isHtml = path === base || path === `${base}/` || path.endsWith('.html')
+      if (!base || !path.startsWith(`${base}/`) || !isHtml) return next()
+      const stripped =
+        path === base || path === `${base}/` ? '/index.html' : path.slice(base.length)
+      const file = resolve(__dirname, stripped.slice(1))
+      if (!existsSync(file)) return next()
+      const html = readFileSync(file, 'utf8')
+      server
+        .transformIndexHtml(`${stripped}${query ? `?${query}` : ''}`, html)
+        .then((out) => {
+          res.writeHead(200, {
+            'Content-Type': 'text/html; charset=utf-8',
+            'Cache-Control': 'no-store',
+          })
+          res.end(out)
+        })
+        .catch(next)
+    })
+  },
+})
 
 const baseSlashRedirect = (): Plugin => ({
   name: 'base-slash-redirect',
@@ -103,7 +131,7 @@ export default defineConfig({
     cors: { origin: '*' },
   },
   preview: { cors: { origin: '*' } },
-  plugins: [baseSlashRedirect(), webRunnerDoc(), wasmAsset(), react(), tailwindcss()],
+  plugins: [htmlProxy(), baseSlashRedirect(), webRunnerDoc(), wasmAsset(), react(), tailwindcss()],
   build: {
     rollupOptions: {
       input: Object.fromEntries(

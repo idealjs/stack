@@ -79,6 +79,15 @@ export function Playground({ initialFiles = INITIAL_FILES }: PlaygroundProps) {
     if (name === active.name) setActiveName(next[0].name)
   }
 
+  const pendingRun = useRef<{ code: string; html: string } | null>(null)
+
+  const reloadRuntime = useCallback(() => {
+    const frame = iframeRef.current
+    if (frame === null) return
+    if (RUNTIME_ORIGIN) frame.src = `${RUNTIME_ORIGIN.replace(/\/$/, '')}/?t=${Date.now()}`
+    else frame.srcdoc = `${runtimeDoc}\n<!--${Date.now()}-->`
+  }, [])
+
   const pingRuntime = useCallback(() => {
     iframeRef.current?.contentWindow?.postMessage({ v: PROTOCOL_VERSION, type: 'ping' }, '*')
   }, [])
@@ -94,6 +103,14 @@ export function Playground({ initialFiles = INITIAL_FILES }: PlaygroundProps) {
         setStatus({ origin: msg.origin, parentBlocked: msg.parentBlocked })
 
         setSameOriginAlert(msg.origin === window.location.origin)
+        const pending = pendingRun.current
+        if (pending !== null) {
+          pendingRun.current = null
+          iframeRef.current?.contentWindow?.postMessage(
+            { v: PROTOCOL_VERSION, type: 'run', code: pending.code, html: pending.html },
+            '*',
+          )
+        }
       } else if (msg.type === 'console') {
         setLines((prev) => [...prev, { level: msg.level, text: msg.text }])
       } else if (msg.type === 'error') {
@@ -134,15 +151,8 @@ export function Playground({ initialFiles = INITIAL_FILES }: PlaygroundProps) {
       }
       const html = extractHtmlBody(doc.code)
       const code = await buildDemo(files, entry)
-      iframeRef.current?.contentWindow?.postMessage(
-        {
-          v: PROTOCOL_VERSION,
-          type: 'run',
-          code,
-          html,
-        },
-        '*',
-      )
+      pendingRun.current = { code, html }
+      reloadRuntime()
       setPreview(true)
     } catch (error) {
       setLines((prev) => [
