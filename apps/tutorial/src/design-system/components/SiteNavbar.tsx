@@ -129,7 +129,7 @@ export function SiteNavbar({
         {rows.map((row) => (
           <div
             key={row.sectionKey}
-            className="mt-2 grid grid-cols-[88px_minmax(0,1fr)] items-center gap-x-1.5 border-t border-dashed border-ink/20 pt-2 max-lg:grid-cols-1 max-lg:items-start"
+            className="mt-2 grid grid-cols-[88px_minmax(0,1fr)] items-start gap-x-1.5 border-t border-dashed border-ink/20 pt-2 max-lg:grid-cols-1 max-lg:items-start"
           >
             <RowLabel on={rowOn(row)} href={row.href}>
               {row.label}
@@ -144,7 +144,7 @@ export function SiteNavbar({
                   <a
                     key={item.key}
                     href={item.href}
-                    className={`rounded-lg px-2.5 py-0.5 text-center text-content font-bold leading-snug no-underline ${LIGHT_PRESS} ${
+                    className={`rounded-lg px-2.5 py-0.5 text-left text-content font-bold leading-snug no-underline ${LIGHT_PRESS} ${
                       on ? (item.color ? 'text-ink' : SELECTED) : IDLE
                     } ${item.mono ? 'font-mono' : ''}`}
                     style={on && item.color ? { background: item.color } : undefined}
