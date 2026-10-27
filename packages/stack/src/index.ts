@@ -32,7 +32,11 @@ export type {
   StackHook,
   WatchHook,
 } from './core/hooks.ts'
-export { loadConfigFromSource, type StackSourceConfig } from './core/loadConfigSource.ts'
+export {
+  loadConfigFromSource,
+  type StackSourceConfig,
+  type StackSourceInput,
+} from './core/loadConfigSource.ts'
 export { memoryFs } from './core/memoryFs.ts'
 export type { ParsedExport, ParsedImport, ParsedImportName } from './core/parse.ts'
 export type { ParsedHtmlAsset } from './core/parseHtml.ts'

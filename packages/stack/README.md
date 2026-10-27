@@ -75,10 +75,13 @@ export default defineConfig({
   `const defineConfig = (c) => c;`（配置源不 import 任何东西、纯数据导出）→ 模块求值
   （浏览器 Blob URL 动态 import；node 降级 data: URL，其 ESM loader 不认 blob: scheme）
   → 取 default（兼容 `config` 命名导出），非对象即响亮报错。
-- **语义边界**：返回 `StackSourceConfig`（MVP 数据面，现仅 `entry?`）而非完整
-  `StackConfig`——inputs/dist/hooks 由宿主固定（策略归宿主），配置只声明数据面；
-  `fs`/`hooks` 这类平台绑定与函数字段不经配置源跨越（内联函数拿不到 stack 的
-  builtins，写了也没有意义）。宿主拿到 entry 后自行映射 `inputs`。
+- **语义边界**：返回 `StackSourceConfig`（数据面：`inputs?: { name, path }[]`＋兼容
+  `entry?: string`）而非完整 `StackConfig`——dist/hooks 由宿主固定（策略归宿主），配置
+  只声明数据面；`fs`/`hooks` 这类平台绑定与函数字段不经配置源跨越（内联函数拿不到
+  stack 的 builtins，写了也没有意义）。解析守卫：inputs 须为非空数组、每项有 name/path
+  非空字符串（缺即响亮报错）；kind 由扩展名推断（`.html` → html、`.css` → css、其余
+  module）。宿主自行映射 build inputs——inputs 与 entry 同时出现时 inputs 优先，entry
+  等价单条 module 输入（`inputs: [{ name: 'demo', path: entry }]`）。
 
 ## 架构总览（两相两入口）
 
