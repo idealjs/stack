@@ -71,18 +71,6 @@ export function PracticeWorkspace() {
 
   const stop = () => abortRef.current?.abort()
 
-  const openerNotice = (
-    <PromptStrip
-      testId="coach-opener"
-      title="开场提示词 · 一键开工"
-      text={task.opener}
-      onSend={send}
-      disabled={false}
-      busy={busy}
-      flat
-    />
-  )
-
   return (
     <div className="flex flex-col gap-4 pb-24" suppressHydrationWarning>
       <div className="rounded-lg border-2 border-dashed border-ink/30 bg-paper-deep px-3 py-2 text-[12.5px] leading-5 text-body">
@@ -155,7 +143,6 @@ export function PracticeWorkspace() {
           onSend={send}
           onStop={stop}
           onOpenKey={() => setKeyOpen(true)}
-          notice={openerNotice}
           flat
         />
       </CoachSticky>

@@ -9,8 +9,6 @@ export interface PracticeTask {
   expectation: string
 
   acceptance: string[]
-
-  opener: string
 }
 
 export const TASKS: PracticeTask[] = [
@@ -27,9 +25,6 @@ export const TASKS: PracticeTask[] = [
       '介绍恰好 3 行',
       '只改了 src/App.tsx（可以让 agent 展示改动内容）',
     ],
-    opener:
-      '请把 src/App.tsx 改成一张「自我介绍卡」：大标题显示我的名字，下面正好 3 行介绍（来自哪里 / 正在学什么 / 想做什么项目）。' +
-      '只用最基础的 JSX 与内联样式，不引入新依赖；改完把改动内容展示给我，我去看预览并逐条对照验收清单。',
   },
 ]
 

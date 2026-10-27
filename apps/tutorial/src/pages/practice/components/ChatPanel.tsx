@@ -1,4 +1,4 @@
-import type { KeyboardEvent, ReactNode } from 'react'
+import type { KeyboardEvent } from 'react'
 import { useState } from 'react'
 
 export interface ChatItem {
@@ -15,7 +15,6 @@ export function ChatPanel({
   onSend,
   onStop,
   onOpenKey,
-  notice,
   flat = false,
 }: {
   items: ChatItem[]
@@ -27,8 +26,6 @@ export function ChatPanel({
   onSend: (text: string) => void
   onStop: () => void
   onOpenKey: () => void
-
-  notice?: ReactNode
 
   flat?: boolean
 }) {
@@ -89,8 +86,6 @@ export function ChatPanel({
         )}
         {busy && <p className="t-small-mute m-0 animate-pulse font-mono">agent 工作中…</p>}
       </div>
-
-      {notice && <div className="border-t border-dashed border-ink/20 p-2.5">{notice}</div>}
 
       <div className="border-t border-dashed border-ink/20 p-2.5">
         <textarea
