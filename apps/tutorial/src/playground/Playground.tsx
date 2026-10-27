@@ -92,8 +92,20 @@ export function Playground({ initialFiles = INITIAL_FILES }: PlaygroundProps) {
     else frame.srcdoc = `${runtimeDoc}\n<!--${Date.now()}-->`
   }, [])
 
+  const [engineReady, setEngineReady] = useState(false)
+
   useEffect(() => {
-    void initEsbuild(WASM_URL)
+    initEsbuild(WASM_URL)
+      .then(() => setEngineReady(true))
+      .catch((error: unknown) => {
+        setLines((prev) => [
+          ...prev,
+          {
+            level: 'error',
+            text: `引擎初始化失败：${error instanceof Error ? error.message : String(error)}`,
+          },
+        ])
+      })
   }, [])
 
   const pingRuntime = useCallback(() => {
@@ -278,8 +290,8 @@ export function Playground({ initialFiles = INITIAL_FILES }: PlaygroundProps) {
       />
 
       <div className="mt-2.5 flex items-center gap-3">
-        <ShadowButton tone="clash1a" onClick={run} disabled={building}>
-          运行 ▶
+        <ShadowButton tone="clash1a" onClick={run} disabled={building || !engineReady}>
+          {engineReady ? '运行 ▶' : '引擎加载中…'}
         </ShadowButton>
         <span className="t-small-mute">
           {building
