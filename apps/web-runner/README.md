@@ -20,7 +20,7 @@ playground 沙箱运行时——**纯执行器**（无 React 依赖、无构建�
 
 ```bash
 yarn workspace @stack/web-runner build:runtime   # stack 构建
-yarn workspace @stack/web-runner dev:runtime     # stack dev --port 5174：watch 重建 + hono 伺服
+yarn workspace @stack/web-runner dev:runtime     # stack dev --base /absproxy/5174 --port 5174：watch 重建 + hono 伺服
 ```
 
 `stack.config.ts`：html 入口 `index.html`（script src `./runtime/main.ts`）＋
@@ -54,7 +54,7 @@ vite dev/preview 中间件伺服，供宿主侧 stack 初始化）。
 - **本地 dev（默认形态，零额外注入）**：无环境变量要求——tutorial vite `base='/'`；
   教程 `.env.development` 的 `VITE_WEB_RUNNER_ORIGIN=http://localhost:5174`（iframe
   src 指向运行时位）；根 `package.json` 的 dev 脚本并行拉起 tutorial dev（5173）与本包
-  `stack dev --port 5174`。
+  `stack dev --base /absproxy/5174 --port 5174`。
 - **远程 code-server 同域场景**：教程侧注入 `TUTORIAL_BASE=/absproxy/5173`（vite
   base，经根 dev 脚本**可选**携带——默认不注入，本地用不上；曾用 301 做前缀跳转被
   浏览器永久缓存、撤掉环境后仍阴魂不散，已改 302 且默认不携带）；教程 env

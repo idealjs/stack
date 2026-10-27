@@ -15,6 +15,7 @@ const MIME: Record<string, string> = {
 
 export interface DevServerOptions {
   port?: number
+  base?: string
   assets?: Record<string, string>
 }
 
@@ -25,6 +26,7 @@ export async function startDevServer(
   const root = resolve(process.cwd(), config.root ?? '.')
   const dist = resolve(root, config.dist ?? 'dist')
   const distRelative = relative(process.cwd(), dist).replaceAll('\\', '/')
+  const base = options.base?.replace(/\/$/, '') ?? ''
   const app = new Hono()
   for (const [route, filePath] of Object.entries(options.assets ?? {})) {
     app.get(route, async (c) => {
@@ -34,6 +36,7 @@ export async function startDevServer(
         'Cache-Control': 'no-store',
       })
     })
+    if (base !== '') app.get(`${base}${route}`, async (c) => app.fetch(c.req.raw))
   }
 
   try {
@@ -51,7 +54,12 @@ export async function startDevServer(
   }
   app.get('*', async (c) => {
     const requestPath = decodeURIComponent(new URL(c.req.url).pathname)
-    for (const candidate of [requestPath, join(requestPath, 'index.html')]) {
+    const withoutBase =
+      base !== '' && (requestPath === base || requestPath.startsWith(`${base}/`))
+        ? requestPath.slice(base.length) || '/'
+        : requestPath
+    const stripped = withoutBase.endsWith('/') ? withoutBase : `${withoutBase}`
+    for (const candidate of [stripped, join(stripped, 'index.html')]) {
       const safe = join(distRelative, candidate)
       if (!safe.startsWith(distRelative)) continue
       try {
@@ -76,6 +84,6 @@ export async function startDevServer(
     }
     process.exit(1)
   })
-  console.log(`hono dev server → http://localhost:${port}/（伺服 ${distRelative}）`)
+  console.log(`hono dev server → http://localhost:${port}/${base}（伺服 ${distRelative}）`)
   return server
 }

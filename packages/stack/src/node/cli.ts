@@ -14,6 +14,7 @@ interface CliOptions {
   mode: 'build' | 'watch' | 'dev'
   configPath: string
   port: number
+  base: string
   assets: Record<string, string>
 }
 
@@ -21,6 +22,7 @@ function parseArgs(argv: string[]): CliOptions {
   let mode: CliOptions['mode'] = 'build'
   let configPath = 'stack.config.ts'
   let port = 3000
+  let base = ''
   const assets: Record<string, string> = {}
   for (let i = 0; i < argv.length; i += 1) {
     const arg = argv[i]
@@ -35,6 +37,13 @@ function parseArgs(argv: string[]): CliOptions {
       configPath = arg.slice('--config='.length)
     } else if (arg === '--watch' || arg === '-w') {
       mode = 'watch'
+    } else if (arg === '--base') {
+      const value = argv[i + 1]
+      if (value === undefined) throw new Error('--base 需要一个路径前缀')
+      base = value
+      i += 1
+    } else if (arg.startsWith('--base=')) {
+      base = arg.slice('--base='.length)
     } else if (arg === '--port') {
       const value = argv[i + 1]
       if (value === undefined) throw new Error('--port 需要一个端口号')
@@ -59,7 +68,7 @@ function parseArgs(argv: string[]): CliOptions {
       throw new Error(`未知参数：${arg}`)
     }
   }
-  return { mode, configPath, port, assets }
+  return { mode, configPath, port, base, assets }
 }
 
 export async function loadConfig(configPath: string): Promise<StackConfig> {
@@ -172,7 +181,11 @@ export async function runCLI(argv: string[]): Promise<void> {
   )
   if (options.mode === 'watch' || options.mode === 'dev') {
     if (options.mode === 'dev') {
-      await startDevServer(config, { port: options.port, assets: options.assets })
+      await startDevServer(config, {
+        port: options.port,
+        base: options.base,
+        assets: options.assets,
+      })
     }
     await runWatch(config)
     return
