@@ -1,4 +1,4 @@
-import { existsSync, readdirSync, readFileSync } from 'node:fs'
+import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs'
 import { readFile } from 'node:fs/promises'
 import { createRequire } from 'node:module'
 import { resolve } from 'node:path'
@@ -57,6 +57,7 @@ const RUNTIME_DOC_PATH = resolve(__dirname, '../web-runner/dist-runtime/index.ht
 const RUNTIME_WASM_PATH = createRequire(resolve(__dirname, 'package.json')).resolve(
   'esbuild-wasm/esbuild.wasm',
 )
+const RUNTIME_WASM_MTIME = statSync(RUNTIME_WASM_PATH).mtimeMs
 const DOC_FALLBACK =
   '<!doctype html><html lang="zh-CN"><body><!-- web-runner 产物缺失：先跑 yarn workspace @stack/web-runner build:runtime --></body></html>'
 
@@ -95,12 +96,30 @@ const webRunnerDoc = (): Plugin => ({
 const wasmAsset = (): Plugin => ({
   name: 'web-runner-wasm',
   configureServer(server) {
-    server.middlewares.use('/esbuild.wasm', (_req, res, next) => {
+    server.middlewares.use((req, res, next) => {
+      const base = server.config.base.replace(/\/$/, '')
+      const path = (req.url ?? '').split('?')[0]
+      const target =
+        base === ''
+          ? path
+          : path === base
+            ? '/'
+            : path.startsWith(`${base}/`)
+              ? path.slice(base.length)
+              : null
+      if (target !== '/esbuild.wasm') return next()
       readFile(RUNTIME_WASM_PATH)
         .then((wasm) => {
+          const etag = `"${wasm.byteLength}-${RUNTIME_WASM_MTIME}"`
+          if (req.headers['if-none-match'] === etag) {
+            res.writeHead(304, { Etag: etag })
+            res.end()
+            return
+          }
           res.writeHead(200, {
             'Access-Control-Allow-Origin': '*',
-            'Cache-Control': 'no-store',
+            'Cache-Control': 'public, max-age=31536000, immutable',
+            Etag: etag,
             'Content-Type': 'application/wasm',
           })
           res.end(wasm)
@@ -109,7 +128,18 @@ const wasmAsset = (): Plugin => ({
     })
   },
   configurePreviewServer(server) {
-    server.middlewares.use('/esbuild.wasm', (_req, res, next) => {
+    server.middlewares.use((req, res, next) => {
+      const base = server.config.base.replace(/\/$/, '')
+      const path = (req.url ?? '').split('?')[0]
+      const target =
+        base === ''
+          ? path
+          : path === base
+            ? '/'
+            : path.startsWith(`${base}/`)
+              ? path.slice(base.length)
+              : null
+      if (target !== '/esbuild.wasm') return next()
       readFile(RUNTIME_WASM_PATH)
         .then((wasm) => {
           res.writeHead(200, {
