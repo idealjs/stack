@@ -107,9 +107,9 @@ export function SiteNavbar({
 
       <div
         id="site-nav-drawer"
-        className="max-lg:fixed max-lg:inset-y-0 max-lg:left-0 max-lg:z-50 max-lg:w-72 max-lg:overflow-y-auto max-lg:rounded-none max-lg:border-r-2 max-lg:border-ink max-lg:bg-paper max-lg:p-3 max-lg:shadow-[8px_0_0_0_var(--color-ink)] max-lg:invisible max-lg:-translate-x-full max-lg:transition-[transform,visibility] max-lg:duration-300 max-lg:ease-[cubic-bezier(0.32,0.72,0,1)] max-lg:motion-reduce:transition-none max-lg:peer-checked:visible max-lg:peer-checked:translate-x-0"
+        className="max-lg:fixed max-lg:inset-y-0 max-lg:left-0 max-lg:z-50 max-lg:w-72 max-lg:overflow-y-auto max-lg:rounded-none max-lg:border-r-2 max-lg:border-ink max-lg:bg-paper max-lg:px-4 max-lg:py-5 max-lg:shadow-[8px_0_0_0_var(--color-ink)] max-lg:invisible max-lg:opacity-0 max-lg:-translate-x-full max-lg:transition-[transform,visibility,opacity] max-lg:duration-300 max-lg:ease-[cubic-bezier(0.32,0.72,0,1)] max-lg:motion-reduce:transition-none max-lg:peer-checked:visible max-lg:peer-checked:translate-x-0 max-lg:peer-checked:opacity-100"
       >
-        <div className="lg:hidden max-lg:mb-3 max-lg:flex max-lg:items-center max-lg:justify-between">
+        <div className="lg:hidden max-lg:mb-5 max-lg:flex max-lg:items-center max-lg:justify-between">
           <ShadowButton tone="ghost" href={brand.href} size="sm" className="font-mono">
             {brand.label}
           </ShadowButton>
@@ -129,7 +129,7 @@ export function SiteNavbar({
         {rows.map((row) => (
           <div
             key={row.sectionKey}
-            className="mt-2 grid grid-cols-[88px_minmax(0,1fr)] items-start gap-x-1.5 border-t border-dashed border-ink/20 pt-2 max-lg:grid-cols-1 max-lg:items-start"
+            className="mt-2 grid grid-cols-[88px_minmax(0,1fr)] items-start gap-x-1.5 border-t border-dashed border-ink/20 pt-2 max-lg:mt-3 max-lg:grid-cols-1 max-lg:items-start"
           >
             <RowLabel on={rowOn(row)} href={row.href}>
               {row.label}
