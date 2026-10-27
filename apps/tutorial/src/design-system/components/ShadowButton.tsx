@@ -1,6 +1,7 @@
 import type { MouseEventHandler, ReactNode } from 'react'
 
 export type ShadowButtonTone =
+  | 'ghost'
   | 'paper'
   | 'clash1a'
   | 'clash1b'
@@ -10,6 +11,7 @@ export type ShadowButtonTone =
   | 'clash3b'
 
 const TONE_BG: Record<ShadowButtonTone, string> = {
+  ghost: '',
   paper: 'bg-paper',
   clash1a: 'bg-clash1a',
   clash1b: 'bg-clash1b',
