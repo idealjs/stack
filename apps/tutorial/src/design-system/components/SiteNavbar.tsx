@@ -79,11 +79,7 @@ export function SiteNavbar({
       <div className="flex flex-wrap items-center gap-1.5 max-lg:peer-checked:[&>span]:invisible">
         <a
           href={brand.href}
-          className={`mr-auto rounded-lg border-2 px-2.5 py-0.5 font-mono text-t2 font-extrabold leading-snug no-underline transition-[transform,box-shadow,background-color] duration-150 ${SHADOW_BUTTON_ACTIVE} ${
-            active === brand.key
-              ? 'border-ink bg-clash1b text-ink'
-              : 'border-ink bg-paper text-ink hover:bg-paper-deep'
-          }`}
+          className={`mr-auto rounded-lg border-2 px-2.5 py-0.5 font-mono text-t2 font-extrabold leading-snug no-underline transition-[transform,box-shadow,background-color] duration-150 ${SHADOW_BUTTON_ACTIVE} border-ink bg-clash1b text-ink`}
         >
           {brand.label}
         </a>
@@ -113,7 +109,7 @@ export function SiteNavbar({
           <ShadowButton
             href={brand.href}
             size="sm"
-            tone={active === brand.key ? 'clash1b' : 'paper'}
+            tone="clash1b"
             className="font-mono"
           >
             {brand.label}
