@@ -6,7 +6,7 @@ import { ShadowButton } from '../design-system'
 const WASM_URL = 'esbuild.wasm'
 
 import { buildDemo } from './demoBuild'
-import { extractHtmlBody } from './htmlBody'
+import { extractHtmlDocument } from './htmlBody'
 import { type OutputLine, OutputPanel } from './OutputPanel'
 import { isRuntimeMessage, PROTOCOL_VERSION } from './protocol'
 
@@ -155,7 +155,7 @@ export function Playground({ initialFiles = INITIAL_FILES }: PlaygroundProps) {
         return
       }
       const { code, htmlDoc } = await buildDemo(files)
-      const html = extractHtmlBody(htmlDoc)
+      const html = extractHtmlDocument(htmlDoc)
       pendingRun.current = { code, html }
       reloadRuntime()
       setPreview(true)
