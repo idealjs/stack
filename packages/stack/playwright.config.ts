@@ -7,7 +7,7 @@ export default defineConfig({
   use: { baseURL: 'http://localhost:5901' },
   webServer: {
     command: 'node bin/stack.mjs dev --config stack.config.ts --port 5901',
-    url: 'http://localhost:5901/browser/',
+    url: 'http://localhost:5901/',
     reuseExistingServer: false,
     timeout: 60_000,
   },

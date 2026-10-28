@@ -32,21 +32,26 @@ const commonDirectory = (paths: string[]): string => {
   return shared.join('/') || '/'
 }
 
-const canonicalPath = (id: string, baseDir: string, kind: StackInputKind): string => {
-  const relative = relativePath(baseDir, id)
-  return kind === 'module' ? replaceExtension(relative, '.js') : relative
-}
+const SHARED_PREFIX = '__shared'
 
 export function renderPreserveEsm(input: RenderInput): EmittedFile[] {
-  const baseDir = commonDirectory([
-    ...input.entryIds,
-    ...input.records.map((record) => record.pathAnchor),
-  ])
+  const baseDir = commonDirectory(input.entryIds)
+  const escapedAnchors = input.records
+    .map((record) => record.pathAnchor)
+    .filter((anchor) => relativePath(baseDir, anchor).startsWith('..'))
+  const sharedBase = commonDirectory(escapedAnchors)
+  const pathFor = (id: string, kind: StackInputKind): string => {
+    const relative = relativePath(baseDir, id)
+    if (!relative.startsWith('..')) return kind === 'module' ? replaceExtension(relative, '.js') : relative
+    const shared = relativePath(sharedBase, id)
+    const suffix = kind === 'module' ? replaceExtension(shared, '.js') : shared
+    return `${SHARED_PREFIX}${suffix.startsWith('/') ? suffix : `/${suffix}`}`
+  }
   const targetPaths = new Map<string, string>()
   for (const [from, to] of input.redirects) targetPaths.set(from, to)
   for (const record of input.records) {
     const primary =
-      record.artifacts[0]?.path ?? canonicalPath(record.pathAnchor, baseDir, record.kind)
+      record.artifacts[0]?.path ?? pathFor(record.pathAnchor, record.kind)
     targetPaths.set(record.id, primary)
     for (const [from, to] of input.redirects) {
       if (to === record.id) targetPaths.set(from, primary)
@@ -55,7 +60,7 @@ export function renderPreserveEsm(input: RenderInput): EmittedFile[] {
   const files: EmittedFile[] = []
   for (const record of input.records) {
     for (const artifact of record.artifacts) {
-      const artifactPath = artifact.path ?? canonicalPath(record.pathAnchor, baseDir, record.kind)
+      const artifactPath = artifact.path ?? pathFor(record.pathAnchor, record.kind)
       files.push({
         path: artifactPath,
         code: rewriteArtifact(artifact, artifactPath, targetPaths, record.kind),
