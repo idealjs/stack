@@ -88,14 +88,14 @@ function DoDont({
   text: string
 }) {
   return (
-    <div className="flex flex-1 items-center gap-3">
+    <div className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1.5 max-md:pb-1 md:flex-nowrap md:py-4 md:pl-4 md:pr-5">
       <span
         className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 border-ink text-[11px] font-extrabold ${bad ? 'bg-clash1a text-paper' : 'bg-clash1b'}`}
       >
         {bad ? '✗' : '✓'}
       </span>
       {children}
-      <p className="m-0 flex-1 text-small leading-snug text-body">{text}</p>
+      <p className="m-0 flex-1 basis-[160px] text-small leading-snug text-body">{text}</p>
     </div>
   )
 }
@@ -136,22 +136,25 @@ export function App() {
         </div>
       </Section>
       <Section label="规则与反例" note="三条硬规则，✗/✓ 对照即规范">
-        <div className="space-y-5">
+        <div className="grid gap-4">
           {RULES.map((r, i) => (
-            <div key={r.name}>
-              <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
-                <span className="flex h-[18px] w-[18px] shrink-0 translate-y-[2px] items-center justify-center rounded-full border-2 border-ink bg-ink text-[10px] font-extrabold text-paper">
-                  {i + 1}
-                </span>
-                <b className="text-[13px]">{r.name}</b>
+            <div
+              key={r.name}
+              className="grid gap-y-3 rounded-xl border-2 border-ink bg-paper p-4 md:grid-cols-[minmax(0,280px)_minmax(0,1fr)_minmax(0,1fr)] md:gap-y-0 md:divide-x-2 md:divide-ink/15 md:p-0"
+            >
+              <div className="grid content-start gap-1.5 md:py-4 md:pr-4 md:pl-5">
+                <div className="flex items-center gap-2">
+                  <span className="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-full border-2 border-ink bg-ink text-[10px] font-extrabold text-paper">
+                    {i + 1}
+                  </span>
+                  <b className="text-[13px]">{r.name}</b>
+                </div>
                 <i className="t-small-mute not-italic">{r.note}</i>
               </div>
-              <div className="mt-2 grid grid-cols-2 gap-3">
-                <DoDont bad text={r.badCap}>
-                  {r.badDemo}
-                </DoDont>
-                <DoDont text={r.goodCap}>{r.goodDemo}</DoDont>
-              </div>
+              <DoDont bad text={r.badCap}>
+                {r.badDemo}
+              </DoDont>
+              <DoDont text={r.goodCap}>{r.goodDemo}</DoDont>
             </div>
           ))}
         </div>
