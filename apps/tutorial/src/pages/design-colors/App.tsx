@@ -36,7 +36,7 @@ function Chip({ c, n, h }: { c: string; n: string; h: string }) {
 const RULES = [
   {
     name: '相邻必撞色（跨对取色）',
-    why: '孟菲斯的鲜艳靠碰撞成立：两个高饱和色块相邻时，只有色相拉开距离，视觉才读得出「两个声音」。同色相邻只是一个声音变大——画面发平发闷，鲜艳互相抵消；跨对取色（coral 挨 teal、mustard 挨 violet）反而把彼此衬得更亮。拿到相邻色块时问一句「它俩是不是同一对」，是，就换掉一个。',
+    note: '鲜艳靠碰撞成立；同色相邻＝一个声音，发平发闷；相邻必跨对取色（coral 挨 teal、mustard 挨 violet），色相拉开才互相衬亮',
     badCap: '同色相邻失去碰撞',
     goodCap: '相邻必撞色（跨对取色）',
     badDemo: (
@@ -54,7 +54,7 @@ const RULES = [
   },
   {
     name: '黑描边收束鲜艳',
-    why: '高饱和色放在浅纸上会「振动」：边缘发虚、像悬浮在页面上。2px ink 描边给每块鲜艳一道明确的边界，把颜色关进形状里——这也是拟物卡世界的基础：卡片、形状、站点共用同一粗细的墨线，颜色再艳也是「零件」而不是「光」，缩放与低分屏上轮廓依然清晰。去掉描边，鲜艳就是没裁过的布料。',
+    note: '高饱和色在浅纸上会振动（边缘发虚、似悬浮）；2px ink 描边把颜色关进形状；全站同一粗细墨线，再艳也是零件不是光，低分屏轮廓清晰',
     badCap: '无描边的鲜艳漂浮刺眼',
     goodCap: '一切鲜艳以 2px ink 描边为界',
     badDemo: <div className="h-10 w-40 rounded-lg bg-clash2a" />,
@@ -62,7 +62,7 @@ const RULES = [
   },
   {
     name: '大底纸色，鲜艳只进局部',
-    why: '鲜艳是注意力，铺满屏幕等于没有注意力。大底永远是 paper，鲜艳只进相框、站点、散落形状这些局部（≤10%/屏），视线才有落点、正文才永远可读；大底一旦鲜艳，字被淹没，卡片也失去「纸上的物」的载体感。记住层级：大底是世界，卡片是物，鲜艳是物上的标记。',
+    note: '鲜艳＝注意力，铺满＝没有；大底恒 paper，鲜艳只进相框/站点/散落形状（≤10%/屏）；层级：大底是世界、卡片是物、鲜艳是标记',
     badCap: '大底鲜艳，字被淹没',
     goodCap: '大底纸色，鲜艳只进局部',
     badDemo: (
@@ -135,20 +135,18 @@ export function App() {
           ))}
         </div>
       </Section>
-      <Section label="规则与反例" note="先讲为什么这样设计，再看 ✗/✓ 对照">
+      <Section label="规则与反例" note="三条硬规则，✗/✓ 对照即规范">
         <div className="space-y-5">
           {RULES.map((r, i) => (
             <div key={r.name}>
-              <div className="flex items-baseline gap-2">
+              <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
                 <span className="flex h-[18px] w-[18px] shrink-0 translate-y-[2px] items-center justify-center rounded-full border-2 border-ink bg-ink text-[10px] font-extrabold text-paper">
                   {i + 1}
                 </span>
                 <b className="text-[13px]">{r.name}</b>
+                <i className="t-small-mute not-italic">{r.note}</i>
               </div>
-              <p className="m-0 mt-1.5 mb-2 max-w-[760px] text-content leading-relaxed text-body">
-                {r.why}
-              </p>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="mt-2 grid grid-cols-2 gap-3">
                 <DoDont bad text={r.badCap}>
                   {r.badDemo}
                 </DoDont>
