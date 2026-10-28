@@ -1,4 +1,4 @@
-import type { CSSProperties, ReactNode } from 'react'
+import type { ReactNode } from 'react'
 import { ShadowButton, shadowButtonClasses } from './ShadowButton'
 
 export interface NavSectionLink {
@@ -25,28 +25,22 @@ export interface NavRowGroup {
   items: NavItemLink[]
 }
 
-const SELECTED = 'bg-paper-deep text-ink shadow-[inset_0_0_0_2px_var(--color-ink)]'
+const SELECTED = 'bg-paper-deep text-ink'
 const IDLE = 'text-body hover:bg-paper-deep'
 
-const LIGHT_PRESS = 'transition-[transform,background-color] duration-150 active:translate-y-[1px]'
+const LIGHT_PRESS =
+  'transition-[transform,background-color,border-color] duration-150 active:translate-y-[1px]'
 
 function RowLabel({ on, href, children }: { on: boolean; href?: string; children: ReactNode }) {
-  const cls = `w-full rounded-lg px-2 py-0.5 text-left text-t3 font-extrabold leading-tight ${LIGHT_PRESS} ${on ? SELECTED : 'text-ink hover:bg-paper-deep'}`
+  const cls = `w-full rounded-lg border-2 px-2 py-0.5 text-left text-t3 font-extrabold leading-tight ${LIGHT_PRESS} ${
+    on ? 'border-ink' : 'border-ink/30 text-ink hover:border-ink'
+  }`
   if (!href) return <span className={cls}>{children}</span>
   return (
     <a href={href} className={`no-underline ${cls}`}>
       {children}
     </a>
   )
-}
-
-function itemGridStyle(n: number): CSSProperties {
-  const cols = Math.min(n, 6)
-  return {
-    ['--cols' as string]: cols,
-    ['--cols-sm' as string]: Math.min(n, 2),
-    maxWidth: `min(100%, calc(${cols} * 180px))`,
-  }
 }
 
 export function SiteNavbar({
@@ -131,15 +125,12 @@ export function SiteNavbar({
         {rows.map((row) => (
           <div
             key={row.sectionKey}
-            className="mt-2 grid grid-cols-[88px_minmax(0,1fr)] items-start gap-x-1.5 border-t border-dashed border-ink/20 pt-2 max-lg:mt-3 max-lg:grid-cols-1 max-lg:items-start"
+            className="mt-2 grid grid-cols-[96px_minmax(0,1fr)] items-start gap-x-1.5 border-t border-dashed border-ink/20 pt-2 max-lg:mt-3 max-lg:grid-cols-1 max-lg:items-start"
           >
             <RowLabel on={rowOn(row)} href={row.href}>
               {row.label}
             </RowLabel>
-            <div
-              className="grid min-w-0 grid-cols-[repeat(var(--cols,1),minmax(0,1fr))] gap-1.5 max-lg:max-w-none max-lg:grid-cols-[repeat(var(--cols-sm,1),minmax(0,1fr))]"
-              style={itemGridStyle(row.items.length)}
-            >
+            <div className="grid min-w-0 grid-cols-[repeat(6,minmax(0,180px))] gap-1.5 max-lg:grid-cols-2">
               {row.items.map((item) => {
                 const on = item.key === active
                 return (
