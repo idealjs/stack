@@ -7,6 +7,12 @@ on:
 env:
   YARN_NPM_REGISTRY_SERVER: https://registry.npmmirror.com
 
+concurrency:
+  # 同一分支/PR 只保留最新 run：新 run 触发即取消在跑的旧 run、排队中的旧 run 直接丢弃。
+  # runner 侧 capacity=1 只能串行排队、撤不了单；高频 push 时靠这层砍掉过时任务
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   check:
     name: check
