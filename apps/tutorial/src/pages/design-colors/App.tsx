@@ -36,7 +36,7 @@ function Chip({ c, n, h }: { c: string; n: string; h: string }) {
 const RULES = [
   {
     name: '撞色定义',
-    note: '鲜艳靠碰撞成立；同色相邻＝一个声音，发平发闷；相邻必跨对取色（coral 挨 teal、mustard 挨 violet），色相拉开才互相衬亮',
+    note: '高饱和色块挨在一起，必须颜色差得够远；同色相邻没有对比，画面发闷。相邻色块要从不同的撞色对里取色——coral 挨 teal、mustard 挨 violet，彼此衬得更亮',
     badCap: '同色相邻失去碰撞',
     goodCap: '相邻必撞色（跨对取色）',
     badDemo: (
@@ -54,7 +54,7 @@ const RULES = [
   },
   {
     name: '描边定义',
-    note: '高饱和色在浅纸上会振动（边缘发虚、似悬浮）；2px ink 描边把颜色关进形状；全站同一粗细墨线，再艳也是零件不是光，低分屏轮廓清晰',
+    note: '高饱和的颜色铺在浅色底上，会导致边缘发虚、像浮在页面上。加 2px 黑描边和硬阴影，明确卡片的浮动效果；描边粗细全站统一，低分屏上轮廓依然清晰',
     badCap: '无描边的鲜艳漂浮刺眼',
     goodCap: '一切鲜艳以 2px ink 描边为界',
     badDemo: <div className="h-10 w-40 rounded-lg bg-clash2a" />,
@@ -62,7 +62,7 @@ const RULES = [
   },
   {
     name: '底色定义',
-    note: '鲜艳＝注意力，铺满＝没有；大底恒 paper，鲜艳只进相框/站点/散落形状（≤10%/屏）；层级：大底是世界、卡片是物、鲜艳是标记',
+    note: '满屏铺鲜艳颜色会吸走用户注意力，但页面的焦点是文字。大底只用纸色，鲜艳只出现在相框、站点、散落形状这些局部（不超过一屏的 10%）',
     badCap: '大底鲜艳，字被淹没',
     goodCap: '大底纸色，鲜艳只进局部',
     badDemo: (
