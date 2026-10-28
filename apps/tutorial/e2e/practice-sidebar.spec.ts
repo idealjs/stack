@@ -61,6 +61,7 @@ test.describe('练习场 · sidebar 导航（唯一导航形态）', () => {
     await expect(sidebar).toBeHidden()
     await page.locator(OPENER).click()
     await expect(sidebar).toBeVisible()
+    await page.mouse.move(370, 700)
     const brand = sidebar.locator('a').first()
     await expect(brand).toHaveText('idealjs stack')
     await expect
