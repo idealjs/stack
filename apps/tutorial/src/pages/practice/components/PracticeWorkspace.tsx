@@ -78,7 +78,7 @@ export function PracticeWorkspace() {
         要真正跑代码，先走本地路线。
       </div>
 
-      <section className="grid gap-4">
+      <section id="practice-task" className="grid scroll-mt-4 gap-4">
         <TaskEnvelope
           title={`练习任务 · ${task.title}`}
           summary={`${task.expectation.split('。')[0]}。`}
@@ -97,7 +97,11 @@ export function PracticeWorkspace() {
         />
       </section>
 
-      <section data-testid="create-project" className="grid gap-2.5">
+      <section
+        id="practice-create"
+        data-testid="create-project"
+        className="grid scroll-mt-4 gap-2.5"
+      >
         <h2 className="m-0 flex flex-wrap items-baseline gap-2">
           <span className="t-small-strong">创建项目</span>
           <i className="t-small-mute not-italic">{CREATE_PROJECT_NOTE}</i>

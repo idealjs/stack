@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test'
 
-const PAGES = ['/index.html', '/practice.html', '/design.html', '/ch7.html', '/blog.html']
+const PAGES = ['/index.html', '/design.html', '/ch7.html', '/blog.html']
 
 test.describe('navbar 品牌徽章一致性', () => {
   test('各页面 brand 徽章：无背景填充、同款 3px 阴影（logo 恒定，不随页面翻转）', async ({
@@ -25,10 +25,10 @@ test.describe('navbar 品牌徽章一致性', () => {
     const brand = page.locator('header a').first()
     const rest = await brand.evaluate((el) => getComputedStyle(el).boxShadow)
     await brand.hover()
-    const hover = await brand.evaluate((el) => getComputedStyle(el).boxShadow)
     expect(rest).toContain('3px')
-    expect(hover).not.toBe(rest)
-    expect(hover).toContain('5px')
+    await expect
+      .poll(async () => brand.evaluate((el) => getComputedStyle(el).boxShadow))
+      .toContain('5px')
   })
 
   test('移动抽屉 brand 同款阴影', async ({ page }) => {

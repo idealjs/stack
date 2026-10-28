@@ -553,10 +553,9 @@ test.describe('ShadowButton 按压契约', () => {
 
     const tags = await buttons.evaluateAll((ns) => ns.map((n) => n.tagName))
     expect(tags).toEqual(expect.arrayContaining(['BUTTON', 'A', 'SPAN']))
-    await expect(page.locator('a[data-comp="shadow-button"]:visible').first()).toHaveAttribute(
-      'href',
-      /\/(learn|design-components)\.html/,
-    )
+    await expect(
+      page.locator('a[data-comp="shadow-button"]', { hasText: '链接 · href 渲染 a' }),
+    ).toHaveAttribute('href', /learn\.html/)
     await expect(page.locator('button[data-comp="shadow-button"]').first()).toHaveAttribute(
       'type',
       'button',

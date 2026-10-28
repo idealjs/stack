@@ -1,4 +1,5 @@
 import '../design-system'
+import type { SiteNav } from '@stack/site-kit'
 import { SitePage } from '@stack/site-kit'
 import type { ReactNode } from 'react'
 import { MONTHS } from '../content/blogs'
@@ -54,6 +55,11 @@ const NAV_ROWS: NavRowGroup[] = [
   },
 ]
 
+export const SITE_NAV: SiteNav = {
+  brand: { key: 'index', label: 'idealjs stack', href: '/index.html' },
+  rows: NAV_ROWS,
+}
+
 export function Page({
   title,
   subtitle,
@@ -86,10 +92,7 @@ export function Page({
 
   return (
     <SitePage
-      nav={{
-        brand: { key: 'index', label: 'idealjs stack', href: './index.html' },
-        rows: NAV_ROWS,
-      }}
+      nav={SITE_NAV}
       active={activeKey}
       viewTransitionName="site-header"
       title={title}

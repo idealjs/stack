@@ -77,7 +77,7 @@ export function SiteNavbar({
       />
 
       <div className="flex flex-wrap items-center gap-1.5 max-lg:peer-checked:[&>span]:invisible">
-        <span className="mr-auto inline-flex">
+        <span className="hover-host mr-auto inline-flex">
           <ShadowButton
             tone="ghost"
             href={brand.href}
@@ -110,9 +110,11 @@ export function SiteNavbar({
         className="max-lg:fixed max-lg:inset-y-0 max-lg:left-0 max-lg:z-50 max-lg:w-72 max-lg:overflow-y-auto max-lg:rounded-none max-lg:border-r-2 max-lg:border-ink max-lg:bg-paper max-lg:px-4 max-lg:py-5 max-lg:shadow-[8px_0_0_0_var(--color-ink)] max-lg:invisible max-lg:opacity-0 max-lg:-translate-x-full max-lg:transition-[transform,visibility,opacity] max-lg:duration-300 max-lg:ease-[cubic-bezier(0.32,0.72,0,1)] max-lg:motion-reduce:transition-none max-lg:peer-checked:visible max-lg:peer-checked:translate-x-0 max-lg:peer-checked:opacity-100"
       >
         <div className="lg:hidden max-lg:mb-5 max-lg:flex max-lg:items-center max-lg:justify-between">
-          <ShadowButton tone="ghost" href={brand.href} size="sm" className="font-mono">
-            {brand.label}
-          </ShadowButton>
+          <span className="hover-host inline-flex">
+            <ShadowButton tone="ghost" href={brand.href} size="sm" className="font-mono">
+              {brand.label}
+            </ShadowButton>
+          </span>
           <span className="hover-host inline-flex">
             {/* biome-ignore lint/a11y/useAriaPropsSupportedByRole: 纯 CSS checkbox 开合的触发 label，aria 状态为增强语义保留 */}
             <label
