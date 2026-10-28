@@ -22,7 +22,7 @@ interface CliOptions {
 function parseArgs(argv: string[]): CliOptions {
   let mode: CliOptions['mode'] = 'build'
   let configPath = 'stack.config.ts'
-  let port = 3000
+  let port = 8910
   let base = ''
   let noWatch = false
   const assets: Record<string, string> = {}

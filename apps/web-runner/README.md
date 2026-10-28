@@ -12,7 +12,7 @@ playground 沙箱运行时——**纯执行器**（无 React 依赖、无构建�
   由扩展名推断，index.html 即入口＝html 输入，script src 引用的模块由 imports() 拉成
   闭包），旧 `entry` 单字段兼容（等价单条 module 输入），无配置回退按 index.html 的
   script src 推导（module 输入＋html 输入）；`memoryFs(工程文件)` ＋
-  `build({ inputs, hooks: [imports(), bundle()] })`，在 5173 页面内跑（esbuild-wasm
+  `build({ inputs, hooks: [imports(), bundle()] })`，在 8910 页面内跑（esbuild-wasm
   由 stack dev 内建 `/esbuild.wasm` 路由同源伺服）。产出**双件**：wrapped 单文件 bundle（bundle 钩子
   取 module 输入为闭包入口、纯 html 输入则取其 script 引用闭包）＋引擎重写后的
   index.html（script/link 引用按 value-offset 重写为最终相对路径）；宿主从重写后的
@@ -59,7 +59,7 @@ Blob URL ＋ 动态 `import()`、`default.init()` 钩子、console 四级捕获�
 
 - **本地 dev（默认形态，零额外注入）**：无环境变量要求——tutorial `--base` 缺省 `/`；
   教程 `.env.development` 的 `VITE_STACK_RUNTIME_ORIGIN=http://localhost:5174`（iframe
-  src 指向运行时位）；根 `package.json` 的 dev 脚本并行拉起 tutorial dev（5173）与本包
+  src 指向运行时位）；根 `package.json` 的 dev 脚本并行拉起 tutorial dev（8910）与本包
   `stack dev --base /absproxy/5174 --port 5174`。
 - **远程 code-server 同域场景**：根目录 `yarn dev:proxy` 一键启动（等价于本地 dev
   ＋教程侧 `--base /absproxy/5173` 与环境变量
@@ -74,7 +74,7 @@ Blob URL ＋ 动态 `import()`、`default.init()` 钩子、console 四级捕获�
 修改位置：教程侧 env 全部在 `apps/tutorial/.env.development`（stack.config.ts 经
 `process.loadEnvFile` 载入，进程已设变量不被覆盖）；`--base` 走 dev 脚本旗标。e2e 栈不读这些 env——playwright webServer 构建时经
 进程 env 注入 `VITE_STACK_RUNTIME_ORIGIN=http://localhost:5175` 并以 `dev --port
-5175` 起运行时位，与交互 dev 的 5173/5174 互不抢占、契约独立。
+5175` 起运行时位，与交互 dev 的 8910/5174 互不抢占、契约独立。
 
 注意事项：运行时 doc 零子资源后，鉴权链（code-server 的 SameSite=Lax cookie）只影响
 doc 导航本身——由父页面发起、cookie 可达；宿主页面的 `/esbuild.wasm` 是同源资源、带

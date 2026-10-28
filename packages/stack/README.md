@@ -188,7 +188,7 @@ interface LowerContext {
 
 ```bash
 stack [--config stack.config.ts] [--watch]          # 构建 / watch 重建循环
-stack dev [--port 3000] [--base 前缀] [--asset 路由=文件]...  # watch ＋ hono dev server（伺服 default 产物目录；--base 让运行时可被前缀路径访问，code-server absproxy/隧道场景用）
+stack dev [--port 8910] [--base 前缀] [--asset 路由=文件]...  # watch ＋ hono dev server（伺服 default 产物目录；--base 让运行时可被前缀路径访问，code-server absproxy/隧道场景用）
 ```
 
 - 配置文件为 TS（node 24 type stripping 直载）；`fs` 未定义时 CLI 默认注入 `nodeFs()`；

@@ -55,7 +55,7 @@
 配置接缝：`apps/tutorial/.env.development` 的 `VITE_STACK_RUNTIME_ORIGIN`（默认
 `http://localhost:5174`＝本地 dev 的运行时位；置空 = srcdoc；设远程位 = 跨源 src，仅限
 无 cookie 鉴权问题的位）、根 `package.json` dev 脚本只并行拉起 tutorial dev 与 web-runner
-的 `stack dev`；教程侧 `TUTORIAL_BASE=/absproxy/5173` 仅为远程 absproxy 场景的**可选
+的 `stack dev`；教程侧 `--base /absproxy/5173` 仅为远程 absproxy 场景的**可选
 注入**（默认启动指令不携带——教程的 301 重定向会被浏览器永久缓存，撤环境后仍阴魂
 不散，已改 302）；运行时静态服务器端口默认 5174（`--port` 覆盖）。
 教程站 `allowedHosts` 含 `code.idealjs.com`（代理透传保留 Host）；运行时是自持静态
@@ -93,7 +93,7 @@ top-navigation/popups/forms/modals、src 源 ≠ 宿主源。
 
 e2e 栈自包含（playwright webServer 数组）：站点 `yarn build`＋preview 于 4491（构建时
 经进程 env 注入 `VITE_STACK_RUNTIME_ORIGIN=http://localhost:5175`），运行时
-`dev --port 5175`——与交互 dev 的 5173/5174 互不抢占，跨源契约不再隐式依赖
+`dev --port 5175`——与交互 dev 的 8910/5174 互不抢占，跨源契约不再隐式依赖
 「机器上恰好在跑的 dev 服务器」。
 
 ## 运行时嵌入头（已移除）

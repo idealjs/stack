@@ -107,7 +107,7 @@ export async function startDevServer(
     }
     return c.text('Not Found', 404)
   })
-  const port = options.port ?? 3000
+  const port = options.port ?? 8910
   const server = serve({ fetch: app.fetch, port }) as StackDevServer
   server.stackReload = () => {
     for (const send of clients) send('data: reload\n\n')
