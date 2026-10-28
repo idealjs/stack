@@ -1,4 +1,5 @@
-import type { ReactNode } from 'react'
+import type { CSSProperties, ReactNode } from 'react'
+import { Fragment } from 'react'
 import { ShadowButton, shadowButtonClasses } from './ShadowButton'
 
 export interface NavSectionLink {
@@ -31,13 +32,30 @@ const IDLE = 'text-body hover:bg-paper-deep'
 const LIGHT_PRESS =
   'transition-[transform,background-color,border-color] duration-150 active:translate-y-[1px]'
 
-function RowLabel({ on, href, children }: { on: boolean; href?: string; children: ReactNode }) {
+function RowLabel({
+  on,
+  href,
+  children,
+  className,
+  style,
+}: {
+  on: boolean
+  href?: string
+  children: ReactNode
+  className?: string
+  style?: CSSProperties
+}) {
   const cls = `w-full rounded-lg border-2 px-2 py-0.5 text-left text-t3 font-extrabold leading-tight ${LIGHT_PRESS} ${
-    on ? 'border-ink' : 'border-ink/30 text-ink hover:border-ink'
-  }`
-  if (!href) return <span className={cls}>{children}</span>
+    on ? 'border-ink' : 'border-transparent text-ink hover:border-ink'
+  } ${className ?? ''}`
+  if (!href)
+    return (
+      <span className={cls} style={style}>
+        {children}
+      </span>
+    )
   return (
-    <a href={href} className={`no-underline ${cls}`}>
+    <a href={href} className={`no-underline ${cls}`} style={style}>
       {children}
     </a>
   )
@@ -58,6 +76,14 @@ export function SiteNavbar({
 }) {
   const rowOn = (row: NavRowGroup) =>
     active === row.sectionKey || row.items.some((i) => i.key === active)
+  let bandCursor = 1
+  const bands = rows.map((row) => {
+    const divider = bandCursor
+    const span = Math.max(1, Math.ceil(row.items.length / 6))
+    const band = { row, divider, start: divider + 1, span }
+    bandCursor = divider + 1 + span
+    return band
+  })
   return (
     <header
       className="relative max-lg:z-50 mb-8 rounded-2xl border-2 border-ink bg-paper p-2.5 shadow-ink"
@@ -122,33 +148,45 @@ export function SiteNavbar({
             </label>
           </span>
         </div>
-        {rows.map((row) => (
-          <div
-            key={row.sectionKey}
-            className="mt-2 grid grid-cols-[96px_minmax(0,1fr)] items-start gap-x-1.5 border-t border-dashed border-ink/20 pt-2 max-lg:mt-3 max-lg:grid-cols-1 max-lg:items-start"
-          >
-            <RowLabel on={rowOn(row)} href={row.href}>
-              {row.label}
-            </RowLabel>
-            <div className="grid min-w-0 grid-cols-[repeat(6,minmax(0,180px))] gap-1.5 max-lg:grid-cols-2">
-              {row.items.map((item) => {
-                const on = item.key === active
-                return (
-                  <a
-                    key={item.key}
-                    href={item.href}
-                    className={`rounded-lg px-2.5 py-0.5 text-left text-content font-bold leading-snug no-underline ${LIGHT_PRESS} ${
-                      on ? (item.color ? 'text-ink' : SELECTED) : IDLE
-                    } ${item.mono ? 'font-mono' : ''}`}
-                    style={on && item.color ? { background: item.color } : undefined}
-                  >
-                    {item.label}
-                  </a>
-                )
-              })}
-            </div>
-          </div>
-        ))}
+        <div className="grid gap-x-1.5 gap-y-2 max-lg:grid-cols-2 lg:mt-3 lg:grid-cols-[96px_repeat(6,minmax(0,180px))]">
+          {bands.map(({ row, divider, start, span }) => (
+            <Fragment key={row.sectionKey}>
+              <div
+                aria-hidden="true"
+                className="col-span-full border-t border-dashed border-ink/20 lg:[grid-column:1/-1] lg:[grid-row:var(--divider)]"
+                style={{ '--divider': divider } as CSSProperties}
+              />
+              <RowLabel
+                on={rowOn(row)}
+                href={row.href}
+                className="self-start max-lg:col-span-2 lg:[grid-column:1] lg:[grid-row:var(--band)]"
+                style={{ '--band': `${start} / span ${span}` } as CSSProperties}
+              >
+                {row.label}
+              </RowLabel>
+              <div
+                className="grid min-w-0 gap-1.5 max-lg:col-span-2 max-lg:grid-cols-2 lg:col-span-6 lg:col-start-2 lg:grid-cols-subgrid lg:[grid-row:var(--band)]"
+                style={{ '--band': `${start} / span ${span}` } as CSSProperties}
+              >
+                {row.items.map((item) => {
+                  const on = item.key === active
+                  return (
+                    <a
+                      key={item.key}
+                      href={item.href}
+                      className={`rounded-lg px-2.5 py-0.5 text-left text-content font-bold leading-snug no-underline ${LIGHT_PRESS} ${
+                        on ? (item.color ? 'text-ink' : SELECTED) : IDLE
+                      } ${item.mono ? 'font-mono' : ''}`}
+                      style={on && item.color ? { background: item.color } : undefined}
+                    >
+                      {item.label}
+                    </a>
+                  )
+                })}
+              </div>
+            </Fragment>
+          ))}
+        </div>
       </div>
 
       {/* biome-ignore lint/a11y/noLabelWithoutControl: 遮罩 label 关联的 checkbox 由纯 CSS 开合机制持有 */}
