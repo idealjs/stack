@@ -13,21 +13,52 @@ const MIME: Record<string, string> = {
   '.wasm': 'application/wasm',
 }
 
+const LIVE_PATH = '/__stack/live'
+
+const LIVE_SCRIPT = `<script>new EventSource(${JSON.stringify(LIVE_PATH)}).onmessage = () => location.reload()</script>`
+
 export interface DevServerOptions {
   port?: number
   base?: string
   assets?: Record<string, string>
+  liveReload?: boolean
 }
+
+export type StackDevServer = ServerType & { stackReload: () => void }
 
 export async function startDevServer(
   config: StackConfig,
   options: DevServerOptions = {},
-): Promise<ServerType> {
+): Promise<StackDevServer> {
   const root = resolve(process.cwd(), config.root ?? '.')
   const dist = resolve(root, config.dist ?? 'dist')
   const distRelative = relative(process.cwd(), dist).replaceAll('\\', '/')
   const base = options.base?.replace(/\/$/, '') ?? ''
+  const clients = new Set<(chunk: string) => void>()
   const app = new Hono()
+  if (options.liveReload === true) {
+    app.get(LIVE_PATH, (c) => {
+      let send: ((chunk: string) => void) | undefined
+      const stream = new ReadableStream({
+        start(controller) {
+          const push = (chunk: string): void => {
+            controller.enqueue(new TextEncoder().encode(chunk))
+          }
+          push('retry: 500\n\n')
+          send = push
+          clients.add(send)
+        },
+        cancel() {
+          if (send !== undefined) clients.delete(send)
+        },
+      })
+      return c.body(stream, 200, {
+        'Content-Type': 'text/event-stream',
+        'Cache-Control': 'no-store',
+        Connection: 'keep-alive',
+      })
+    })
+  }
   for (const [route, filePath] of Object.entries(options.assets ?? {})) {
     app.get(route, async (c) => {
       const body = await readFile(filePath)
@@ -64,7 +95,11 @@ export async function startDevServer(
       if (!safe.startsWith(distRelative)) continue
       try {
         const body = await readFile(safe)
-        return c.body(new Uint8Array(body), 200, {
+        const isHtml = extname(safe) === '.html' && options.liveReload === true
+        const code = isHtml
+          ? body.toString('utf8').replace(/<\/body>/i, `${LIVE_SCRIPT}</body>`)
+          : body
+        return c.body(code, 200, {
           'Content-Type': MIME[extname(safe)] ?? 'application/octet-stream',
           'Cache-Control': 'no-store',
         })
@@ -73,8 +108,11 @@ export async function startDevServer(
     return c.text('Not Found', 404)
   })
   const port = options.port ?? 3000
-  const server = serve({ fetch: app.fetch, port })
-  server.on('error', (error: NodeJS.ErrnoException) => {
+  const server = serve({ fetch: app.fetch, port }) as StackDevServer
+  server.stackReload = () => {
+    for (const send of clients) send('data: reload\n\n')
+  }
+  ;(server as ServerType).on('error', (error: NodeJS.ErrnoException) => {
     if (error.code === 'EADDRINUSE') {
       console.error(
         `[stack] 端口 ${port} 已被占用——可能有另一个 stack dev 在运行；停掉占用进程或换 --port 后重试`,

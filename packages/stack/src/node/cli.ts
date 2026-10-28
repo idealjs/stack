@@ -16,6 +16,7 @@ interface CliOptions {
   port: number
   base: string
   assets: Record<string, string>
+  noWatch: boolean
 }
 
 function parseArgs(argv: string[]): CliOptions {
@@ -23,11 +24,14 @@ function parseArgs(argv: string[]): CliOptions {
   let configPath = 'stack.config.ts'
   let port = 3000
   let base = ''
+  let noWatch = false
   const assets: Record<string, string> = {}
   for (let i = 0; i < argv.length; i += 1) {
     const arg = argv[i]
     if (arg === 'dev') {
       mode = 'dev'
+    } else if (arg === '--no-watch') {
+      noWatch = true
     } else if (arg === '--config') {
       const value = argv[i + 1]
       if (value === undefined) throw new Error('--config 需要一个配置文件路径')
@@ -68,7 +72,7 @@ function parseArgs(argv: string[]): CliOptions {
       throw new Error(`未知参数：${arg}`)
     }
   }
-  return { mode, configPath, port, base, assets }
+  return { mode, configPath, port, base, assets, noWatch }
 }
 
 export async function loadConfig(configPath: string): Promise<StackConfig> {
@@ -127,10 +131,14 @@ async function buildOnce(config: StackConfig): Promise<void> {
   printSummary(config, result)
 }
 
-async function runWatch(config: StackConfig): Promise<void> {
+async function runWatch(
+  config: StackConfig,
+  onRebuilt?: () => void,
+): Promise<void> {
   const root = config.root ?? '.'
   console.log(`stack v${VERSION} watch 模式：监听 ${root}（忽略 node_modules/dist/.git）`)
   await buildOnce(config)
+  onRebuilt?.()
   let rebuilding = false
   let queued = false
   const rebuild = async (): Promise<void> => {
@@ -141,6 +149,7 @@ async function runWatch(config: StackConfig): Promise<void> {
     rebuilding = true
     try {
       await buildOnce(config)
+      onRebuilt?.()
     } catch (error) {
       console.error(`重建失败：${error instanceof Error ? error.message : error}`)
     } finally {
@@ -181,11 +190,18 @@ export async function runCLI(argv: string[]): Promise<void> {
   )
   if (options.mode === 'watch' || options.mode === 'dev') {
     if (options.mode === 'dev') {
-      await startDevServer(config, {
+      const server = await startDevServer(config, {
         port: options.port,
         base: options.base,
         assets: options.assets,
+        liveReload: options.noWatch !== true,
       })
+      if (options.noWatch) {
+        await buildOnce(config)
+        return
+      }
+      await runWatch(config, () => server.stackReload())
+      return
     }
     await runWatch(config)
     return

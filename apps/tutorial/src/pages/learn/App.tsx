@@ -10,7 +10,6 @@ import {
 } from '../../design-system'
 import { Page, Section } from '../../lib/ui'
 import { TodoPreview } from './components/TodoPreview'
-import './learn.css'
 
 const BRICKS: readonly ToolboxBrick[] = [
   {

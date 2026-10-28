@@ -38,12 +38,12 @@ export function renderPreserveEsm(input: RenderInput): EmittedFile[] {
   const baseDir = commonDirectory(input.entryIds)
   const escapedAnchors = input.records
     .map((record) => record.pathAnchor)
-    .filter((anchor) => relativePath(baseDir, anchor).startsWith('..'))
+    .filter((anchor) => anchor.includes('/') && relativePath(baseDir, anchor).startsWith('..'))
   const sharedBase = commonDirectory(escapedAnchors)
   const pathFor = (id: string, kind: StackInputKind): string => {
     const relative = relativePath(baseDir, id)
     if (!relative.startsWith('..')) return kind === 'module' ? replaceExtension(relative, '.js') : relative
-    const shared = relativePath(sharedBase, id)
+    const shared = relativePath(sharedBase, id).replace(/^(\.\.\/)+/, '')
     const suffix = kind === 'module' ? replaceExtension(shared, '.js') : shared
     return `${SHARED_PREFIX}${suffix.startsWith('/') ? suffix : `/${suffix}`}`
   }

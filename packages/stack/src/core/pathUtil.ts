@@ -70,7 +70,7 @@ export function toSpecifier(fromDir: string, toPath: string): string {
 export const isRelativeSpecifier = (source: string): boolean =>
   source === '.' || source === '..' || source.startsWith('./') || source.startsWith('../')
 
-const MODULE_EXTENSIONS = ['.ts', '.tsx', '.js', '.jsx', '.mjs']
+const MODULE_EXTENSIONS = ['.ts', '.tsx', '.js', '.jsx', '.mjs', '.css']
 
 export const moduleCandidates = (path: string): string[] => [
   path,

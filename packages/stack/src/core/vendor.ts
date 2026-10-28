@@ -55,7 +55,10 @@ export function vendor(options: VendorOptions): StackHook {
 
   const bundleFiles = (root: string): Promise<Map<string, string>> => {
     filesPromise ??= build({
-      entryPoints: options.entries,
+      entryPoints: options.entries.map((specifier) => ({
+        in: specifier,
+        out: specifier.replaceAll('/', '-'),
+      })),
       bundle: true,
       splitting: true,
       format: 'esm',

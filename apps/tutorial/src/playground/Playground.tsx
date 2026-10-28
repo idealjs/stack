@@ -1,4 +1,5 @@
 import runtimeDoc from 'virtual:web-runner-doc'
+import runtimeOrigin from 'virtual:stack-env'
 import { initEsbuild } from '@idealjs/stack'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { ShadowButton } from '../design-system'
@@ -10,7 +11,7 @@ import { extractHtmlDocument } from './htmlBody'
 import { type OutputLine, OutputPanel } from './OutputPanel'
 import { isRuntimeMessage, PROTOCOL_VERSION } from './protocol'
 
-const RUNTIME_ORIGIN: string = import.meta.env.VITE_STACK_RUNTIME_ORIGIN ?? ''
+const RUNTIME_ORIGIN: string = runtimeOrigin
 
 const MAIN_TS = `// 沙箱工程入口：TypeScript 直写，点「运行」由宿主 stack 构建后送进沙箱执行。
 const greeting: string = 'hello, playground'

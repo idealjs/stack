@@ -1,5 +1,3 @@
-import './styles/tokens.css'
-import './styles/learning.css'
 
 export { Button } from './components/Button'
 export type { ChapterTicketProps } from './components/ChapterTicket'

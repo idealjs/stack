@@ -4,28 +4,26 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
-    "build": "tsc -b && vite build && node scripts/ssg.mjs",
-    "dev": "vite",
-    "dev:proxy": "TUTORIAL_BASE=/absproxy/5173 VITE_STACK_RUNTIME_ORIGIN=https://code.idealjs.com/absproxy/5174 vite",
-    "preview": "vite preview",
+    "build": "STACK_SSG=1 stack",
+    "dev": "stack dev --port 5173",
+    "dev:proxy": "TUTORIAL_BASE=/absproxy/5173 VITE_STACK_RUNTIME_ORIGIN=https://code.idealjs.com/absproxy/5174 stack dev --base /absproxy/5173 --port 5173",
+    "preview": "stack dev --no-watch --port 4173",
     "test:e2e": "playwright test",
     "test:e2e:update": "playwright test --update-snapshots"
   },
   "dependencies": {
     "@idealjs/stack": "workspace:*",
     "@stack/site-kit": "workspace:*",
-    "esbuild-wasm": "^0.25.12",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
   },
   "devDependencies": {
     "@playwright/test": "1.63.0",
-    "@tailwindcss/vite": "^4.1.0",
+    "@tailwindcss/node": "^4.3.3",
+    "@tailwindcss/oxide": "^4.3.3",
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",
-    "@vitejs/plugin-react": "^4.3.4",
-    "tailwindcss": "^4.1.0",
-    "typescript": "~5.6.2",
-    "vite": "^6.0.0"
+    "esbuild-wasm": "^0.25.12",
+    "typescript": "~5.6.2"
   }
 }

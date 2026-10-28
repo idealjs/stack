@@ -20,10 +20,10 @@ export default defineConfig({
   webServer: [
     {
       command:
-        'VITE_STACK_RUNTIME_ORIGIN=http://localhost:5175 yarn build && yarn preview --port 4491 --strictPort',
+        'VITE_STACK_RUNTIME_ORIGIN=http://localhost:5175 yarn build && yarn stack dev --no-watch --port 4491',
       url: 'http://localhost:4491/index.html',
       reuseExistingServer: true,
-      timeout: 180_000,
+      timeout: 300_000,
     },
     {
       command: 'yarn workspace @stack/web-runner dev --port 5175',

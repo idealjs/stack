@@ -71,7 +71,7 @@ Cross-Origin-Opener-Policy: same-origin
 Cross-Origin-Embedder-Policy: require-corp
 ```
 
-本地 `yarn dev` / `yarn preview` 已由 vite 配置（apps/tutorial/vite.config.ts）带上同名头；生产环境的反向代理（nginx 等）需做同样配置，否则练习页会提示启动失败。
+本地伺服由 stack dev 承担；生产环境的反向代理（nginx 等）需做同样配置，否则练习页会提示启动失败。
 
 ## 反馈方式
 
