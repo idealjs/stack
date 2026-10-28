@@ -2,7 +2,7 @@
 
 孟菲斯 × 拟物卡设计系统的唯一定义处：组件（MemphisCard/RouteLine/Ticket/ChapterTicket/AssignBlock/EntryGuide/Scatter/shapes）、tokens（颜色/字体/投影/票券打孔）、类型。
 
-教程站内的唯一定义处——特性只改这里，站点直接获得；结构契约与视觉基线的 E2E 在 `apps/tutorial/e2e/`。消费方式：源码直出（vite 编译 TS，无需构建步骤），调用方按相对路径引 `src/design-system`。
+教程站内的唯一定义处——特性只改这里，站点直接获得；结构契约与视觉基线的 E2E 在 `apps/tutorial/e2e/`。消费方式：源码直出（stack 构建期 strip TS），调用方按相对路径引 `src/design-system`。
 
 `Ticket` 是独立的通用票券，内容通过 `children` 传入。票面先用 mask 打孔，内层 `.ticket-shadow` 包裹用 `filter: drop-shadow()` 根据挖空轮廓生成阴影；孔缘描边留在包裹之外，不参与投影（filter 不能放在被 mask 的票面上——同元素上 mask 在 filter 之后应用，会把孔位处的阴影一起裁掉）。上下孔的圆心使用同一个横坐标，位置相对于票面左侧计算。
 

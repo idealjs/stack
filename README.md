@@ -62,7 +62,7 @@
 
 即导航栏中的 **在线练习**。
 
-浏览器里的 Node.js 练习场：一个 vite + react 模板工程跑在 WebContainer 中，读者指挥陪练 agent 改代码完成学习任务。agent 的模型接入由读者自填 key（默认 DeepSeek，兼容任意 OpenAI 兼容端点），key 仅保存在读者浏览器 localStorage。
+浏览器里的 Node.js 练习场：一个 stack 模板工程跑在 WebContainer 中，读者指挥陪练 agent 改代码完成学习任务。agent 的模型接入由读者自填 key（默认 DeepSeek，兼容任意 OpenAI 兼容端点），key 仅保存在读者浏览器 localStorage。
 
 **部署要求**：WebContainer 依赖 SharedArrayBuffer，页面必须处于跨域隔离状态（`crossOriginIsolated`），服务端需为站点响应加两个头：
 

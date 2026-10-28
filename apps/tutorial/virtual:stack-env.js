@@ -1,4 +1,2 @@
-var stdin_default = "";
-export {
-  stdin_default as default
-};
+var stdin_default = ''
+export { stdin_default as default }

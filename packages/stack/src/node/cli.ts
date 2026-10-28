@@ -131,10 +131,7 @@ async function buildOnce(config: StackConfig): Promise<void> {
   printSummary(config, result)
 }
 
-async function runWatch(
-  config: StackConfig,
-  onRebuilt?: () => void,
-): Promise<void> {
+async function runWatch(config: StackConfig, onRebuilt?: () => void): Promise<void> {
   const root = config.root ?? '.'
   console.log(`stack v${VERSION} watch 模式：监听 ${root}（忽略 node_modules/dist/.git）`)
   await buildOnce(config)

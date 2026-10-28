@@ -13,7 +13,7 @@ playground 沙箱运行时——**纯执行器**（无 React 依赖、无构建�
   闭包），旧 `entry` 单字段兼容（等价单条 module 输入），无配置回退按 index.html 的
   script src 推导（module 输入＋html 输入）；`memoryFs(工程文件)` ＋
   `build({ inputs, hooks: [imports(), bundle()] })`，在 5173 页面内跑（esbuild-wasm
-  由 tutorial vite 中间件同源伺服）。产出**双件**：wrapped 单文件 bundle（bundle 钩子
+  由 stack dev 内建 `/esbuild.wasm` 路由同源伺服）。产出**双件**：wrapped 单文件 bundle（bundle 钩子
   取 module 输入为闭包入口、纯 html 输入则取其 script 引用闭包）＋引擎重写后的
   index.html（script/link 引用按 value-offset 重写为最终相对路径）；宿主从重写后的
   html（而非原始文件）提取身体注入沙箱，输入路径的存在性校验在宿主、缺失即响亮报错。
@@ -47,32 +47,32 @@ Blob URL ＋ 动态 `import()`、`default.init()` 钩子、console 四级捕获�
 
 ## tutorial 接缝
 
-`virtual:web-runner-doc`（`apps/tutorial/vite.config.ts` 本地实现）：fs 读本包
-`dist-runtime/index.html`（dev 期 `stack --watch` 保持常新，vite watcher 变更即
-整页刷新）；文件缺失回退占位 doc 并 console.warn。srcdoc 与跨源 src 双路消费同一份
-产物；沙箱对 `/esbuild.wasm` 已无任何请求——wasm 现为宿主页面的同源资源（tutorial
-vite dev/preview 中间件伺服，供宿主侧 stack 初始化）。
+`virtual:web-runner-doc`（`apps/tutorial/stack.config.ts` 本地实现）：fs 读本包
+`dist-runtime/index.html`（dev 期 `stack --watch` 保持常新，live-reload 整页刷新）；
+文件缺失回退占位 doc。srcdoc 与跨源 src 双路消费同一份产物；沙箱对 `/esbuild.wasm`
+已无任何请求——wasm 现为宿主页面的同源资源（stack dev 内建路由伺服，供宿主侧 stack
+初始化）。
 
 ## 远程访问（环境变量与同域）
 
 三个部署位，各自的环境变量与注意点：
 
-- **本地 dev（默认形态，零额外注入）**：无环境变量要求——tutorial vite `base='/'`；
+- **本地 dev（默认形态，零额外注入）**：无环境变量要求——tutorial `--base` 缺省 `/`；
   教程 `.env.development` 的 `VITE_STACK_RUNTIME_ORIGIN=http://localhost:5174`（iframe
   src 指向运行时位）；根 `package.json` 的 dev 脚本并行拉起 tutorial dev（5173）与本包
   `stack dev --base /absproxy/5174 --port 5174`。
 - **远程 code-server 同域场景**：根目录 `yarn dev:proxy` 一键启动（等价于本地 dev
-  ＋两个环境变量：教程侧 `TUTORIAL_BASE=/absproxy/5173`（vite base）与
+  ＋教程侧 `--base /absproxy/5173` 与环境变量
   `VITE_STACK_RUNTIME_ORIGIN=https://code.idealjs.com/absproxy/5174`——运行时与宿主
   同源，同源告警如实亮红，隔离只剩 sandbox 一道，与 srcdoc 等强度）。环境变量已
   下沉到各包的 `dev:proxy` 脚本（tutorial 的 package.json），根脚本只做编排。
-  `stack dev --port` 与 `TUTORIAL_BASE=/absproxy/5173` 的端口数字成对，改一处必须
+  `stack dev --port` 与 `--base /absproxy/5173` 的端口数字成对，改一处必须
   同步另一处。
 - **生产**：`VITE_STACK_RUNTIME_ORIGIN=https://<runtime-domain>`——运行时独立域静态托管
   `dist-runtime/`，跨源 src 形态（第二道防线完整）。
 
-修改位置：教程侧 env 全部在 `apps/tutorial/.env.development`；`TUTORIAL_BASE` 只经根
-dev 脚本注入（vite 无此配置项）。e2e 栈不读这些 env——playwright webServer 构建时经
+修改位置：教程侧 env 全部在 `apps/tutorial/.env.development`（stack.config.ts 经
+`process.loadEnvFile` 载入，进程已设变量不被覆盖）；`--base` 走 dev 脚本旗标。e2e 栈不读这些 env——playwright webServer 构建时经
 进程 env 注入 `VITE_STACK_RUNTIME_ORIGIN=http://localhost:5175` 并以 `dev --port
 5175` 起运行时位，与交互 dev 的 5173/5174 互不抢占、契约独立。
 

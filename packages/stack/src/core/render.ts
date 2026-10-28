@@ -42,7 +42,8 @@ export function renderPreserveEsm(input: RenderInput): EmittedFile[] {
   const sharedBase = commonDirectory(escapedAnchors)
   const pathFor = (id: string, kind: StackInputKind): string => {
     const relative = relativePath(baseDir, id)
-    if (!relative.startsWith('..')) return kind === 'module' ? replaceExtension(relative, '.js') : relative
+    if (!relative.startsWith('..'))
+      return kind === 'module' ? replaceExtension(relative, '.js') : relative
     const shared = relativePath(sharedBase, id).replace(/^(\.\.\/)+/, '')
     const suffix = kind === 'module' ? replaceExtension(shared, '.js') : shared
     return `${SHARED_PREFIX}${suffix.startsWith('/') ? suffix : `/${suffix}`}`
@@ -50,8 +51,7 @@ export function renderPreserveEsm(input: RenderInput): EmittedFile[] {
   const targetPaths = new Map<string, string>()
   for (const [from, to] of input.redirects) targetPaths.set(from, to)
   for (const record of input.records) {
-    const primary =
-      record.artifacts[0]?.path ?? pathFor(record.pathAnchor, record.kind)
+    const primary = record.artifacts[0]?.path ?? pathFor(record.pathAnchor, record.kind)
     targetPaths.set(record.id, primary)
     for (const [from, to] of input.redirects) {
       if (to === record.id) targetPaths.set(from, primary)

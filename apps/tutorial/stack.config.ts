@@ -9,6 +9,10 @@ import { nodeFs } from '@idealjs/stack/node'
 import { tutorialBuild } from './stack-plugins/build.ts'
 
 const appDir = dirname(fileURLToPath(import.meta.url))
+try {
+  process.loadEnvFile(resolve(appDir, '.env.development'))
+} catch {}
+
 const siteKitIndex = resolve(appDir, '../../packages/site-kit/src/index.ts')
 const runtimeDocPath = resolve(appDir, '../web-runner/dist-runtime/index.html')
 

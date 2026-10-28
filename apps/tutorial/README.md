@@ -7,9 +7,9 @@
 - **View Transitions**：`@view-transition { navigation: auto }` 跨文档交叉淡入（MPA 不闪白）；书架相框 ↔ 章节页章头同名 `view-transition-name: ch-<id>` 共享元素变形；站头 `site-header` 常驻；`prefers-reduced-motion` 下禁用
 - **设计系统**：组件与 tokens 唯一定义于 `src/design-system`（孟菲斯 × 拟物卡）
 - **内容**：`src/lib/chapters.ts`（六章的靶子/步骤/积木/指派数据），改内容只动这一个文件
-- **远程 code-server 访问**：按需注入 `TUTORIAL_BASE=/absproxy/5173`（--base，仅远程
+- **远程 code-server 访问**：按需传 `--base /absproxy/5173`（仅远程
   absproxy 入口用、默认不携带——301 前缀跳转会被浏览器永久缓存，现为 302）——各环境变量
-  远程同域场景可用包级 `yarn dev:proxy`（TUTORIAL_BASE＋运行时 origin 注入）；
+  远程同域场景可用包级 `yarn dev:proxy`（`--base`＋运行时 origin 注入）；
   与同域接缝的完整说明见 [../web-runner/README.md](../web-runner/README.md)「远程访问」节
 - **E2E 防画面偏差**（两层，针对设计系统四册页）：
   1. **结构契约**（`e2e/pages.spec.ts` + `e2e/learning-kit.spec.ts`）：规格级断言——卡片 2px 描边/硬投影/纸叠三层、16:9 相框比例与内阴影、积木点实心数、站点 r6 半嵌（源骑黑影外缘/目标贴描边）、票券裁切式（overflow hidden + 头部无框 + 双打孔 + 撕线虚/实）、拟物学习组件交互。布局微调不误报，破坏规格必红。

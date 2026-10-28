@@ -204,8 +204,9 @@ stack dev [--port 3000] [--base 前缀] [--asset 路由=文件]...  # watch ＋ 
 ## 浏览器路线
 
 核心与 SDK 入口只依赖 acorn 与 esbuild-wasm（两者均可浏览器运行）。`browser/` 是真实
-harness（vite dev 直接 serve TS 源），`yarn test:browser`（Playwright，webServer 起 vite
-于 5901 端口）在 chromium 里跑全部内存 FS 场景并断言零 console error。
+harness（`stack dev` 构建并伺服，wasm 走 dev server 内建 `/esbuild.wasm` 路由），
+`yarn test:browser`（Playwright，webServer 起 `stack dev` 于 5901 端口）在 chromium 里
+跑全部内存 FS 场景并断言零 console error。
 
 ## 测试（双层）
 

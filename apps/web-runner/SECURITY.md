@@ -27,7 +27,7 @@
 - 教程站·端口子域名：`https://5173.code.idealjs.com`——code-server 端口子域名代理，
   顶层导航，会话/登录跳转正常。**跨源验证的正式形态**：此入口下教程页与运行时不同源。
 - 教程站·主域路径：`https://code.idealjs.com/absproxy/5173/`——`/absproxy` 语义为路径
-  直通（应用自知前缀），配教程 vite `base`（env `TUTORIAL_BASE`）。**远程开发入口**：
+  直通（应用自知前缀），配教程 `--base`（env `TUTORIAL_BASE`）。**远程开发入口**：
   此入口下教程页与运行时（主域 `/absproxy/5174/`）同源——origin 不含路径，上节的
   第二道防线在该入口不存在，隔离只剩 sandbox 剥源一道（opaque origin 仍成立，框内
   代码依旧拿不到宿主数据）。此入口是为远程开发便利而设，**不是**跨源能力的验证场所；
@@ -41,7 +41,7 @@
   Lax），任何外部子资源必 401；而 iframe 文档导航由父页面发起、cookie 可达。运行时
   现在是纯执行器——doc 内没有任何运行期网络请求（曾有的 `/esbuild.wasm` 例外随 demo
   构建迁回宿主一起撤除），这条鉴权链边界对沙箱已不再成立、只剩记录价值：esbuild-wasm
-  现为**宿主页面的同源资源**（tutorial vite dev/preview 中间件同源伺服 `/esbuild.wasm`），
+  现为**宿主页面的同源资源**（stack dev 内建路由同源伺服 `/esbuild.wasm`），
   宿主页面带会话 cookie 读取自己的同源资源，不经过 opaque-origin 无 cookie 的死路，
   无跨源问题。
   该入口下运行时与宿主同源（origin 不含路径），同源告警如实亮红，隔离只剩 sandbox
@@ -121,17 +121,17 @@ web-runner 包（`apps/web-runner/`，无 React 依赖）＝纯运行时应用�
 - **src 路（主形态）**：`stack dev`（hono 静态伺服）直出 `dist-runtime/`；
   `stack --watch` 重建后刷新即生效。自包含 doc 零子资源，唯一常规网络请求是 iframe
   文档导航本身（父页面发起、cookie 可达）。
-- **srcdoc 路（兜底）**：宿主经 tutorial vite 配置内的 virtual module
+- **srcdoc 路（兜底）**：宿主经 tutorial stack.config.ts 内的 resolve hook
   （`virtual:web-runner-doc`）fs 读同一份 `dist-runtime/index.html` 赋 `srcDoc`——
-  doc 本体零网络；文件缺失回退占位 doc 并 console.warn。stack --watch 重建触发
-  vite watcher → 失效虚拟模块＋整页刷新。
+  doc 本体零网络；文件缺失回退占位 doc。stack --watch 重建完成触发 live-reload
+  整页刷新。
 
 执行核心同为 Blob URL＋动态 `import()`。
 
 **暂定与后向接缝**：virtual module 的 `export default ${JSON.stringify(...)}` 字符串
 操作是「不引重型依赖」约束下的最小原语，暂定接受。后续方向：virtual module 走正规
 代码生成，待运行时文档结构复杂到字符串操作开始失控时再引入；当下引入属超前依赖。
-vite 供给层已退役（`vite.config.ts`/`vite-plugin.ts` 删除，本包不再依赖 vite）；
+vite 供给层已退役（宿主 virtual module 改由 stack.config.ts resolve hook 实现）；
 曾把 stack SDK 浏览器面内嵌进 doc 的 `sdk-embed.ts` 随「构建进沙箱」实验一起退场。
 
 ## 文件管理边界
@@ -146,7 +146,7 @@ vite 供给层已退役（`vite.config.ts`/`vite-plugin.ts` 删除，本包不�
 `src/playground/demoBuild.ts` 用 stack SDK——`memoryFs(工程文件)` →
 `build({ inputs, fs, hooks: [imports(), bundle()] })` → 单文件 wrapped bundle。
 esbuild-wasm 初始化走 `initialize({ wasmURL: '/esbuild.wasm' })`：wasm 由宿主页所在
-源同源伺服（tutorial vite dev/preview 中间件），宿主页面读自己的同源资源，无跨源/
+源同源伺服（stack dev 内建 `/esbuild.wasm` 路由），宿主页面读自己的同源资源，无跨源/
 鉴权链问题（对照：沙箱 opaque origin 位曾 401，见上节——该位已随构建迁出而消失）。
 
 宿主同时保留**入口推导与存在性校验**（发生在任何代码进入沙箱之前，拒绝路径零执行

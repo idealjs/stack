@@ -90,7 +90,10 @@ export function vendor(options: VendorOptions): StackHook {
       rootSeen = ctx.root
       if (entries.has(specifier)) {
         const files = await bundleFiles(ctx.root)
-        return { id: idFor(ctx.root, entryFileName(specifier)), content: files.get(entryFileName(specifier)) }
+        return {
+          id: idFor(ctx.root, entryFileName(specifier)),
+          content: files.get(entryFileName(specifier)),
+        }
       }
       if (isRelativeSpecifier(specifier) && importer.startsWith(`${joinPath(ctx.root, dir)}/`)) {
         const files = await bundleFiles(ctx.root)
