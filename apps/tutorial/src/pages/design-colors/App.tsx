@@ -35,7 +35,7 @@ function Chip({ c, n, h }: { c: string; n: string; h: string }) {
 
 const RULES = [
   {
-    name: '相邻必撞色（跨对取色）',
+    name: '撞色定义',
     note: '鲜艳靠碰撞成立；同色相邻＝一个声音，发平发闷；相邻必跨对取色（coral 挨 teal、mustard 挨 violet），色相拉开才互相衬亮',
     badCap: '同色相邻失去碰撞',
     goodCap: '相邻必撞色（跨对取色）',
@@ -53,7 +53,7 @@ const RULES = [
     ),
   },
   {
-    name: '黑描边收束鲜艳',
+    name: '描边定义',
     note: '高饱和色在浅纸上会振动（边缘发虚、似悬浮）；2px ink 描边把颜色关进形状；全站同一粗细墨线，再艳也是零件不是光，低分屏轮廓清晰',
     badCap: '无描边的鲜艳漂浮刺眼',
     goodCap: '一切鲜艳以 2px ink 描边为界',
@@ -61,7 +61,7 @@ const RULES = [
     goodDemo: <div className="h-10 w-40 rounded-lg border-2 border-ink bg-clash2a shadow-ink" />,
   },
   {
-    name: '大底纸色，鲜艳只进局部',
+    name: '底色定义',
     note: '鲜艳＝注意力，铺满＝没有；大底恒 paper，鲜艳只进相框/站点/散落形状（≤10%/屏）；层级：大底是世界、卡片是物、鲜艳是标记',
     badCap: '大底鲜艳，字被淹没',
     goodCap: '大底纸色，鲜艳只进局部',
