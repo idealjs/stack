@@ -6,8 +6,8 @@ export default defineConfig({
   projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
   use: { baseURL: 'http://localhost:5901' },
   webServer: {
-    command: 'npx vite browser --port 5901 --strictPort',
-    url: 'http://localhost:5901/',
+    command: 'node bin/stack.mjs dev --config stack.config.ts --port 5901',
+    url: 'http://localhost:5901/browser/',
     reuseExistingServer: false,
     timeout: 60_000,
   },

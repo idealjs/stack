@@ -38,7 +38,10 @@ const canonicalPath = (id: string, baseDir: string, kind: StackInputKind): strin
 }
 
 export function renderPreserveEsm(input: RenderInput): EmittedFile[] {
-  const baseDir = commonDirectory(input.entryIds)
+  const baseDir = commonDirectory([
+    ...input.entryIds,
+    ...input.records.map((record) => record.pathAnchor),
+  ])
   const targetPaths = new Map<string, string>()
   for (const [from, to] of input.redirects) targetPaths.set(from, to)
   for (const record of input.records) {

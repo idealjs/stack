@@ -8,7 +8,7 @@ test('浏览器内跑通全部内存 FS 场景', async ({ page }) => {
   })
   page.on('pageerror', (error) => consoleErrors.push(String(error)))
 
-  await page.goto('/')
+  await page.goto('/browser/')
   await page.waitForFunction(() => {
     const flag = (window as unknown as { __stackBrowserTestsDone?: boolean })
       .__stackBrowserTestsDone
@@ -22,7 +22,7 @@ test('浏览器内跑通全部内存 FS 场景', async ({ page }) => {
 })
 
 test('页面用例清单与共享场景单一事实源一一对应', async ({ page }) => {
-  await page.goto('/')
+  await page.goto('/browser/')
   await page.waitForFunction(() => {
     const flag = (window as unknown as { __stackBrowserTestsDone?: boolean })
       .__stackBrowserTestsDone

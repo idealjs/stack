@@ -1,5 +1,4 @@
 import { initialize } from 'esbuild-wasm'
-import wasmUrl from 'esbuild-wasm/esbuild.wasm?url'
 import { runScenario, SCENARIOS } from '../test/scenarios.ts'
 
 const markDone = (): void => {
@@ -17,7 +16,7 @@ const appendCase = (name: string, failures: string[]): void => {
 }
 
 const runAll = async (): Promise<void> => {
-  await initialize({ wasmURL: wasmUrl, worker: true })
+  await initialize({ wasmURL: '/esbuild.wasm', worker: true })
   let allPassed = true
   for (const scenario of SCENARIOS) {
     const report = await runScenario(scenario)

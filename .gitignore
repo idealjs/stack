@@ -40,3 +40,6 @@ test-results/
 apps/*/dist/
 apps/*/dist-runtime/
 examples/*/dist/
+
+# stack 包自举构建产物
+packages/*/dist/
