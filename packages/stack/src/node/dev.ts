@@ -20,6 +20,7 @@ const LIVE_SCRIPT = `<script>new EventSource(${JSON.stringify(LIVE_PATH)}).onmes
 export interface DevServerOptions {
   port?: number
   base?: string
+  host?: boolean | string
   assets?: Record<string, string>
   liveReload?: boolean
 }
@@ -34,6 +35,12 @@ export async function startDevServer(
   const dist = resolve(root, config.dist ?? 'dist')
   const distRelative = relative(process.cwd(), dist).replaceAll('\\', '/')
   const base = options.base?.replace(/\/$/, '') ?? ''
+  const hostname =
+    options.host === true
+      ? '0.0.0.0'
+      : typeof options.host === 'string' && options.host !== ''
+        ? options.host
+        : undefined
   const clients = new Set<(chunk: string) => void>()
   const app = new Hono()
   if (options.liveReload === true) {
@@ -108,7 +115,7 @@ export async function startDevServer(
     return c.text('Not Found', 404)
   })
   const port = options.port ?? 8910
-  const server = serve({ fetch: app.fetch, port }) as StackDevServer
+  const server = serve({ fetch: app.fetch, port, hostname }) as StackDevServer
   server.stackReload = () => {
     for (const send of clients) send('data: reload\n\n')
   }
@@ -122,6 +129,5 @@ export async function startDevServer(
     }
     process.exit(1)
   })
-  console.log(`hono dev server → http://localhost:${port}/${base}（伺服 ${distRelative}）`)
   return server
 }

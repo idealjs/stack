@@ -1,4 +1,5 @@
 import { existsSync, type FSWatcher, rmSync, watch } from 'node:fs'
+import { networkInterfaces } from 'node:os'
 import { resolve as resolvePath } from 'node:path'
 import { pathToFileURL } from 'node:url'
 import { imports } from '../builtins.ts'
@@ -15,6 +16,7 @@ interface CliOptions {
   configPath: string
   port: number
   base: string
+  host?: boolean | string
   assets: Record<string, string>
   noWatch: boolean
 }
@@ -24,6 +26,7 @@ function parseArgs(argv: string[]): CliOptions {
   let configPath = 'stack.config.ts'
   let port = 8910
   let base = ''
+  let host: boolean | string | undefined
   let noWatch = false
   const assets: Record<string, string> = {}
   for (let i = 0; i < argv.length; i += 1) {
@@ -41,6 +44,10 @@ function parseArgs(argv: string[]): CliOptions {
       configPath = arg.slice('--config='.length)
     } else if (arg === '--watch' || arg === '-w') {
       mode = 'watch'
+    } else if (arg === '--host') {
+      host = true
+    } else if (arg.startsWith('--host=')) {
+      host = arg.slice('--host='.length)
     } else if (arg === '--base') {
       const value = argv[i + 1]
       if (value === undefined) throw new Error('--base 需要一个路径前缀')
@@ -72,7 +79,7 @@ function parseArgs(argv: string[]): CliOptions {
       throw new Error(`未知参数：${arg}`)
     }
   }
-  return { mode, configPath, port, base, assets, noWatch }
+  return { mode, configPath, port, base, host, assets, noWatch }
 }
 
 export async function loadConfig(configPath: string): Promise<StackConfig> {
@@ -125,17 +132,13 @@ function printSummary(config: StackConfig, result: BuildResult): void {
   console.log(lines.join('\n'))
 }
 
-async function buildOnce(config: StackConfig): Promise<void> {
+async function buildOnce(config: StackConfig, summary = true): Promise<void> {
   const result = await build(withDefaults(config))
   await writeOutputs(config, result)
-  printSummary(config, result)
+  if (summary) printSummary(config, result)
 }
 
-async function runWatch(config: StackConfig, onRebuilt?: () => void): Promise<void> {
-  const root = config.root ?? '.'
-  console.log(`stack v${VERSION} watch 模式：监听 ${root}（忽略 node_modules/dist/.git）`)
-  await buildOnce(config)
-  onRebuilt?.()
+function startWatcher(config: StackConfig, onRebuilt?: () => void): FSWatcher {
   let rebuilding = false
   let queued = false
   const rebuild = async (): Promise<void> => {
@@ -158,7 +161,7 @@ async function runWatch(config: StackConfig, onRebuilt?: () => void): Promise<vo
     }
   }
   let timer: ReturnType<typeof setTimeout> | undefined
-  const watcher: FSWatcher = watch(root, { recursive: true }, (_event, filename) => {
+  const watcher: FSWatcher = watch(config.root ?? '.', { recursive: true }, (_event, filename) => {
     const changed = filename === null ? '' : String(filename).replaceAll('\\', '/')
     if (changed.split('/').some((segment) => IGNORED_WATCH_SEGMENTS.has(segment))) return
     if (timer !== undefined) clearTimeout(timer)
@@ -173,6 +176,98 @@ async function runWatch(config: StackConfig, onRebuilt?: () => void): Promise<vo
     console.log('\nwatch 已停止')
     process.exit(0)
   })
+  return watcher
+}
+
+async function runWatch(config: StackConfig, onRebuilt?: () => void): Promise<void> {
+  const root = config.root ?? '.'
+  console.log(`stack v${VERSION} watch 模式：监听 ${root}（忽略 node_modules/dist/.git）`)
+  await buildOnce(config)
+  onRebuilt?.()
+  startWatcher(config, onRebuilt)
+}
+
+function firstLanAddress(): string | undefined {
+  for (const list of Object.values(networkInterfaces())) {
+    for (const info of list ?? []) {
+      if (info.family === 'IPv4' && !info.internal) return info.address
+    }
+  }
+  return undefined
+}
+
+function printDevBanner(options: {
+  port: number
+  base: string
+  host?: boolean | string
+  readyMs: number
+}): void {
+  const suffix =
+    options.base === '' ? '/' : `/${options.base.replace(/^\/+/, '').replace(/\/+$/, '')}/`
+  const lines = [
+    '',
+    `  Stack v${VERSION}  ready in ${Math.round(options.readyMs)} ms`,
+    '',
+    `  ➜  Local:    http://localhost:${options.port}${suffix}`,
+  ]
+  if (options.host) {
+    const address =
+      typeof options.host === 'string' ? options.host : (firstLanAddress() ?? 'localhost')
+    lines.push(`  ➜  Network:  http://${address}:${options.port}${suffix}`)
+  } else {
+    lines.push('  ➜  Network:  use --host to expose')
+  }
+  lines.push('  ➜  press h + enter to show help', '')
+  console.log(lines.join('\n'))
+}
+
+function printDevHelp(): void {
+  console.log(['', '  Shortcuts:', '    h  显示帮助', '    q  退出 dev server', ''].join('\n'))
+}
+
+function attachDevShortcuts(): void {
+  if (!process.stdin.isTTY) return
+  process.stdin.setEncoding('utf8')
+  process.stdin.resume()
+  process.stdin.on('data', (chunk: string) => {
+    const key = chunk.trim()
+    if (key === 'h') printDevHelp()
+    if (key === 'q') {
+      console.log('\ndev server 已停止')
+      process.exit(0)
+    }
+  })
+}
+
+async function runDev(config: StackConfig, options: CliOptions): Promise<void> {
+  if (options.noWatch) {
+    await startDevServer(config, {
+      port: options.port,
+      base: options.base,
+      host: options.host,
+      assets: options.assets,
+      liveReload: false,
+    })
+    await buildOnce(config)
+    return
+  }
+  const startedAt = performance.now()
+  await buildOnce(config, false)
+  const server = await startDevServer(config, {
+    port: options.port,
+    base: options.base,
+    host: options.host,
+    assets: options.assets,
+    liveReload: true,
+  })
+  printDevBanner({
+    port: options.port,
+    base: options.base,
+    host: options.host,
+    readyMs: performance.now() - startedAt,
+  })
+  attachDevShortcuts()
+  startWatcher(config, () => server.stackReload())
 }
 
 export async function runCLI(argv: string[]): Promise<void> {
@@ -182,24 +277,14 @@ export async function runCLI(argv: string[]): Promise<void> {
     ...userConfig,
     root: resolvePath(process.cwd(), userConfig.root ?? '.'),
   }
+  if (options.mode === 'dev') {
+    await runDev(config, options)
+    return
+  }
   console.log(
     `stack v${VERSION}：${config.inputs.length} 个输入，规范产物 → ${config.dist ?? 'dist'}`,
   )
-  if (options.mode === 'watch' || options.mode === 'dev') {
-    if (options.mode === 'dev') {
-      const server = await startDevServer(config, {
-        port: options.port,
-        base: options.base,
-        assets: options.assets,
-        liveReload: options.noWatch !== true,
-      })
-      if (options.noWatch) {
-        await buildOnce(config)
-        return
-      }
-      await runWatch(config, () => server.stackReload())
-      return
-    }
+  if (options.mode === 'watch') {
     await runWatch(config)
     return
   }

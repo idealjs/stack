@@ -188,10 +188,13 @@ interface LowerContext {
 
 ```bash
 stack [--config stack.config.ts] [--watch]          # 构建 / watch 重建循环
-stack dev [--port 8910] [--base 前缀] [--asset 路由=文件]...  # watch ＋ hono dev server（伺服 default 产物目录；--base 让运行时可被前缀路径访问，code-server absproxy/隧道场景用）
+stack dev [--port 8910] [--host] [--base 前缀] [--asset 路由=文件]...  # watch ＋ hono dev server（伺服 default 产物目录；--base 让运行时可被前缀路径访问，code-server absproxy/隧道场景用；--host 暴露局域网）
 ```
 
 - 配置文件为 TS（node 24 type stripping 直载）；`fs` 未定义时 CLI 默认注入 `nodeFs()`；
+- `stack dev` 启动即打 Vite 风格横幅（ready 耗时／Local／Network／h 帮助提示），TTY 下
+  `h`＋回车看快捷键、`q`＋回车退出；`--host` 裸旗＝0.0.0.0，Network 行显示第一块非内网
+  IPv4，`--host=地址` 显式指定；
 - `stack dev` 自带约定路由 `/esbuild.wasm` → stack 自带的 esbuild-wasm 副本（浏览器内
   stack 的 `initialize({ wasmURL: '/esbuild.wasm' })` 零配置可用；显式 `--asset` 同名路由
   优先）；额外静态路由用 `--asset 路由=文件` 注入；
