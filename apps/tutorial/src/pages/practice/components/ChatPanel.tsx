@@ -1,5 +1,5 @@
 import type { KeyboardEvent } from 'react'
-import { useState } from 'react'
+import { useEffect, useRef } from 'react'
 
 export interface ChatItem {
   kind: 'user' | 'assistant' | 'tool'
@@ -12,6 +12,9 @@ export function ChatPanel({
   ready,
   hasKey,
   model,
+  draft,
+  onDraftChange,
+  focusSignal = 0,
   onSend,
   onStop,
   onOpenKey,
@@ -23,18 +26,25 @@ export function ChatPanel({
   ready: boolean
   hasKey: boolean
   model: string
+  draft: string
+  onDraftChange: (text: string) => void
+  focusSignal?: number
   onSend: (text: string) => void
   onStop: () => void
   onOpenKey: () => void
 
   flat?: boolean
 }) {
-  const [draft, setDraft] = useState('')
+  const textareaRef = useRef<HTMLTextAreaElement>(null)
+
+  useEffect(() => {
+    if (focusSignal > 0) textareaRef.current?.focus()
+  }, [focusSignal])
 
   const submit = () => {
     const text = draft.trim()
     if (!text || busy || !ready) return
-    setDraft('')
+    onDraftChange('')
     onSend(text)
   }
 
@@ -89,8 +99,9 @@ export function ChatPanel({
 
       <div className="border-t border-dashed border-ink/20 p-2.5">
         <textarea
+          ref={textareaRef}
           value={draft}
-          onChange={(e) => setDraft(e.target.value)}
+          onChange={(e) => onDraftChange(e.target.value)}
           onKeyDown={onKeyDown}
           rows={2}
           placeholder={

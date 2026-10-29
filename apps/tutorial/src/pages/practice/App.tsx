@@ -1,9 +1,7 @@
 import { SiteFooter } from '@stack/site-kit'
 import type { NavRowGroup } from '../../design-system'
 import { SiteSidebar } from '../../design-system'
-import { TEMPLATE_FILES } from '../../lib/templateFiles'
 import { SITE_NAV } from '../../lib/ui'
-import { Playground } from '../../playground'
 import { PracticeWorkspace } from './components/PracticeWorkspace'
 
 const PAGE_ROWS: NavRowGroup[] = [
@@ -12,9 +10,9 @@ const PAGE_ROWS: NavRowGroup[] = [
     sectionKey: 'practice-page',
     label: '本页',
     items: [
-      { key: 'practice-task', label: '任务卡', href: '#practice-task' },
-      { key: 'practice-create', label: '创建项目', href: '#practice-create' },
       { key: 'practice-sandbox', label: '代码沙箱', href: '#practice-sandbox' },
+      { key: 'practice-brief', label: '练习任务', href: '#practice-brief' },
+      { key: 'practice-flow', label: '操作流水线', href: '#practice-flow' },
     ],
   },
 ]
@@ -27,18 +25,13 @@ export function App() {
         <div className="mb-7">
           <h1 className="m-0 text-t1 font-extrabold text-ink">在线练习</h1>
           <p className="m-0 mt-2 text-content text-mute">
-            任务卡、陪练 agent 与创建示例先行上线：你提要求、对照验收，agent
-            负责讲解与给代码。代码执行运行时已以跨源沙箱接入——写在下面的编辑器里，送进隔离 iframe
-            真写真跑。
+            左边写真跑：上半是 web runner 沙箱预览，下半是 playground 编辑器，点「运行
+            ▶」构建产物送进隔离 iframe
+            执行；右边读任务——点「操作流水线」任意一步，提示词自动填进陪练 agent
+            输入框，回车即发；验收清单收在右下角贴签里，做完拉出来逐条打勾。
           </p>
         </div>
         <PracticeWorkspace />
-        <section id="practice-sandbox" aria-label="代码沙箱" className="mt-8 scroll-mt-4">
-          <h2 className="t-small-strong m-0 mb-2.5">
-            代码沙箱（跨源 iframe 隔离执行 · 预置 template 工程）
-          </h2>
-          <Playground initialFiles={TEMPLATE_FILES} />
-        </section>
         <SiteFooter />
       </main>
     </div>

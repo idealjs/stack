@@ -1,46 +1,66 @@
 import { expect, test } from '@playwright/test'
 
-const TAB = '[data-comp="coach-sticky"]'
-const PANEL = '#coach-sticky-panel'
-const ENVELOPE = '[data-comp="task-envelope"]'
+const COACH_TAB = '[data-comp="coach-sticky"]'
+const COACH_PANEL = '#coach-sticky-panel'
+const LIST_TAB = '[data-comp="checklist-sticky"]'
+const LIST_PANEL = '#checklist-sticky-panel'
 const CHECKLIST = '[data-comp="clipboard-checklist"]'
+const FLOW = '[data-comp="data-flow-board"]'
 
-test.describe('练习场 · 陪练 agent 便签', () => {
+test.describe('练习场 · 右下角 dock 贴签', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/practice.html')
   })
 
-  test('折叠态停靠右下角，aria 关系正确；点击展开、再点与 Esc 收起', async ({ page }) => {
-    const tab = page.locator(TAB)
-    await expect(tab).toBeVisible()
-    await expect(tab).toContainText('陪练 agent')
-    await expect(tab).toContainText('react-starter')
-    await expect(tab).toHaveAttribute('aria-expanded', 'false')
-    await expect(tab).toHaveAttribute('aria-controls', 'coach-sticky-panel')
-    await expect(page.locator(PANEL)).toBeHidden()
+  test('两枚贴签停靠右下角，aria 关系正确；点击展开、再点与 Esc 收起', async ({ page }) => {
+    const coach = page.locator(COACH_TAB)
+    const list = page.locator(LIST_TAB)
+    await expect(coach).toBeVisible()
+    await expect(coach).toContainText('陪练 agent')
+    await expect(coach).toHaveAttribute('aria-expanded', 'false')
+    await expect(coach).toHaveAttribute('aria-controls', 'coach-sticky-panel')
+    await expect(list).toBeVisible()
+    await expect(list).toContainText('验收清单')
+    await expect(page.locator(COACH_PANEL)).toBeHidden()
+    await expect(page.locator(LIST_PANEL)).toBeHidden()
 
-    await tab.click()
-    await expect(tab).toHaveAttribute('aria-expanded', 'true')
-    const panel = page.locator(PANEL)
+    await coach.click()
+    await expect(coach).toHaveAttribute('aria-expanded', 'true')
+    const panel = page.locator(COACH_PANEL)
     await expect(panel).toBeVisible()
     await expect(panel).toContainText('陪练 agent')
 
-    await tab.click()
-    await expect(page.locator(PANEL)).toBeHidden()
-    await expect(tab).toHaveAttribute('aria-expanded', 'false')
+    await coach.click()
+    await expect(page.locator(COACH_PANEL)).toBeHidden()
+    await expect(coach).toHaveAttribute('aria-expanded', 'false')
 
-    await tab.click()
-    await expect(page.locator(PANEL)).toBeVisible()
+    await coach.click()
+    await expect(panel).toBeVisible()
     await page.keyboard.press('Escape')
-    await expect(page.locator(PANEL)).toBeHidden()
-    await expect(tab).toHaveAttribute('aria-expanded', 'false')
+    await expect(page.locator(COACH_PANEL)).toBeHidden()
+    await expect(coach).toHaveAttribute('aria-expanded', 'false')
+
+    await list.click()
+    await expect(list).toHaveAttribute('aria-expanded', 'true')
+    await expect(page.locator(LIST_PANEL)).toBeVisible()
+    await page.keyboard.press('Escape')
+    await expect(page.locator(LIST_PANEL)).toBeHidden()
   })
 
-  test('展开面板直接进入对话：无开场提示词，输入区与发送动作在场', async ({ page }) => {
-    const tab = page.locator(TAB)
-    await expect(page.getByTestId('coach-opener')).toHaveCount(0)
-    await tab.click()
-    const panel = page.locator(PANEL)
+  test('两枚贴签互斥：打开一块收起另一块', async ({ page }) => {
+    await page.locator(COACH_TAB).click()
+    await expect(page.locator(COACH_PANEL)).toBeVisible()
+    await page.locator(LIST_TAB).click()
+    await expect(page.locator(LIST_PANEL)).toBeVisible()
+    await expect(page.locator(COACH_PANEL)).toBeHidden()
+    await page.locator(COACH_TAB).click()
+    await expect(page.locator(COACH_PANEL)).toBeVisible()
+    await expect(page.locator(LIST_PANEL)).toBeHidden()
+  })
+
+  test('展开陪练面板直接进入对话：无开场提示词，输入区与发送动作在场', async ({ page }) => {
+    await page.locator(COACH_TAB).click()
+    const panel = page.locator(COACH_PANEL)
     await expect(panel).toBeVisible()
     await expect(panel).toContainText('当前任务')
     const input = panel.locator('textarea')
@@ -48,110 +68,128 @@ test.describe('练习场 · 陪练 agent 便签', () => {
     await expect(input).toHaveValue('')
     await expect(panel.getByRole('button', { name: '发送' })).toBeVisible()
   })
-})
 
-test.describe('练习场 · 任务卡拟物组件', () => {
-  test.beforeEach(async ({ page }) => {
-    await page.goto('/practice.html')
-  })
-
-  test('任务信封：封面为任务名与摘要，拆开可见与 TASK.md 同源的完整任务', async ({ page }) => {
-    const envelope = page.locator(ENVELOPE)
-    await expect(envelope).toContainText('练习任务 · 我的自我介绍卡')
-    await expect(envelope.locator('summary')).toContainText('TO / 你的 Agent')
-    const letter = envelope.locator('.learning-envelope-letter')
-    await expect(letter).toBeHidden()
-    await envelope.locator('summary').click()
-    await expect(letter).toBeVisible()
-    await expect(letter).toContainText('# 练习任务 · 我的自我介绍卡')
-    await expect(letter).toContainText('## 验收清单')
-    await expect(letter).toContainText('预览页大标题显示名字')
-    await envelope.locator('summary').click()
-    await expect(letter).toBeHidden()
-  })
-
-  test('夹板清单：条目来自任务卡，全勾盖章、取消撤章', async ({ page }) => {
-    const checklist = page.locator(CHECKLIST)
+  test('验收清单贴签：面板内是任务清单，勾选进度回填贴签角标，全勾盖章、取消撤章', async ({
+    page,
+  }) => {
+    const tab = page.locator(LIST_TAB)
+    await expect(tab).toContainText('0/3')
+    await tab.click()
+    const panel = page.locator(LIST_PANEL)
+    await expect(panel).toBeVisible()
+    const checklist = panel.locator(CHECKLIST)
     await expect(checklist).toContainText('已核对 0 / 3')
     await expect(checklist.locator('[data-comp="stamp"]')).toHaveCount(0)
+
     await checklist.getByRole('checkbox', { name: '预览页大标题显示名字' }).check()
+    await expect(tab).toContainText('1/3')
     await checklist.getByRole('checkbox', { name: '介绍恰好 3 行' }).check()
     await checklist
       .getByRole('checkbox', { name: '只改了 src/App.tsx（可以让 agent 展示改动内容）' })
       .check()
     await expect(checklist).toContainText('已核对 3 / 3')
     await expect(checklist.locator('[data-comp="stamp"]')).toHaveText('✓已核对')
+    await expect(tab).toContainText('3/3')
+
     await checklist.getByRole('checkbox', { name: '介绍恰好 3 行' }).uncheck()
     await expect(checklist).toContainText('已核对 2 / 3')
     await expect(checklist.locator('[data-comp="stamp"]')).toHaveCount(0)
+    await expect(tab).toContainText('2/3')
   })
 })
 
-test.describe('练习场 · 创建项目板块', () => {
-  const SECTION = '[data-testid="create-project"]'
-  const SENTENCE = '创建一个 vite 项目，使用'
-  const IDS = ['basic', 'counter', 'compare']
-
+test.describe('练习场 · 右栏教程文本', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/practice.html')
   })
 
-  test('板块在场：标题 + 教学文案（四要素加粗词）+ 文件夹页签；三条示例都在 DOM 且同句式', async ({
+  test('练习任务区：标题、场景与预期以纯文本呈现，不再使用信封', async ({ page }) => {
+    const brief = page.locator('#practice-brief')
+    await expect(brief).toBeVisible()
+    await expect(brief.locator('h2')).toContainText('练习任务 · 我的自我介绍卡')
+    await expect(brief).toContainText('这是你第一次「指挥 agent」')
+    await expect(brief).toContainText('预期：')
+    await expect(brief).toContainText('大标题显示一个名字')
+    await expect(page.locator('[data-comp="task-envelope"]')).toHaveCount(0)
+  })
+
+  test('操作流水线：数据流水线板在场，三步同源示例提示词，第一步为虚线起点', async ({ page }) => {
+    const section = page.locator('#practice-flow')
+    await expect(section.locator('h2')).toContainText('操作流水线')
+    await expect(section).toContainText('脚手架')
+
+    const board = section.locator(FLOW)
+    await expect(board).toBeVisible()
+    const steps = board.locator('.learning-flow-step')
+    await expect(steps).toHaveCount(3)
+    await expect(steps.first()).toHaveAttribute('data-input', 'true')
+    await expect(board).toContainText('基础 · 一句话说清框架与语言')
+    await expect(board).toContainText('进阶 · 把初始内容和约束一次说全')
+    await expect(board).toContainText('对照 · 换个框架，对比差异')
+    await expect(steps.locator('button')).toHaveCount(3)
+  })
+
+  test('点击流水线步骤：陪练面板自动展开，提示词填入输入框并聚焦，回车直达 Key 门', async ({
     page,
   }) => {
-    const section = page.locator(SECTION)
-    await expect(section).toBeVisible()
-    await expect(section.locator('h2')).toContainText('创建项目')
-    await expect(section).toContainText('下一步——让 agent 从零建一个工程')
-    for (const word of ['脚手架', '框架与语言', '有什么', '约束']) {
-      await expect(section.locator('p').filter({ hasText: word }).first()).toBeVisible()
-    }
+    const steps = page.locator(`${FLOW} .learning-flow-step`)
+    await steps.first().locator('button').click()
 
-    const prompts = section.locator('[data-testid^="create-prompt-"]')
-    await expect(prompts).toHaveCount(3)
+    const panel = page.locator(COACH_PANEL)
+    await expect(panel).toBeVisible()
+    await expect(page.locator(COACH_TAB)).toHaveAttribute('aria-expanded', 'true')
+    const input = panel.locator('textarea')
+    await expect(input).toHaveValue('创建一个 vite 项目，使用 React 和 TypeScript，工程名叫 demo。')
+    await expect(input).toBeFocused()
 
-    for (const id of IDS) {
-      await expect(page.getByTestId(`create-prompt-${id}`)).toContainText(SENTENCE)
-    }
+    await input.press('Enter')
+    await expect(page.getByRole('heading', { name: '模型接入' })).toBeVisible()
+    await page.getByRole('button', { name: '取消' }).click()
 
-    await expect(page.getByTestId('create-prompt-basic')).toBeVisible()
-    await expect(page.getByTestId('create-prompt-counter')).toBeHidden()
-    await expect(page.getByTestId('create-prompt-compare')).toBeHidden()
+    await page.keyboard.press('Escape')
+    await expect(page.locator(COACH_PANEL)).toBeHidden()
+    await steps.nth(2).locator('button').click()
+    await expect(input).toHaveValue(
+      '创建一个 vite 项目，使用 Vue 和 TypeScript，工程名叫 vue-counter，初始同样带一个点按加一的计数器，同样不要引入 UI 库；建完把文件结构和 React 版的差异讲给我听。',
+    )
+  })
+})
+
+test.describe('练习场 · 左栏沙箱布局', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto('/practice.html')
   })
 
-  test('逐条示例：页签切换后复制/发给陪练在场，发送保持可用', async ({ page }) => {
-    const section = page.locator(SECTION)
-    const tabs = section.getByRole('tab')
-    await expect(tabs).toHaveCount(3)
+  test('web runner 在上、playground 编辑器在下，各自成卡', async ({ page }) => {
+    const runner = page.locator('section[aria-label="web runner 沙箱预览"]')
+    const editor = page.locator('section[aria-label="playground 编辑器"]')
+    await expect(runner).toBeVisible()
+    await expect(runner).toContainText('web runner · 沙箱预览')
+    await expect(runner.locator('[data-testid="runtime-status"]')).toBeVisible()
+    await expect(runner.locator('[data-testid="sandbox-frame"]')).toHaveCount(1)
+    await expect(runner.getByRole('region', { name: '输出' })).toBeVisible()
 
-    for (let i = 0; i < IDS.length; i++) {
-      await tabs.nth(i).click()
-      await expect(tabs.nth(i)).toHaveAttribute('aria-selected', 'true')
-      const strip = page.getByTestId(`create-prompt-${IDS[i]}`)
-      await expect(strip).toBeVisible()
-      await expect(strip).toContainText(SENTENCE)
-      await expect(strip.getByRole('button', { name: '复制' })).toBeVisible()
-      const send = strip.getByRole('button', { name: '发给陪练' })
-      await expect(send).toBeVisible()
-      await expect(send).toBeEnabled()
-    }
+    await expect(editor).toBeVisible()
+    await expect(editor).toContainText('playground · 编辑器')
+    await expect(editor.getByLabel('模块代码')).toBeVisible()
+    await expect(editor.getByRole('button', { name: '运行 ▶' })).toBeVisible()
 
-    await tabs.nth(0).click()
-    await tabs.nth(0).press('ArrowRight')
-    await expect(tabs.nth(1)).toHaveAttribute('aria-selected', 'true')
-    await expect(page.getByTestId('create-prompt-counter')).toBeVisible()
+    const runnerBox = await runner.boundingBox()
+    const editorBox = await editor.boundingBox()
+    expect(runnerBox && editorBox ? editorBox.y : 0).toBeGreaterThan(
+      runnerBox ? runnerBox.y + runnerBox.height : 0,
+    )
   })
 
-  test('复制动作可用：点击后按钮进入「已复制」态', async ({ page }) => {
-    await page.context().grantPermissions(['clipboard-write'])
-    const strip = page.getByTestId('create-prompt-basic')
-    await strip.getByRole('button', { name: '复制' }).click()
-    await expect(strip.getByRole('button', { name: '已复制' })).toBeVisible()
+  test('运行前预览区展示占位说明，iframe 未运行时不显示', async ({ page }) => {
+    const runner = page.locator('section[aria-label="web runner 沙箱预览"]')
+    await expect(runner).toContainText('在下方编辑器点「运行 ▶」')
+    await expect(runner.locator('[data-testid="sandbox-frame"]')).not.toBeVisible()
   })
 })
 
 test.describe('练习场 · 布局自查', () => {
-  test('320/390/768/1280 无横向溢出，便签停靠不压说明条', async ({ page }) => {
+  test('320/390/768/1280 无横向溢出，两枚贴签停靠不压内容', async ({ page }) => {
     await page.goto('/practice.html')
     for (const width of [320, 390, 768, 1280]) {
       await page.setViewportSize({ width, height: 900 })
@@ -159,21 +197,26 @@ test.describe('练习场 · 布局自查', () => {
         () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
       )
       expect(overflow, `宽度 ${width} 出现 ${overflow}px 横向溢出`).toBe(0)
-      await page.locator(TAB).click()
-      await expect(page.locator(PANEL)).toBeVisible()
-      await page.keyboard.press('Escape')
-      await expect(page.locator(PANEL)).toBeHidden()
 
-      const tabBox = await page.locator(TAB).boundingBox()
-      expect(tabBox).not.toBeNull()
+      await page.locator(COACH_TAB).click()
+      await expect(page.locator(COACH_PANEL)).toBeVisible()
+      await page.keyboard.press('Escape')
+      await expect(page.locator(COACH_PANEL)).toBeHidden()
+
+      const coachBox = await page.locator(COACH_TAB).boundingBox()
+      expect(coachBox).not.toBeNull()
       expect(
-        900 - (tabBox!.y + tabBox!.height),
-        `宽度 ${width} 便签距底缘过大`,
+        900 - (coachBox!.y + coachBox!.height),
+        `宽度 ${width} 陪练贴签距底缘过大`,
       ).toBeLessThanOrEqual(24)
       expect(
-        width - (tabBox!.x + tabBox!.width),
-        `宽度 ${width} 便签距右缘过大`,
+        width - (coachBox!.x + coachBox!.width),
+        `宽度 ${width} 陪练贴签距右缘过大`,
       ).toBeLessThanOrEqual(24)
+
+      const listBox = await page.locator(LIST_TAB).boundingBox()
+      expect(listBox).not.toBeNull()
+      expect(listBox!.x).toBeLessThan(coachBox!.x)
     }
   })
 })

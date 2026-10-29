@@ -21,7 +21,7 @@ export const CREATE_PROJECT_INTRO: readonly (string | { b: string })[] = [
   { b: '有什么' },
   '、有哪些',
   { b: '约束' },
-  '。下面三条示例从一句话起步，逐步把这四要素补齐——点「发给陪练」就能在右下角便签里直接试。',
+  '。下面三条示例从一句话起步，逐步把这四要素补齐——点流水线上的任意一步，提示词就会填进陪练输入框，回车即发。',
 ]
 
 export const CREATE_PROJECT_EXAMPLES: readonly CreateProjectExample[] = [

@@ -1,3 +1,7 @@
+export type { PlaygroundApi, ProjectFile } from './context'
+export { PlaygroundProvider, RUNTIME_ORIGIN, usePlayground } from './context'
+export type { PlaygroundProps } from './Playground'
 export { Playground } from './Playground'
+export { CodeEditor, FileTabs, OutputView, RunRow, SandboxFrame, StatusLine } from './parts'
 export type { ConsoleLevel } from './protocol'
 export { isRuntimeMessage, PROTOCOL_VERSION } from './protocol'

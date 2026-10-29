@@ -1249,6 +1249,23 @@
   transform: translateY(-2px);
   box-shadow: 5px 5px 0 var(--color-ink);
 }
+.learning-flow-step[data-clickable="true"] {
+  cursor: pointer;
+}
+.learning-flow-step-btn {
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+}
+.learning-flow-step-btn:focus-visible {
+  outline: 2px solid var(--color-ink);
+  outline-offset: 2px;
+}
 .learning-flow-badge {
   position: absolute;
   top: -13px;
