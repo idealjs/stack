@@ -17,7 +17,7 @@
   拿不到宿主任何数据、存储全禁；读 `parent.location` 抛 SecurityError 是自证，ready
   消息带 `parentBlocked`）；第二道是跨源 src 本身：将来 sandbox 属性若被误删或放宽，
   浏览器同源策略仍把框内文档挡在宿主源之外——同源部署则两道一起丢。独立源 dev 为
-  第二端口 5174（`stack dev` hono 伺服），生产为另一域名静态托管；宿主以
+  第二端口 8911（`stack dev --port 8911` hono 伺服），生产为另一域名静态托管；宿主以
   `VITE_STACK_RUNTIME_ORIGIN` 指向它。
 
 ## 外部访问：code-server 反向代理下的双入口形态
@@ -28,11 +28,11 @@
   顶层导航，会话/登录跳转正常。**跨源验证的正式形态**：此入口下教程页与运行时不同源。
 - 教程站·主域路径：`https://code.idealjs.com/absproxy/5173/`——`/absproxy` 语义为路径
   直通（应用自知前缀），配教程 `--base`（env `TUTORIAL_BASE`）。**远程开发入口**：
-  此入口下教程页与运行时（主域 `/absproxy/5174/`）同源——origin 不含路径，上节的
+  此入口下教程页与运行时（主域 `/absproxy/8911/`）同源——origin 不含路径，上节的
   第二道防线在该入口不存在，隔离只剩 sandbox 剥源一道（opaque origin 仍成立，框内
   代码依旧拿不到宿主数据）。此入口是为远程开发便利而设，**不是**跨源能力的验证场所；
   验证跨源请走端口子域名入口。
-- 沙箱运行时：`https://code.idealjs.com/absproxy/5174/`（src 形态）。运行时文档由
+- 沙箱运行时：`https://code.idealjs.com/absproxy/8911/`（src 形态）。运行时文档由
   stack 构建＋inlineScript 内联为自包含单文件（`dist-runtime/index.html`，零工具注入、
   零外置 script），`stack dev`（hono）静态直出——路径匹配/base 处理不存在（文档只认
   根路径），改运行时源文件由 `stack --watch` 重建、刷新即生效。**文档零子资源**：
@@ -53,11 +53,11 @@
 部署（absproxy）双兼容；`e2e/pages.spec.ts` 的 href 选择器同步为相对形态。
 
 配置接缝：`apps/tutorial/.env.development` 的 `VITE_STACK_RUNTIME_ORIGIN`（默认
-`http://localhost:5174`＝本地 dev 的运行时位；置空 = srcdoc；设远程位 = 跨源 src，仅限
+`http://localhost:8911`＝本地 dev 的运行时位；置空 = srcdoc；设远程位 = 跨源 src，仅限
 无 cookie 鉴权问题的位）、根 `package.json` dev 脚本只并行拉起 tutorial dev 与 web-runner
 的 `stack dev`；教程侧 `--base /absproxy/5173` 仅为远程 absproxy 场景的**可选
 注入**（默认启动指令不携带——教程的 301 重定向会被浏览器永久缓存，撤环境后仍阴魂
-不散，已改 302）；运行时静态服务器端口默认 5174（`--port` 覆盖）。
+不散，已改 302）；运行时静态服务器端口随 dev 脚本定 8911（`--port` 覆盖）。
 教程站 `allowedHosts` 含 `code.idealjs.com`（代理透传保留 Host）；运行时是自持静态
 服务器，无 Host 假设。
 e2e 栈（5175）不设这些 env，base 默认 `/`、运行时位构建时注入，契约不受影响。
@@ -93,7 +93,7 @@ top-navigation/popups/forms/modals、src 源 ≠ 宿主源。
 
 e2e 栈自包含（playwright webServer 数组）：站点 `yarn build`＋preview 于 4491（构建时
 经进程 env 注入 `VITE_STACK_RUNTIME_ORIGIN=http://localhost:5175`），运行时
-`dev --port 5175`——与交互 dev 的 8910/5174 互不抢占，跨源契约不再隐式依赖
+`dev --port 5175`——与交互 dev 的 8910/8911 互不抢占，跨源契约不再隐式依赖
 「机器上恰好在跑的 dev 服务器」。
 
 ## 运行时嵌入头（已移除）
