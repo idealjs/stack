@@ -210,7 +210,10 @@ export function App() {
           </div>
         </div>
       </Section>
-      <Section label="票券" note="票=完成状态">
+      <Section
+        label="票券"
+        note="票=完成状态：完成＝沿撕线打双孔（半圆缺口），未开始撕线为实线、无孔；头部色块无独立描边，由票体 overflow-hidden 裁出单一描边圆角；票号＝章程序号"
+      >
         <div className="flex flex-wrap items-start gap-8">
           <ChapterTicket chapter={CHAPTERS[1]} done />
           <ChapterTicket chapter={CHAPTERS[5]} done={false} />

@@ -1,10 +1,14 @@
 import type { ReactNode } from 'react'
-import { BrickDot, ChapterTicket, Mark, Ring, Tri, Wave } from '../../design-system'
-import { CHAPTERS } from '../../lib/chapters'
+import { BrickDot, Mark, Ring, Tri, Wave } from '../../design-system'
 import { Page, Section } from '../../lib/ui'
 
 const SHAPES = [
-  { el: <Tri size={28} />, n: '▲ 靶子', m: '目标，卡头打头', s: '靶子先行' },
+  {
+    el: <Tri size={28} />,
+    n: '▲ 靶子',
+    d: '唯一实心有指向——说「做什么」，不核对、不计数',
+    s: '靶子先行 · 章卡与步骤卡头',
+  },
   {
     el: (
       <span className="flex">
@@ -13,12 +17,27 @@ const SHAPES = [
       </span>
     ),
     n: '● 积木',
-    m: '清单点列，实=已学',
-    s: '积木清单',
+    d: '唯一成列可数——实心＝已学，管进度不管方向',
+    s: '积木清单 · 零件点列与卡头进度点',
   },
-  { el: <Ring size={28} />, n: '○ 预期', m: '可核对的结果', s: '预期结果' },
-  { el: <Wave size={36} />, n: '～ 代理区', m: '交给 agent', s: '每步先分类' },
-  { el: <Mark>过程</Mark>, n: '荧光标记 价值区', m: '划在文字上，不是散落图形', s: '每步先分类' },
+  {
+    el: <Ring size={28} />,
+    n: '○ 预期',
+    d: '唯一空心——中间留空待核对，说「做成什么样」',
+    s: '预期结果 · 对照 agent 输出的尺子',
+  },
+  {
+    el: <Wave size={36} />,
+    n: '～ 代理区',
+    d: '唯一不闭合——是边界不是物件，圈出交给 agent 的范围',
+    s: '每步先分类 · 无学习价值就交接',
+  },
+  {
+    el: <Mark>过程</Mark>,
+    n: '荧光标记 价值区',
+    d: '唯一划在文字上——不散落空白，标记有学习价值的词',
+    s: '每步先分类 · 价值区就地写清',
+  },
 ]
 
 const VOCAB: { p: string; rows: [ReactNode, string][] }[] = [
@@ -45,21 +64,21 @@ export function App() {
     <Page
       active="design-symbols"
       title="符号、形状 · 装饰即语义"
-      desc="形状对内容下定义、散落于空白；票券只表达完成状态。"
+      desc="形状对内容下定义、散落于空白；五种形状各管一件事——区别在形状语言，场景在教程环节。"
     >
       <Section
         label="语义形状 ×5"
-        note="散落＝卡片附近空当＋随机旋转/落点（Scatter 种子化），密度 ≤ 8/屏"
+        note="实心有指向 · 空心待核对 · 点可计数 · 波浪是边界 · 荧光在文字上；散落＝空当＋随机旋转（Scatter 种子化），密度 ≤ 8/屏"
       >
-        <div className="grid grid-cols-3 gap-3.5 sm:grid-cols-5">
+        <div className="grid grid-cols-2 gap-3.5 sm:grid-cols-3 lg:grid-cols-5">
           {SHAPES.map((s) => (
             <div key={s.n} className="text-center">
               <div className="mx-auto flex h-[46px] w-[46px] items-center justify-center rounded-xl border-2 border-ink bg-white">
                 {s.el}
               </div>
               <div className="mt-1.5 text-[11px] font-bold">{s.n}</div>
-              <div className="t-small-mute leading-tight">{s.m}</div>
-              <div className="mt-0.5 t-small-mute">{s.s}</div>
+              <div className="mt-0.5 text-small leading-snug text-body">{s.d}</div>
+              <div className="mt-0.5 t-small-mute leading-tight">场景 · {s.s}</div>
             </div>
           ))}
         </div>
@@ -92,17 +111,6 @@ export function App() {
             )}
           </tbody>
         </table>
-      </Section>
-      <Section label="票券" note="状态的载体——完成即打孔（裁切式实现）">
-        <div className="flex flex-wrap items-start gap-6">
-          <ChapterTicket chapter={CHAPTERS[1]} done />
-          <ChapterTicket chapter={CHAPTERS[5]} done={false} />
-          <p className="m-0 max-w-[280px] flex-1 text-content leading-relaxed text-body">
-            <b>完成＝沿撕线打双孔</b>
-            （半圆缺口）；未开始撕线为实线、无孔。头部色块无独立描边，由票体 overflow-hidden
-            裁出单一描边圆角。票号＝章程序号。
-          </p>
-        </div>
       </Section>
     </Page>
   )

@@ -271,11 +271,14 @@ test.describe('价值区荧光标记契约', () => {
 })
 
 test.describe('票券规格契约', () => {
-  test.beforeEach(async ({ page }) => await page.goto('/design-symbols.html'))
+  test.beforeEach(async ({ page }) => await page.goto('/design-components.html'))
   test.use({ reducedMotion: 'no-preference' })
 
+  const chapterTickets = (page: Page) =>
+    page.locator('[data-comp="ticket"]').filter({ has: page.locator('.ticket-stub') })
+
   test('裁切式：overflow hidden + 单一 2px 描边 + 头部色块无独立边框', async ({ page }) => {
-    const done = page.locator('.ticket-pk').first()
+    const done = chapterTickets(page).first().locator('.ticket-face')
     await expect(done).toBeVisible()
     const s = await done.evaluate((el) => {
       const cs = getComputedStyle(el)
@@ -295,7 +298,7 @@ test.describe('票券规格契约', () => {
   })
 
   test('票面 mask 打孔，内层包裹 drop-shadow 跟随轮廓，孔缘对齐撕线', async ({ page }) => {
-    const done = page.locator('.ticket-pk').first()
+    const done = chapterTickets(page).first().locator('.ticket-face')
     const mask = await done.evaluate((el) => {
       const cs = getComputedStyle(el)
       return cs.maskImage || cs.webkitMaskImage || 'none'
@@ -318,9 +321,8 @@ test.describe('票券规格契约', () => {
     expect(f.pseudoContent).toBe('none')
     expect(f.innerShadow).toBe('none')
 
-    const arcs = await page.evaluate(() => {
-      const done = document.querySelector('.ticket-pk') as HTMLElement
-      const shell = done.closest('.ticket-shell') as HTMLElement
+    const arcs = await done.evaluate((el) => {
+      const shell = el.closest('.ticket-shell') as HTMLElement
       const stub = shell.querySelector('.ticket-stub') as HTMLElement
       const tearX =
         stub.getBoundingClientRect().x + parseFloat(getComputedStyle(stub).borderLeftWidth) / 2
