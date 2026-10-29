@@ -122,7 +122,7 @@ export async function startDevServer(
   ;(server as ServerType).on('error', (error: NodeJS.ErrnoException) => {
     if (error.code === 'EADDRINUSE') {
       console.error(
-        `[stack] 端口 ${port} 已被占用——可能有另一个 stack dev 在运行；停掉占用进程或换 --port 后重试`,
+        `[stack] 端口 ${port} 已被占用——可能有另一个 stack dev/preview 在运行；停掉占用进程或换 --port 后重试`,
       )
     } else {
       console.error(`[stack] dev server 错误：${error.message}`)

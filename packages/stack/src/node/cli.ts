@@ -12,7 +12,7 @@ const WATCH_DEBOUNCE_MS = 150
 const IGNORED_WATCH_SEGMENTS = new Set(['node_modules', 'dist', '.git'])
 
 interface CliOptions {
-  mode: 'build' | 'watch' | 'dev'
+  mode: 'build' | 'watch' | 'dev' | 'preview'
   configPath: string
   port: number
   base: string
@@ -25,6 +25,7 @@ function parseArgs(argv: string[]): CliOptions {
   let mode: CliOptions['mode'] = 'build'
   let configPath = 'stack.config.ts'
   let port = 8910
+  let portExplicit = false
   let base = ''
   let host: boolean | string | undefined
   let noWatch = false
@@ -33,6 +34,8 @@ function parseArgs(argv: string[]): CliOptions {
     const arg = argv[i]
     if (arg === 'dev') {
       mode = 'dev'
+    } else if (arg === 'preview') {
+      mode = 'preview'
     } else if (arg === '--no-watch') {
       noWatch = true
     } else if (arg === '--config') {
@@ -59,9 +62,11 @@ function parseArgs(argv: string[]): CliOptions {
       const value = argv[i + 1]
       if (value === undefined) throw new Error('--port 需要一个端口号')
       port = Number(value)
+      portExplicit = true
       i += 1
     } else if (arg.startsWith('--port=')) {
       port = Number(arg.slice('--port='.length))
+      portExplicit = true
     } else if (arg === '--asset') {
       const value = argv[i + 1]
       if (value === undefined) throw new Error('--asset 需要 <路由>=<文件路径>')
@@ -79,7 +84,15 @@ function parseArgs(argv: string[]): CliOptions {
       throw new Error(`未知参数：${arg}`)
     }
   }
-  return { mode, configPath, port, base, host, assets, noWatch }
+  return {
+    mode,
+    configPath,
+    port: portExplicit ? port : mode === 'preview' ? 9910 : 8910,
+    base,
+    host,
+    assets,
+    noWatch,
+  }
 }
 
 export async function loadConfig(configPath: string): Promise<StackConfig> {
@@ -241,14 +254,7 @@ function attachDevShortcuts(): void {
 
 async function runDev(config: StackConfig, options: CliOptions): Promise<void> {
   if (options.noWatch) {
-    await startDevServer(config, {
-      port: options.port,
-      base: options.base,
-      host: options.host,
-      assets: options.assets,
-      liveReload: false,
-    })
-    await buildOnce(config)
+    await runPreview(config, options)
     return
   }
   const startedAt = performance.now()
@@ -270,6 +276,30 @@ async function runDev(config: StackConfig, options: CliOptions): Promise<void> {
   startWatcher(config, () => server.stackReload())
 }
 
+async function runPreview(config: StackConfig, options: CliOptions): Promise<void> {
+  const dist = resolvePath(config.root ?? '.', config.dist ?? 'dist')
+  if (!existsSync(dist)) {
+    throw new Error(
+      `产物目录不存在：${dist}——preview 伺服已构建产物，先跑一次构建（stack 或 stack build）`,
+    )
+  }
+  const startedAt = performance.now()
+  await startDevServer(config, {
+    port: options.port,
+    base: options.base,
+    host: options.host,
+    assets: options.assets,
+    liveReload: false,
+  })
+  printDevBanner({
+    port: options.port,
+    base: options.base,
+    host: options.host,
+    readyMs: performance.now() - startedAt,
+  })
+  attachDevShortcuts()
+}
+
 export async function runCLI(argv: string[]): Promise<void> {
   const options = parseArgs(argv)
   const userConfig = await loadConfig(options.configPath)
@@ -279,6 +309,10 @@ export async function runCLI(argv: string[]): Promise<void> {
   }
   if (options.mode === 'dev') {
     await runDev(config, options)
+    return
+  }
+  if (options.mode === 'preview') {
+    await runPreview(config, options)
     return
   }
   console.log(

@@ -15,7 +15,7 @@
   1. **结构契约**（`e2e/pages.spec.ts` + `e2e/learning-kit.spec.ts`）：规格级断言——卡片 2px 描边/硬投影/纸叠三层、16:9 相框比例与内阴影、积木点实心数、站点 r6 半嵌（源骑黑影外缘/目标贴描边）、票券裁切式（overflow hidden + 头部无框 + 双打孔 + 撕线虚/实）、拟物学习组件交互。布局微调不误报，破坏规格必红。
   2. **视觉基线**（`e2e/visual.spec.ts` + `e2e/visual.spec.ts-snapshots/`）：设计四册整页截图像素比对，容差 1%。**基线需随代码提交**；有意变更用 `yarn test:e2e:update` 生成新基线后一并提交。
 
-  测试在 `prefers-reduced-motion` 下运行（卡片的 8000ms 翻转与动效关闭，截图稳定）；跑前先 `yarn build`（webServer 走 `stack dev --no-watch`）。
+  测试在 `prefers-reduced-motion` 下运行（卡片的 8000ms 翻转与动效关闭，截图稳定）；跑前先 `yarn build`（webServer 走 `stack preview`）。
 
 ```bash
 yarn workspace @stack/tutorial dev            # 开发

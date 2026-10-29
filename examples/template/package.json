@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "stack dev",
     "build": "stack",
-    "preview": "stack dev --no-watch --port 4173"
+    "preview": "stack preview --port 4173"
   },
   "dependencies": {
     "@idealjs/stack": "workspace:*"
