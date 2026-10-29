@@ -140,7 +140,7 @@ export function App() {
           {RULES.map((r, i) => (
             <div
               key={r.name}
-              className="grid gap-y-3 rounded-xl border-2 border-ink bg-paper p-4 md:grid-cols-[minmax(0,280px)_minmax(0,1fr)_minmax(0,1fr)] md:gap-y-0 md:divide-x-2 md:divide-ink/15 md:p-0"
+              className="grid gap-y-3 rounded-xl border-2 border-ink bg-paper p-4 md:grid-cols-[minmax(0,320px)_minmax(0,1fr)_minmax(0,1fr)] md:gap-y-0 md:divide-x-2 md:divide-ink/15 md:p-0"
             >
               <div className="grid content-start gap-1.5 md:py-4 md:pr-4 md:pl-5">
                 <div className="flex items-center gap-2">
@@ -149,7 +149,7 @@ export function App() {
                   </span>
                   <b className="text-[13px]">{r.name}</b>
                 </div>
-                <i className="t-small-mute not-italic">{r.note}</i>
+                <p className="m-0 text-content text-body">{r.note}</p>
               </div>
               <DoDont bad text={r.badCap}>
                 {r.badDemo}
