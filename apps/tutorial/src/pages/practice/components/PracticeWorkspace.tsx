@@ -201,6 +201,8 @@ export function PracticeWorkspace() {
 
       <ChecklistDock
         panelId="checklist-dock-panel"
+        done={checkedIds.length}
+        total={task.acceptance.length}
         open={openDock === 'checklist'}
         onToggle={() => setOpenDock((v) => (v === 'checklist' ? null : 'checklist'))}
       >

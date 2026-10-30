@@ -116,12 +116,6 @@
 .learning-clipboard-dock .learning-clipboard-clip {
   display: none;
 }
-.learning-clipboard-dock {
-  padding-top: 16px;
-  border-top: 0;
-  border-top-left-radius: 0;
-  border-top-right-radius: 0;
-}
 .learning-clipboard-paper {
   padding: 18px 16px 14px;
   border: 1px solid var(--color-ink);
