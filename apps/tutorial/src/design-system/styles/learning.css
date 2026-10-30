@@ -122,9 +122,6 @@
   border-top-left-radius: 0;
   border-top-right-radius: 0;
 }
-.checklist-dock-clip {
-  left: 14px;
-}
 .learning-clipboard-paper {
   padding: 18px 16px 14px;
   border: 1px solid var(--color-ink);

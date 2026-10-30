@@ -33,7 +33,7 @@ export function ChecklistDock({
             onClick={onToggle}
             className="relative block h-[19px] w-full cursor-pointer rounded-t-[12px] border-2 border-b-0 border-ink bg-paper-deep outline-none"
           >
-            <span aria-hidden className="learning-clipboard-clip checklist-dock-clip" />
+            <span aria-hidden className="learning-clipboard-clip" />
             <span className="sr-only">验收清单</span>
           </button>
         </span>
