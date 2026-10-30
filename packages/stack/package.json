@@ -13,7 +13,8 @@
     "typecheck": "tsc --noEmit",
     "test": "node --test test/*.spec.ts",
     "test:browser": "playwright test",
-    "test:all": "yarn test && yarn test:browser"
+    "test:e2e": "node scripts/run-examples-e2e.mjs",
+    "test:all": "yarn test && yarn test:browser && yarn test:e2e"
   },
   "dependencies": {
     "@hono/node-server": "^2.1.5",

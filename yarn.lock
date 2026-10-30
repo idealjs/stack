@@ -3178,6 +3178,7 @@ __metadata:
   resolution: "@stack/template@workspace:examples/template"
   dependencies:
     "@idealjs/stack": "workspace:*"
+    "@playwright/test": "npm:1.63.0"
     typescript: "npm:~5.6.2"
   languageName: unknown
   linkType: soft
@@ -11686,6 +11687,7 @@ __metadata:
   resolution: "stack-demo@workspace:examples/stack-demo"
   dependencies:
     "@idealjs/stack": "workspace:*"
+    "@playwright/test": "npm:1.63.0"
     typescript: "npm:~5.6.2"
   languageName: unknown
   linkType: soft
