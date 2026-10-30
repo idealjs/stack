@@ -25,12 +25,17 @@ export function ChecklistDock({
     return () => window.removeEventListener('keydown', onKey)
   }, [open, onToggle])
 
+  const all = total > 0 && done >= total
+  const progress = all ? 'all' : done > 0 ? 'partial' : 'none'
+  const stripClass = all ? 'bg-clash1a' : done > 0 ? 'bg-clash1b' : 'bg-paper-deep'
+
   return (
     <div className="pointer-events-none fixed top-0 right-4 z-40 w-[min(380px,calc(100vw-24px))] sm:right-6">
       <div className="pointer-events-auto relative mt-[18px]">
         <button
           type="button"
           data-comp="checklist-clip"
+          data-progress={progress}
           aria-expanded={open}
           aria-controls={panelId}
           onClick={onToggle}
@@ -40,7 +45,10 @@ export function ChecklistDock({
             aria-hidden
             className="absolute top-[-9px] left-1/2 block h-[13px] w-[24px] -translate-x-1/2 rounded-t-[6px] border-2 border-ink bg-paper"
           />
-          <span aria-hidden className="mx-1.5 mt-[5px] block h-[7px] rounded-[3px] bg-clash1b" />
+          <span
+            aria-hidden
+            className={`mx-1.5 mt-[5px] block h-[7px] rounded-[3px] transition-colors duration-200 motion-reduce:transition-none ${stripClass}`}
+          />
           <span className="flex flex-1 items-center justify-center gap-1 pb-[3px] leading-none">
             <span className="t-small-strong">验收</span>
             <span className="font-mono text-[12px] font-bold text-ink">

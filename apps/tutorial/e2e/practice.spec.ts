@@ -78,8 +78,9 @@ test.describe('练习场 · 验收清单夹板（顶部右上）', () => {
     await expect(clip).toHaveAttribute('aria-expanded', 'false')
   })
 
-  test('夹板展开后核对进度与盖章联动：全勾盖章、取消撤章', async ({ page }) => {
+  test('夹板展开后核对进度与盖章联动，夹具金属条随进度变色', async ({ page }) => {
     const clip = page.locator(CLIP)
+    await expect(clip).toHaveAttribute('data-progress', 'none')
     await clip.click()
     const panel = page.locator(LIST_PANEL)
     const checklist = panel.locator(CHECKLIST)
@@ -87,16 +88,19 @@ test.describe('练习场 · 验收清单夹板（顶部右上）', () => {
     await expect(checklist.locator('[data-comp="stamp"]')).toHaveCount(0)
 
     await checklist.getByRole('checkbox', { name: '预览页大标题显示名字' }).check()
+    await expect(clip).toHaveAttribute('data-progress', 'partial')
     await checklist.getByRole('checkbox', { name: '介绍恰好 3 行' }).check()
     await checklist
       .getByRole('checkbox', { name: '只改了 src/App.tsx（可以让 agent 展示改动内容）' })
       .check()
     await expect(checklist).toContainText('已核对 3 / 3')
     await expect(checklist.locator('[data-comp="stamp"]')).toHaveText('✓已核对')
+    await expect(clip).toHaveAttribute('data-progress', 'all')
 
     await checklist.getByRole('checkbox', { name: '介绍恰好 3 行' }).uncheck()
     await expect(checklist).toContainText('已核对 2 / 3')
     await expect(checklist.locator('[data-comp="stamp"]')).toHaveCount(0)
+    await expect(clip).toHaveAttribute('data-progress', 'partial')
   })
 
   test('与陪练贴签全局互斥：开一块收另一块，清单在顶、对话在底', async ({ page }) => {
