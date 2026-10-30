@@ -98,7 +98,7 @@ export class DemandEngine {
       knownModule: (id) => this.#registry.has(id),
       bindModule: (id, into) => this.#bindModule(id, into),
     }
-    this.#resolveContext = { root: this.root }
+    this.#resolveContext = { root: this.root, fs: this.readOnlyFs }
     this.channel = new OutputChannel({
       watchHooks: this.watchHooks,
       contextFor: (hookName) => this.outputContext(hookName),

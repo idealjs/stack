@@ -51,6 +51,7 @@ export interface ResolveResult {
 
 export interface ResolveContext {
   readonly root: string
+  readonly fs: ReadOnlyFs
 }
 
 export type ResolveHook = (

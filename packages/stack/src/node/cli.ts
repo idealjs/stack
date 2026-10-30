@@ -2,7 +2,7 @@ import { existsSync, type FSWatcher, rmSync, watch } from 'node:fs'
 import { networkInterfaces } from 'node:os'
 import { extname, relative, resolve as resolvePath } from 'node:path'
 import { pathToFileURL } from 'node:url'
-import { imports } from '../builtins.ts'
+import { imports, pkgResolve } from '../builtins.ts'
 import { type BuildResult, build, type StackConfig, type StackHook } from '../index.ts'
 import { MIME, startDevServer, type ServedFile } from './dev.ts'
 import { createDevBuildQueue } from './devBuild.ts'
@@ -110,10 +110,17 @@ export async function loadConfig(configPath: string): Promise<StackConfig> {
 const hasImportsHook = (hooks: StackHook[] | undefined): boolean =>
   (hooks ?? []).some((hook) => hook.name.startsWith('imports:'))
 
+const hasPkgResolveHook = (hooks: StackHook[] | undefined): boolean =>
+  (hooks ?? []).some((hook) => hook.name.startsWith('pkg:'))
+
 const withDefaults = (config: StackConfig): StackConfig => ({
   ...config,
   fs: config.fs ?? nodeFs(),
-  hooks: hasImportsHook(config.hooks) ? (config.hooks ?? []) : [imports(), ...(config.hooks ?? [])],
+  hooks: [
+    ...(hasImportsHook(config.hooks) ? [] : [imports()]),
+    ...(config.hooks ?? []),
+    ...(hasPkgResolveHook(config.hooks) ? [] : [pkgResolve()]),
+  ],
 })
 
 async function writeOutputs(config: StackConfig, result: BuildResult): Promise<void> {
