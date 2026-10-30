@@ -2,11 +2,11 @@
 
 给 AI agent 与协作者的仓库约定。
 
-## Git：分支并入 main 只用 rebase
+## Git：main 禁止直推，并入一律 PR ＋ rebase
 
-- 功能分支并入 **main 一律只用 rebase**，保持线性历史：
-  1. 分支上先 `git rebase main`（冲突在分支侧解决）；
-  2. 回 main 执行 `git merge --ff-only <branch>` 完成并入。
+- **main 受保护，不能直接 push**，本地 main 只用于同步远端；一切改动通过 PR 并入，保持线性历史：
+  1. 功能分支上先 `git rebase main`（冲突在分支侧解决）；
+  2. push 分支并开 PR（`tea pulls create -b main -t <标题> -d <说明>`），由平台以 rebase 方式并入。
 - **禁止 `-no-ff` / 普通 merge 产生 merge commit**。
 - 涉及视觉基线（`apps/tutorial/e2e/visual.spec.ts-snapshots/*.png`）的分支，rebase 重放后可能在每条 commit 上遇到图片冲突——逐条取任一侧即可，**并在合并完成后于 main 上整批重建基线**：
   ```bash
