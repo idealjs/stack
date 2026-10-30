@@ -24,43 +24,44 @@ export function ChecklistDock({
   }, [open, onToggle])
 
   return (
-    <div className="fixed top-0 right-4 z-40 flex flex-col items-center sm:right-6">
-      <span className="hover-host block">
+    <div className="pointer-events-none fixed top-0 right-4 z-40 w-[min(380px,calc(100vw-24px))] sm:right-6">
+      <span className="hover-host pointer-events-auto mt-[10px] ml-auto block w-fit">
         <button
           type="button"
           data-comp="checklist-clip"
           aria-expanded={open}
           aria-controls={panelId}
           onClick={onToggle}
-          className="group flex cursor-pointer flex-col items-center outline-none"
+          className="relative ml-auto block w-[190px] cursor-pointer rounded-t-[10px] border-2 border-ink bg-paper px-3 pt-[22px] pb-1.5 pl-4 text-left outline-none"
         >
-          <span className="relative block h-[24px] w-[68px] rounded-[7px_7px_4px_4px] border-2 border-ink bg-clash1b shadow-[0_3px_0_var(--color-ink)] transition-transform duration-150 group-hover:-translate-y-0.5 motion-reduce:transition-none">
-            <span
-              aria-hidden
-              className="absolute top-[-8px] left-[21px] block h-[12px] w-[22px] rounded-t-[6px] border-2 border-ink bg-paper"
-            />
+          <span aria-hidden className="learning-clipboard-clip checklist-dock-clip" />
+          <span className="flex items-center gap-2">
+            <span className="t-small-strong">验收清单</span>
+            <span className="font-mono text-[11px] font-bold text-body">{badge}</span>
+            <span aria-hidden className="ml-auto text-[11px]">
+              {open ? '▾' : '▴'}
+            </span>
           </span>
-          <span
-            aria-hidden
-            className="relative -mt-[2px] block h-[16px] w-[96px] rounded-t-[5px] border-2 border-ink bg-paper text-center font-mono text-[10px] leading-[14px] font-bold text-body"
-          >
-            {badge}
-          </span>
-          <span className="sr-only">验收清单</span>
         </button>
       </span>
 
-      <section
-        id={panelId}
-        aria-label="验收清单面板"
-        className={`absolute top-[calc(100%+6px)] right-0 max-h-[min(560px,calc(100dvh_-_80px))] w-[min(380px,calc(100vw-24px))] origin-top overflow-auto rounded-lg border-2 border-ink bg-paper-deep p-2 shadow-ink transition-[opacity,transform,visibility] duration-200 motion-reduce:transition-none ${
+      <div
+        className={`grid pointer-events-auto transition-[grid-template-rows,opacity,visibility] duration-200 ease-out motion-reduce:transition-none ${
           open
-            ? 'visible translate-y-0 scale-100 opacity-100'
-            : 'invisible pointer-events-none -translate-y-2 scale-[0.98] opacity-0'
+            ? 'visible [grid-template-rows:1fr] opacity-100'
+            : 'invisible pointer-events-none [grid-template-rows:0fr] opacity-0'
         }`}
       >
-        {children}
-      </section>
+        <div className="min-h-0 overflow-hidden">
+          <section
+            id={panelId}
+            aria-label="验收清单面板"
+            className="max-h-[min(560px,calc(100dvh_-_140px))] overflow-auto pt-2.5"
+          >
+            {children}
+          </section>
+        </div>
+      </div>
     </div>
   )
 }

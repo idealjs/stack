@@ -211,6 +211,7 @@ export function PracticeWorkspace() {
           items={task.acceptance.map((label) => ({ id: label, label }))}
           checkedIds={checkedIds}
           onCheckedChange={setCheckedIds}
+          className="learning-clipboard-dock"
         />
       </ChecklistDock>
 

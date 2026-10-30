@@ -78,7 +78,7 @@ test.describe('练习场 · 验收清单夹板（顶部右上）', () => {
     await expect(clip).toHaveAttribute('aria-expanded', 'false')
   })
 
-  test('夹具纸边徽标实时显示核对进度，全勾盖章、取消撤章', async ({ page }) => {
+  test('夹具纸条徽标实时显示核对进度，全勾盖章、取消撤章', async ({ page }) => {
     const clip = page.locator(CLIP)
     await expect(clip).toContainText('0/3')
     await clip.click()
@@ -217,11 +217,11 @@ test.describe('练习场 · 布局自查', () => {
 
       const clipBox = await page.locator(CLIP).boundingBox()
       expect(clipBox).not.toBeNull()
-      expect(clipBox!.y, `宽度 ${width} 清单夹具距顶缘过大`).toBeLessThanOrEqual(4)
-      expect(
-        width - (clipBox!.x + clipBox!.width),
-        `宽度 ${width} 清单夹具距右缘过大`,
-      ).toBeLessThanOrEqual(32)
+      expect(clipBox!.y, `宽度 ${width} 清单夹具距顶缘过大`).toBeLessThanOrEqual(12)
+      expect(clipBox!.x, `宽度 ${width} 清单夹具越出左缘`).toBeGreaterThanOrEqual(0)
+      expect(clipBox!.x + clipBox!.width, `宽度 ${width} 清单夹具越出右缘`).toBeLessThanOrEqual(
+        width,
+      )
 
       await page.locator(CLIP).click()
       await expect(page.locator(LIST_PANEL)).toBeVisible()
