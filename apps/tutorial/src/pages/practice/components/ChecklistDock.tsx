@@ -27,7 +27,7 @@ export function ChecklistDock({
 
   const all = total > 0 && done >= total
   const progress = all ? 'all' : done > 0 ? 'partial' : 'none'
-  const stripClass = all ? 'bg-clash1a' : done > 0 ? 'bg-clash1b' : 'bg-paper-deep'
+  const stripClass = all ? 'bg-clash1b' : done > 0 ? 'bg-clash2a' : 'bg-paper-deep'
 
   return (
     <div className="pointer-events-none fixed top-0 right-4 z-40 w-[min(380px,calc(100vw-24px))] sm:right-6">
