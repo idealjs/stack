@@ -58,10 +58,10 @@ const RULES = [
   {
     name: '描边定义',
     note: [
-      '高饱和的颜色铺在浅色底上，会导致边缘发虚、像浮在页面上。',
+      '高饱和的颜色铺在浅色底上，会导致边缘发虚、像是摊在页面上。',
       '加 2px 黑描边和硬阴影，明确卡片的浮动效果；描边粗细全站统一，低分屏上轮廓依然清晰',
     ],
-    badCap: '无描边的鲜艳漂浮刺眼',
+    badCap: '无描边的鲜艳摊平刺眼',
     goodCap: '一切鲜艳以 2px ink 描边为界',
     badDemo: <div className="h-10 w-40 rounded-lg bg-clash2a" />,
     goodDemo: <div className="h-10 w-40 rounded-lg border-2 border-ink bg-clash2a shadow-ink" />,
