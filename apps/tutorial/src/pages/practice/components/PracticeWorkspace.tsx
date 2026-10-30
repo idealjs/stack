@@ -23,10 +23,11 @@ import { ChecklistDock } from './ChecklistDock'
 import { DockSticky } from './DockSticky'
 import { EditorDock } from './EditorDock'
 import { KeyModal } from './KeyModal'
+import { TipsDock } from './TipsDock'
 
 const FLOW_TONES = ['coral', 'teal', 'blue'] as const
 
-type DockPane = 'agent' | 'checklist' | null
+type DockPane = 'agent' | 'checklist' | 'tips' | null
 
 function appendAssistant(items: ChatItem[], delta: string): ChatItem[] {
   const next = items.slice()
@@ -71,7 +72,7 @@ export function PracticeWorkspace() {
   const [chat, setChat] = useState<ChatItem[]>(() => [
     {
       kind: 'assistant',
-      text: `我是这个练习场的陪练 agent，收在右下角贴签里。当前任务「${task.title}」——点右侧流水线卡片的任意一步，提示词会自动填进输入框，回车就能发给我；也可以直接聊思路、要代码、贴报错。代码写进右缘「编辑器」侧栏（点右缘小签拉开），点「运行 ▶」在沙箱里真跑；验收清单夹在页面右上角，做完拉出来逐条打勾。`,
+      text: `我是这个练习场的陪练 agent，收在右下角贴签里。当前任务「${task.title}」——点右上角「tips」拉出操作流水线，点任意一步，提示词会自动填进输入框，回车就能发给我；也可以直接聊思路、要代码、贴报错。代码写进右缘「编辑器」侧栏（点右缘小签拉开），点「运行 ▶」在沙箱里真跑；验收清单夹在页面右上角，做完拉出来逐条打勾。`,
     },
   ])
 
@@ -138,36 +139,38 @@ export function PracticeWorkspace() {
   return (
     <div className="pb-24" suppressHydrationWarning>
       <PlaygroundProvider initialFiles={TEMPLATE_FILES}>
-        <div className="grid items-start gap-3 lg:grid-cols-[minmax(0,1fr)_minmax(0,26rem)]">
-          <div
-            id="practice-sandbox"
-            className="grid scroll-mt-3 content-start gap-3 lg:sticky lg:top-3 lg:max-h-[calc(100dvh-1.5rem)] lg:overflow-y-auto lg:pr-1"
+        <div
+          id="practice-sandbox"
+          className="grid scroll-mt-3 content-start gap-3 lg:sticky lg:top-3 lg:max-h-[calc(100dvh-1.5rem)] lg:overflow-y-auto lg:pr-1"
+        >
+          <section
+            aria-label="web runner 沙箱预览"
+            className="rounded-xl border-2 border-ink bg-paper-deep p-2.5 shadow-ink"
           >
-            <section
-              aria-label="web runner 沙箱预览"
-              className="rounded-xl border-2 border-ink bg-paper-deep p-2.5 shadow-ink"
-            >
-              <div className="mb-1.5 flex flex-wrap items-baseline justify-between gap-x-2">
-                <span className="t-small-strong">web runner · 沙箱预览</span>
-                <span className="t-small-mute">隔离 iframe，postMessage 单通道</span>
-              </div>
-              <StatusLine />
-              <RunnerStage />
-              <OutputView />
-            </section>
-          </div>
-
-          <div className="lg:sticky lg:top-3 lg:max-h-[calc(100dvh-1.5rem)] lg:overflow-y-auto lg:pr-1">
-            <section id="practice-flow" className="grid scroll-mt-3">
-              <DataFlowBoard
-                title="点一步，喂给陪练"
-                note="点击任一步骤：陪练面板自动展开、提示词填进输入框，确认无误按回车发送。"
-                steps={flowSteps}
-                onStepClick={(step) => feedDraft(stepPrompt(step.id))}
-              />
-            </section>
-          </div>
+            <div className="mb-1.5 flex flex-wrap items-baseline justify-between gap-x-2">
+              <span className="t-small-strong">web runner · 沙箱预览</span>
+              <span className="t-small-mute">隔离 iframe，postMessage 单通道</span>
+            </div>
+            <StatusLine />
+            <RunnerStage />
+            <OutputView />
+          </section>
         </div>
+
+        <TipsDock
+          panelId="tips-dock-panel"
+          open={openDock === 'tips'}
+          onToggle={() => setOpenDock((v) => (v === 'tips' ? null : 'tips'))}
+        >
+          <section id="practice-flow">
+            <DataFlowBoard
+              title="点一步，喂给陪练"
+              note="点击任一步骤：陪练面板自动展开、提示词填进输入框，确认无误按回车发送。"
+              steps={flowSteps}
+              onStepClick={(step) => feedDraft(stepPrompt(step.id))}
+            />
+          </section>
+        </TipsDock>
 
         <EditorDock
           panelId="editor-dock-panel"

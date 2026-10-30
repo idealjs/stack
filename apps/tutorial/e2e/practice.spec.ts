@@ -8,6 +8,8 @@ const CHECKLIST = '[data-comp="clipboard-checklist"]'
 const FLOW = '[data-comp="data-flow-board"]'
 const EDITOR_TAB = '[data-comp="editor-dock-tab"]'
 const EDITOR_PANEL = '#editor-dock-panel'
+const TIPS = '[data-comp="tips-dock-trigger"]'
+const TIPS_PANEL = '#tips-dock-panel'
 
 test.describe('练习场 · 陪练 agent 贴签（右下角）', () => {
   test.beforeEach(async ({ page }) => {
@@ -117,22 +119,53 @@ test.describe('练习场 · 验收清单夹板（顶部右上）', () => {
   })
 })
 
-test.describe('练习场 · 右栏流水线卡片', () => {
+test.describe('练习场 · tips 喂给陪练（右上角）', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/practice.html')
   })
 
-  test('右栏只留流水线卡片：练习任务文字区与流水线标题说明已撤下', async ({ page }) => {
-    await expect(page.locator('#practice-brief')).toHaveCount(0)
-    await expect(page.locator('#practice-flow h2')).toHaveCount(0)
+  test('tips 贴签停靠右上角，默认收起；点击展开流水线板、再点与 Esc 收起，与验收夹具互斥', async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 1280, height: 900 })
+    const tips = page.locator(TIPS)
+    await expect(tips).toBeVisible()
+    await expect(tips).toHaveAttribute('aria-label', 'tips · 喂给陪练')
+    await expect(tips).toHaveAttribute('aria-expanded', 'false')
+    await expect(tips).toHaveAttribute('aria-controls', 'tips-dock-panel')
+    await expect(page.locator(TIPS_PANEL)).toBeHidden()
 
-    const board = page.locator('#practice-flow').locator(FLOW)
+    const chipBox = await tips.boundingBox()
+    expect(chipBox).not.toBeNull()
+    expect(chipBox!.y, 'tips 贴签应停靠顶缘').toBeLessThanOrEqual(20)
+    expect(1280 - (chipBox!.x + chipBox!.width), 'tips 贴签应停靠右缘').toBeLessThanOrEqual(24)
+
+    await tips.click()
+    await expect(tips).toHaveAttribute('aria-expanded', 'true')
+    const panel = page.locator(TIPS_PANEL)
+    await expect(panel).toBeVisible()
+    const board = panel.locator(FLOW)
     await expect(board).toBeVisible()
     await expect(board.locator('h3')).toContainText('点一步，喂给陪练')
+
+    await page.keyboard.press('Escape')
+    await expect(panel).toBeHidden()
+    await expect(tips).toHaveAttribute('aria-expanded', 'false')
+
+    await tips.click()
+    await expect(panel).toBeVisible()
+    await page.locator(CLIP).click()
+    await expect(page.locator(LIST_PANEL)).toBeVisible()
+    await expect(panel).toBeHidden()
+    await expect(tips).toHaveAttribute('aria-expanded', 'false')
   })
 
-  test('操作流水线：数据流水线板在场，三步同源示例提示词，第一步为虚线起点', async ({ page }) => {
-    const board = page.locator('#practice-flow').locator(FLOW)
+  test('流水线板收进面板：主区不再有板，三步同源提示词，第一步为虚线起点', async ({ page }) => {
+    await expect(page.locator('#practice-sandbox').locator(FLOW)).toHaveCount(0)
+    await expect(page.locator('main > #practice-flow')).toHaveCount(0)
+
+    await page.locator(TIPS).click()
+    const board = page.locator(TIPS_PANEL).locator(FLOW)
     await expect(board).toBeVisible()
     await expect(board).toContainText('脚手架')
 
@@ -145,14 +178,16 @@ test.describe('练习场 · 右栏流水线卡片', () => {
     await expect(steps.locator('button')).toHaveCount(3)
   })
 
-  test('点击流水线步骤：陪练面板自动展开，提示词填入输入框并聚焦，回车直达 Key 门', async ({
+  test('点击流水线步骤：陪练面板自动展开且 tips 收起，提示词填入输入框并聚焦，回车直达 Key 门', async ({
     page,
   }) => {
-    const steps = page.locator(`${FLOW} .learning-flow-step`)
+    await page.locator(TIPS).click()
+    const steps = page.locator(`${TIPS_PANEL} ${FLOW} .learning-flow-step`)
     await steps.first().locator('button').click()
 
     const panel = page.locator(COACH_PANEL)
     await expect(panel).toBeVisible()
+    await expect(page.locator(TIPS_PANEL)).toBeHidden()
     await expect(page.locator(COACH_TAB)).toHaveAttribute('aria-expanded', 'true')
     const input = panel.locator('textarea')
     await expect(input).toHaveValue('创建一个 vite 项目，使用 React 和 TypeScript，工程名叫 demo。')
@@ -164,6 +199,8 @@ test.describe('练习场 · 右栏流水线卡片', () => {
 
     await page.keyboard.press('Escape')
     await expect(page.locator(COACH_PANEL)).toBeHidden()
+
+    await page.locator(TIPS).click()
     await steps.nth(2).locator('button').click()
     await expect(input).toHaveValue(
       '创建一个 vite 项目，使用 Vue 和 TypeScript，工程名叫 vue-counter，初始同样带一个点按加一的计数器，同样不要引入 UI 库；建完把文件结构和 React 版的差异讲给我听。',
@@ -171,12 +208,12 @@ test.describe('练习场 · 右栏流水线卡片', () => {
   })
 })
 
-test.describe('练习场 · 主区双栏布局', () => {
+test.describe('练习场 · 主区布局', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/practice.html')
   })
 
-  test('沙箱在左、流水线在右，大屏下双栏各自独立滚动', async ({ page }) => {
+  test('沙箱独占主区，大屏下沙箱栏独立滚动', async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 900 })
     const runner = page.locator('section[aria-label="web runner 沙箱预览"]')
     await expect(runner).toBeVisible()
@@ -185,22 +222,10 @@ test.describe('练习场 · 主区双栏布局', () => {
     await expect(runner.locator('[data-testid="sandbox-frame"]')).toHaveCount(1)
     await expect(runner.getByRole('region', { name: '输出' })).toBeVisible()
 
-    const board = page.locator('#practice-flow').locator(FLOW)
-    await expect(board).toBeVisible()
-
-    const runnerBox = await runner.boundingBox()
-    const boardBox = await board.boundingBox()
-    expect(runnerBox && boardBox ? boardBox.x : 0).toBeGreaterThan(
-      runnerBox ? runnerBox.x + runnerBox.width : 0,
-    )
-
-    const overflows = await page.evaluate(() => {
-      const sandbox = document.getElementById('practice-sandbox')
-      const flow = document.getElementById('practice-flow')?.parentElement
-      if (!sandbox || !flow) return null
-      return [sandbox, flow].map((el) => getComputedStyle(el).overflowY)
-    })
-    expect(overflows, '双栏都应是独立滚动容器').toEqual(['auto', 'auto'])
+    const sandboxOverflow = await page
+      .locator('#practice-sandbox')
+      .evaluate((el) => getComputedStyle(el).overflowY)
+    expect(sandboxOverflow, '沙箱栏应是独立滚动容器').toBe('auto')
   })
 
   test('运行前预览区展示占位说明，iframe 未运行时不显示，编辑器收成固定贴签不占排版', async ({
@@ -267,7 +292,7 @@ test.describe('练习场 · 编辑器侧栏（右缘）', () => {
 })
 
 test.describe('练习场 · 布局自查', () => {
-  test('320/390/768/1280 无横向溢出，清单夹具停靠右上、陪练贴签停靠右下、编辑器签停靠右缘', async ({
+  test('320/390/768/1280 无横向溢出，清单夹具与 tips 贴签停靠右上、陪练贴签右下、编辑器签右缘', async ({
     page,
   }) => {
     await page.goto('/practice.html')
@@ -285,6 +310,17 @@ test.describe('练习场 · 布局自查', () => {
       expect(clipBox!.x + clipBox!.width, `宽度 ${width} 清单夹具越出右缘`).toBeLessThanOrEqual(
         width,
       )
+
+      const tipsBox = await page.locator(TIPS).boundingBox()
+      expect(tipsBox).not.toBeNull()
+      expect(tipsBox!.y, `宽度 ${width} tips 贴签距顶缘过大`).toBeLessThanOrEqual(60)
+      expect(
+        width - (tipsBox!.x + tipsBox!.width),
+        `宽度 ${width} tips 贴签越出右缘`,
+      ).toBeLessThanOrEqual(24)
+      const clearOfClip =
+        tipsBox!.y > clipBox!.y + clipBox!.height || tipsBox!.x > clipBox!.x + clipBox!.width
+      expect(clearOfClip, `宽度 ${width} tips 贴签与清单夹具重叠`).toBe(true)
 
       await page.locator(CLIP).click()
       await expect(page.locator(LIST_PANEL)).toBeVisible()
@@ -317,6 +353,15 @@ test.describe('练习场 · 布局自查', () => {
       expect(panelOverflow, `宽度 ${width} 编辑器展开后出现横向溢出`).toBe(0)
       await page.keyboard.press('Escape')
       await expect(page.locator(EDITOR_PANEL)).toBeHidden()
+
+      await page.locator(TIPS).click()
+      await expect(page.locator(TIPS_PANEL)).toBeVisible()
+      const tipsOverflow = await page.evaluate(
+        () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
+      )
+      expect(tipsOverflow, `宽度 ${width} tips 展开后出现横向溢出`).toBe(0)
+      await page.keyboard.press('Escape')
+      await expect(page.locator(TIPS_PANEL)).toBeHidden()
     }
   })
 })
