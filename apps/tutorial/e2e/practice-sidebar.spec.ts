@@ -44,14 +44,18 @@ test.describe('练习场 · sidebar 导航（唯一导航形态）', () => {
     expect(rowShadow).toContain('inset')
   })
 
-  test('桌面：本页锚点点击滚动到位', async ({ page }) => {
+  test('桌面：主区一屏放下，本页锚点目标保持在视口内', async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 900 })
     await page.goto('/practice.html', { timeout: 20_000 })
-    await clickAnchorAndAssertScroll(
-      page,
-      () => page.locator(SIDEBAR).getByText('代码沙箱', { exact: true }).click(),
-      900,
+    await page.locator(SIDEBAR).getByText('代码沙箱', { exact: true }).click()
+    const box = await page.locator('#practice-sandbox').boundingBox()
+    expect(box, '锚点目标应在场').not.toBeNull()
+    expect(box!.y, '锚点目标顶部应落在视口内').toBeGreaterThanOrEqual(0)
+    expect(box!.y, '锚点目标顶部应落在视口内').toBeLessThan(900)
+    const overflow = await page.evaluate(
+      () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
     )
+    expect(overflow).toBe(0)
   })
 
   test('移动：抽屉开合，brand 同款，遮罩点按收起', async ({ page }) => {

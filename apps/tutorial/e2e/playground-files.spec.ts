@@ -1,5 +1,10 @@
 import { expect, test } from '@playwright/test'
 
+async function openEditor(page: import('@playwright/test').Page) {
+  await page.locator('[data-comp="editor-dock-tab"]').click()
+  await expect(page.locator('#editor-dock-panel')).toBeVisible()
+}
+
 async function addFile(page: import('@playwright/test').Page, name: string) {
   await page.getByTestId('new-file-name').fill(name)
   await page.getByRole('button', { name: '新建文件' }).click()
@@ -7,6 +12,7 @@ async function addFile(page: import('@playwright/test').Page, name: string) {
 
 test('新建文件：进列表并自动激活', async ({ page }) => {
   await page.goto('/practice.html')
+  await openEditor(page)
   await addFile(page, 'utils.js')
   const tab = page.getByRole('button', { name: 'utils.js', exact: true })
   await expect(tab).toBeVisible()
@@ -15,6 +21,7 @@ test('新建文件：进列表并自动激活', async ({ page }) => {
 
 test('切换文件：两份代码互不串', async ({ page }) => {
   await page.goto('/practice.html')
+  await openEditor(page)
   await addFile(page, 'utils.js')
   await page.getByLabel('模块代码').fill('export const one = 1')
   await page.getByRole('button', { name: 'main.ts', exact: true }).click()
@@ -27,6 +34,7 @@ test('切换文件：两份代码互不串', async ({ page }) => {
 
 test('删除文件：删活跃文件后切到首个剩余文件，最后一份不可再删', async ({ page }) => {
   await page.goto('/practice.html')
+  await openEditor(page)
   await addFile(page, 'utils.js')
   await page.getByRole('button', { name: '删除 utils.js' }).click()
   await expect(page.getByRole('button', { name: 'utils.js', exact: true })).toHaveCount(0)
@@ -49,6 +57,7 @@ test('删除文件：删活跃文件后切到首个剩余文件，最后一份�
 
 test('文件名白名单：路径与非法字符被拒并提示', async ({ page }) => {
   await page.goto('/practice.html')
+  await openEditor(page)
   await addFile(page, '../evil')
   await expect(page.getByTestId('file-name-error')).toContainText('文件名只能')
   await expect(page.getByRole('button', { name: 'evil', exact: true })).toHaveCount(0)

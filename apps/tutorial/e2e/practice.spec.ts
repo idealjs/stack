@@ -6,6 +6,8 @@ const CLIP = '[data-comp="checklist-clip"]'
 const LIST_PANEL = '#checklist-dock-panel'
 const CHECKLIST = '[data-comp="clipboard-checklist"]'
 const FLOW = '[data-comp="data-flow-board"]'
+const EDITOR_TAB = '[data-comp="editor-dock-tab"]'
+const EDITOR_PANEL = '#editor-dock-panel'
 
 test.describe('练习场 · 陪练 agent 贴签（右下角）', () => {
   test.beforeEach(async ({ page }) => {
@@ -169,41 +171,105 @@ test.describe('练习场 · 右栏流水线卡片', () => {
   })
 })
 
-test.describe('练习场 · 左栏沙箱布局', () => {
+test.describe('练习场 · 主区双栏布局', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/practice.html')
   })
 
-  test('web runner 在上、playground 编辑器在下，各自成卡', async ({ page }) => {
+  test('沙箱在左、流水线在右，大屏下双栏各自独立滚动', async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 900 })
     const runner = page.locator('section[aria-label="web runner 沙箱预览"]')
-    const editor = page.locator('section[aria-label="playground 编辑器"]')
     await expect(runner).toBeVisible()
     await expect(runner).toContainText('web runner · 沙箱预览')
     await expect(runner.locator('[data-testid="runtime-status"]')).toBeVisible()
     await expect(runner.locator('[data-testid="sandbox-frame"]')).toHaveCount(1)
     await expect(runner.getByRole('region', { name: '输出' })).toBeVisible()
 
-    await expect(editor).toBeVisible()
-    await expect(editor).toContainText('playground · 编辑器')
-    await expect(editor.getByLabel('模块代码')).toBeVisible()
-    await expect(editor.getByRole('button', { name: '运行 ▶' })).toBeVisible()
+    const board = page.locator('#practice-flow').locator(FLOW)
+    await expect(board).toBeVisible()
 
     const runnerBox = await runner.boundingBox()
-    const editorBox = await editor.boundingBox()
-    expect(runnerBox && editorBox ? editorBox.y : 0).toBeGreaterThan(
-      runnerBox ? runnerBox.y + runnerBox.height : 0,
+    const boardBox = await board.boundingBox()
+    expect(runnerBox && boardBox ? boardBox.x : 0).toBeGreaterThan(
+      runnerBox ? runnerBox.x + runnerBox.width : 0,
     )
+
+    const overflows = await page.evaluate(() => {
+      const sandbox = document.getElementById('practice-sandbox')
+      const flow = document.getElementById('practice-flow')?.parentElement
+      if (!sandbox || !flow) return null
+      return [sandbox, flow].map((el) => getComputedStyle(el).overflowY)
+    })
+    expect(overflows, '双栏都应是独立滚动容器').toEqual(['auto', 'auto'])
   })
 
-  test('运行前预览区展示占位说明，iframe 未运行时不显示', async ({ page }) => {
+  test('运行前预览区展示占位说明，iframe 未运行时不显示，编辑器收成固定贴签不占排版', async ({
+    page,
+  }) => {
     const runner = page.locator('section[aria-label="web runner 沙箱预览"]')
-    await expect(runner).toContainText('在下方编辑器点「运行 ▶」')
+    await expect(runner).toContainText('点右缘「编辑器」')
     await expect(runner.locator('[data-testid="sandbox-frame"]')).not.toBeVisible()
+    const editor = page.locator('section[aria-label="playground 编辑器"]')
+    await expect(editor).toBeHidden()
+    await expect(editor).toHaveCSS('position', 'fixed')
+  })
+})
+
+test.describe('练习场 · 编辑器侧栏（右缘）', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto('/practice.html')
+  })
+
+  test('大屏与窄屏默认都收起；点击展开成大区域，Esc 与 ✕ 收起', async ({ page }) => {
+    for (const width of [1280, 390]) {
+      await page.setViewportSize({ width, height: 900 })
+      const tab = page.locator(EDITOR_TAB)
+      const panel = page.locator(EDITOR_PANEL)
+      await expect(tab).toBeVisible()
+      await expect(tab).toContainText('playground · 编辑器')
+      await expect(tab).toHaveAttribute('aria-expanded', 'false')
+      await expect(tab).toHaveAttribute('aria-controls', 'editor-dock-panel')
+      await expect(panel).toBeHidden()
+
+      await tab.click()
+      await expect(tab).toHaveAttribute('aria-expanded', 'true')
+      await expect(panel).toBeVisible()
+      await expect(panel).toContainText('playground · 编辑器')
+      await expect(panel.getByLabel('项目文件')).toBeVisible()
+      await expect(panel.getByLabel('模块代码')).toBeVisible()
+      await expect(panel.getByRole('button', { name: '运行 ▶' })).toBeVisible()
+
+      await page.keyboard.press('Escape')
+      await expect(panel).toBeHidden()
+      await expect(tab).toHaveAttribute('aria-expanded', 'false')
+
+      await tab.click()
+      await expect(panel).toBeVisible()
+      await panel.getByRole('button', { name: '收起编辑器' }).click()
+      await expect(panel).toBeHidden()
+    }
+  })
+
+  test('展开区域比原卡片区更大：大屏面板 ≥520px 宽，内部独立滚动', async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 900 })
+    await page.locator(EDITOR_TAB).click()
+    const panel = page.locator(EDITOR_PANEL)
+    await expect(panel).toBeVisible()
+    const panelBox = await panel.boundingBox()
+    expect(panelBox?.width ?? 0).toBeGreaterThanOrEqual(520)
+    expect(panelBox?.height ?? 0).toBeGreaterThanOrEqual(800)
+    const bodyOverflow = await panel
+      .locator('> div')
+      .last()
+      .evaluate((el) => getComputedStyle(el).overflowY)
+    expect(bodyOverflow).toBe('auto')
   })
 })
 
 test.describe('练习场 · 布局自查', () => {
-  test('320/390/768/1280 无横向溢出，清单夹具停靠右上、陪练贴签停靠右下', async ({ page }) => {
+  test('320/390/768/1280 无横向溢出，清单夹具停靠右上、陪练贴签停靠右下、编辑器签停靠右缘', async ({
+    page,
+  }) => {
     await page.goto('/practice.html')
     for (const width of [320, 390, 768, 1280]) {
       await page.setViewportSize({ width, height: 900 })
@@ -235,6 +301,22 @@ test.describe('练习场 · 布局自查', () => {
         width - (coachBox!.x + coachBox!.width),
         `宽度 ${width} 陪练贴签距右缘过大`,
       ).toBeLessThanOrEqual(24)
+
+      const editorBox = await page.locator(EDITOR_TAB).boundingBox()
+      expect(editorBox).not.toBeNull()
+      expect(
+        width - (editorBox!.x + editorBox!.width),
+        `宽度 ${width} 编辑器签距右缘过大`,
+      ).toBeLessThanOrEqual(2)
+
+      await page.locator(EDITOR_TAB).click()
+      await expect(page.locator(EDITOR_PANEL)).toBeVisible()
+      const panelOverflow = await page.evaluate(
+        () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
+      )
+      expect(panelOverflow, `宽度 ${width} 编辑器展开后出现横向溢出`).toBe(0)
+      await page.keyboard.press('Escape')
+      await expect(page.locator(EDITOR_PANEL)).toBeHidden()
     }
   })
 })

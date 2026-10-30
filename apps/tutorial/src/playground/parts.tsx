@@ -108,7 +108,7 @@ export function FileTabs() {
   )
 }
 
-export function CodeEditor() {
+export function CodeEditor({ className = '' }: { className?: string }) {
   const { active, updateActiveCode } = usePlayground()
   return (
     <textarea
@@ -117,7 +117,7 @@ export function CodeEditor() {
       onChange={(e) => updateActiveCode(e.target.value)}
       spellCheck={false}
       rows={12}
-      className="w-full resize-y rounded-xl border-2 border-ink bg-white p-3 font-mono text-[13px] leading-relaxed text-ink outline-none selection:bg-white"
+      className={`w-full resize-y rounded-xl border-2 border-ink bg-white p-3 font-mono text-[13px] leading-relaxed text-ink outline-none selection:bg-white ${className}`}
     />
   )
 }

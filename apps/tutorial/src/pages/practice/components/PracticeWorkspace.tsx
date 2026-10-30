@@ -21,6 +21,7 @@ import type { ChatItem } from './ChatPanel'
 import { ChatPanel } from './ChatPanel'
 import { ChecklistDock } from './ChecklistDock'
 import { DockSticky } from './DockSticky'
+import { EditorDock } from './EditorDock'
 import { KeyModal } from './KeyModal'
 
 const FLOW_TONES = ['coral', 'teal', 'blue'] as const
@@ -44,7 +45,9 @@ function RunnerStage() {
       {!preview && (
         <div className="pointer-events-none absolute inset-0 grid place-content-center gap-1 p-4 text-center">
           <p className="t-small-strong m-0">沙箱预览</p>
-          <p className="t-small-mute m-0">在下方编辑器点「运行 ▶」，构建产物会送进这里真跑。</p>
+          <p className="t-small-mute m-0">
+            点右缘「编辑器」签写代码，点「运行 ▶」，构建产物会送进这里真跑。
+          </p>
         </div>
       )}
     </div>
@@ -63,11 +66,12 @@ export function PracticeWorkspace() {
   const [draft, setDraft] = useState('')
   const [focusSignal, setFocusSignal] = useState(0)
   const [openDock, setOpenDock] = useState<DockPane>(null)
+  const [editorOpen, setEditorOpen] = useState(false)
   const [checkedIds, setCheckedIds] = useState<readonly string[]>([])
   const [chat, setChat] = useState<ChatItem[]>(() => [
     {
       kind: 'assistant',
-      text: `我是这个练习场的陪练 agent，收在右下角贴签里。当前任务「${task.title}」——点右侧流水线卡片的任意一步，提示词会自动填进输入框，回车就能发给我；也可以直接聊思路、要代码、贴报错。代码写进左侧编辑器，点「运行 ▶」在沙箱里真跑；验收清单夹在页面右上角，做完拉出来逐条打勾。`,
+      text: `我是这个练习场的陪练 agent，收在右下角贴签里。当前任务「${task.title}」——点右侧流水线卡片的任意一步，提示词会自动填进输入框，回车就能发给我；也可以直接聊思路、要代码、贴报错。代码写进右缘「编辑器」侧栏（点右缘小签拉开），点「运行 ▶」在沙箱里真跑；验收清单夹在页面右上角，做完拉出来逐条打勾。`,
     },
   ])
 
@@ -134,13 +138,16 @@ export function PracticeWorkspace() {
   return (
     <div className="pb-24" suppressHydrationWarning>
       <PlaygroundProvider initialFiles={TEMPLATE_FILES}>
-        <div className="grid items-start gap-6 lg:grid-cols-2">
-          <div id="practice-sandbox" className="grid scroll-mt-4 content-start gap-4">
+        <div className="grid items-start gap-3 lg:grid-cols-[minmax(0,1fr)_minmax(0,26rem)]">
+          <div
+            id="practice-sandbox"
+            className="grid scroll-mt-3 content-start gap-3 lg:sticky lg:top-3 lg:max-h-[calc(100dvh-1.5rem)] lg:overflow-y-auto lg:pr-1"
+          >
             <section
               aria-label="web runner 沙箱预览"
-              className="rounded-xl border-2 border-ink bg-paper-deep p-3 shadow-ink"
+              className="rounded-xl border-2 border-ink bg-paper-deep p-2.5 shadow-ink"
             >
-              <div className="mb-2 flex flex-wrap items-baseline justify-between gap-x-2">
+              <div className="mb-1.5 flex flex-wrap items-baseline justify-between gap-x-2">
                 <span className="t-small-strong">web runner · 沙箱预览</span>
                 <span className="t-small-mute">隔离 iframe，postMessage 单通道</span>
               </div>
@@ -148,22 +155,10 @@ export function PracticeWorkspace() {
               <RunnerStage />
               <OutputView />
             </section>
-            <section
-              aria-label="playground 编辑器"
-              className="rounded-xl border-2 border-ink bg-paper p-3 shadow-ink"
-            >
-              <div className="mb-2 flex flex-wrap items-baseline justify-between gap-x-2">
-                <span className="t-small-strong">playground · 编辑器</span>
-                <span className="t-small-mute">宿主 stack 构建，产物送上方沙箱</span>
-              </div>
-              <FileTabs />
-              <CodeEditor />
-              <RunRow />
-            </section>
           </div>
 
-          <div className="grid content-start gap-4">
-            <section id="practice-flow" className="grid scroll-mt-4">
+          <div className="lg:sticky lg:top-3 lg:max-h-[calc(100dvh-1.5rem)] lg:overflow-y-auto lg:pr-1">
+            <section id="practice-flow" className="grid scroll-mt-3">
               <DataFlowBoard
                 title="点一步，喂给陪练"
                 note="点击任一步骤：陪练面板自动展开、提示词填进输入框，确认无误按回车发送。"
@@ -173,6 +168,16 @@ export function PracticeWorkspace() {
             </section>
           </div>
         </div>
+
+        <EditorDock
+          panelId="editor-dock-panel"
+          open={editorOpen}
+          onToggle={() => setEditorOpen((v) => !v)}
+        >
+          <FileTabs />
+          <CodeEditor className="min-h-[360px] flex-1" />
+          <RunRow />
+        </EditorDock>
       </PlaygroundProvider>
 
       <ChecklistDock
