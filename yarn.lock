@@ -2874,6 +2874,7 @@ __metadata:
     "@playwright/test": "npm:1.63.0"
     "@types/node": "npm:^26.2.0"
     acorn: "npm:^8.18.0"
+    cac: "npm:^7.1.0"
     esbuild-wasm: "npm:^0.25.12"
     hono: "npm:^4.13.14"
     typescript: "npm:~5.6.2"
@@ -4690,6 +4691,13 @@ __metadata:
   version: 3.1.2
   resolution: "bytes@npm:3.1.2"
   checksum: 10/a10abf2ba70c784471d6b4f58778c0beeb2b5d405148e66affa91f23a9f13d07603d0a0354667310ae1d6dc141474ffd44e2a074be0f6e2254edb8fc21445388
+  languageName: node
+  linkType: hard
+
+"cac@npm:^7.1.0":
+  version: 7.1.0
+  resolution: "cac@npm:7.1.0"
+  checksum: 10/2be44f8fd9e60ad21c0f2e2aad914c9666e0a14045b89b90696f79140fcb3ffd296626f3807d360603efa2c488bc15c61774d2573593a543966b0733660cc2b3
   languageName: node
   linkType: hard
 

@@ -2,6 +2,7 @@ import { existsSync, type FSWatcher, rmSync, watch } from 'node:fs'
 import { networkInterfaces } from 'node:os'
 import { extname, relative, resolve as resolvePath } from 'node:path'
 import { pathToFileURL } from 'node:url'
+import { cac } from 'cac'
 import { imports, pkgResolve } from '../builtins.ts'
 import { type BuildResult, build, type StackConfig, type StackHook } from '../index.ts'
 import { MIME, startDevServer, type ServedFile } from './dev.ts'
@@ -22,78 +23,61 @@ interface CliOptions {
   noWatch: boolean
 }
 
+const lastOf = <T>(value: T | T[] | undefined): T | undefined =>
+  Array.isArray(value) ? value[value.length - 1] : value
+
 function parseArgs(argv: string[]): CliOptions {
-  let mode: CliOptions['mode'] = 'build'
-  let configPath = 'stack.config.ts'
-  let port = 8910
-  let portExplicit = false
-  let base = ''
-  let host: boolean | string | undefined
-  let noWatch = false
-  const assets: Record<string, string> = {}
-  for (let i = 0; i < argv.length; i += 1) {
-    const arg = argv[i]
-    if (arg === 'dev') {
-      mode = 'dev'
-    } else if (arg === 'preview') {
-      mode = 'preview'
-    } else if (arg === '--no-watch') {
-      noWatch = true
-    } else if (arg === '--config') {
-      const value = argv[i + 1]
-      if (value === undefined) throw new Error('--config 需要一个配置文件路径')
-      configPath = value
-      i += 1
-    } else if (arg.startsWith('--config=')) {
-      configPath = arg.slice('--config='.length)
-    } else if (arg === '--watch' || arg === '-w') {
-      mode = 'watch'
-    } else if (arg === '--host') {
-      host = true
-    } else if (arg.startsWith('--host=')) {
-      host = arg.slice('--host='.length)
-    } else if (arg === '--base') {
-      const value = argv[i + 1]
-      if (value === undefined) throw new Error('--base 需要一个路径前缀')
-      base = value
-      i += 1
-    } else if (arg.startsWith('--base=')) {
-      base = arg.slice('--base='.length)
-    } else if (arg === '--port') {
-      const value = argv[i + 1]
-      if (value === undefined) throw new Error('--port 需要一个端口号')
-      port = Number(value)
-      portExplicit = true
-      i += 1
-    } else if (arg.startsWith('--port=')) {
-      port = Number(arg.slice('--port='.length))
-      portExplicit = true
-    } else if (arg === '--asset') {
-      const value = argv[i + 1]
-      if (value === undefined) throw new Error('--asset 需要 <路由>=<文件路径>')
-      const [route, filePath] = value.split('=')
-      if (route === undefined || filePath === undefined)
-        throw new Error('--asset 需要 <路由>=<文件路径>')
-      assets[route] = filePath
-      i += 1
-    } else if (arg.startsWith('--asset=')) {
-      const [route, filePath] = arg.slice('--asset='.length).split('=')
-      if (route === undefined || filePath === undefined)
-        throw new Error('--asset 需要 <路由>=<文件路径>')
-      assets[route] = filePath
-    } else {
-      throw new Error(`未知参数：${arg}`)
-    }
-  }
-  return {
-    mode,
-    configPath,
-    port: portExplicit ? port : mode === 'preview' ? 9910 : 8910,
-    base,
-    host,
-    assets,
-    noWatch,
-  }
+  const cli = cac('stack')
+  cli.help()
+  cli.version(VERSION)
+  let parsed: CliOptions | undefined
+  cli
+    .command('[mode]', '构建一次；--watch 持续构建；dev 启动 dev server；preview 伺服已构建产物')
+    .option('-w, --watch', 'watch 模式：监听文件变化持续构建')
+    .option('--no-watch', 'dev server 是否监听文件变化')
+    .option('--config <path>', '配置文件路径')
+    .option('--port <port>', 'dev server 端口')
+    .option('--base <path>', '部署路径前缀')
+    .option('--host [address]', '暴露到局域网，可指定地址')
+    .option('--asset <route>=<path>', '静态资源映射 <路由>=<文件路径>，可重复')
+    .ignoreOptionDefaultValue()
+    .action((mode, options) => {
+      if (mode !== undefined && mode !== 'dev' && mode !== 'preview')
+        throw new Error(`未知参数：${mode}`)
+      const assets: Record<string, string> = {}
+      const pairs =
+        options.asset === undefined
+          ? []
+          : Array.isArray(options.asset)
+            ? options.asset
+            : [options.asset]
+      for (const pair of pairs) {
+        const [route, filePath] = pair.split('=')
+        if (route === undefined || filePath === undefined)
+          throw new Error('--asset 需要 <路由>=<文件路径>')
+        assets[route] = filePath
+      }
+      const resolvedMode: CliOptions['mode'] =
+        mode === 'dev'
+          ? 'dev'
+          : mode === 'preview'
+            ? 'preview'
+            : options.watch === true
+              ? 'watch'
+              : 'build'
+      parsed = {
+        mode: resolvedMode,
+        configPath: lastOf(options.config) ?? 'stack.config.ts',
+        port: Number(lastOf(options.port) ?? (resolvedMode === 'preview' ? 9910 : 8910)),
+        base: lastOf(options.base) ?? '',
+        host: lastOf(options.host),
+        assets,
+        noWatch: options.watch === false,
+      }
+    })
+  cli.parse(['stack', 'stack', ...argv])
+  if (parsed === undefined) process.exit(0)
+  return parsed
 }
 
 export async function loadConfig(configPath: string): Promise<StackConfig> {
