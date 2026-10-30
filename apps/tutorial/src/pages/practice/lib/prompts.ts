@@ -10,20 +10,6 @@ export interface CreateProjectExample {
   hint: string
 }
 
-export const CREATE_PROJECT_NOTE = '下一步——让 agent 从零建一个工程'
-
-export const CREATE_PROJECT_INTRO: readonly (string | { b: string })[] = [
-  '真实工作里，接手的第一件事往往就是建个新项目。它也最考验你把需求说全：用哪个',
-  { b: '脚手架' },
-  '、什么',
-  { b: '框架与语言' },
-  '、初始要',
-  { b: '有什么' },
-  '、有哪些',
-  { b: '约束' },
-  '。下面三条示例从一句话起步，逐步把这四要素补齐——点流水线上的任意一步，提示词就会填进陪练输入框，回车即发。',
-]
-
 export const CREATE_PROJECT_EXAMPLES: readonly CreateProjectExample[] = [
   {
     id: 'basic',

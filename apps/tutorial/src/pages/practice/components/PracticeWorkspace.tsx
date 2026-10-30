@@ -15,7 +15,7 @@ import {
 import type { ChatMessage, LlmConfig } from '../lib/agent/llm'
 import { hasKey, loadLlmConfig, saveLlmConfig } from '../lib/agent/llm'
 import { runAgentTurn, systemPrompt } from '../lib/agent/loop'
-import { CREATE_PROJECT_EXAMPLES, CREATE_PROJECT_INTRO, CREATE_PROJECT_NOTE } from '../lib/prompts'
+import { CREATE_PROJECT_EXAMPLES } from '../lib/prompts'
 import { taskFromLocation } from '../lib/tasks'
 import type { ChatItem } from './ChatPanel'
 import { ChatPanel } from './ChatPanel'
@@ -67,7 +67,7 @@ export function PracticeWorkspace() {
   const [chat, setChat] = useState<ChatItem[]>(() => [
     {
       kind: 'assistant',
-      text: `我是这个练习场的陪练 agent，收在右下角贴签里。当前任务「${task.title}」——点右侧「操作流水线」的任意一步，提示词会自动填进输入框，回车就能发给我；也可以直接聊思路、要代码、贴报错。代码写进左侧编辑器，点「运行 ▶」在沙箱里真跑；验收清单夹在页面右上角，做完拉出来逐条打勾。`,
+      text: `我是这个练习场的陪练 agent，收在右下角贴签里。当前任务「${task.title}」——点右侧流水线卡片的任意一步，提示词会自动填进输入框，回车就能发给我；也可以直接聊思路、要代码、贴报错。代码写进左侧编辑器，点「运行 ▶」在沙箱里真跑；验收清单夹在页面右上角，做完拉出来逐条打勾。`,
     },
   ])
 
@@ -163,31 +163,7 @@ export function PracticeWorkspace() {
           </div>
 
           <div className="grid content-start gap-4">
-            <section id="practice-brief" className="grid scroll-mt-4 gap-2.5">
-              <h2 className="t-small-strong m-0">练习任务 · {task.title}</h2>
-              <p className="m-0 text-[13.5px] leading-6 text-body">{task.scene}</p>
-              <p className="m-0 text-[13.5px] leading-6 text-body">
-                <b>预期：</b>
-                {task.expectation}
-              </p>
-              <p className="t-small-mute m-0">验收清单夹在页面右上角——点夹具拉出来逐条打勾。</p>
-            </section>
-
-            <section id="practice-flow" className="grid scroll-mt-4 gap-2.5">
-              <h2 className="m-0 flex flex-wrap items-baseline gap-2">
-                <span className="t-small-strong">操作流水线</span>
-                <i className="t-small-mute not-italic">{CREATE_PROJECT_NOTE}</i>
-              </h2>
-              <p className="m-0 text-[13.5px] leading-6 text-body">
-                {CREATE_PROJECT_INTRO.map((seg, i) =>
-                  typeof seg === 'string' ? (
-                    seg
-                  ) : (
-                    // biome-ignore lint/suspicious/noArrayIndexKey: 静态文案段，顺序恒定
-                    <b key={i}>{seg.b}</b>
-                  ),
-                )}
-              </p>
+            <section id="practice-flow" className="grid scroll-mt-4">
               <DataFlowBoard
                 title="点一步，喂给陪练"
                 note="点击任一步骤：陪练面板自动展开、提示词填进输入框，确认无误按回车发送。"

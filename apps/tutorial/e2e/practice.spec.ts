@@ -115,28 +115,25 @@ test.describe('练习场 · 验收清单夹板（顶部右上）', () => {
   })
 })
 
-test.describe('练习场 · 右栏教程文本', () => {
+test.describe('练习场 · 右栏流水线卡片', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/practice.html')
   })
 
-  test('练习任务区：标题、场景与预期以纯文本呈现，不再使用信封', async ({ page }) => {
-    const brief = page.locator('#practice-brief')
-    await expect(brief).toBeVisible()
-    await expect(brief.locator('h2')).toContainText('练习任务 · 我的自我介绍卡')
-    await expect(brief).toContainText('这是你第一次「指挥 agent」')
-    await expect(brief).toContainText('预期：')
-    await expect(brief).toContainText('大标题显示一个名字')
-    await expect(page.locator('[data-comp="task-envelope"]')).toHaveCount(0)
+  test('右栏只留流水线卡片：练习任务文字区与流水线标题说明已撤下', async ({ page }) => {
+    await expect(page.locator('#practice-brief')).toHaveCount(0)
+    await expect(page.locator('#practice-flow h2')).toHaveCount(0)
+
+    const board = page.locator('#practice-flow').locator(FLOW)
+    await expect(board).toBeVisible()
+    await expect(board.locator('h3')).toContainText('点一步，喂给陪练')
   })
 
   test('操作流水线：数据流水线板在场，三步同源示例提示词，第一步为虚线起点', async ({ page }) => {
-    const section = page.locator('#practice-flow')
-    await expect(section.locator('h2')).toContainText('操作流水线')
-    await expect(section).toContainText('脚手架')
-
-    const board = section.locator(FLOW)
+    const board = page.locator('#practice-flow').locator(FLOW)
     await expect(board).toBeVisible()
+    await expect(board).toContainText('脚手架')
+
     const steps = board.locator('.learning-flow-step')
     await expect(steps).toHaveCount(3)
     await expect(steps.first()).toHaveAttribute('data-input', 'true')
