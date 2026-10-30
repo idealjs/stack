@@ -5,12 +5,17 @@ import { type ServerType, serve } from '@hono/node-server'
 import { Hono } from 'hono'
 import type { StackConfig } from '../index.ts'
 
-const MIME: Record<string, string> = {
+export const MIME: Record<string, string> = {
   '.css': 'text/css; charset=utf-8',
   '.html': 'text/html; charset=utf-8',
   '.js': 'text/javascript; charset=utf-8',
   '.json': 'application/json; charset=utf-8',
   '.wasm': 'application/wasm',
+}
+
+export interface ServedFile {
+  code: string | Uint8Array
+  contentType: string
 }
 
 const LIVE_PATH = '/__stack/live'
@@ -23,6 +28,7 @@ export interface DevServerOptions {
   host?: boolean | string
   assets?: Record<string, string>
   liveReload?: boolean
+  serve?: (path: string) => Promise<ServedFile | null>
 }
 
 export type StackDevServer = ServerType & { stackReload: () => void }
@@ -100,6 +106,25 @@ export async function startDevServer(
     for (const candidate of [stripped, join(stripped, 'index.html')]) {
       const safe = join(distRelative, candidate)
       if (!safe.startsWith(distRelative)) continue
+      if (options.serve !== undefined) {
+        let served: ServedFile | null
+        try {
+          served = await options.serve(candidate)
+        } catch (error) {
+          const message = error instanceof Error ? error.message : String(error)
+          return c.text(`[stack] dev 构建未就绪：${message}`, 500)
+        }
+        if (served !== null) {
+          const isHtml = served.contentType.startsWith('text/html') && options.liveReload === true
+          const code = isHtml
+            ? String(served.code).replace(/<\/body>/i, `${LIVE_SCRIPT}</body>`)
+            : served.code
+          return c.body(code, 200, {
+            'Content-Type': served.contentType,
+            'Cache-Control': 'no-store',
+          })
+        }
+      }
       try {
         const body = await readFile(safe)
         const isHtml = extname(safe) === '.html' && options.liveReload === true

@@ -1,10 +1,11 @@
 import { existsSync, type FSWatcher, rmSync, watch } from 'node:fs'
 import { networkInterfaces } from 'node:os'
-import { resolve as resolvePath } from 'node:path'
+import { extname, relative, resolve as resolvePath } from 'node:path'
 import { pathToFileURL } from 'node:url'
 import { imports } from '../builtins.ts'
 import { type BuildResult, build, type StackConfig, type StackHook } from '../index.ts'
-import { startDevServer } from './dev.ts'
+import { MIME, startDevServer, type ServedFile } from './dev.ts'
+import { createDevBuildQueue } from './devBuild.ts'
 import { nodeFs } from './fs.ts'
 
 const VERSION = '0.2.0'
@@ -145,34 +146,34 @@ function printSummary(config: StackConfig, result: BuildResult): void {
   console.log(lines.join('\n'))
 }
 
-async function buildOnce(config: StackConfig, summary = true): Promise<void> {
+async function buildAndWrite(config: StackConfig): Promise<BuildResult> {
   const result = await build(withDefaults(config))
   await writeOutputs(config, result)
+  return result
+}
+
+async function buildOnce(config: StackConfig, summary = true): Promise<void> {
+  const result = await buildAndWrite(config)
   if (summary) printSummary(config, result)
 }
 
-function startWatcher(config: StackConfig, onRebuilt?: () => void): FSWatcher {
-  let rebuilding = false
-  let queued = false
-  const rebuild = async (): Promise<void> => {
-    if (rebuilding) {
-      queued = true
-      return
-    }
-    rebuilding = true
-    try {
-      await buildOnce(config)
-      onRebuilt?.()
-    } catch (error) {
-      console.error(`重建失败：${error instanceof Error ? error.message : error}`)
-    } finally {
-      rebuilding = false
-      if (queued) {
-        queued = false
-        await rebuild()
-      }
+const outputUrlIndex = (config: StackConfig, result: BuildResult): Map<string, ServedFile> => {
+  const rootAbsolute = resolvePath(config.root ?? '.')
+  const index = new Map<string, ServedFile>()
+  for (const output of result.outputs) {
+    const dir = relative(rootAbsolute, resolvePath(rootAbsolute, output.dir)).replaceAll('\\', '/')
+    const prefix = dir === '.' ? '' : `${dir}/`
+    for (const file of output.files) {
+      index.set(`/${prefix}${file.path}`, {
+        code: file.code,
+        contentType: MIME[extname(file.path)] ?? 'application/octet-stream',
+      })
     }
   }
+  return index
+}
+
+function startWatcher(config: StackConfig, onChange: () => void): FSWatcher {
   let timer: ReturnType<typeof setTimeout> | undefined
   const watcher: FSWatcher = watch(config.root ?? '.', { recursive: true }, (_event, filename) => {
     const changed = filename === null ? '' : String(filename).replaceAll('\\', '/')
@@ -180,7 +181,7 @@ function startWatcher(config: StackConfig, onRebuilt?: () => void): FSWatcher {
     if (timer !== undefined) clearTimeout(timer)
     timer = setTimeout(() => {
       timer = undefined
-      void rebuild()
+      onChange()
     }, WATCH_DEBOUNCE_MS)
   })
   process.once('SIGINT', () => {
@@ -195,9 +196,18 @@ function startWatcher(config: StackConfig, onRebuilt?: () => void): FSWatcher {
 async function runWatch(config: StackConfig, onRebuilt?: () => void): Promise<void> {
   const root = config.root ?? '.'
   console.log(`stack v${VERSION} watch 模式：监听 ${root}（忽略 node_modules/dist/.git）`)
-  await buildOnce(config)
-  onRebuilt?.()
-  startWatcher(config, onRebuilt)
+  const queue = createDevBuildQueue({
+    run: () => buildAndWrite(config),
+    onBuilt: (result) => {
+      printSummary(config, result)
+      onRebuilt?.()
+    },
+    onFailed: (error) => {
+      console.error(`重建失败：${error instanceof Error ? error.message : error}`)
+    },
+  })
+  await queue.ensure()
+  startWatcher(config, () => queue.invalidate())
 }
 
 function firstLanAddress(): string | undefined {
@@ -214,6 +224,7 @@ function printDevBanner(options: {
   base: string
   host?: boolean | string
   readyMs: number
+  building?: boolean
 }): void {
   const suffix =
     options.base === '' ? '/' : `/${options.base.replace(/^\/+/, '').replace(/\/+$/, '')}/`
@@ -230,6 +241,7 @@ function printDevBanner(options: {
   } else {
     lines.push('  ➜  Network:  use --host to expose')
   }
+  if (options.building === true) lines.push('  ➜  Build:    后台构建中（完成后自动刷新）')
   lines.push('  ➜  press h + enter to show help', '')
   console.log(lines.join('\n'))
 }
@@ -258,22 +270,53 @@ async function runDev(config: StackConfig, options: CliOptions): Promise<void> {
     return
   }
   const startedAt = performance.now()
-  await buildOnce(config, false)
+  let reload: () => void = () => {}
+  const queue = createDevBuildQueue({
+    run: () => buildAndWrite(config),
+    onBuilt: (result) => {
+      printSummary(config, result)
+      reload()
+    },
+    onFailed: (error) => {
+      console.error(`后台构建失败：${error instanceof Error ? error.message : error}`)
+    },
+  })
+  let servedFrom: BuildResult | null = null
+  let servedIndex: Map<string, ServedFile> | null = null
+  const serve = async (candidate: string): Promise<ServedFile | null> => {
+    let result: BuildResult | null = null
+    try {
+      result = await queue.ensure()
+    } catch (error) {
+      if (servedFrom === null) throw error
+    }
+    if (result !== null && result !== servedFrom) {
+      servedFrom = result
+      servedIndex = outputUrlIndex(config, result)
+    }
+    if (servedFrom === null || servedIndex === null) return null
+    const path = candidate.replace(/^\/+/, '')
+    return servedIndex.get(`/${path}`) ?? null
+  }
   const server = await startDevServer(config, {
     port: options.port,
     base: options.base,
     host: options.host,
     assets: options.assets,
     liveReload: true,
+    serve,
   })
+  reload = () => server.stackReload()
   printDevBanner({
     port: options.port,
     base: options.base,
     host: options.host,
     readyMs: performance.now() - startedAt,
+    building: true,
   })
   attachDevShortcuts()
-  startWatcher(config, () => server.stackReload())
+  queue.invalidate()
+  startWatcher(config, () => queue.invalidate())
 }
 
 async function runPreview(config: StackConfig, options: CliOptions): Promise<void> {
