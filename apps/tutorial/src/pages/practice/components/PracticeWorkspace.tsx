@@ -19,12 +19,13 @@ import { CREATE_PROJECT_EXAMPLES, CREATE_PROJECT_INTRO, CREATE_PROJECT_NOTE } fr
 import { taskFromLocation } from '../lib/tasks'
 import type { ChatItem } from './ChatPanel'
 import { ChatPanel } from './ChatPanel'
+import { ChecklistDock } from './ChecklistDock'
 import { DockSticky } from './DockSticky'
 import { KeyModal } from './KeyModal'
 
 const FLOW_TONES = ['coral', 'teal', 'blue'] as const
 
-type DockPane = 'checklist' | 'agent' | null
+type DockPane = 'agent' | 'checklist' | null
 
 function appendAssistant(items: ChatItem[], delta: string): ChatItem[] {
   const next = items.slice()
@@ -66,7 +67,7 @@ export function PracticeWorkspace() {
   const [chat, setChat] = useState<ChatItem[]>(() => [
     {
       kind: 'assistant',
-      text: `我是这个练习场的陪练 agent，收在右下角贴签里。当前任务「${task.title}」——点右侧「操作流水线」的任意一步，提示词会自动填进输入框，回车就能发给我；也可以直接聊思路、要代码、贴报错。代码写进左侧编辑器，点「运行 ▶」在沙箱里真跑。`,
+      text: `我是这个练习场的陪练 agent，收在右下角贴签里。当前任务「${task.title}」——点右侧「操作流水线」的任意一步，提示词会自动填进输入框，回车就能发给我；也可以直接聊思路、要代码、贴报错。代码写进左侧编辑器，点「运行 ▶」在沙箱里真跑；验收清单夹在页面右上角，做完拉出来逐条打勾。`,
     },
   ])
 
@@ -169,7 +170,7 @@ export function PracticeWorkspace() {
                 <b>预期：</b>
                 {task.expectation}
               </p>
-              <p className="t-small-mute m-0">验收清单收在右下角贴签里——做完拉出来逐条打勾。</p>
+              <p className="t-small-mute m-0">验收清单夹在页面右上角——点夹具拉出来逐条打勾。</p>
             </section>
 
             <section id="practice-flow" className="grid scroll-mt-4 gap-2.5">
@@ -198,26 +199,22 @@ export function PracticeWorkspace() {
         </div>
       </PlaygroundProvider>
 
-      <div className="fixed right-3 bottom-3 z-40 flex items-end gap-2 sm:right-4 sm:bottom-4">
-        <DockSticky
-          comp="checklist-sticky"
-          panelId="checklist-sticky-panel"
-          label="验收清单"
-          meta={`${checkedIds.length}/${task.acceptance.length}`}
-          accentClass="bg-clash1a"
-          open={openDock === 'checklist'}
-          onToggle={() => toggleDock('checklist')}
-          panelClassName="max-h-[min(540px,calc(100dvh_-_120px))] w-[min(380px,calc(100vw-24px))] overflow-auto"
-        >
-          <ClipboardChecklist
-            title="完成后逐条核对"
-            description="跟着任务说明动手，逐条自查确认；全部勾选即盖章。"
-            items={task.acceptance.map((label) => ({ id: label, label }))}
-            checkedIds={checkedIds}
-            onCheckedChange={setCheckedIds}
-          />
-        </DockSticky>
+      <ChecklistDock
+        panelId="checklist-dock-panel"
+        badge={`${checkedIds.length}/${task.acceptance.length}`}
+        open={openDock === 'checklist'}
+        onToggle={() => setOpenDock((v) => (v === 'checklist' ? null : 'checklist'))}
+      >
+        <ClipboardChecklist
+          title="完成后逐条核对"
+          description="跟着任务说明动手，逐条自查确认；全部勾选即盖章。"
+          items={task.acceptance.map((label) => ({ id: label, label }))}
+          checkedIds={checkedIds}
+          onCheckedChange={setCheckedIds}
+        />
+      </ChecklistDock>
 
+      <div className="fixed right-3 bottom-3 z-40 flex items-end gap-2 sm:right-4 sm:bottom-4">
         <DockSticky
           comp="coach-sticky"
           panelId="coach-sticky-panel"

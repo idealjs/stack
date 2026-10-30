@@ -2,27 +2,23 @@ import { expect, test } from '@playwright/test'
 
 const COACH_TAB = '[data-comp="coach-sticky"]'
 const COACH_PANEL = '#coach-sticky-panel'
-const LIST_TAB = '[data-comp="checklist-sticky"]'
-const LIST_PANEL = '#checklist-sticky-panel'
+const CLIP = '[data-comp="checklist-clip"]'
+const LIST_PANEL = '#checklist-dock-panel'
 const CHECKLIST = '[data-comp="clipboard-checklist"]'
 const FLOW = '[data-comp="data-flow-board"]'
 
-test.describe('练习场 · 右下角 dock 贴签', () => {
+test.describe('练习场 · 陪练 agent 贴签（右下角）', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/practice.html')
   })
 
-  test('两枚贴签停靠右下角，aria 关系正确；点击展开、再点与 Esc 收起', async ({ page }) => {
+  test('停靠右下角，aria 关系正确；点击展开、再点与 Esc 收起', async ({ page }) => {
     const coach = page.locator(COACH_TAB)
-    const list = page.locator(LIST_TAB)
     await expect(coach).toBeVisible()
     await expect(coach).toContainText('陪练 agent')
     await expect(coach).toHaveAttribute('aria-expanded', 'false')
     await expect(coach).toHaveAttribute('aria-controls', 'coach-sticky-panel')
-    await expect(list).toBeVisible()
-    await expect(list).toContainText('验收清单')
     await expect(page.locator(COACH_PANEL)).toBeHidden()
-    await expect(page.locator(LIST_PANEL)).toBeHidden()
 
     await coach.click()
     await expect(coach).toHaveAttribute('aria-expanded', 'true')
@@ -39,26 +35,9 @@ test.describe('练习场 · 右下角 dock 贴签', () => {
     await page.keyboard.press('Escape')
     await expect(page.locator(COACH_PANEL)).toBeHidden()
     await expect(coach).toHaveAttribute('aria-expanded', 'false')
-
-    await list.click()
-    await expect(list).toHaveAttribute('aria-expanded', 'true')
-    await expect(page.locator(LIST_PANEL)).toBeVisible()
-    await page.keyboard.press('Escape')
-    await expect(page.locator(LIST_PANEL)).toBeHidden()
   })
 
-  test('两枚贴签互斥：打开一块收起另一块', async ({ page }) => {
-    await page.locator(COACH_TAB).click()
-    await expect(page.locator(COACH_PANEL)).toBeVisible()
-    await page.locator(LIST_TAB).click()
-    await expect(page.locator(LIST_PANEL)).toBeVisible()
-    await expect(page.locator(COACH_PANEL)).toBeHidden()
-    await page.locator(COACH_TAB).click()
-    await expect(page.locator(COACH_PANEL)).toBeVisible()
-    await expect(page.locator(LIST_PANEL)).toBeHidden()
-  })
-
-  test('展开陪练面板直接进入对话：无开场提示词，输入区与发送动作在场', async ({ page }) => {
+  test('展开面板直接进入对话：无开场提示词，输入区与发送动作在场', async ({ page }) => {
     await page.locator(COACH_TAB).click()
     const panel = page.locator(COACH_PANEL)
     await expect(panel).toBeVisible()
@@ -68,33 +47,71 @@ test.describe('练习场 · 右下角 dock 贴签', () => {
     await expect(input).toHaveValue('')
     await expect(panel.getByRole('button', { name: '发送' })).toBeVisible()
   })
+})
 
-  test('验收清单贴签：面板内是任务清单，勾选进度回填贴签角标，全勾盖章、取消撤章', async ({
-    page,
-  }) => {
-    const tab = page.locator(LIST_TAB)
-    await expect(tab).toContainText('0/3')
-    await tab.click()
+test.describe('练习场 · 验收清单夹板（顶部右上）', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto('/practice.html')
+  })
+
+  test('夹具停靠页面右上，aria 关系正确；点击拉出清单、再点与 Esc 收回', async ({ page }) => {
+    const clip = page.locator(CLIP)
+    await expect(clip).toBeVisible()
+    await expect(clip).toHaveAttribute('aria-expanded', 'false')
+    await expect(clip).toHaveAttribute('aria-controls', 'checklist-dock-panel')
+    await expect(page.locator(LIST_PANEL)).toBeHidden()
+
+    await clip.click()
+    await expect(clip).toHaveAttribute('aria-expanded', 'true')
     const panel = page.locator(LIST_PANEL)
     await expect(panel).toBeVisible()
+    await expect(panel.locator(CHECKLIST)).toContainText('CHECK / 验收清单')
+
+    await clip.click()
+    await expect(page.locator(LIST_PANEL)).toBeHidden()
+    await expect(clip).toHaveAttribute('aria-expanded', 'false')
+
+    await clip.click()
+    await expect(panel).toBeVisible()
+    await page.keyboard.press('Escape')
+    await expect(page.locator(LIST_PANEL)).toBeHidden()
+    await expect(clip).toHaveAttribute('aria-expanded', 'false')
+  })
+
+  test('夹具纸边徽标实时显示核对进度，全勾盖章、取消撤章', async ({ page }) => {
+    const clip = page.locator(CLIP)
+    await expect(clip).toContainText('0/3')
+    await clip.click()
+    const panel = page.locator(LIST_PANEL)
     const checklist = panel.locator(CHECKLIST)
     await expect(checklist).toContainText('已核对 0 / 3')
     await expect(checklist.locator('[data-comp="stamp"]')).toHaveCount(0)
 
     await checklist.getByRole('checkbox', { name: '预览页大标题显示名字' }).check()
-    await expect(tab).toContainText('1/3')
+    await expect(clip).toContainText('1/3')
     await checklist.getByRole('checkbox', { name: '介绍恰好 3 行' }).check()
     await checklist
       .getByRole('checkbox', { name: '只改了 src/App.tsx（可以让 agent 展示改动内容）' })
       .check()
     await expect(checklist).toContainText('已核对 3 / 3')
     await expect(checklist.locator('[data-comp="stamp"]')).toHaveText('✓已核对')
-    await expect(tab).toContainText('3/3')
+    await expect(clip).toContainText('3/3')
 
     await checklist.getByRole('checkbox', { name: '介绍恰好 3 行' }).uncheck()
     await expect(checklist).toContainText('已核对 2 / 3')
     await expect(checklist.locator('[data-comp="stamp"]')).toHaveCount(0)
-    await expect(tab).toContainText('2/3')
+    await expect(clip).toContainText('2/3')
+  })
+
+  test('与陪练贴签全局互斥：开一块收另一块，清单在顶、对话在底', async ({ page }) => {
+    await page.locator(CLIP).click()
+    await expect(page.locator(LIST_PANEL)).toBeVisible()
+    await page.locator(COACH_TAB).click()
+    await expect(page.locator(COACH_PANEL)).toBeVisible()
+    await expect(page.locator(LIST_PANEL)).toBeHidden()
+    await page.locator(CLIP).click()
+    await expect(page.locator(LIST_PANEL)).toBeVisible()
+    await expect(page.locator(COACH_PANEL)).toBeHidden()
   })
 })
 
@@ -189,7 +206,7 @@ test.describe('练习场 · 左栏沙箱布局', () => {
 })
 
 test.describe('练习场 · 布局自查', () => {
-  test('320/390/768/1280 无横向溢出，两枚贴签停靠不压内容', async ({ page }) => {
+  test('320/390/768/1280 无横向溢出，清单夹具停靠右上、陪练贴签停靠右下', async ({ page }) => {
     await page.goto('/practice.html')
     for (const width of [320, 390, 768, 1280]) {
       await page.setViewportSize({ width, height: 900 })
@@ -198,10 +215,18 @@ test.describe('练习场 · 布局自查', () => {
       )
       expect(overflow, `宽度 ${width} 出现 ${overflow}px 横向溢出`).toBe(0)
 
-      await page.locator(COACH_TAB).click()
-      await expect(page.locator(COACH_PANEL)).toBeVisible()
+      const clipBox = await page.locator(CLIP).boundingBox()
+      expect(clipBox).not.toBeNull()
+      expect(clipBox!.y, `宽度 ${width} 清单夹具距顶缘过大`).toBeLessThanOrEqual(4)
+      expect(
+        width - (clipBox!.x + clipBox!.width),
+        `宽度 ${width} 清单夹具距右缘过大`,
+      ).toBeLessThanOrEqual(32)
+
+      await page.locator(CLIP).click()
+      await expect(page.locator(LIST_PANEL)).toBeVisible()
       await page.keyboard.press('Escape')
-      await expect(page.locator(COACH_PANEL)).toBeHidden()
+      await expect(page.locator(LIST_PANEL)).toBeHidden()
 
       const coachBox = await page.locator(COACH_TAB).boundingBox()
       expect(coachBox).not.toBeNull()
@@ -213,10 +238,6 @@ test.describe('练习场 · 布局自查', () => {
         width - (coachBox!.x + coachBox!.width),
         `宽度 ${width} 陪练贴签距右缘过大`,
       ).toBeLessThanOrEqual(24)
-
-      const listBox = await page.locator(LIST_TAB).boundingBox()
-      expect(listBox).not.toBeNull()
-      expect(listBox!.x).toBeLessThan(coachBox!.x)
     }
   })
 })
