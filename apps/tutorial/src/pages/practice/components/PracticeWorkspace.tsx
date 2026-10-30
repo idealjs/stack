@@ -201,7 +201,6 @@ export function PracticeWorkspace() {
 
       <ChecklistDock
         panelId="checklist-dock-panel"
-        badge={`${checkedIds.length}/${task.acceptance.length}`}
         open={openDock === 'checklist'}
         onToggle={() => setOpenDock((v) => (v === 'checklist' ? null : 'checklist'))}
       >

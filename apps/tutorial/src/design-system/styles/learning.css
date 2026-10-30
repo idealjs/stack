@@ -118,6 +118,9 @@
 }
 .learning-clipboard-dock {
   padding-top: 16px;
+  border-top: 0;
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
 }
 .checklist-dock-clip {
   left: 14px;
