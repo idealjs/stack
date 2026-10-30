@@ -3,11 +3,11 @@ import { mkdtemp, readFile, rm } from 'node:fs/promises'
 
 import { dirname, join } from 'node:path'
 import { pathToFileURL } from 'node:url'
+import type { StackHook, WatchHook } from '@idealjs/stack'
 import { compile } from '@tailwindcss/node'
 import { Scanner } from '@tailwindcss/oxide'
 import { build as esbuild, type Plugin as esbuildWasmPlugin } from 'esbuild-wasm'
 import { renderToString } from 'react-dom/server'
-import type { StackHook, WatchHook } from '@idealjs/stack'
 
 export interface TutorialBuildOptions {
   root: string
@@ -71,7 +71,6 @@ interface OutputContextLike {
 }
 
 const RAW_SUFFIX = '?raw'
-const SITE_KIT_INDEX = '../../packages/site-kit/src/index.ts'
 
 const RUNTIME_DOC_FALLBACK =
   '<!doctype html><html lang="zh-CN"><body><!-- web-runner 产物缺失：先跑 yarn workspace @stack/web-runner build:runtime --></body></html>'
@@ -102,9 +101,6 @@ const tutorialSsrPlugin = (root: string): esbuildWasmPlugin => ({
         loader: 'js',
       }
     })
-    build.onResolve({ filter: /^@stack\/site-kit$/ }, () => ({
-      path: join(root, SITE_KIT_INDEX),
-    }))
   },
 })
 

@@ -1,10 +1,10 @@
 import '../design-system'
-import type { SiteNav } from '@stack/site-kit'
-import { SitePage } from '@stack/site-kit'
 import type { ReactNode } from 'react'
 import { MONTHS } from '../content/blogs'
 import type { ChapterId, NavItemLink, NavRowGroup } from '../design-system'
 import { CHAPTERS } from './chapters'
+import type { SiteNav } from './site'
+import { SitePage } from './site'
 
 export type DesignKey =
   | 'design-colors'
@@ -104,4 +104,4 @@ export function Page({
   )
 }
 
-export { Section } from '@stack/site-kit'
+export { Section } from './site'

@@ -13,7 +13,6 @@
   },
   "dependencies": {
     "@idealjs/stack": "workspace:*",
-    "@stack/site-kit": "workspace:*",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
   },

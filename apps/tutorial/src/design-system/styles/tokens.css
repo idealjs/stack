@@ -1,7 +1,6 @@
 @import "tailwindcss";
 
 @source "../";
-@source "../../../../../packages/site-kit/src";
 @source "../../../../../apps/playground/src";
 
 @theme {

@@ -2,10 +2,10 @@ import { readdirSync } from 'node:fs'
 import { readFile } from 'node:fs/promises'
 import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { transform } from 'esbuild-wasm'
 import { defineConfig } from '@idealjs/stack'
 import { imports, vendor } from '@idealjs/stack/builtins'
 import { nodeFs } from '@idealjs/stack/node'
+import { transform } from 'esbuild-wasm'
 import { tutorialBuild } from './stack-plugins/build.ts'
 
 const appDir = dirname(fileURLToPath(import.meta.url))
@@ -13,7 +13,6 @@ try {
   process.loadEnvFile(resolve(appDir, '.env.development'))
 } catch {}
 
-const siteKitIndex = resolve(appDir, '../../packages/site-kit/src/index.ts')
 const runtimeDocPath = resolve(appDir, '../web-runner/dist-runtime/index.html')
 
 const pages = readdirSync(appDir)
@@ -49,13 +48,6 @@ export default defineConfig({
         '@idealjs/stack/builtins',
       ],
     }),
-    {
-      name: 'site-kit',
-      resolve: (specifier) => {
-        if (specifier !== '@stack/site-kit') return null
-        return { id: siteKitIndex }
-      },
-    },
     {
       name: 'virtual',
       resolve: async (specifier, importer) => {

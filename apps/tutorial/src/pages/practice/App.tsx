@@ -1,6 +1,6 @@
-import { SiteFooter } from '@stack/site-kit'
 import type { NavRowGroup } from '../../design-system'
 import { SiteSidebar } from '../../design-system'
+import { SiteFooter } from '../../lib/site'
 import { SITE_NAV } from '../../lib/ui'
 import { PracticeWorkspace } from './components/PracticeWorkspace'
 

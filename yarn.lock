@@ -3167,12 +3167,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@stack/site-kit@workspace:*, @stack/site-kit@workspace:packages/site-kit":
-  version: 0.0.0-use.local
-  resolution: "@stack/site-kit@workspace:packages/site-kit"
-  languageName: unknown
-  linkType: soft
-
 "@stack/template@workspace:examples/template":
   version: 0.0.0-use.local
   resolution: "@stack/template@workspace:examples/template"
@@ -3189,7 +3183,6 @@ __metadata:
   dependencies:
     "@idealjs/stack": "workspace:*"
     "@playwright/test": "npm:1.63.0"
-    "@stack/site-kit": "workspace:*"
     "@tailwindcss/node": "npm:^4.3.3"
     "@tailwindcss/oxide": "npm:^4.3.3"
     "@types/react": "npm:^18.3.12"
