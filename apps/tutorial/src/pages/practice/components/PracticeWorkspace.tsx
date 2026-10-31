@@ -21,8 +21,8 @@ import type { ChatItem } from './ChatPanel'
 import { ChatPanel } from './ChatPanel'
 import { ChecklistDock } from './ChecklistDock'
 import { DockSticky } from './DockSticky'
-import { EditorDock } from './EditorDock'
 import { KeyModal } from './KeyModal'
+import { PlaygroundDock } from './PlaygroundDock'
 import { TipsDock } from './TipsDock'
 
 const FLOW_TONES = ['coral', 'teal', 'blue'] as const
@@ -38,20 +38,24 @@ function appendAssistant(items: ChatItem[], delta: string): ChatItem[] {
   return next
 }
 
-function RunnerStage() {
+function SandboxPane() {
   const { preview } = usePlayground()
   return (
-    <div className="relative h-[280px] overflow-hidden rounded-lg border-2 border-ink bg-white">
-      <SandboxFrame fill />
-      {!preview && (
-        <div className="pointer-events-none absolute inset-0 grid place-content-center gap-1 p-4 text-center">
-          <p className="t-small-strong m-0">沙箱预览</p>
-          <p className="t-small-mute m-0">
-            点右缘「编辑器」签写代码，点「运行 ▶」，构建产物会送进这里真跑。
-          </p>
-        </div>
-      )}
-    </div>
+    <section aria-label="web runner 沙箱预览" className="flex min-h-0 flex-1 flex-col gap-2.5">
+      <StatusLine />
+      <div className="relative h-[320px] shrink-0 overflow-hidden rounded-lg border-2 border-ink bg-white">
+        <SandboxFrame fill />
+        {!preview && (
+          <div className="pointer-events-none absolute inset-0 grid place-content-center gap-1 p-4 text-center">
+            <p className="t-small-strong m-0">沙箱预览</p>
+            <p className="t-small-mute m-0">
+              切到「编辑器」页签写代码，点「运行 ▶」回到这里，构建产物送进隔离 iframe 真跑。
+            </p>
+          </div>
+        )}
+      </div>
+      <OutputView />
+    </section>
   )
 }
 
@@ -67,12 +71,12 @@ export function PracticeWorkspace() {
   const [draft, setDraft] = useState('')
   const [focusSignal, setFocusSignal] = useState(0)
   const [openDock, setOpenDock] = useState<DockPane>(null)
-  const [editorOpen, setEditorOpen] = useState(false)
+  const [dockOpen, setDockOpen] = useState(false)
   const [checkedIds, setCheckedIds] = useState<readonly string[]>([])
   const [chat, setChat] = useState<ChatItem[]>(() => [
     {
       kind: 'assistant',
-      text: `我是这个练习场的陪练 agent，收在右下角贴签里。当前任务「${task.title}」——点右上角「tips」拉出操作流水线，点任意一步，提示词会自动填进输入框，回车就能发给我；也可以直接聊思路、要代码、贴报错。代码写进右缘「编辑器」侧栏（点右缘小签拉开），点「运行 ▶」在沙箱里真跑；验收清单夹在页面右上角，做完拉出来逐条打勾。`,
+      text: `我是这个练习场的陪练 agent，收在右下角贴签里。当前任务「${task.title}」——点右上角「tips」拉出操作流水线，点任意一步，提示词会自动填进输入框，回车就能发给我；也可以直接聊思路、要代码、贴报错。代码写进右缘侧栏（点「编辑器」签拉开），点「运行 ▶」自动切到「沙箱预览」页签真跑；验收清单夹在页面右上角，做完拉出来逐条打勾。`,
     },
   ])
 
@@ -139,24 +143,6 @@ export function PracticeWorkspace() {
   return (
     <div className="pb-24" suppressHydrationWarning>
       <PlaygroundProvider initialFiles={TEMPLATE_FILES}>
-        <div
-          id="practice-sandbox"
-          className="grid scroll-mt-3 content-start gap-3 lg:sticky lg:top-3 lg:max-h-[calc(100dvh-1.5rem)] lg:overflow-y-auto lg:pr-1"
-        >
-          <section
-            aria-label="web runner 沙箱预览"
-            className="rounded-xl border-2 border-ink bg-paper-deep p-2.5 shadow-ink"
-          >
-            <div className="mb-1.5 flex flex-wrap items-baseline justify-between gap-x-2">
-              <span className="t-small-strong">web runner · 沙箱预览</span>
-              <span className="t-small-mute">隔离 iframe，postMessage 单通道</span>
-            </div>
-            <StatusLine />
-            <RunnerStage />
-            <OutputView />
-          </section>
-        </div>
-
         <TipsDock
           panelId="tips-dock-panel"
           open={openDock === 'tips'}
@@ -172,15 +158,19 @@ export function PracticeWorkspace() {
           </section>
         </TipsDock>
 
-        <EditorDock
-          panelId="editor-dock-panel"
-          open={editorOpen}
-          onToggle={() => setEditorOpen((v) => !v)}
-        >
-          <FileTabs />
-          <CodeEditor className="min-h-[360px] flex-1" />
-          <RunRow />
-        </EditorDock>
+        <PlaygroundDock
+          panelId="playground-dock-panel"
+          open={dockOpen}
+          onToggle={() => setDockOpen((v) => !v)}
+          editor={
+            <>
+              <FileTabs />
+              <CodeEditor className="min-h-[360px] flex-1" />
+              <RunRow />
+            </>
+          }
+          sandbox={<SandboxPane />}
+        />
       </PlaygroundProvider>
 
       <ChecklistDock

@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test'
 
 async function openEditor(page: import('@playwright/test').Page) {
   await page.locator('[data-comp="editor-dock-tab"]').click()
-  await expect(page.locator('#editor-dock-panel')).toBeVisible()
+  await expect(page.locator('#playground-dock-panel')).toBeVisible()
 }
 
 test('html 身体注入：运行后预览框渲染 #app 文本', async ({ page }) => {

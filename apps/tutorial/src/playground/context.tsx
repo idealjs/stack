@@ -50,6 +50,7 @@ export interface PlaygroundApi {
   sameOriginAlert: boolean
   done: boolean
   building: boolean
+  runSeq: number
   engineReady: boolean
   preview: boolean
   iframeRef: RefObject<HTMLIFrameElement>
@@ -88,6 +89,7 @@ export function PlaygroundProvider({
   const [sameOriginAlert, setSameOriginAlert] = useState(false)
   const [done, setDone] = useState(false)
   const [building, setBuilding] = useState(false)
+  const [runSeq, setRunSeq] = useState(0)
   const [preview, setPreview] = useState(false)
   const [engineReady, setEngineReady] = useState(false)
   const iframeRef = useRef<HTMLIFrameElement>(null)
@@ -178,6 +180,7 @@ export function PlaygroundProvider({
 
   const run = async () => {
     if (building) return
+    setRunSeq((s) => s + 1)
     setLines([])
     setDone(false)
     setSameOriginAlert(false)
@@ -216,6 +219,7 @@ export function PlaygroundProvider({
     sameOriginAlert,
     done,
     building,
+    runSeq,
     engineReady,
     preview,
     iframeRef,

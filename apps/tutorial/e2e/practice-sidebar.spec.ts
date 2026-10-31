@@ -4,18 +4,6 @@ const SIDEBAR = '#site-sidebar-drawer'
 const OPENER = 'label[for="site-sidebar-toggle"][aria-label="打开侧栏导航"]'
 const OVERLAY = 'label[for="site-sidebar-toggle"][aria-hidden="true"]'
 
-async function clickAnchorAndAssertScroll(
-  page: import('@playwright/test').Page,
-  click: () => Promise<void>,
-  maxY: number,
-) {
-  const before = await page.evaluate(() => window.scrollY)
-  await click()
-  await expect.poll(async () => page.evaluate(() => window.scrollY)).toBeGreaterThan(before + 100)
-  const box = await page.locator('#practice-sandbox').boundingBox()
-  expect(box?.y ?? Number.POSITIVE_INFINITY).toBeLessThan(maxY)
-}
-
 test.describe('练习场 · sidebar 导航（唯一导航形态）', () => {
   test('桌面：顶部 navbar 退场，侧栏常驻在场', async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 900 })
@@ -24,7 +12,7 @@ test.describe('练习场 · sidebar 导航（唯一导航形态）', () => {
     const sidebar = page.locator(SIDEBAR)
     await expect(sidebar).toBeVisible()
     await expect(sidebar.locator('a').first()).toContainText('idealjs stack')
-    for (const label of ['全栈教程', '博客', '设计系统', '在线练习', '本页']) {
+    for (const label of ['全栈教程', '博客', '设计系统', '在线练习']) {
       await expect(sidebar.getByText(label, { exact: true })).toBeVisible()
     }
   })
@@ -44,14 +32,11 @@ test.describe('练习场 · sidebar 导航（唯一导航形态）', () => {
     expect(rowShadow).toContain('inset')
   })
 
-  test('桌面：主区一屏放下，本页锚点目标保持在视口内', async ({ page }) => {
+  test('桌面：主区一屏放下，沙箱已撤出主区住进右缘侧栏', async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 900 })
     await page.goto('/practice.html', { timeout: 20_000 })
-    await page.locator(SIDEBAR).getByText('代码沙箱', { exact: true }).click()
-    const box = await page.locator('#practice-sandbox').boundingBox()
-    expect(box, '锚点目标应在场').not.toBeNull()
-    expect(box!.y, '锚点目标顶部应落在视口内').toBeGreaterThanOrEqual(0)
-    expect(box!.y, '锚点目标顶部应落在视口内').toBeLessThan(900)
+    await expect(page.getByRole('heading', { name: '在线练习' })).toBeVisible()
+    await expect(page.locator('#practice-sandbox')).toHaveCount(0)
     const overflow = await page.evaluate(
       () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
     )
@@ -77,18 +62,5 @@ test.describe('练习场 · sidebar 导航（唯一导航形态）', () => {
     await expect(sidebar).toBeVisible()
     await sidebar.getByLabel('收起侧栏导航', { exact: true }).click()
     await expect(sidebar).toBeHidden()
-  })
-
-  test('移动：抽屉打开后可点本页锚点滚动到位', async ({ page }) => {
-    await page.setViewportSize({ width: 390, height: 844 })
-    await page.goto('/practice.html', { timeout: 20_000 })
-    await page.locator(OPENER).click()
-    const sidebar = page.locator(SIDEBAR)
-    await expect(sidebar).toBeVisible()
-    await clickAnchorAndAssertScroll(
-      page,
-      () => sidebar.getByText('代码沙箱', { exact: true }).click(),
-      844,
-    )
   })
 })

@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test'
 
 async function openEditor(page: import('@playwright/test').Page) {
   await page.locator('[data-comp="editor-dock-tab"]').click()
-  await expect(page.locator('#editor-dock-panel')).toBeVisible()
+  await expect(page.locator('#playground-dock-panel')).toBeVisible()
 }
 
 async function addFile(page: import('@playwright/test').Page, name: string) {
