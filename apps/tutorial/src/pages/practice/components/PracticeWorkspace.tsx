@@ -196,7 +196,7 @@ export function PracticeWorkspace() {
           accentClass="bg-clash2a"
           open={openDock === 'agent'}
           onOpenChange={openAgent}
-          panelClassName="h-[min(540px,calc(100dvh_-_120px))] w-[min(420px,calc(100vw-24px))]"
+          panelClassName="h-[min(540px,100dvh_-_120px)] w-[min(420px,100vw_-_24px)]"
           fill
         >
           <ChatPanel

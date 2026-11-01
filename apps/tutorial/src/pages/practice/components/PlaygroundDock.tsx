@@ -55,14 +55,12 @@ export function PlaygroundDock({
           comp: 'editor-dock-tab',
           label: 'playground · 编辑器',
           accentClass: 'bg-clash1a',
-          positionClass: 'top-[calc(50%-7.5rem)]',
         },
         {
           id: 'sandbox',
           comp: 'sandbox-dock-tab',
           label: 'web runner · 沙箱预览',
           accentClass: 'bg-clash2b',
-          positionClass: 'top-[calc(50%+7.5rem)]',
         },
       ]}
       toolbar={

@@ -58,7 +58,7 @@ export function DockPop({
         id={panelId}
         aria-label={`${label}面板`}
         tabIndex={-1}
-        className={`absolute right-0 bottom-[calc(100%+8px)] origin-bottom-right rounded-b-lg rounded-tl-lg border-2 border-ink p-2 shadow-ink transition-[opacity,transform,visibility] outline-none motion-reduce:transition-none ${accentClass} ${
+        className={`absolute right-0 bottom-full mb-2 origin-bottom-right rounded-b-lg rounded-tl-lg border-2 border-ink p-2 shadow-ink transition-[opacity,transform,visibility] outline-none motion-reduce:transition-none ${accentClass} ${
           open
             ? 'visible translate-y-0 scale-100 opacity-100 duration-200'
             : 'invisible pointer-events-none translate-y-2 scale-[0.97] opacity-0 duration-100'

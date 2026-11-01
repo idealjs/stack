@@ -6,7 +6,6 @@ export interface DockSheetTab {
   comp: string
   label: string
   accentClass: string
-  positionClass: string
 }
 
 export interface DockSheetProps {
@@ -39,7 +38,7 @@ function SheetTab({
       aria-expanded={open}
       aria-controls={panelId}
       onClick={onOpen}
-      className={`fixed right-0 z-30 flex -translate-y-1/2 cursor-pointer flex-col items-center gap-1.5 rounded-l-lg border-2 border-r-0 border-ink py-3 pr-2 pl-1.5 text-[12.5px] font-extrabold text-ink shadow-[-3px_3px_0_var(--color-ink)] transition-[translate] duration-150 motion-reduce:transition-none hover:-translate-x-0.5 ${tab.accentClass} ${tab.positionClass}`}
+      className={`flex cursor-pointer flex-col items-center gap-1.5 rounded-l-lg border-2 border-r-0 border-ink py-3 pr-2 pl-1.5 text-[12.5px] font-extrabold text-ink shadow-[-3px_3px_0_var(--color-ink)] transition-[translate] duration-150 motion-reduce:transition-none hover:-translate-x-0.5 ${tab.accentClass}`}
     >
       <span aria-hidden className="text-[10px] leading-none">
         ◀
@@ -73,20 +72,22 @@ export function DockSheet({
         }`}
       />
 
-      {tabs.map((tab) => (
-        <SheetTab
-          key={tab.id}
-          tab={tab}
-          panelId={panelId}
-          open={open}
-          onOpen={() => onTabOpen?.(tab.id)}
-        />
-      ))}
+      <div className="fixed right-0 top-1/2 z-30 flex -translate-y-1/2 flex-col gap-36">
+        {tabs.map((tab) => (
+          <SheetTab
+            key={tab.id}
+            tab={tab}
+            panelId={panelId}
+            open={open}
+            onOpen={() => onTabOpen?.(tab.id)}
+          />
+        ))}
+      </div>
 
       <section
         id={panelId}
         aria-label={label}
-        className={`fixed top-0 right-0 z-50 flex h-dvh w-[min(600px,calc(100vw-24px))] flex-col rounded-l-xl border-2 border-r-0 border-ink bg-paper shadow-ink transition-[transform,opacity,visibility] ease-out motion-reduce:transition-none ${
+        className={`fixed top-0 right-0 z-50 flex h-dvh w-[min(600px,100vw_-_24px)] flex-col rounded-l-xl border-2 border-r-0 border-ink bg-paper shadow-ink transition-[transform,opacity,visibility] ease-out motion-reduce:transition-none ${
           open
             ? 'visible translate-x-0 opacity-100 duration-200'
             : 'invisible pointer-events-none translate-x-full opacity-0 duration-100'
