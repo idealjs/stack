@@ -78,3 +78,18 @@ import { ClipboardChecklist, TaskEnvelope } from '../../design-system'
 ```
 
 教程站 `design-components.html` 引用 `LearningKitGallery` 标本，从 `../../design-system/examples/LearningKitGallery` 导入。标本的交互状态仅保留在当前页面，不写入真实学习进度。
+
+## 贴签抽拉组件
+
+页面浮层（贴签触发＋抽拉面板）的四个基件，只做 chrome：触发按钮的 aria 关系（`aria-expanded` / `aria-controls`）、Esc 关闭、开关过渡与蒙版。全部是纯展示件，不依赖 playground 等视图层模块——esbuild wasm 只允许出现在调用方（视图组件）里，基件被任何页面引入都不会拖入构建引擎。
+
+| 基件 | 形态 | 用法 |
+| --- | --- | --- |
+| `DockDrop` | 贴签＋下拉面板 | 标题栏触发排里成对使用；面板 `absolute right-0 top-[calc(100%+8px)]`，锚定到最近的定位祖先（调用方用 `fixed` 容器排布触发签，面板即对齐右缘、从整排下方展开） |
+| `DockSheet` | 右缘抽屉 | 全高侧栏＋灰色蒙版＋右缘竖排贴签；`tabs` 描述贴签组，`toolbar` 放页签切换等视图内容，✕ 常驻 |
+| `DockPop` | 底角弹层 | 贴签锚定底部，面板向上弹出 |
+| `DockModal` | 居中模态 | 蒙版点击与 Esc 关闭，卡片内容调用方给 |
+
+`DockDrop` 的触发签样式由 `triggerClassName` 整体提供（基件不带形状类，避免 tailwind 类冲突），`data-*` 等透传属性直接写在组件上，落到触发按钮。
+
+右缘贴签（`DockSheet.tabs`）不参与开合动画：贴签常驻右缘 z-40，面板 z-50 盖在其上，开合只动面板自身——收起时贴签是被面板滑出「揭出来」的，不做自己的过渡，避免多签同时播放入场动画。

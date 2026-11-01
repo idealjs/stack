@@ -1,6 +1,6 @@
 import { useMemo, useRef, useState } from 'react'
 import type { DataFlowStep } from '../../../design-system'
-import { ClipboardChecklist, DataFlowBoard } from '../../../design-system'
+import { ClipboardChecklist, DataFlowBoard, DockPop } from '../../../design-system'
 import { TEMPLATE_FILES } from '../../../lib/templateFiles'
 import {
   CodeEditor,
@@ -20,7 +20,6 @@ import { taskFromLocation } from '../lib/tasks'
 import type { ChatItem } from './ChatPanel'
 import { ChatPanel } from './ChatPanel'
 import { ChecklistDock } from './ChecklistDock'
-import { DockSticky } from './DockSticky'
 import { KeyModal } from './KeyModal'
 import { PlaygroundDock } from './PlaygroundDock'
 import { TipsDock } from './TipsDock'
@@ -76,7 +75,7 @@ export function PracticeWorkspace() {
   const [chat, setChat] = useState<ChatItem[]>(() => [
     {
       kind: 'assistant',
-      text: `我是这个练习场的陪练 agent，收在右下角贴签里。当前任务「${task.title}」——点右上角「tips」拉出操作流水线，点任意一步，提示词会自动填进输入框，回车就能发给我；也可以直接聊思路、要代码、贴报错。代码写进右缘侧栏（点「编辑器」签拉开），点「运行 ▶」自动切到「沙箱预览」页签真跑；验收清单夹在页面右上角，做完拉出来逐条打勾。`,
+      text: `我是这个练习场的陪练 agent，收在右下角贴签里。当前任务「${task.title}」——点标题栏右上角「tips」拉出操作流水线，点任意一步，提示词会自动填进输入框，回车就能发给我；也可以直接聊思路、要代码、贴报错。代码写进右缘侧栏（点「编辑器」签拉开），点「运行 ▶」自动切到「沙箱预览」页签真跑；验收夹具和 tips 并排在标题栏，做完拉出来逐条打勾。`,
     },
   ])
 
@@ -142,7 +141,24 @@ export function PracticeWorkspace() {
 
   return (
     <div className="pb-24" suppressHydrationWarning>
-      <PlaygroundProvider initialFiles={TEMPLATE_FILES}>
+      <div className="fixed top-3 right-4 z-40 flex items-start gap-2 sm:right-6">
+        <ChecklistDock
+          panelId="checklist-dock-panel"
+          done={checkedIds.length}
+          total={task.acceptance.length}
+          open={openDock === 'checklist'}
+          onToggle={() => setOpenDock((v) => (v === 'checklist' ? null : 'checklist'))}
+        >
+          <ClipboardChecklist
+            title="完成后逐条核对"
+            description="跟着任务说明动手，逐条自查确认；全部勾选即盖章。"
+            items={task.acceptance.map((label) => ({ id: label, label }))}
+            checkedIds={checkedIds}
+            onCheckedChange={setCheckedIds}
+            className="learning-clipboard-dock"
+          />
+        </ChecklistDock>
+
         <TipsDock
           panelId="tips-dock-panel"
           open={openDock === 'tips'}
@@ -157,7 +173,9 @@ export function PracticeWorkspace() {
             />
           </section>
         </TipsDock>
+      </div>
 
+      <PlaygroundProvider initialFiles={TEMPLATE_FILES}>
         <PlaygroundDock
           panelId="playground-dock-panel"
           open={dockOpen}
@@ -173,25 +191,8 @@ export function PracticeWorkspace() {
         />
       </PlaygroundProvider>
 
-      <ChecklistDock
-        panelId="checklist-dock-panel"
-        done={checkedIds.length}
-        total={task.acceptance.length}
-        open={openDock === 'checklist'}
-        onToggle={() => setOpenDock((v) => (v === 'checklist' ? null : 'checklist'))}
-      >
-        <ClipboardChecklist
-          title="完成后逐条核对"
-          description="跟着任务说明动手，逐条自查确认；全部勾选即盖章。"
-          items={task.acceptance.map((label) => ({ id: label, label }))}
-          checkedIds={checkedIds}
-          onCheckedChange={setCheckedIds}
-          className="learning-clipboard-dock"
-        />
-      </ChecklistDock>
-
       <div className="fixed right-3 bottom-3 z-40 flex items-end gap-2 sm:right-4 sm:bottom-4">
-        <DockSticky
+        <DockPop
           comp="coach-sticky"
           panelId="coach-sticky-panel"
           label="陪练 agent"
@@ -216,7 +217,7 @@ export function PracticeWorkspace() {
             onOpenKey={() => setKeyOpen(true)}
             flat
           />
-        </DockSticky>
+        </DockPop>
       </div>
 
       {keyOpen && (

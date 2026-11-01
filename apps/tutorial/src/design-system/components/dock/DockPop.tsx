@@ -1,18 +1,7 @@
 import type { ReactNode } from 'react'
-import { useEffect, useRef } from 'react'
+import { useDockEscape } from './shared'
 
-export function DockSticky({
-  comp,
-  panelId,
-  label,
-  meta,
-  accentClass,
-  open,
-  onToggle,
-  panelClassName = '',
-  fill = false,
-  children,
-}: {
+export interface DockPopProps {
   comp: string
   panelId: string
   label: string
@@ -23,17 +12,21 @@ export function DockSticky({
   panelClassName?: string
   fill?: boolean
   children: ReactNode
-}) {
-  const panelRef = useRef<HTMLElement>(null)
+}
 
-  useEffect(() => {
-    if (!open) return
-    const onKey = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') onToggle()
-    }
-    window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
-  }, [open, onToggle])
+export function DockPop({
+  comp,
+  panelId,
+  label,
+  meta,
+  accentClass,
+  open,
+  onToggle,
+  panelClassName = '',
+  fill = false,
+  children,
+}: DockPopProps) {
+  useDockEscape(open, onToggle)
 
   return (
     <div className="relative">
@@ -58,7 +51,6 @@ export function DockSticky({
       </span>
 
       <section
-        ref={panelRef}
         id={panelId}
         aria-label={`${label}面板`}
         tabIndex={-1}

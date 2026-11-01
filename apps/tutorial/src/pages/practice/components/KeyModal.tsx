@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { DockModal } from '../../../design-system'
 import type { LlmConfig } from '../lib/agent/llm'
 
 const FIELD =
@@ -18,23 +19,17 @@ export function KeyModal({
   const [model, setModel] = useState(config.model)
 
   return (
-    <div
-      className="fixed inset-0 z-50 grid place-items-center bg-ink/40 p-4"
-      onClick={onClose}
-      role="presentation"
-    >
+    <DockModal label="模型接入" className="w-full max-w-md" onClose={onClose}>
+      <h2 className="m-0 text-t3 font-extrabold text-ink">模型接入</h2>
+      <p className="t-small-mute mt-1.5 mb-4">
+        默认 DeepSeek；也可填任何 OpenAI 兼容端点。key 仅保存在浏览器 localStorage。
+      </p>
       <form
-        className="w-full max-w-md rounded-2xl border-2 border-ink bg-paper p-5 shadow-ink"
-        onClick={(e) => e.stopPropagation()}
         onSubmit={(e) => {
           e.preventDefault()
           onSave({ baseURL: baseURL.trim(), apiKey: apiKey.trim(), model: model.trim() })
         }}
       >
-        <h2 className="m-0 text-t3 font-extrabold text-ink">模型接入</h2>
-        <p className="t-small-mute mt-1.5 mb-4">
-          默认 DeepSeek；也可填任何 OpenAI 兼容端点。key 仅保存在浏览器 localStorage。
-        </p>
         <label htmlFor="km-base-url" className="t-small-strong mb-1 block">
           API 地址（baseURL）
         </label>
@@ -84,6 +79,6 @@ export function KeyModal({
           </button>
         </div>
       </form>
-    </div>
+    </DockModal>
   )
 }
