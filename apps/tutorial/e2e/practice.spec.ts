@@ -53,6 +53,20 @@ test.describe('练习场 · 陪练 agent 贴签（右下角）', () => {
     await expect(input).toHaveValue('')
     await expect(panel.getByRole('button', { name: '发送' })).toBeVisible()
   })
+
+  test('点面板外任意处收回，点面板内部不收', async ({ page }) => {
+    const coach = page.locator(COACH_TAB)
+    const panel = page.locator(COACH_PANEL)
+    await coach.click()
+    await expect(panel).toBeVisible()
+
+    await panel.locator('textarea').click()
+    await expect(panel).toBeVisible()
+
+    await page.mouse.click(400, 600)
+    await expect(panel).toBeHidden()
+    await expect(coach).toHaveAttribute('aria-expanded', 'false')
+  })
 })
 
 test.describe('练习场 · 验收清单夹板（顶部右上）', () => {

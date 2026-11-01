@@ -1,5 +1,6 @@
+import { useRef } from 'react'
 import type { ReactNode } from 'react'
-import { useDockEscape } from './shared'
+import { useDockDismiss, useDockEscape } from './shared'
 
 export interface DockPopProps {
   comp: string
@@ -8,7 +9,7 @@ export interface DockPopProps {
   meta?: string
   accentClass: string
   open: boolean
-  onToggle: () => void
+  onOpenChange: (open: boolean) => void
   panelClassName?: string
   fill?: boolean
   children: ReactNode
@@ -21,22 +22,25 @@ export function DockPop({
   meta,
   accentClass,
   open,
-  onToggle,
+  onOpenChange,
   panelClassName = '',
   fill = false,
   children,
 }: DockPopProps) {
-  useDockEscape(open, onToggle)
+  const rootRef = useRef<HTMLDivElement>(null)
+
+  useDockEscape(open, () => onOpenChange(false))
+  useDockDismiss(open, () => onOpenChange(false), [rootRef])
 
   return (
-    <div className="relative">
+    <div ref={rootRef} className="relative">
       <span className="hover-host block">
         <button
           type="button"
           data-comp={comp}
           aria-expanded={open}
           aria-controls={panelId}
-          onClick={onToggle}
+          onClick={() => onOpenChange(!open)}
           className={`hoverable-shadow lift-sm flex cursor-pointer items-center gap-2 rounded-t-lg border-2 border-ink py-2 pr-4 pl-3 text-[12.5px] font-extrabold text-ink shadow-[3px_3px_0_var(--color-ink)] transition-[translate] duration-150 motion-reduce:transition-none ${accentClass}`}
         >
           <span aria-hidden className="size-3 shrink-0 rounded-full border-2 border-ink bg-paper" />

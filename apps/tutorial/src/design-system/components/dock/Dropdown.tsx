@@ -1,6 +1,6 @@
 import type { ButtonHTMLAttributes, ReactNode } from 'react'
-import { useEffect, useRef } from 'react'
-import { useDockEscape } from './shared'
+import { useRef } from 'react'
+import { useDockDismiss, useDockEscape } from './shared'
 
 export interface DropdownProps
   extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'className' | 'children' | 'type'> {
@@ -29,17 +29,7 @@ export function Dropdown({
   const panelRef = useRef<HTMLDivElement>(null)
 
   useDockEscape(open, () => onOpenChange(false))
-
-  useEffect(() => {
-    if (!open) return
-    const onPointerDown = (event: PointerEvent) => {
-      const target = event.target as Node
-      if (triggerRef.current?.contains(target) || panelRef.current?.contains(target)) return
-      onOpenChange(false)
-    }
-    document.addEventListener('pointerdown', onPointerDown)
-    return () => document.removeEventListener('pointerdown', onPointerDown)
-  }, [open, onOpenChange])
+  useDockDismiss(open, () => onOpenChange(false), [triggerRef, panelRef])
 
   return (
     <>

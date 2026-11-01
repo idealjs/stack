@@ -120,13 +120,9 @@ export function PracticeWorkspace() {
     setFocusSignal((s) => s + 1)
   }
 
-  const toggleDock = (pane: Exclude<DockPane, null>) => {
-    if (openDock === pane) {
-      setOpenDock(null)
-      return
-    }
-    setOpenDock(pane)
-    if (pane === 'agent') setFocusSignal((s) => s + 1)
+  const openAgent = (open: boolean) => {
+    setOpenDock((v) => (open ? 'agent' : v === 'agent' ? null : v))
+    if (open) setFocusSignal((s) => s + 1)
   }
 
   const flowSteps: DataFlowStep[] = CREATE_PROJECT_EXAMPLES.map((example, i) => ({
@@ -199,7 +195,7 @@ export function PracticeWorkspace() {
           meta={task.label}
           accentClass="bg-clash2a"
           open={openDock === 'agent'}
-          onToggle={() => toggleDock('agent')}
+          onOpenChange={openAgent}
           panelClassName="h-[min(540px,calc(100dvh_-_120px))] w-[min(420px,calc(100vw-24px))]"
           fill
         >

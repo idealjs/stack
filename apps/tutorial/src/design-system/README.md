@@ -85,9 +85,9 @@ import { ClipboardChecklist, TaskEnvelope } from '../../design-system'
 
 | 基件 | 形态 | 用法 |
 | --- | --- | --- |
-| `Dropdown` | 下拉面板 | 入口点击展开/收起，点面板外任意处（`pointerdown`）收起，Esc 同；点面板内部不收。受控 `open` / `onOpenChange`；面板 `absolute right-0 top-[calc(100%+8px)]`，锚定到最近的定位祖先（调用方用 `fixed` 容器排布入口，面板即对齐右缘、从整排下方展开） |
+| `Dropdown` | 下拉面板 | 入口点击展开/收起，点面板外任意处（`pointerdown`）收起，Esc 同；点面板内部不收。收起判定与 `DockPop` 共用 `useDockDismiss`（传入包住入口与面板的 ref）。受控 `open` / `onOpenChange`；面板 `absolute right-0 top-[calc(100%+8px)]`，锚定到最近的定位祖先（调用方用 `fixed` 容器排布入口，面板即对齐右缘、从整排下方展开） |
 | `DockSheet` | 右缘抽屉 | 全高侧栏＋灰色蒙版＋右缘竖排贴签；`tabs` 描述贴签组，`toolbar` 放页签切换等视图内容，✕ 常驻 |
-| `DockPop` | 底角弹层 | 贴签锚定底部，面板向上弹出 |
+| `DockPop` | 底角弹层 | 贴签锚定底部，面板向上弹出；点面板外任意处（`pointerdown`）收起，Esc 同，点面板内部不收 |
 | `DockModal` | 居中模态 | 蒙版点击与 Esc 关闭，卡片内容调用方给 |
 
 `Dropdown` 的入口样式由 `triggerClassName` 整体提供（基件不带形状类，避免 tailwind 类冲突），`data-*` 等透传属性直接写在组件上，落到入口按钮。
