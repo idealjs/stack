@@ -143,7 +143,9 @@ export function PracticeWorkspace() {
           done={checkedIds.length}
           total={task.acceptance.length}
           open={openDock === 'checklist'}
-          onOpenChange={(open) => setOpenDock((v) => (open ? 'checklist' : v === 'checklist' ? null : v))}
+          onOpenChange={(open) =>
+            setOpenDock((v) => (open ? 'checklist' : v === 'checklist' ? null : v))
+          }
         >
           <ClipboardChecklist
             title="完成后逐条核对"
