@@ -39,7 +39,7 @@ function SheetTab({
       aria-expanded={open}
       aria-controls={panelId}
       onClick={onOpen}
-      className={`fixed right-0 z-40 flex -translate-y-1/2 cursor-pointer flex-col items-center gap-1.5 rounded-l-lg border-2 border-r-0 border-ink py-3 pr-2 pl-1.5 text-[12.5px] font-extrabold text-ink shadow-[-3px_3px_0_var(--color-ink)] transition-[translate] duration-150 motion-reduce:transition-none hover:-translate-x-0.5 ${tab.accentClass} ${tab.positionClass}`}
+      className={`fixed right-0 z-30 flex -translate-y-1/2 cursor-pointer flex-col items-center gap-1.5 rounded-l-lg border-2 border-r-0 border-ink py-3 pr-2 pl-1.5 text-[12.5px] font-extrabold text-ink shadow-[-3px_3px_0_var(--color-ink)] transition-[translate] duration-150 motion-reduce:transition-none hover:-translate-x-0.5 ${tab.accentClass} ${tab.positionClass}`}
     >
       <span aria-hidden className="text-[10px] leading-none">
         ◀
