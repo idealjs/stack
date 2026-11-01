@@ -68,8 +68,8 @@ export function DockSheet({
         data-comp={maskComp}
         aria-hidden
         onClick={onToggle}
-        className={`fixed inset-0 z-[45] bg-ink/45 transition-opacity duration-200 motion-reduce:transition-none ${
-          open ? 'opacity-100' : 'pointer-events-none opacity-0'
+        className={`fixed inset-0 z-[45] bg-ink/45 transition-opacity motion-reduce:transition-none ${
+          open ? 'opacity-100 duration-200' : 'pointer-events-none opacity-0 duration-100'
         }`}
       />
 
@@ -86,10 +86,10 @@ export function DockSheet({
       <section
         id={panelId}
         aria-label={label}
-        className={`fixed top-0 right-0 z-50 flex h-dvh w-[min(600px,calc(100vw-24px))] flex-col rounded-l-xl border-2 border-r-0 border-ink bg-paper shadow-ink transition-[transform,opacity,visibility] duration-200 ease-out motion-reduce:transition-none ${
+        className={`fixed top-0 right-0 z-50 flex h-dvh w-[min(600px,calc(100vw-24px))] flex-col rounded-l-xl border-2 border-r-0 border-ink bg-paper shadow-ink transition-[transform,opacity,visibility] ease-out motion-reduce:transition-none ${
           open
-            ? 'visible translate-x-0 opacity-100'
-            : 'invisible pointer-events-none translate-x-full opacity-0'
+            ? 'visible translate-x-0 opacity-100 duration-200'
+            : 'invisible pointer-events-none translate-x-full opacity-0 duration-100'
         }`}
       >
         <div className="flex shrink-0 items-center gap-x-2 border-b-2 border-ink px-4 py-2.5">

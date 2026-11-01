@@ -49,10 +49,10 @@ export function Dropdown({
       </button>
       <div
         ref={panelRef}
-        className={`pointer-events-auto absolute top-[calc(100%+8px)] right-0 grid w-[min(380px,calc(100vw-24px))] transition-[grid-template-rows,opacity,visibility] duration-200 ease-out motion-reduce:transition-none ${
+        className={`pointer-events-auto absolute top-[calc(100%+8px)] right-0 grid w-[min(380px,calc(100vw-24px))] transition-[grid-template-rows,opacity,visibility] ease-out motion-reduce:transition-none ${
           open
-            ? 'visible [grid-template-rows:1fr] opacity-100'
-            : 'invisible pointer-events-none [grid-template-rows:0fr] opacity-0'
+            ? 'visible [grid-template-rows:1fr] opacity-100 duration-200'
+            : 'invisible pointer-events-none [grid-template-rows:0fr] opacity-0 duration-100'
         }`}
       >
         <div className="min-h-0 overflow-hidden">

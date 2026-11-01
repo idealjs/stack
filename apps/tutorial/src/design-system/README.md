@@ -92,4 +92,6 @@ import { ClipboardChecklist, TaskEnvelope } from '../../design-system'
 
 `Dropdown` 的入口样式由 `triggerClassName` 整体提供（基件不带形状类，避免 tailwind 类冲突），`data-*` 等透传属性直接写在组件上，落到入口按钮。
 
+开合时长不对称：展开 200ms，收起 100ms——收起要利落，拖长的退出动画会让页面发黏。duration 类随开合状态二选一挂载（不与静态 duration 同串并存），避免 tailwind 同串冲突后样式表序定胜负。
+
 右缘贴签（`DockSheet.tabs`）不参与开合动画：贴签常驻右缘 z-30，本抽屉面板 z-50 盖在其上，开合只动面板自身——收起时贴签是被面板滑出「揭出来」的，不做自己的过渡，避免多签同时播放入场动画。z-30 同时低于 `Dropdown`/`DockPop` 的调用方浮层容器（z-40 起）与蒙版（z-45）：任何下拉/弹层面板展开时直接盖过贴签，面板右缘与贴签重叠区不吞点击。
