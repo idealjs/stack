@@ -119,6 +119,23 @@ test.describe('练习场 · 验收清单夹板（顶部右上）', () => {
     await expect(page.locator(LIST_PANEL)).toBeVisible()
     await expect(page.locator(COACH_PANEL)).toBeHidden()
   })
+
+  test('点面板外任意处收回，点面板内部不收', async ({ page }) => {
+    const clip = page.locator(CLIP)
+    await clip.click()
+    await expect(page.locator(LIST_PANEL)).toBeVisible()
+
+    await page.mouse.click(400, 600)
+    await expect(page.locator(LIST_PANEL)).toBeHidden()
+
+    await clip.click()
+    const panel = page.locator(LIST_PANEL)
+    await panel.locator(CHECKLIST).getByText('完成后逐条核对').click()
+    await expect(panel).toBeVisible()
+
+    await page.keyboard.press('Escape')
+    await expect(panel).toBeHidden()
+  })
 })
 
 test.describe('练习场 · tips 喂给陪练（右上角）', () => {
@@ -160,6 +177,24 @@ test.describe('练习场 · tips 喂给陪练（右上角）', () => {
     await expect(page.locator(LIST_PANEL)).toBeVisible()
     await expect(panel).toBeHidden()
     await expect(tips).toHaveAttribute('aria-expanded', 'false')
+  })
+
+  test('点面板外任意处收回，点面板内部不收', async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 900 })
+    const tips = page.locator(TIPS)
+    const panel = page.locator(TIPS_PANEL)
+    await tips.click()
+    await expect(panel).toBeVisible()
+
+    await page.mouse.click(400, 600)
+    await expect(panel).toBeHidden()
+
+    await tips.click()
+    await panel.locator(FLOW).locator('h3').click()
+    await expect(panel).toBeVisible()
+
+    await page.keyboard.press('Escape')
+    await expect(panel).toBeHidden()
   })
 
   test('流水线板收进面板：主区不再有板，三步同源提示词，第一步为虚线起点', async ({ page }) => {

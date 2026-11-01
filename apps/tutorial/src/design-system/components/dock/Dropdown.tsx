@@ -1,47 +1,64 @@
 import type { ButtonHTMLAttributes, ReactNode } from 'react'
+import { useEffect, useRef } from 'react'
 import { useDockEscape } from './shared'
 
-export interface DockDropProps
+export interface DropdownProps
   extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'className' | 'children' | 'type'> {
   comp: string
   panelId: string
   label: string
   open: boolean
-  onToggle: () => void
+  onOpenChange: (open: boolean) => void
   triggerClassName: string
   trigger: ReactNode
   children: ReactNode
 }
 
-export function DockDrop({
+export function Dropdown({
   comp,
   panelId,
   label,
   open,
-  onToggle,
+  onOpenChange,
   triggerClassName,
   trigger,
   children,
   ...rest
-}: DockDropProps) {
-  useDockEscape(open, onToggle)
+}: DropdownProps) {
+  const triggerRef = useRef<HTMLButtonElement>(null)
+  const panelRef = useRef<HTMLDivElement>(null)
+
+  useDockEscape(open, () => onOpenChange(false))
+
+  useEffect(() => {
+    if (!open) return
+    const onPointerDown = (event: PointerEvent) => {
+      const target = event.target as Node
+      if (triggerRef.current?.contains(target) || panelRef.current?.contains(target)) return
+      onOpenChange(false)
+    }
+    document.addEventListener('pointerdown', onPointerDown)
+    return () => document.removeEventListener('pointerdown', onPointerDown)
+  }, [open, onOpenChange])
 
   return (
     <>
       <button
+        ref={triggerRef}
         type="button"
         data-comp={comp}
         aria-expanded={open}
         aria-controls={panelId}
         aria-label={label}
         title={label}
-        onClick={onToggle}
+        onClick={() => onOpenChange(!open)}
         className={`pointer-events-auto relative cursor-pointer outline-none ${triggerClassName}`}
         {...rest}
       >
         {trigger}
       </button>
       <div
+        ref={panelRef}
         className={`pointer-events-auto absolute top-[calc(100%+8px)] right-0 grid w-[min(380px,calc(100vw-24px))] transition-[grid-template-rows,opacity,visibility] duration-200 ease-out motion-reduce:transition-none ${
           open
             ? 'visible [grid-template-rows:1fr] opacity-100'

@@ -1,19 +1,19 @@
 import type { ReactNode } from 'react'
-import { DockDrop } from '../../../design-system'
+import { Dropdown } from '../../../design-system'
 
 export function ChecklistDock({
   panelId,
   done,
   total,
   open,
-  onToggle,
+  onOpenChange,
   children,
 }: {
   panelId: string
   done: number
   total: number
   open: boolean
-  onToggle: () => void
+  onOpenChange: (open: boolean) => void
   children: ReactNode
 }) {
   const all = total > 0 && done >= total
@@ -21,12 +21,12 @@ export function ChecklistDock({
   const stripClass = all ? 'bg-clash1b' : done > 0 ? 'bg-clash2a' : 'bg-paper-deep'
 
   return (
-    <DockDrop
+    <Dropdown
       comp="checklist-clip"
       panelId={panelId}
       label="验收清单"
       open={open}
-      onToggle={onToggle}
+      onOpenChange={onOpenChange}
       data-progress={progress}
       triggerClassName="flex h-[34px] w-[116px] flex-col rounded-[7px_7px_4px_4px] border-2 border-ink bg-paper shadow-[3px_3px_0_var(--color-ink)]"
       trigger={
@@ -50,6 +50,6 @@ export function ChecklistDock({
       }
     >
       {children}
-    </DockDrop>
+    </Dropdown>
   )
 }

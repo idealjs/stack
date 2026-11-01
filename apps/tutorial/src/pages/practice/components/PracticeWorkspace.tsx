@@ -147,7 +147,7 @@ export function PracticeWorkspace() {
           done={checkedIds.length}
           total={task.acceptance.length}
           open={openDock === 'checklist'}
-          onToggle={() => setOpenDock((v) => (v === 'checklist' ? null : 'checklist'))}
+          onOpenChange={(open) => setOpenDock((v) => (open ? 'checklist' : v === 'checklist' ? null : v))}
         >
           <ClipboardChecklist
             title="完成后逐条核对"
@@ -162,7 +162,7 @@ export function PracticeWorkspace() {
         <TipsDock
           panelId="tips-dock-panel"
           open={openDock === 'tips'}
-          onToggle={() => setOpenDock((v) => (v === 'tips' ? null : 'tips'))}
+          onOpenChange={(open) => setOpenDock((v) => (open ? 'tips' : v === 'tips' ? null : v))}
         >
           <section id="practice-flow">
             <DataFlowBoard
