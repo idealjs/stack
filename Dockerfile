@@ -8,15 +8,15 @@ ENV YARN_NPM_REGISTRY_SERVER=https://registry.npmmirror.com
 WORKDIR /workspace
 
 # ① 依赖配置——只拷贝清单/锁文件/yarn 运行时，源码变更不失效依赖层
-# 七个 workspace 清单缺一不可：--immutable 会校验锁文件与 workspace 树一致，
-# workspace 成员（packages/stack 的 @idealjs/stack、examples/stack-demo 等）缺任一即 Workspace not found
+# 六个 workspace 清单缺一不可：--immutable 会校验锁文件与 workspace 树一致，
+# workspace 成员（packages/stack 的 @idealjs/stack、examples/stack-demo 等）缺任一即 Workspace not found；
+# 增删 workspace 成员时本层同步增删（前科：site-kit 删目录漏改此层，kaniko lstat 即炸连挂四天）
 COPY .yarnrc.yml package.json yarn.lock ./
 COPY .yarn/releases/yarn-4.9.2.cjs .yarn/releases/
 COPY apps/tutorial/package.json apps/tutorial/
 COPY apps/web-runner/package.json apps/web-runner/
 COPY packages/stack/package.json packages/stack/
 COPY packages/stack-idealjs/package.json packages/stack-idealjs/
-COPY packages/site-kit/package.json packages/site-kit/
 COPY examples/stack-demo/package.json examples/stack-demo/
 COPY examples/template/package.json examples/template/
 
