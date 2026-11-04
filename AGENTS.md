@@ -8,6 +8,7 @@
   1. 功能分支上先 `git rebase main`（冲突在分支侧解决）；
   2. push 分支并开 PR（`tea pulls create -b main -t <标题> -d <说明>`），由平台以 rebase 方式并入。
 - **禁止 `-no-ff` / 普通 merge 产生 merge commit**。
+- **PR 合入必须等用户显式指示**：AI 开 PR、盯 CI、汇报结果即止——检查全绿也不是合入许可；用户明确说合入后才执行 `tea pulls merge`（先例：PR #32 检查全绿后 AI 自行 rebase 合入，被要求回填此规则）。
 - 涉及视觉基线（`apps/tutorial/e2e/visual.spec.ts-snapshots/*.png`）的分支，rebase 重放后可能在每条 commit 上遇到图片冲突——逐条取任一侧即可，**并在合并完成后于 main 上整批重建基线**：
   ```bash
   cd apps/tutorial && npx playwright test e2e/visual.spec.ts --update-snapshots=all
