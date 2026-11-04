@@ -18,11 +18,7 @@
 ## PR：描述必须带图
 
 - 涉及页面 / 组件视觉效果的 PR，**描述里必须带截图**，改动前后对照（before / after）；纯 docs、ci、依赖类改动可免。
-- 图随分支提交进 `docs/assets/<主题>/`，命名 `pr-shot-before-*.png` / `pr-shot-after-*.png`（先例：`docs/assets/design-colors-rule-note/`、`docs/screenshots/lazy-dev/<commit>/`）。
-- PR 描述里内嵌用**分支绝对 raw 链接**，不能用相对路径——合并前 base 分支上还没有这些文件：
-  ```markdown
-  ![改后·桌面](https://gitea.idealjs.com/idealjs/stack/raw/branch/<分支>/docs/assets/<主题>/pr-shot-after-desktop.png)
-  ```
+- **截图以附件直贴 PR，不进仓库**：web 粘贴上传，或 API `POST /repos/<owner>/<repo>/issues/<index>/assets`（multipart 字段 `attachment`）后把返回的 `/attachments/<uuid>` 链接内嵌进描述。不用分支 raw 链接指向仓库内文件——分支合入删除即死链（先例：PR #32 贴图被迫三换其链）。
 - 出图口径与 e2e 一致：起 `stack preview`（带 `VITE_STACK_RUNTIME_ORIGIN` 指向 web-runner）后用 playwright 截图，视口取 e2e 惯用档位（桌面 1280×900、移动 390×844），`document.fonts.ready` 后再截防字体抖动；fixed 贴签 / 抽屉类状态用视口截图（非 fullPage）。
 
 ## 代码零注释：唯一例外 biome 指令
