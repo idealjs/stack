@@ -56,7 +56,7 @@ const NAV_ROWS: NavRowGroup[] = [
 ]
 
 export const SITE_NAV: SiteNav = {
-  brand: { key: 'index', label: 'idealjs stack', href: '/index.html' },
+  brand: { key: 'index', label: 'idealjs stack', href: './index.html' },
   rows: NAV_ROWS,
 }
 

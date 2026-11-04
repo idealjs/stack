@@ -4,6 +4,7 @@ import { extname, join, relative, resolve } from 'node:path'
 import { type ServerType, serve } from '@hono/node-server'
 import { Hono } from 'hono'
 import type { StackConfig } from '../index.ts'
+import { rewriteWithBase } from './baseHtml.ts'
 
 export const MIME: Record<string, string> = {
   '.css': 'text/css; charset=utf-8',
@@ -19,8 +20,6 @@ export interface ServedFile {
 }
 
 const LIVE_PATH = '/__stack/live'
-
-const LIVE_SCRIPT = `<script>new EventSource(${JSON.stringify(LIVE_PATH)}).onmessage = () => location.reload()</script>`
 
 export interface DevServerOptions {
   port?: number
@@ -41,6 +40,8 @@ export async function startDevServer(
   const dist = resolve(root, config.dist ?? 'dist')
   const distRelative = relative(process.cwd(), dist).replaceAll('\\', '/')
   const base = options.base?.replace(/\/$/, '') ?? ''
+  const livePath = `${base}${LIVE_PATH}`
+  const liveScript = `<script>new EventSource(${JSON.stringify(livePath)}).onmessage = () => location.reload()</script>`
   const hostname =
     options.host === true
       ? '0.0.0.0'
@@ -50,7 +51,7 @@ export async function startDevServer(
   const clients = new Set<(chunk: string) => void>()
   const app = new Hono()
   if (options.liveReload === true) {
-    app.get(LIVE_PATH, (c) => {
+    app.get(livePath, (c) => {
       let send: ((chunk: string) => void) | undefined
       const stream = new ReadableStream({
         start(controller) {
@@ -98,6 +99,7 @@ export async function startDevServer(
   }
   app.get('*', async (c) => {
     const requestPath = decodeURIComponent(new URL(c.req.url).pathname)
+    if (base !== '' && requestPath === base) return c.redirect(`${base}/`, 308)
     const withoutBase =
       base !== '' && (requestPath === base || requestPath.startsWith(`${base}/`))
         ? requestPath.slice(base.length) || '/'
@@ -115,10 +117,14 @@ export async function startDevServer(
           return c.text(`[stack] dev 构建未就绪：${message}`, 500)
         }
         if (served !== null) {
-          const isHtml = served.contentType.startsWith('text/html') && options.liveReload === true
-          const code = isHtml
-            ? String(served.code).replace(/<\/body>/i, `${LIVE_SCRIPT}</body>`)
-            : served.code
+          const isHtml = served.contentType.startsWith('text/html')
+          let code: string | Uint8Array = served.code
+          if (isHtml && typeof code === 'string') {
+            let text = base === '' ? code : rewriteWithBase(code, base, withoutBase)
+            if (options.liveReload === true)
+              text = text.replace(/<\/body>/i, `${liveScript}</body>`)
+            code = text
+          }
           return c.body(code, 200, {
             'Content-Type': served.contentType,
             'Cache-Control': 'no-store',
@@ -127,10 +133,14 @@ export async function startDevServer(
       }
       try {
         const body = await readFile(safe)
-        const isHtml = extname(safe) === '.html' && options.liveReload === true
-        const code = isHtml
-          ? body.toString('utf8').replace(/<\/body>/i, `${LIVE_SCRIPT}</body>`)
-          : body
+        const isHtml = extname(safe) === '.html'
+        let code: string | Buffer = body
+        if (isHtml) {
+          let text = body.toString('utf8')
+          if (base !== '') text = rewriteWithBase(text, base, withoutBase)
+          if (options.liveReload === true) text = text.replace(/<\/body>/i, `${liveScript}</body>`)
+          code = text
+        }
         return c.body(code, 200, {
           'Content-Type': MIME[extname(safe)] ?? 'application/octet-stream',
           'Cache-Control': 'no-store',
