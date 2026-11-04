@@ -51,6 +51,7 @@ test.describe('教程首页', () => {
     await page.goto('/learn.html')
     const open = page.locator('label[aria-label="打开导航菜单"]')
     const close = page.locator('label[aria-label="收起导航菜单"]')
+    const overlay = page.locator('label[for="site-nav-toggle"][aria-hidden="true"]')
     const drawer = page.locator('#site-nav-drawer')
 
     await expect(open).toBeVisible()
@@ -63,7 +64,7 @@ test.describe('教程首页', () => {
     await expect(open).toBeHidden()
     await expect(close).toBeVisible()
     await expect(close).toHaveAttribute('aria-expanded', 'true')
-    await close.click()
+    await overlay.click({ position: { x: 350, y: 400 } })
     await expect(drawer).toBeHidden()
     await expect(open).toBeVisible()
     await expect(open).toHaveAttribute('aria-expanded', 'false')

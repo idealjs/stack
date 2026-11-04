@@ -96,7 +96,7 @@ export function SiteNavbar({
         className="peer sr-only"
       />
 
-      <div className="flex flex-wrap items-center gap-1.5 max-lg:peer-checked:[&>span]:invisible">
+      <div className="flex flex-wrap items-center gap-1.5 max-lg:peer-checked:[&_.nav-drawer-open]:invisible max-lg:peer-checked:[&_.nav-drawer-close]:visible">
         <span className="hover-host mr-auto inline-flex">
           <ShadowButton
             tone="ghost"
@@ -107,19 +107,31 @@ export function SiteNavbar({
             {brand.label}
           </ShadowButton>
         </span>
-        <span className="hover-host hidden max-lg:inline-flex">
+        <span className="hover-host hidden max-lg:inline-grid">
           {/* biome-ignore lint/a11y/useAriaPropsSupportedByRole: 纯 CSS checkbox 开合的触发 label，aria 状态为增强语义保留 */}
           <label
             htmlFor="site-nav-toggle"
             aria-label="打开导航菜单"
             aria-expanded="false"
             aria-controls="site-nav-drawer"
-            className={`hidden max-lg:grid max-lg:size-10 max-lg:place-items-center ${shadowButtonClasses({ size: 'none' })}`}
+            className={`nav-drawer-open hidden max-lg:col-start-1 max-lg:row-start-1 max-lg:grid max-lg:size-10 max-lg:place-items-center ${shadowButtonClasses({ size: 'none' })}`}
           >
             <span aria-hidden="true" className="flex flex-col gap-[5px]">
               <i className="block h-[3px] w-5 rounded-sm bg-ink" />
               <i className="block h-[3px] w-5 rounded-sm bg-ink" />
               <i className="block h-[3px] w-5 rounded-sm bg-ink" />
+            </span>
+          </label>
+          {/* biome-ignore lint/a11y/useAriaPropsSupportedByRole: 纯 CSS checkbox 开合的触发 label，aria 状态为增强语义保留 */}
+          <label
+            htmlFor="site-nav-toggle"
+            aria-label="收起导航菜单"
+            aria-expanded="true"
+            aria-controls="site-nav-drawer"
+            className={`nav-drawer-close hidden max-lg:col-start-1 max-lg:row-start-1 max-lg:invisible max-lg:grid max-lg:size-10 max-lg:place-items-center ${shadowButtonClasses({ size: 'none' })}`}
+          >
+            <span aria-hidden="true" className="text-lg font-extrabold leading-none">
+              ×
             </span>
           </label>
         </span>
@@ -129,23 +141,11 @@ export function SiteNavbar({
         id="site-nav-drawer"
         className="max-lg:fixed max-lg:inset-y-0 max-lg:left-0 max-lg:z-50 max-lg:w-72 max-lg:overflow-y-auto max-lg:rounded-none max-lg:border-r-2 max-lg:border-ink max-lg:bg-paper max-lg:px-4 max-lg:py-5 max-lg:shadow-[8px_0_0_0_var(--color-ink)] max-lg:invisible max-lg:opacity-0 max-lg:-translate-x-full max-lg:transition-[transform,visibility,opacity] max-lg:duration-300 max-lg:ease-[cubic-bezier(0.32,0.72,0,1)] max-lg:motion-reduce:transition-none max-lg:peer-checked:visible max-lg:peer-checked:translate-x-0 max-lg:peer-checked:opacity-100"
       >
-        <div className="lg:hidden max-lg:mb-5 max-lg:flex max-lg:items-center max-lg:justify-between">
+        <div className="lg:hidden max-lg:mb-5">
           <span className="hover-host inline-flex">
             <ShadowButton tone="ghost" href={brand.href} size="sm" className="font-mono">
               {brand.label}
             </ShadowButton>
-          </span>
-          <span className="hover-host inline-flex">
-            {/* biome-ignore lint/a11y/useAriaPropsSupportedByRole: 纯 CSS checkbox 开合的触发 label，aria 状态为增强语义保留 */}
-            <label
-              htmlFor="site-nav-toggle"
-              aria-label="收起导航菜单"
-              aria-expanded="true"
-              aria-controls="site-nav-drawer"
-              className={`grid size-8 place-items-center text-lg font-extrabold leading-none ${shadowButtonClasses({ size: 'none' })}`}
-            >
-              <span aria-hidden="true">×</span>
-            </label>
           </span>
         </div>
         <div className="grid gap-x-1.5 gap-y-2 max-lg:grid-cols-2 lg:mt-3 lg:grid-cols-[96px_repeat(6,minmax(0,180px))]">

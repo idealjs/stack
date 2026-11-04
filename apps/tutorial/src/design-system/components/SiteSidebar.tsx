@@ -33,7 +33,7 @@ export function SiteSidebar({
           aria-label="打开侧栏导航"
           aria-expanded="false"
           aria-controls="site-sidebar-drawer"
-          className={`max-lg:peer-checked:invisible grid size-10 cursor-pointer place-items-center ${shadowButtonClasses({ size: 'none' })}`}
+          className={`grid size-10 cursor-pointer place-items-center ${shadowButtonClasses({ size: 'none' })}`}
         >
           <span aria-hidden="true" className="flex flex-col gap-[5px]">
             <i className="block h-[3px] w-5 rounded-sm bg-ink" />
