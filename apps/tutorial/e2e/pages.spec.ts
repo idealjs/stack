@@ -701,3 +701,37 @@ test.describe('阴影册 · hover-host 尊重 reduced-motion', () => {
     await expect(inner).toHaveCSS('box-shadow', /rgb\(17, 17, 17\) 8px 8px 0px 0px/)
   })
 })
+
+test.describe('技能熟悉页', () => {
+  const SKILLS = [
+    { key: 'html', name: 'HTML' },
+    { key: 'css', name: 'CSS' },
+    { key: 'javascript', name: 'JavaScript' },
+  ] as const
+
+  for (const { key, name } of SKILLS) {
+    test(`${key}.html 渲染有内容，导航新组「技能熟悉」当前项高亮`, async ({ page }) => {
+      await page.goto(`/${key}.html`)
+      await expect(page.locator('#root')).not.toBeEmpty()
+      await expect(page.locator('h1')).toHaveText(name)
+      await expect(page.getByText('内容建设中')).toBeVisible()
+      for (const { key: sibling } of SKILLS) {
+        const item = page.locator(`#site-nav-drawer a[href="./${sibling}.html"]`)
+        await expect(item).toHaveClass(
+          sibling === key ? /bg-paper-deep/ : /text-body hover:bg-paper-deep/,
+        )
+      }
+      await expect(page.locator('#site-nav-drawer').getByText('技能熟悉')).toBeVisible()
+    })
+  }
+
+  test('practice 侧栏同步出现技能熟悉组与三个入口', async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 900 })
+    await page.goto('/practice.html')
+    const sidebar = page.locator('#site-sidebar-drawer')
+    await expect(sidebar.getByText('技能熟悉')).toBeVisible()
+    for (const { key, name } of SKILLS) {
+      await expect(sidebar.locator(`a[href="./${key}.html"]`)).toHaveText(name)
+    }
+  })
+})

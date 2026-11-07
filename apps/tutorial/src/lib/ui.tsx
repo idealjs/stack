@@ -13,12 +13,20 @@ export type DesignKey =
   | 'design-components'
   | 'design-shadow'
 
+export type SkillKey = 'html' | 'css' | 'javascript'
+
 const DESIGN: { href: string; label: string; key: DesignKey }[] = [
   { href: './design-colors.html', label: '颜色', key: 'design-colors' },
   { href: './design-typography.html', label: '字体', key: 'design-typography' },
   { href: './design-symbols.html', label: '符号形状', key: 'design-symbols' },
   { href: './design-components.html', label: '组件', key: 'design-components' },
   { href: './design-shadow.html', label: '阴影', key: 'design-shadow' },
+]
+
+const SKILLS: { href: string; label: string; key: SkillKey }[] = [
+  { href: './html.html', label: 'HTML', key: 'html' },
+  { href: './css.html', label: 'CSS', key: 'css' },
+  { href: './javascript.html', label: 'JavaScript', key: 'javascript' },
 ]
 
 const CHAPTER_ITEMS: NavItemLink[] = ([1, 2, 3, 4, 5, 6, 7] as ChapterId[]).map((id) => ({
@@ -30,6 +38,11 @@ const CHAPTER_ITEMS: NavItemLink[] = ([1, 2, 3, 4, 5, 6, 7] as ChapterId[]).map(
 
 const NAV_ROWS: NavRowGroup[] = [
   { sectionKey: 'tutorial', label: '全栈教程', href: './learn.html', items: CHAPTER_ITEMS },
+  {
+    sectionKey: 'skills',
+    label: '技能熟悉',
+    items: SKILLS.map((n) => ({ key: n.key, label: n.label, href: n.href })),
+  },
   {
     sectionKey: 'blog',
     label: '博客',
@@ -78,6 +91,7 @@ export function Page({
     | 'design'
     | 'practice'
     | DesignKey
+    | SkillKey
     | `blog-${string}`
   children: ReactNode
 }) {
