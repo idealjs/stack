@@ -72,8 +72,14 @@ test.describe('教程首页', () => {
 
   test('技术用途直接可读，键盘能展开详情并使用实际学习入口', async ({ page }) => {
     const toolbox = page.locator('[data-comp="brick-toolbox"]')
-    await expect(toolbox).toContainText('搭出输入框、列表和按钮。')
-    const html = toolbox.locator('details').first()
+    const tray = toolbox.locator('.learning-toolbox-tray')
+    await expect(toolbox).toContainText('项目里的技术积木')
+    await expect(tray).toBeHidden()
+    const fold = toolbox.locator('summary.learning-toolbox-header')
+    await fold.focus()
+    await fold.press('Enter')
+    await expect(tray).toBeVisible()
+    const html = toolbox.locator('details.learning-brick').first()
     await expect(html.getByText('描述网页结构的标记语言。', { exact: false })).toBeHidden()
     await html.locator('summary').focus()
     await html.locator('summary').press('Enter')
@@ -89,6 +95,10 @@ test.describe('教程首页', () => {
     test(`概览及展开内容在 ${width}px 下可完整阅读`, async ({ page }) => {
       await page.setViewportSize({ width, height: 900 })
       await page.locator('[data-comp="brick-toolbox"] summary').first().click()
+      await page
+        .locator('[data-comp="brick-toolbox"] details.learning-brick summary')
+        .first()
+        .click()
       const input = page.getByRole('textbox', { name: '新的待办' })
       await input.fill('LongUnbrokenTodo'.repeat(5))
       await input.press('Enter')

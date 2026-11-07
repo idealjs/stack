@@ -679,16 +679,19 @@
   background: var(--color-clash2b);
   border-radius: 8px 8px 0 0;
 }
-.learning-toolbox header > span {
+.learning-toolbox header > span,
+.learning-toolbox .learning-toolbox-header > span {
   font-size: 8px;
   letter-spacing: 2px;
   white-space: nowrap;
 }
-.learning-toolbox header h3 {
+.learning-toolbox header h3,
+.learning-toolbox .learning-toolbox-header h3 {
   flex: 1;
   font-size: 14px;
 }
-.learning-toolbox header small {
+.learning-toolbox header small,
+.learning-toolbox .learning-toolbox-header small {
   font-size: 10px;
   white-space: nowrap;
 }
@@ -696,6 +699,37 @@
   display: grid;
   gap: 16px;
   padding: 28px 14px 16px;
+}
+.learning-toolbox-note {
+  margin: -10px 0 0;
+  color: var(--color-body);
+  font-size: 13px;
+  line-height: 1.75;
+}
+.learning-toolbox-fold > summary {
+  list-style: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  background: var(--color-clash2b);
+  border-radius: 8px;
+}
+.learning-toolbox-fold > summary::-webkit-details-marker {
+  display: none;
+}
+.learning-toolbox-fold[open] > summary {
+  border-bottom: 2px solid var(--color-ink);
+  border-radius: 8px 8px 0 0;
+}
+.learning-toolbox-fold-mark {
+  font-size: 17px;
+  font-weight: 800;
+  line-height: 1;
+}
+.learning-toolbox-fold[open] .learning-toolbox-fold-mark {
+  transform: rotate(45deg);
 }
 .learning-brick {
   position: relative;

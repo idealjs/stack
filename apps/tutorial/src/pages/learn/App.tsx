@@ -139,6 +139,15 @@ export function App() {
       title="全栈教程"
       desc="从第一个网页到前后端协作，用同一个待办应用串起整个过程。"
     >
+      <BrickToolbox
+        title="项目里的技术积木"
+        variant="overview"
+        bricks={BRICKS}
+        note="先看每块积木的用途，需要时展开详情。我们逐步完善同一个应用，再用 React、TypeScript 和 Tailwind CSS 改写它。"
+        defaultCollapsed
+        className="learn-bricks"
+      />
+
       <div className="learn-top">
         <section className="learn-copy" aria-labelledby="learn-goal">
           <h2 id="learn-goal">做一个自己的待办清单</h2>
@@ -255,19 +264,6 @@ export function App() {
             ),
           }}
         />
-      </Section>
-
-      <Section
-        id="bricks"
-        className="learn-section"
-        label="用哪些技术"
-        note="先学页面与交互，再组织工程，最后连接并保存数据。"
-      >
-        <BrickToolbox title="项目里的技术积木" variant="overview" bricks={BRICKS} />
-        <p className="learn-section-note">
-          先看每块积木的用途，需要时展开详情。我们逐步完善同一个应用，再用 React、TypeScript 和
-          Tailwind CSS 改写它。
-        </p>
       </Section>
     </Page>
   )
