@@ -73,14 +73,24 @@ const BRICKS: readonly ToolboxBrick[] = [
     family: '原生 CSS、工具类与组件样式；都需要理解布局和 CSS 的基础规则。',
   },
   {
-    id: 'vite',
-    name: 'Vite',
+    id: 'stack-cli',
+    name: 'Stack CLI',
     stage: '运行与构建',
     tone: 'coral',
-    summary: '运行工程，生成部署产物。',
-    what: '提供开发服务器和构建能力的工具。开发时预览修改，构建时生成发布文件。',
+    summary: '一条命令跑开发、构建与预览。',
+    what: '本仓自研的工程工具：stack cli 提供开发服务器、SSG 构建与预览，把源码编译成可部署的产物。',
     why: '跑起待办工程，并看懂源码怎样变成可部署的 HTML、CSS 和 JavaScript。',
-    family: 'Node.js、npm、开发服务器与构建产物；区分开发环境和发布环境。',
+    family: '与 Vite 同类的工程职责（开发服务器与构建）；区分开发环境和发布环境。',
+  },
+  {
+    id: 'hono',
+    name: 'Hono',
+    stage: '服务端框架',
+    tone: 'pink',
+    summary: '服务端 Web 框架，承接请求返回数据。',
+    what: '跑在服务端的 Web 框架：接收 HTTP 请求，按路由分发到处理函数，返回 JSON 或页面。',
+    why: '待办的添加、删除、勾选在服务端由 Hono 路由承接，校验后读写数据库并返回结果。',
+    family: '与 Express 同类；由请求方法、JSON 与中间件组织服务端。',
   },
   {
     id: 'api',
@@ -101,6 +111,16 @@ const BRICKS: readonly ToolboxBrick[] = [
     what: 'SQLite 是数据库；Prisma 帮助代码按约定的数据结构读写数据库。',
     why: '让服务端保存待办数据，浏览器重新打开时通过 API 读取。',
     family: '数据模型、数据库迁移与持久化；界面状态和长期保存的数据需要配合。',
+  },
+  {
+    id: 'data-flow',
+    name: '数据流',
+    stage: '全栈主线',
+    tone: 'violet',
+    summary: '一次点击，数据在前后端之间的完整旅程。',
+    what: '从界面操作出发：JavaScript 更新状态、界面即时变化，请求带着数据到达服务端，校验后落进数据库，刷新后从数据库原路回来。',
+    why: '这是全栈的主线：框架和工具换了五茬，唯一不变的就是数据怎么流。',
+    family: '串起 HTML、JavaScript、HTTP 与数据库，是「数据控制」章节的核心。',
   },
 ]
 
@@ -134,11 +154,7 @@ const DATA_FLOW_STEPS: readonly DataFlowStep[] = [
 
 export function App() {
   return (
-    <Page
-      active="learn"
-      title="全栈教程"
-      desc="从第一个网页到前后端协作，用同一个待办应用串起整个过程。"
-    >
+    <Page active="learn" title="全栈教程" desc="从个人的待办记录工具到多人可填写待办的网站。">
       <BrickToolbox
         title="项目里的技术积木"
         variant="overview"
