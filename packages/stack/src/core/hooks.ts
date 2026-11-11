@@ -52,6 +52,7 @@ export interface ResolveResult {
 export interface ResolveContext {
   readonly root: string
   readonly fs: ReadOnlyFs
+  resolve(specifier: string, importer: string): Promise<ResolveResult | null>
 }
 
 export type ResolveHook = (

@@ -1,4 +1,5 @@
 import type { StackConfig } from './config.ts'
+import { withDefaultHooks } from './defaults.ts'
 import { DemandEngine } from './engine.ts'
 import type { BuildResult } from './hooks.ts'
 import { CORE_PRODUCER } from './hooks.ts'
@@ -10,12 +11,13 @@ export { DEFAULT_DIST }
 export async function build(config: StackConfig): Promise<BuildResult> {
   if (config.fs === undefined) {
     throw new Error(
-      '[stack] 需要注入 fs：node 宿主用 nodeFs()（@idealjs/stack/node），浏览器/测试用 memoryFs()',
+      '[stack] fs is required: node hosts use nodeFs() (@idealjs/stack/node), browser/tests use memoryFs()',
     )
   }
-  if ((config.inputs ?? []).length === 0) throw new Error('[stack] config.inputs 至少需要一个入口')
+  if ((config.inputs ?? []).length === 0)
+    throw new Error('[stack] config.inputs requires at least one entry')
   const startedAt = Date.now()
-  const engine = new DemandEngine(config)
+  const engine = new DemandEngine(withDefaultHooks(config))
   try {
     for (const input of config.inputs) {
       await engine.resolveEntry(input)

@@ -243,7 +243,7 @@ export const SCENARIOS: Scenario[] = [
       inputs: [{ name: 'main', path: 'src/main.ts' }],
       hooks: [imports()],
     },
-    expected: { error: '无法解析导入 "./missing"' },
+    expected: { error: 'cannot resolve import "./missing"' },
   },
   {
     name: 'imports() 声明的 A↔B 图环：自身闭环捕获降级为边数据，双向说明符重写',
@@ -880,7 +880,7 @@ export const SCENARIOS: Scenario[] = [
       inputs: [{ name: 'page', path: 'src/index.html' }],
       hooks: [imports()],
     },
-    expected: { error: '无法解析导入 "./missing.ts"' },
+    expected: { error: 'cannot resolve import "./missing.ts"' },
   },
   {
     name: 'html 内 script src 走 alias：重写指向 alias 解析后的最终落位',

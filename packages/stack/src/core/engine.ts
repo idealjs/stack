@@ -16,37 +16,19 @@ import type {
   Resolution,
   ResolveContext,
   ResolveHook,
+  ResolveResult,
   StackHook,
   WatchHook,
 } from './hooks.ts'
 import { hookProducer } from './hooks.ts'
 import { createLoading } from './loading.ts'
 import { parseModuleImports } from './parse.ts'
-import {
-  dirnamePath,
-  isRelativeSpecifier,
-  joinPath,
-  moduleCandidates,
-  normalizePath,
-} from './pathUtil.ts'
+import { normalizePath } from './pathUtil.ts'
 import {
   type ResourceRuntime,
   loweringBindImportFrom as resourcesBindImports,
   loweringImportFrom as resourcesLoweringImport,
 } from './resources.ts'
-
-const applyAlias = (
-  source: string,
-  alias: Record<string, string> | undefined,
-): { source: string; aliased: boolean } => {
-  if (alias === undefined) return { source, aliased: false }
-  for (const [prefix, target] of Object.entries(alias)) {
-    if (source === prefix || source.startsWith(prefix)) {
-      return { source: `${target}${source.slice(prefix.length)}`, aliased: true }
-    }
-  }
-  return { source, aliased: false }
-}
 
 export class DemandEngine {
   readonly detector = new CycleDetector()
@@ -66,7 +48,7 @@ export class DemandEngine {
   readonly #runtime: ResourceRuntime
   readonly #queue: QueueTask[] = []
   readonly #idleWaiters: (() => void)[] = []
-  readonly #resolveContext: ResolveContext
+  readonly #resolveContexts: ResolveContext[] = []
   #pendingTasks = 0
   #failure: { error: unknown } | null = null
 
@@ -98,7 +80,6 @@ export class DemandEngine {
       knownModule: (id) => this.#registry.has(id),
       bindModule: (id, into) => this.#bindModule(id, into),
     }
-    this.#resolveContext = { root: this.root, fs: this.readOnlyFs }
     this.channel = new OutputChannel({
       watchHooks: this.watchHooks,
       contextFor: (hookName) => this.outputContext(hookName),
@@ -117,42 +98,50 @@ export class DemandEngine {
   }
 
   async resolveEntry(input: StackInput): Promise<void> {
-    const resolution = await this.resolveDemand(input.path, `${this.root}/`, { entry: true })
+    const resolution = await this.resolveDemand(input.path, `${this.root}/`)
     if (resolution.kind === 'external') {
-      throw new Error(`[stack] 无法解析入口 "${input.path}"（root=${this.root}）`)
+      throw new Error(`[stack] cannot resolve entry "${input.path}" (root=${this.root})`)
     }
     this.#kindOverrides.set(resolution.id, inputKindOf(input.path, input.type))
     this.entries.push({ name: input.name, id: resolution.id })
     await this.ensureLifecycle(resolution.id)
   }
 
-  async resolveDemand(
-    rawSource: string,
-    importer: string,
-    options: { entry?: boolean } = {},
-  ): Promise<Resolution> {
-    const { source, aliased } = applyAlias(rawSource, this.#config.alias)
-    for (const hook of this.resolveHooks) {
-      const result = await hook.resolve(source, importer, this.#resolveContext)
-      if (result != null) {
-        if (result.content !== undefined) this.#loading.seed(result.id, result.content)
-        return { kind: 'module', id: result.id }
-      }
-    }
-    if (isRelativeSpecifier(rawSource) || rawSource.startsWith('/')) {
-      const base = rawSource.startsWith('/')
-        ? rawSource
-        : joinPath(dirnamePath(importer), rawSource)
-      const id = await this.#loading.probe(moduleCandidates(base))
-      if (id !== null) return { kind: 'module', id }
-      throw new Error(`[stack] 无法解析导入 "${rawSource}"（来自 ${importer}）`)
-    }
-    const rootRelative = await this.#loading.probe(moduleCandidates(joinPath(this.root, source)))
-    if (rootRelative !== null) return { kind: 'module', id: rootRelative }
-    if (options.entry === true || aliased) {
-      throw new Error(`[stack] 无法解析导入 "${rawSource}"（来自 ${importer}，root=${this.root}）`)
+  async resolveDemand(rawSource: string, importer: string): Promise<Resolution> {
+    const result = await this.#dispatchFrom(0, rawSource, importer)
+    if (result !== null) {
+      if (result.content !== undefined) this.#loading.seed(result.id, result.content)
+      return { kind: 'module', id: result.id }
     }
     return { kind: 'external', specifier: rawSource }
+  }
+
+  async #dispatchFrom(
+    start: number,
+    specifier: string,
+    importer: string,
+  ): Promise<ResolveResult | null> {
+    for (let index = start; index < this.resolveHooks.length; index += 1) {
+      const result = await this.resolveHooks[index].resolve(
+        specifier,
+        importer,
+        this.#resolveContextAt(index),
+      )
+      if (result != null) return result
+    }
+    return null
+  }
+
+  #resolveContextAt(index: number): ResolveContext {
+    const cached = this.#resolveContexts[index]
+    if (cached !== undefined) return cached
+    const context: ResolveContext = {
+      root: this.root,
+      fs: this.readOnlyFs,
+      resolve: (specifier, importer) => this.#dispatchFrom(index + 1, specifier, importer),
+    }
+    this.#resolveContexts[index] = context
+    return context
   }
 
   kindOf(id: string): StackInputKind {
@@ -315,7 +304,7 @@ export class DemandEngine {
 
   async #runLifecycle(id: string): Promise<FinalModule> {
     const entry = this.#registry.get(id)
-    if (entry === undefined) throw new Error(`[stack] 内部错误：模块未注册：${id}`)
+    if (entry === undefined) throw new Error(`[stack] internal error: module not registered: ${id}`)
     if (entry.final !== null) return entry.final
     const kind = entry.kind
     const raw = await this.#loading.loadForLifecycle(id)
@@ -371,7 +360,9 @@ export class DemandEngine {
   #requireFs(): StackFs {
     const fs = this.#config.fs
     if (fs === undefined) {
-      throw new Error('[stack] 需要注入 fs：node 宿主用 nodeFs()，浏览器/测试用 memoryFs()')
+      throw new Error(
+        '[stack] fs is required: node hosts use nodeFs(), browser/tests use memoryFs()',
+      )
     }
     return fs
   }
