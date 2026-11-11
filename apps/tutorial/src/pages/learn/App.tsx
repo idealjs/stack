@@ -10,6 +10,7 @@ import {
 } from '../../design-system'
 import { Page, Section } from '../../lib/ui'
 import { TodoPreview } from './components/TodoPreview'
+import { TodoTour } from './components/TodoTour'
 
 const BRICKS: readonly ToolboxBrick[] = [
   {
@@ -165,10 +166,18 @@ export function App() {
       />
 
       <div className="learn-top">
+        <div className="learn-preview">
+          <ExperimentFrame title="你的待办应用" address={null} status="demo" caption="刷新后重置">
+            <TodoPreview />
+          </ExperimentFrame>
+          <TodoTour />
+        </div>
+
         <section className="learn-copy" aria-labelledby="learn-goal">
           <h2 id="learn-goal">做一个自己的待办清单</h2>
           <p>
-            学完做出一个<b>单人版 TodoList</b>：添加、删除、勾选完成，界面随数据更新； 接上 API
+            上面这个<b>单人版 TodoList</b>{' '}
+            就是学完主线后你能亲手做出来的东西：添加、删除、勾选完成，界面随数据更新； 接上 API
             和数据库后，刷新页面，待办仍然保留。
           </p>
           <p className="learn-meta">
@@ -184,16 +193,6 @@ export function App() {
           <Button href="./practice.html">打开练习场</Button>
           <p>你提出需求，Agent 协助实现；再对照结果，理解代码为什么这样工作。</p>
         </div>
-
-        <ExperimentFrame
-          title="你的待办应用"
-          address={null}
-          status="demo"
-          caption="刷新后重置"
-          className="learn-preview"
-        >
-          <TodoPreview />
-        </ExperimentFrame>
 
         <section id="data-control" className="learn-core" aria-labelledby="learn-core-title">
           <h2 id="learn-core-title">

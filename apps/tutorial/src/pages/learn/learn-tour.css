@@ -1,0 +1,70 @@
+.learn-tour {
+  margin-top: 12px;
+  display: flex;
+  justify-content: center;
+}
+.learn-tour-add p {
+  margin: 0 0 10px;
+}
+.learn-tour-close {
+  position: absolute;
+  top: -13px;
+  right: -13px;
+  width: 26px;
+  height: 26px;
+  border: 2px solid var(--color-ink);
+  border-radius: 8px;
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-size: 15px;
+  font-weight: 800;
+  line-height: 1;
+  cursor: pointer;
+  box-shadow: 2px 2px 0 var(--color-ink);
+  transition:
+    translate 150ms,
+    box-shadow 150ms;
+}
+.learn-tour-close:hover {
+  translate: -1px -1px;
+  box-shadow: 3px 3px 0 var(--color-ink);
+}
+.learn-tour-close:active {
+  translate: 1px 1px;
+  box-shadow: 1px 1px 0 var(--color-ink);
+}
+.learn-tour-close:focus-visible {
+  outline: 3px solid var(--color-clash3b);
+  outline-offset: 2px;
+}
+.learn-tour-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 8px 12px;
+}
+.learn-tour-nav {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+.learn-tour-nav-button {
+  padding: 4px 8px;
+  border: 0;
+  background: none;
+  color: var(--color-body);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.learn-tour-nav-button:hover {
+  color: var(--color-ink);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.learn-tour-nav-button:focus-visible {
+  outline: 3px solid var(--color-clash3b);
+  outline-offset: 2px;
+}

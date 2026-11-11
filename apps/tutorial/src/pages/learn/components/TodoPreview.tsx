@@ -1,15 +1,27 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 const INITIAL_ITEMS = [
   { id: 1, text: '读十页书', done: true },
-  { id: 2, text: '买牛奶', done: false },
+  { id: 2, text: '整理房间', done: false },
+  { id: 3, text: '回复邮件', done: false },
+  { id: 4, text: '慢跑 30 分钟', done: false },
+  { id: 5, text: '预约体检', done: false },
 ]
 
 export function TodoPreview() {
   const [items, setItems] = useState(INITIAL_ITEMS)
   const [draft, setDraft] = useState('')
-  const nextId = useRef(3)
+  const [search, setSearch] = useState('')
+  const nextId = useRef(6)
   const inputRef = useRef<HTMLInputElement>(null)
+  const visible = items.filter((item) =>
+    item.text.toLowerCase().includes(search.trim().toLowerCase()),
+  )
+
+  useEffect(() => {
+    document.body.dataset.learnTodoTotal = String(items.length)
+    document.body.dataset.learnTodoMilk = String(items.some((item) => item.text === '买牛奶'))
+  }, [items])
 
   return (
     <section className="learn-todo" aria-label="待办应用演示">
@@ -18,6 +30,23 @@ export function TodoPreview() {
         <output>
           {items.length} 件 · 完成 {items.filter((item) => item.done).length}
         </output>
+        <div className="learn-todo-search">
+          <label className="sr-only" htmlFor="todo-preview-search">
+            搜索待办
+          </label>
+          <input
+            id="todo-preview-search"
+            value={search}
+            onChange={(event) => setSearch(event.target.value)}
+            placeholder="搜索待办…"
+            autoComplete="off"
+          />
+          {search !== '' && (
+            <button type="button" aria-label="清空搜索" onClick={() => setSearch('')}>
+              ×
+            </button>
+          )}
+        </div>
       </div>
       <form
         className="learn-todo-input"
@@ -28,6 +57,7 @@ export function TodoPreview() {
           const id = nextId.current++
           setItems((current) => [...current, { id, text, done: false }])
           setDraft('')
+          setSearch('')
           inputRef.current?.focus()
         }}
       >
@@ -48,8 +78,8 @@ export function TodoPreview() {
         </button>
       </form>
       <ul className="learn-todo-items">
-        {items.map((item) => (
-          <li key={item.id}>
+        {visible.map((item) => (
+          <li key={item.id} data-todo={item.text}>
             <label>
               <input
                 type="checkbox"
@@ -77,7 +107,11 @@ export function TodoPreview() {
           </li>
         ))}
       </ul>
-      {items.length === 0 && <p className="learn-todo-empty">清单空了，添加一件想做的事吧。</p>}
+      {visible.length === 0 && (
+        <p className="learn-todo-empty">
+          {items.length === 0 ? '清单空了，添加一件想做的事吧。' : '没有匹配的待办。'}
+        </p>
+      )}
       <p className="learn-todo-hint">试着勾选一项，看看界面和计数怎样变化。</p>
     </section>
   )

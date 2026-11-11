@@ -127,7 +127,7 @@ const renderPages = async (
         format: 'esm',
         platform: 'node',
         jsx: 'automatic',
-        external: ['react', 'react-dom', '@idealjs/stack', 'esbuild-wasm'],
+        external: ['react', 'react-dom', 'react-joyride', '@idealjs/stack', 'esbuild-wasm'],
         plugins: [tutorialSsrPlugin(root)],
         outfile,
         logLevel: 'silent',

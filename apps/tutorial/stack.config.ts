@@ -44,6 +44,7 @@ export default defineConfig({
         'react',
         'react-dom/client',
         'react/jsx-runtime',
+        'react-joyride',
         '@idealjs/stack',
         '@idealjs/stack/builtins',
       ],
