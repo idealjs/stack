@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "stack dev",
     "build": "stack",
-    "preview": "stack preview --port 4173",
+    "preview": "stack preview",
     "test": "playwright test"
   },
   "dependencies": {

@@ -6,6 +6,8 @@ mkdirSync(process.env.TMPDIR, { recursive: true })
 
 import { defineConfig, devices } from '@playwright/test'
 
+const previewPort = Number(process.env.PW_PREVIEW_PORT ?? 9910)
+
 export default defineConfig({
   testDir: 'e2e',
   timeout: 30_000,
@@ -13,15 +15,14 @@ export default defineConfig({
   workers: 1, // 并行全页截图在 headless-shell 下偶发 runtime 崩溃，串行换稳定
   fullyParallel: true,
   use: {
-    baseURL: 'http://localhost:4491',
+    baseURL: `http://localhost:${previewPort}`,
 
     contextOptions: { reducedMotion: 'reduce', viewport: { width: 1280, height: 900 } },
   },
   webServer: [
     {
-      command:
-        'export VITE_STACK_RUNTIME_ORIGIN=http://localhost:5175 && yarn build && yarn stack preview --port 4491',
-      url: 'http://localhost:4491/index.html',
+      command: `export VITE_STACK_RUNTIME_ORIGIN=http://localhost:5175 && yarn build && yarn stack preview --port ${previewPort}`,
+      url: `http://localhost:${previewPort}/index.html`,
       reuseExistingServer: true,
       timeout: 300_000,
     },

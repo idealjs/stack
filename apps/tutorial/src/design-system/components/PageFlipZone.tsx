@@ -1,0 +1,298 @@
+import type { CSSProperties, ReactNode, RefObject } from 'react'
+import { useEffect, useRef } from 'react'
+import type { Chapter } from '../lib/types'
+import { FlipPeekCard } from './FlipPeekCard'
+
+const CHARGE_DAMPING = 0.12
+const CHARGE_RATE_CAP = 220
+const FLIP_THRESHOLD = 110
+const QUIET_MS = 250
+const GESTURE_GAP_MS = 100
+const SPRING_STIFFNESS = 170
+const SPRING_DAMPING = 18
+const PEEK_TRAVEL_PERCENT = 170
+
+export interface FlipTarget {
+  href: string
+  chapter: Chapter
+}
+
+export interface PageFlipZoneProps {
+  prev?: FlipTarget
+  next?: FlipTarget
+  children: ReactNode
+}
+
+const edgeStyle = {
+  opacity: 'calc(var(--flip-progress) * 12)',
+  '--flip-progress': 0,
+  '--flip-pointer': 'none',
+} as CSSProperties
+
+const cardTransform = (side: 'prev' | 'next') =>
+  side === 'next'
+    ? `translateY(calc((1 - var(--flip-progress)) * ${PEEK_TRAVEL_PERCENT}%))`
+    : `translateY(calc((var(--flip-progress) - 1) * ${PEEK_TRAVEL_PERCENT}%))`
+
+const EDGE_ANCHOR = {
+  next: {
+    container: 'bottom-0',
+    card: 'bottom-12',
+    badge: 'bottom-2',
+    bar: 'bottom-0',
+    label: '▼ 继续滚动 · 翻到下一章',
+  },
+  prev: {
+    container: 'top-0',
+    card: 'top-12',
+    badge: 'top-2',
+    bar: 'top-0',
+    label: '▲ 继续滚动 · 翻到上一章',
+  },
+} as const
+
+interface FlipEdgeProps {
+  side: 'prev' | 'next'
+  target: FlipTarget
+  edgeRef: RefObject<HTMLDivElement>
+  onFlip: () => void
+}
+
+function FlipEdge({ side, target, edgeRef, onFlip }: FlipEdgeProps) {
+  const anchor = EDGE_ANCHOR[side]
+  return (
+    <div
+      ref={edgeRef}
+      data-flip-edge={side}
+      className={`pointer-events-none fixed inset-x-0 ${anchor.container} z-40`}
+      style={edgeStyle}
+    >
+      <div aria-hidden className={`absolute inset-x-0 ${anchor.card}`}>
+        <div className="mx-auto max-w-[1200px] px-6">
+          <div
+            className="cursor-pointer will-change-transform [pointer-events:var(--flip-pointer)]"
+            style={{ transform: cardTransform(side) }}
+            onClick={onFlip}
+          >
+            <FlipPeekCard chapter={target.chapter} side={side} />
+          </div>
+        </div>
+      </div>
+      <div className={`absolute inset-x-0 ${anchor.badge} flex justify-center`}>
+        <button
+          type="button"
+          onClick={onFlip}
+          className="cursor-pointer rounded-full border-2 border-ink px-3 py-1 text-[12px] font-bold text-ink shadow-ink transition-[translate,box-shadow] duration-150 [pointer-events:var(--flip-pointer)] hover:-translate-y-0.5 hover:shadow-ink-lift active:translate-x-[2px] active:translate-y-[2px] active:shadow-[1px_1px_0_var(--color-ink)]"
+          style={{ background: target.chapter.color }}
+        >
+          {anchor.label}
+        </button>
+      </div>
+      <div aria-hidden className={`absolute inset-x-0 ${anchor.bar} h-1 bg-ink/15`}>
+        <div
+          className="h-full w-full origin-left bg-ink"
+          style={{ transform: 'scaleX(var(--flip-progress))' }}
+        />
+      </div>
+    </div>
+  )
+}
+
+export function PageFlipZone({ prev, next, children }: PageFlipZoneProps) {
+  const surfaceRef = useRef<HTMLDivElement>(null)
+  const nextEdgeRef = useRef<HTMLDivElement>(null)
+  const prevEdgeRef = useRef<HTMLDivElement>(null)
+  const edgesRef = useRef({ prev, next })
+  const flipRef = useRef<(side: 1 | -1) => void>(() => {})
+  edgesRef.current = { prev, next }
+
+  useEffect(() => {
+    const surface = surfaceRef.current
+    if (!surface) return
+
+    let target = 0
+    let position = 0
+    let velocity = 0
+    let frame = 0
+    let stepLastAt = 0
+    let lastWheelAt = 0
+    let gesture = 0
+    let arrivalGesture = -1
+    let lastChargeAt = 0
+    let quietTimer = 0
+    let direction = 0
+    let flipping = false
+
+    const atTop = () => window.scrollY <= 0
+    const atBottom = () =>
+      window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 1
+
+    const wheelDistance = (event: WheelEvent) => {
+      if (event.deltaMode === 1) return event.deltaY * 40
+      if (event.deltaMode === 2) return event.deltaY * window.innerHeight
+      return event.deltaY
+    }
+
+    const setProgress = (side: 1 | -1, progress: number) => {
+      const edge = side > 0 ? nextEdgeRef.current : prevEdgeRef.current
+      if (edge) {
+        edge.style.setProperty('--flip-progress', progress.toFixed(4))
+        edge.style.setProperty('--flip-pointer', progress > 0 ? 'auto' : 'none')
+      }
+    }
+
+    const paint = () => {
+      const offset = direction < 0 ? position : -position
+      surface.style.transform = offset === 0 ? '' : `translateY(${offset}px)`
+      const progress = Math.max(0, Math.min(position / FLIP_THRESHOLD, 1))
+      setProgress(1, direction > 0 ? progress : 0)
+      setProgress(-1, direction < 0 ? progress : 0)
+    }
+
+    const settled = () => Math.abs(target - position) < 0.5 && Math.abs(velocity) < 0.5
+
+    const step = (now: number) => {
+      const dt = stepLastAt === 0 ? 1 / 60 : Math.min((now - stepLastAt) / 1000, 1 / 30)
+      stepLastAt = now
+      velocity += (SPRING_STIFFNESS * (target - position) - SPRING_DAMPING * velocity) * dt
+      position += velocity * dt
+      if (settled()) {
+        position = target
+        velocity = 0
+        if (target === 0) direction = 0
+        paint()
+        frame = 0
+        stepLastAt = 0
+        return
+      }
+      paint()
+      frame = requestAnimationFrame(step)
+    }
+
+    const wake = () => {
+      if (frame === 0) {
+        stepLastAt = 0
+        frame = requestAnimationFrame(step)
+      }
+    }
+
+    const settleBack = () => {
+      window.clearTimeout(quietTimer)
+      quietTimer = 0
+      target = 0
+      lastChargeAt = 0
+      wake()
+    }
+
+    const flip = (side: number) => {
+      const edges = edgesRef.current
+      const targetEdge = side > 0 ? edges.next : edges.prev
+      direction = side
+      flipping = true
+      if (targetEdge) {
+        window.location.assign(targetEdge.href)
+      } else {
+        flipping = false
+        settleBack()
+      }
+    }
+    flipRef.current = flip
+
+    const onWheel = (event: WheelEvent) => {
+      if (flipping || event.deltaY === 0) return
+      const now = performance.now()
+      if (now - lastWheelAt > GESTURE_GAP_MS) gesture += 1
+      lastWheelAt = now
+
+      const distance = wheelDistance(event)
+      const pullingNext = distance > 0 && atBottom() && !!edgesRef.current.next
+      const pullingPrev = distance < 0 && atTop() && !!edgesRef.current.prev
+      if (!pullingNext && !pullingPrev) {
+        if (direction !== 0) settleBack()
+        return
+      }
+      if (gesture === arrivalGesture) return
+
+      event.preventDefault()
+      direction = pullingNext ? 1 : -1
+      const held = lastChargeAt === 0 ? 1 / 60 : Math.min((now - lastChargeAt) / 1000, 0.15)
+      lastChargeAt = now
+      window.clearTimeout(quietTimer)
+      target = Math.min(
+        target + Math.min(Math.abs(distance) * CHARGE_DAMPING, CHARGE_RATE_CAP * held),
+        FLIP_THRESHOLD,
+      )
+      if (target >= FLIP_THRESHOLD) {
+        quietTimer = window.setTimeout(() => {
+          quietTimer = 0
+          if (target >= FLIP_THRESHOLD) flip(direction)
+        }, QUIET_MS)
+        wake()
+        return
+      }
+      wake()
+    }
+
+    const onScroll = () => {
+      if (flipping) return
+      if (atTop() || atBottom()) arrivalGesture = gesture
+      const holding = (direction > 0 && atBottom()) || (direction < 0 && atTop())
+      if (!holding && (position !== 0 || target !== 0)) settleBack()
+    }
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (flipping || event.metaKey || event.ctrlKey || event.altKey) return
+      const node = event.target
+      if (
+        node instanceof HTMLElement &&
+        (node.isContentEditable || /^(INPUT|TEXTAREA|SELECT|BUTTON|A)$/.test(node.tagName))
+      ) {
+        return
+      }
+      const flippingNext =
+        atBottom() && !!edgesRef.current.next && ['ArrowDown', 'PageDown', ' '].includes(event.key)
+      const flippingPrev =
+        atTop() && !!edgesRef.current.prev && ['ArrowUp', 'PageUp'].includes(event.key)
+      if (flippingNext || flippingPrev) {
+        event.preventDefault()
+        direction = flippingNext ? 1 : -1
+        flip(direction)
+      }
+    }
+
+    window.addEventListener('wheel', onWheel, { passive: false })
+    window.addEventListener('scroll', onScroll, { passive: true })
+    window.addEventListener('keydown', onKeyDown)
+    return () => {
+      window.removeEventListener('wheel', onWheel)
+      window.removeEventListener('scroll', onScroll)
+      window.removeEventListener('keydown', onKeyDown)
+      window.clearTimeout(quietTimer)
+      if (frame !== 0) cancelAnimationFrame(frame)
+    }
+  }, [])
+
+  return (
+    <>
+      <div ref={surfaceRef} data-flip-surface>
+        {children}
+      </div>
+      {next && (
+        <FlipEdge
+          side="next"
+          target={next}
+          edgeRef={nextEdgeRef}
+          onFlip={() => flipRef.current(1)}
+        />
+      )}
+      {prev && (
+        <FlipEdge
+          side="prev"
+          target={prev}
+          edgeRef={prevEdgeRef}
+          onFlip={() => flipRef.current(-1)}
+        />
+      )}
+    </>
+  )
+}

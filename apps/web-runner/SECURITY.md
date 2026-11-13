@@ -91,7 +91,7 @@ e2e 栈（5175）不设这些 env，base 默认 `/`、运行时位构建时注�
 放宽 allow-same-origin 时同步改写：含 allow-scripts＋allow-same-origin、不含
 top-navigation/popups/forms/modals、src 源 ≠ 宿主源。
 
-e2e 栈自包含（playwright webServer 数组）：站点 `yarn build`＋preview 于 4491（构建时
+e2e 栈自包含（playwright webServer 数组）：站点 `yarn build`＋preview 于 9910（构建时
 经进程 env 注入 `VITE_STACK_RUNTIME_ORIGIN=http://localhost:5175`），运行时
 `dev --port 5175`——与交互 dev 的 8910/8911 互不抢占，跨源契约不再隐式依赖
 「机器上恰好在跑的 dev 服务器」。

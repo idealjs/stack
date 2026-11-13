@@ -3,6 +3,33 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script>
+      (function () {
+        try {
+          var raw = sessionStorage.getItem('page-flip-landing')
+          sessionStorage.removeItem('page-flip-landing')
+          if (!raw) return
+          if (Date.now() - JSON.parse(raw).at > 2000) return
+        } catch (e) {
+          return
+        }
+        window.scrollTo(0, 0)
+        var lastAt = performance.now()
+        var hold = function (event) {
+          var now = performance.now()
+          if (now - lastAt > 300) {
+            window.removeEventListener('wheel', hold)
+            return
+          }
+          event.preventDefault()
+          lastAt = now
+        }
+        window.addEventListener('wheel', hold, { passive: false })
+        window.setTimeout(function () {
+          window.removeEventListener('wheel', hold)
+        }, 2500)
+      })()
+    </script>
     <title>第 6 章 · 高级教程</title>
     <link rel="stylesheet" href="./src/design-system/styles/tokens.css" />
     <link rel="stylesheet" href="./src/design-system/styles/learning.css" />

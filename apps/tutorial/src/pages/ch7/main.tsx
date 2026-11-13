@@ -1,5 +1,6 @@
 import { ChapterPage } from '../../components/ChapterPage'
 import { mountPage } from '../../lib/mount'
+import { setupPageFlip } from '../../lib/page-flip'
 import { TemplateLab } from './TemplateLab'
 
 const page = (
@@ -10,4 +11,5 @@ const page = (
 
 export default page
 
+setupPageFlip()
 mountPage(page)
