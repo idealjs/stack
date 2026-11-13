@@ -7,7 +7,7 @@
 - **View Transitions**：`@view-transition { navigation: auto }` 跨文档交叉淡入（MPA 不闪白）；书架相框 ↔ 章节页章头同名 `view-transition-name: ch-<id>` 共享元素变形；站头 `site-header` 常驻；`prefers-reduced-motion` 下禁用
 - **设计系统**：组件与 tokens 唯一定义于 `src/design-system`（孟菲斯 × 拟物卡）
 - **内容**：`src/lib/chapters.ts`（六章的靶子/步骤/积木/指派数据），改内容只动这一个文件
-- **远程 code-server 访问**：按需传 `--base /absproxy/5173`（仅远程
+- **远程 code-server 访问**：按需传 `--base /absproxy/9911`（仅远程
   absproxy 入口用、默认不携带——301 前缀跳转会被浏览器永久缓存，现为 302）——各环境变量
   远程同域场景可用包级 `yarn dev:proxy`（`--base`＋运行时 origin 注入）；
   与同域接缝的完整说明见 [../web-runner/README.md](../web-runner/README.md)「远程访问」节

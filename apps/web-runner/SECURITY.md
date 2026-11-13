@@ -24,9 +24,9 @@
 
 远程经 code.idealjs.com（code-server 反向代理）访问时，教程站有两个入口、运行时一个：
 
-- 教程站·端口子域名：`https://5173.code.idealjs.com`——code-server 端口子域名代理，
+- 教程站·端口子域名：`https://9911.code.idealjs.com`——code-server 端口子域名代理，
   顶层导航，会话/登录跳转正常。**跨源验证的正式形态**：此入口下教程页与运行时不同源。
-- 教程站·主域路径：`https://code.idealjs.com/absproxy/5173/`——`/absproxy` 语义为路径
+- 教程站·主域路径：`https://code.idealjs.com/absproxy/9911/`——`/absproxy` 语义为路径
   直通（应用自知前缀），配教程 `--base`（env `TUTORIAL_BASE`）。**远程开发入口**：
   此入口下教程页与运行时（主域 `/absproxy/8911/`）同源——origin 不含路径，上节的
   第二道防线在该入口不存在，隔离只剩 sandbox 剥源一道（opaque origin 仍成立，框内
@@ -46,7 +46,7 @@
   无跨源问题。
   该入口下运行时与宿主同源（origin 不含路径），同源告警如实亮红，隔离只剩 sandbox
   一道——与 srcdoc 等强度。跨源 src 形态只在无 cookie 鉴权的运行时位成立：
-  e2e（localhost:5175）、生产（独立域名静态托管 `dist-runtime/`）。srcdoc
+  e2e（localhost:9912）、生产（独立域名静态托管 `dist-runtime/`）。srcdoc
   （`VITE_STACK_RUNTIME_ORIGIN` 置空）保留为兜底——doc 本体零网络、零子资源。
 
 教程站站内链接一律相对形态（`./xxx.html`）：根部署（本地、子域名、SSG 生产）与前缀
@@ -55,12 +55,12 @@
 配置接缝：`apps/tutorial/.env.development` 的 `VITE_STACK_RUNTIME_ORIGIN`（默认
 `http://localhost:8911`＝本地 dev 的运行时位；置空 = srcdoc；设远程位 = 跨源 src，仅限
 无 cookie 鉴权问题的位）、根 `package.json` dev 脚本只并行拉起 tutorial dev 与 web-runner
-的 `stack dev`；教程侧 `--base /absproxy/5173` 仅为远程 absproxy 场景的**可选
+的 `stack dev`；教程侧 `--base /absproxy/9911` 仅为远程 absproxy 场景的**可选
 注入**（默认启动指令不携带——教程的 301 重定向会被浏览器永久缓存，撤环境后仍阴魂
 不散，已改 302）；运行时静态服务器端口随 dev 脚本定 8911（`--port` 覆盖）。
 教程站 `allowedHosts` 含 `code.idealjs.com`（代理透传保留 Host）；运行时是自持静态
 服务器，无 Host 假设。
-e2e 栈（5175）不设这些 env，base 默认 `/`、运行时位构建时注入，契约不受影响。
+e2e 栈（9912）不设这些 env，base 默认 `/`、运行时位构建时注入，契约不受影响。
 
 ## 持久化 XSS——存储放宽阶段（allow-same-origin）的头号风险
 
@@ -92,8 +92,8 @@ e2e 栈（5175）不设这些 env，base 默认 `/`、运行时位构建时注�
 top-navigation/popups/forms/modals、src 源 ≠ 宿主源。
 
 e2e 栈自包含（playwright webServer 数组）：站点 `yarn build`＋preview 于 9910（构建时
-经进程 env 注入 `VITE_STACK_RUNTIME_ORIGIN=http://localhost:5175`），运行时
-`dev --port 5175`——与交互 dev 的 8910/8911 互不抢占，跨源契约不再隐式依赖
+经进程 env 注入 `VITE_STACK_RUNTIME_ORIGIN=http://localhost:9912`），运行时
+`dev --port 9912`——与交互 dev 的 8910/8911 互不抢占，跨源契约不再隐式依赖
 「机器上恰好在跑的 dev 服务器」。
 
 ## 运行时嵌入头（已移除）

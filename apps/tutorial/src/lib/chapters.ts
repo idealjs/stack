@@ -338,7 +338,7 @@ export const CONTENT: Record<ChapterId, ChapterContent> = {
       {
         name: '联调（CORS）',
         what: '浏览器跨端口拿数据时要带的通行证头',
-        why: '前端 5173、后端 3000，不配就互相不认',
+        why: '前端 9911、后端 3000，不配就互相不认',
         family: '同族是代理转发；开发期用 CORS 头或代理都行，别两头乱配',
       },
     ],

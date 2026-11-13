@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test'
 
-const RUNTIME_ORIGIN = 'http://localhost:5175'
+const RUNTIME_ORIGIN = 'http://localhost:9912'
 
 test('iframe 恰为 allow-scripts，src 指向独立源运行时', async ({ page }) => {
   await page.goto('/practice.html')

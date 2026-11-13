@@ -375,7 +375,7 @@ export function LearningKitGallery() {
           >
             <ExperimentFrame
               title="React Todo / 预期结果"
-              address="localhost:5173"
+              address="localhost:9911"
               caption="点选任务，查看变化"
             >
               <h3 className="mb-3">今天的练习</h3>

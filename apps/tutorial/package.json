@@ -6,7 +6,7 @@
   "scripts": {
     "build": "STACK_SSG=1 stack",
     "dev": "stack dev",
-    "dev:proxy": "VITE_STACK_RUNTIME_ORIGIN=https://code.idealjs.com/absproxy/8911 stack dev --base /absproxy/5173 --port 5173",
+    "dev:proxy": "VITE_STACK_RUNTIME_ORIGIN=https://code.idealjs.com/absproxy/8911 stack dev --base /absproxy/9911 --port 9911",
     "preview": "stack preview",
     "test:e2e": "playwright test",
     "test:e2e:update": "playwright test --update-snapshots"

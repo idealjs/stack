@@ -21,14 +21,14 @@ export default defineConfig({
   },
   webServer: [
     {
-      command: `export VITE_STACK_RUNTIME_ORIGIN=http://localhost:5175 && yarn build && yarn stack preview --port ${previewPort}`,
+      command: `export VITE_STACK_RUNTIME_ORIGIN=http://localhost:9912 && yarn build && yarn stack preview --port ${previewPort}`,
       url: `http://localhost:${previewPort}/index.html`,
       reuseExistingServer: true,
       timeout: 300_000,
     },
     {
-      command: 'yarn workspace @stack/web-runner dev --port 5175',
-      url: 'http://localhost:5175/',
+      command: 'yarn workspace @stack/web-runner dev --port 9912',
+      url: 'http://localhost:9912/',
       reuseExistingServer: true,
     },
   ],
