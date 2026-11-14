@@ -6,15 +6,7 @@
     "useIgnoreFile": true
   },
   "files": {
-    "includes": [
-      "**",
-      "!**/.yarn",
-      "!**/dist",
-      "!**/build",
-      "!**/.docusaurus",
-      "!**/.zcode",
-      "!**/design-refs"
-    ]
+    "includes": ["**", "!**/.yarn", "!**/dist", "!**/build", "!**/.docusaurus", "!**/.zcode"]
   },
   "assist": {
     "actions": {
