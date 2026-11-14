@@ -1,16 +1,14 @@
 import type { CSSProperties, ReactNode, RefObject } from 'react'
 import { useEffect, useRef } from 'react'
 import type { Chapter } from '../lib/types'
-import { FlipPeekCard } from './FlipPeekCard'
 
 const CHARGE_DAMPING = 0.12
 const CHARGE_RATE_CAP = 220
-const FLIP_THRESHOLD = 110
+const FLIP_THRESHOLD = 55
 const QUIET_MS = 250
 const GESTURE_GAP_MS = 100
 const SPRING_STIFFNESS = 170
 const SPRING_DAMPING = 18
-const PEEK_TRAVEL_PERCENT = 170
 
 export interface FlipTarget {
   href: string
@@ -29,22 +27,20 @@ const edgeStyle = {
   '--flip-pointer': 'none',
 } as CSSProperties
 
-const cardTransform = (side: 'prev' | 'next') =>
+const bubbleTransform = (side: 'prev' | 'next') =>
   side === 'next'
-    ? `translateY(calc((1 - var(--flip-progress)) * ${PEEK_TRAVEL_PERCENT}%))`
-    : `translateY(calc((var(--flip-progress) - 1) * ${PEEK_TRAVEL_PERCENT}%))`
+    ? 'translateY(calc((1 - var(--flip-progress)) * 24px))'
+    : 'translateY(calc((var(--flip-progress) - 1) * 24px))'
 
 const EDGE_ANCHOR = {
   next: {
     container: 'bottom-0',
-    card: 'bottom-12',
     badge: 'bottom-2',
     bar: 'bottom-0',
     label: '▼ 继续滚动 · 翻到下一章',
   },
   prev: {
     container: 'top-0',
-    card: 'top-12',
     badge: 'top-2',
     bar: 'top-0',
     label: '▲ 继续滚动 · 翻到上一章',
@@ -67,23 +63,12 @@ function FlipEdge({ side, target, edgeRef, onFlip }: FlipEdgeProps) {
       className={`pointer-events-none fixed inset-x-0 ${anchor.container} z-40`}
       style={edgeStyle}
     >
-      <div aria-hidden className={`absolute inset-x-0 ${anchor.card}`}>
-        <div className="mx-auto max-w-[1200px] px-6">
-          <div
-            className="cursor-pointer will-change-transform [pointer-events:var(--flip-pointer)]"
-            style={{ transform: cardTransform(side) }}
-            onClick={onFlip}
-          >
-            <FlipPeekCard chapter={target.chapter} side={side} />
-          </div>
-        </div>
-      </div>
       <div className={`absolute inset-x-0 ${anchor.badge} flex justify-center`}>
         <button
           type="button"
           onClick={onFlip}
           className="cursor-pointer rounded-full border-2 border-ink px-3 py-1 text-[12px] font-bold text-ink shadow-ink transition-[translate,box-shadow] duration-150 [pointer-events:var(--flip-pointer)] hover:-translate-y-0.5 hover:shadow-ink-lift active:translate-x-[2px] active:translate-y-[2px] active:shadow-[1px_1px_0_var(--color-ink)]"
-          style={{ background: target.chapter.color }}
+          style={{ background: target.chapter.color, transform: bubbleTransform(side) }}
         >
           {anchor.label}
         </button>
@@ -99,7 +84,6 @@ function FlipEdge({ side, target, edgeRef, onFlip }: FlipEdgeProps) {
 }
 
 export function PageFlipZone({ prev, next, children }: PageFlipZoneProps) {
-  const surfaceRef = useRef<HTMLDivElement>(null)
   const nextEdgeRef = useRef<HTMLDivElement>(null)
   const prevEdgeRef = useRef<HTMLDivElement>(null)
   const edgesRef = useRef({ prev, next })
@@ -107,9 +91,6 @@ export function PageFlipZone({ prev, next, children }: PageFlipZoneProps) {
   edgesRef.current = { prev, next }
 
   useEffect(() => {
-    const surface = surfaceRef.current
-    if (!surface) return
-
     let target = 0
     let position = 0
     let velocity = 0
@@ -142,8 +123,6 @@ export function PageFlipZone({ prev, next, children }: PageFlipZoneProps) {
     }
 
     const paint = () => {
-      const offset = direction < 0 ? position : -position
-      surface.style.transform = offset === 0 ? '' : `translateY(${offset}px)`
       const progress = Math.max(0, Math.min(position / FLIP_THRESHOLD, 1))
       setProgress(1, direction > 0 ? progress : 0)
       setProgress(-1, direction < 0 ? progress : 0)
@@ -190,6 +169,7 @@ export function PageFlipZone({ prev, next, children }: PageFlipZoneProps) {
       direction = side
       flipping = true
       if (targetEdge) {
+        sessionStorage.setItem('vt', side > 0 ? 'next' : 'prev')
         window.location.assign(targetEdge.href)
       } else {
         flipping = false
@@ -274,9 +254,7 @@ export function PageFlipZone({ prev, next, children }: PageFlipZoneProps) {
 
   return (
     <>
-      <div ref={surfaceRef} data-flip-surface>
-        {children}
-      </div>
+      {children}
       {next && (
         <FlipEdge
           side="next"

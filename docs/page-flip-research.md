@@ -102,6 +102,17 @@ apps/tutorial/src/
 1. **P0（桌面全量）**：`PageFlipZone` 手势层（wheel + 键盘，到底蓄力/释放判定）+ `tokens.css` 方向关键帧（`linear()` 弹簧、next/prev types、named 元素白名单）+ `page-flip.ts` 方向登记。Firefox/旧浏览器自动降级为现状。
 2. **P1（打磨）**：下一章 prefetch、触屏 overscroll 蓄力。（已落地：蓄力符号层——底缘进度条＋继续滚动文案＋上/下章英雄卡探头；e2e 手势用例）
 
+### 方向机制重构（2026-11）
+
+参考 `idealjs/packages/home/page-one.html` 的做法，方向登记从 JS types 机制换成 sessionStorage 握手＋CSS 属性选择器，进场动画完全交给浏览器：
+
+- **写**：翻页意图产生时落 `sessionStorage['vt']`——页底 `data-dir` 链接由 ch1–ch7.html head 内联脚本的全局 click 监听写入；手势/键盘/气泡点击统一在 `PageFlipZone` 的 `flip()` 里写。
+- **读**：ch1–ch7.html head 内联经典脚本（解析阻塞，早于首帧）读出并写到 `<html data-vt>`，**读后即清**（consume-once，不设默认方向）。
+- **选**：`tokens.css` 用 `html[data-vt="next"]::view-transition-new(root)`（rise-in）/ `[data-vt="prev"]`（drop-in）/ `html[data-vt]::view-transition-old(root)`（recede）选关键帧，`:active-view-transition-type()` 与 `page-flip.ts` 的 pageswap/pagereveal URL 章号比较整体废弃。
+- **读后即清的红利**：浏览器返回、抽屉跳章、刷新等非翻页导航读不到方向，走浏览器默认 crossfade，无残留状态、不会拿旧方向误判返回动画。
+- **蓄力符号层收敛**：只留「气泡（章色胶囊按钮）＋进度条」，探头卡 FlipPeekCard（章标题预览）删除；英雄区 `ch-N` 命名与 `--vt-hero-name` 抑制机制一并移除，标题随整页滑动（`data-vt` 是常驻属性，morph 抑制无法只作用于过渡窗口）。`site-header` morph 保留。
+- `scrollRestoration = 'manual'` 移入内联脚本（原模块脚本晚于首帧，时机不可靠）。
+
 落地后机制说明按仓库约定补进 design-* 册，PR 附 before/after 实拍（`docs/assets/page-flip/`）。
 
 ## 参考

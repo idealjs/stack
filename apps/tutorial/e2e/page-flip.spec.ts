@@ -11,11 +11,6 @@ const chargeByWheel = async (page: Page, deltaY: number, steps = 20) => {
 const isAtBottom = () =>
   window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 1
 
-const surfaceSettled = () => {
-  const surface = document.querySelector('[data-flip-surface]')
-  return surface instanceof HTMLElement && surface.style.transform === ''
-}
-
 const edgeProgress = (side: 'next' | 'prev') => {
   const edge = document.querySelector(`[data-flip-edge="${side}"]`)
   return edge instanceof HTMLElement ? Number(edge.style.getPropertyValue('--flip-progress')) : -1
@@ -30,19 +25,21 @@ const edgeSettled = (side: 'next' | 'prev') => {
 
 test('charge past threshold at bottom flips to next chapter', async ({ page }) => {
   await page.goto('./ch1.html')
-  await expect(page.locator('[data-flip-surface]')).toHaveCount(1)
+  await expect(page.locator('[data-flip-edge="next"]')).toHaveCount(1)
   await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight))
   await page.waitForTimeout(200)
   await page.mouse.move(640, 450)
   await chargeByWheel(page, 250)
   await page.waitForURL('**/ch2.html')
+  await expect(page.locator('html')).toHaveAttribute('data-vt', 'next')
+  expect(await page.evaluate(() => sessionStorage.getItem('vt'))).toBeNull()
 })
 
 test('arrival momentum never flips; charge holds after wheel stops; reverse wheel clears it', async ({
   page,
 }) => {
   await page.goto('./ch1.html')
-  await expect(page.locator('[data-flip-surface]')).toHaveCount(1)
+  await expect(page.locator('[data-flip-edge="next"]')).toHaveCount(1)
   await page.mouse.move(640, 450)
   await page.mouse.wheel(0, 6000)
   await page.waitForFunction(isAtBottom)
@@ -67,15 +64,16 @@ test('arrival momentum never flips; charge holds after wheel stops; reverse whee
 
 test('charge upward at top flips to previous chapter', async ({ page }) => {
   await page.goto('./ch2.html')
-  await expect(page.locator('[data-flip-surface]')).toHaveCount(1)
+  await expect(page.locator('[data-flip-edge="next"]')).toHaveCount(1)
   await page.mouse.move(640, 450)
   await chargeByWheel(page, -250)
   await page.waitForURL('**/ch1.html')
+  await expect(page.locator('html')).toHaveAttribute('data-vt', 'prev')
 })
 
 test('mid-page wheel keeps scrolling without flipping', async ({ page }) => {
   await page.goto('./ch3.html')
-  await expect(page.locator('[data-flip-surface]')).toHaveCount(1)
+  await expect(page.locator('[data-flip-edge="next"]')).toHaveCount(1)
   await page.mouse.move(640, 450)
   await page.mouse.wheel(0, 1500)
   await page.waitForTimeout(600)
@@ -84,7 +82,7 @@ test('mid-page wheel keeps scrolling without flipping', async ({ page }) => {
 
 test('PageDown at bottom flips to next chapter', async ({ page }) => {
   await page.goto('./ch1.html')
-  await expect(page.locator('[data-flip-surface]')).toHaveCount(1)
+  await expect(page.locator('[data-flip-edge="next"]')).toHaveCount(1)
   await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight))
   await page.keyboard.press('PageDown')
   await page.waitForURL('**/ch2.html')
@@ -92,7 +90,7 @@ test('PageDown at bottom flips to next chapter', async ({ page }) => {
 
 test('clicking the next-chapter badge jumps directly to the next chapter', async ({ page }) => {
   await page.goto('./ch1.html')
-  await expect(page.locator('[data-flip-surface]')).toHaveCount(1)
+  await expect(page.locator('[data-flip-edge="next"]')).toHaveCount(1)
   await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight))
   await page.waitForTimeout(200)
   await page.mouse.move(640, 450)
@@ -113,7 +111,7 @@ test('reload returns to chapter top', async ({ page }) => {
 
 test('after flip the next chapter lands at top and first wheel scrolls', async ({ page }) => {
   await page.goto('./ch1.html')
-  await expect(page.locator('[data-flip-surface]')).toHaveCount(1)
+  await expect(page.locator('[data-flip-edge="next"]')).toHaveCount(1)
   await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight))
   await page.waitForTimeout(200)
   await page.mouse.move(640, 450)
@@ -136,7 +134,7 @@ test('weak bottom charge holds next edge symbols on screen, reverse wheel spring
   page,
 }) => {
   await page.goto('./ch1.html')
-  await expect(page.locator('[data-flip-surface]')).toHaveCount(1)
+  await expect(page.locator('[data-flip-edge="next"]')).toHaveCount(1)
   await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight))
   await page.waitForTimeout(300)
   expect(await page.evaluate(edgeProgress, 'next')).toBe(0)
@@ -144,7 +142,7 @@ test('weak bottom charge holds next edge symbols on screen, reverse wheel spring
   await page.mouse.move(640, 450)
   await page.mouse.wheel(0, 200)
   await page.waitForFunction(edgeProgress, 'next')
-  await expect(page.locator('[data-flip-edge="next"] [data-flip-peek]')).toBeVisible()
+  await expect(page.locator('[data-flip-edge="next"] button')).toBeVisible()
 
   await page.waitForTimeout(400)
   expect(await page.evaluate(edgeProgress, 'next')).toBeGreaterThan(0)
@@ -159,11 +157,11 @@ test('weak top charge holds prev edge symbols on screen, reverse wheel springs t
   page,
 }) => {
   await page.goto('./ch2.html')
-  await expect(page.locator('[data-flip-surface]')).toHaveCount(1)
+  await expect(page.locator('[data-flip-edge="next"]')).toHaveCount(1)
   await page.mouse.move(640, 450)
   await page.mouse.wheel(0, -200)
   await page.waitForFunction(edgeProgress, 'prev')
-  await expect(page.locator('[data-flip-edge="prev"] [data-flip-peek]')).toBeVisible()
+  await expect(page.locator('[data-flip-edge="prev"] button')).toBeVisible()
 
   await page.waitForTimeout(400)
   expect(await page.evaluate(edgeProgress, 'prev')).toBeGreaterThan(0)

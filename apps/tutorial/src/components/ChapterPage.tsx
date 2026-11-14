@@ -20,13 +20,7 @@ export function ChapterPage({ id, children }: { id: ChapterId; children?: ReactN
       >
         <div
           className="relative flex items-center gap-4 overflow-hidden rounded-2xl border-2 border-ink p-5 shadow-ink"
-          data-chapter-hero
-          style={
-            {
-              background: ch.color,
-              viewTransitionName: `var(--vt-hero-name, ch-${id})`,
-            } as CSSProperties
-          }
+          style={{ background: ch.color } as CSSProperties}
         >
           <span
             className="t-display pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 select-none"
@@ -123,6 +117,7 @@ export function ChapterPage({ id, children }: { id: ChapterId; children?: ReactN
             {prev ? (
               <a
                 href={`./ch${prev}.html`}
+                data-dir="prev"
                 className="rounded-xl border-2 border-ink bg-paper px-4 py-2 text-[12.5px] font-bold text-ink no-underline shadow-ink"
               >
                 ← 第 {prev} 章 · {CHAPTERS[prev].title}
@@ -139,6 +134,7 @@ export function ChapterPage({ id, children }: { id: ChapterId; children?: ReactN
             {next ? (
               <a
                 href={`./ch${next}.html`}
+                data-dir="next"
                 className="rounded-xl border-2 border-ink bg-paper px-4 py-2 text-[12.5px] font-bold text-ink no-underline shadow-ink"
               >
                 第 {next} 章 · {CHAPTERS[next].title} →

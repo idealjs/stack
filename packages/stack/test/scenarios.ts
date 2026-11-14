@@ -235,6 +235,54 @@ export const SCENARIOS: Scenario[] = [
     },
   },
   {
+    name: '产出级联：watch 订阅者登记的产出继续派发下游钩子',
+    files: { 'src/main.ts': 'console.log(1)\n' },
+    config: {
+      inputs: [{ name: 'main', path: 'src/main.ts' }],
+      hooks: [
+        {
+          name: 'mid-producer',
+          watch: ['default'],
+          lower: (ctx, output) => {
+            ctx.output({
+              name: 'mid',
+              dir: output.dir,
+              files: output.files.map((file) => ({
+                path: file.path,
+                code: `${file.code}\nmidMark()\n`,
+              })),
+            })
+          },
+        } satisfies WatchHook,
+        {
+          name: 'final-producer',
+          watch: ['mid'],
+          lower: (ctx, output) => {
+            ctx.output({
+              name: 'final',
+              dir: output.dir,
+              files: output.files.map((file) => ({
+                path: file.path,
+                code: `${file.code}\nfinalMark()\n`,
+              })),
+            })
+          },
+        } satisfies WatchHook,
+      ],
+    },
+    expected: {
+      outputs: [
+        { name: 'default', dir: 'dist' },
+        { name: 'mid', dir: 'dist', files: [{ path: 'main.js', includes: ['midMark()'] }] },
+        {
+          name: 'final',
+          dir: 'dist',
+          files: [{ path: 'main.js', includes: ['midMark()', 'finalMark()'] }],
+        },
+      ],
+    },
+  },
+  {
     name: '未解析的相对导入使构建失败',
     files: {
       'src/main.ts': "import { missing } from './missing'\nconsole.log(missing)\n",

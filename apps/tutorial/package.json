@@ -4,7 +4,7 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
-    "build": "STACK_SSG=1 stack",
+    "build": "stack",
     "dev": "stack dev",
     "dev:proxy": "VITE_STACK_RUNTIME_ORIGIN=https://code.idealjs.com/absproxy/8911 stack dev --base /absproxy/9911 --port 9911",
     "preview": "stack preview",

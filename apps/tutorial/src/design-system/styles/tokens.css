@@ -176,14 +176,6 @@
   navigation: auto;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  ::view-transition-group(*),
-  ::view-transition-old(*),
-  ::view-transition-new(*) {
-    animation-duration: 0.01ms;
-  }
-}
-
 :root {
   --page-flip-spring: linear(
     0,
@@ -197,11 +189,6 @@
     1 84%,
     1
   );
-}
-
-:root:active-view-transition-type(page-flip-next) [data-chapter-hero],
-:root:active-view-transition-type(page-flip-prev) [data-chapter-hero] {
-  --vt-hero-name: none;
 }
 
 @keyframes page-flip-rise-in {
@@ -233,23 +220,19 @@
   }
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  :root:active-view-transition-type(page-flip-next)::view-transition-new(root),
-  :root:active-view-transition-type(page-flip-prev)::view-transition-new(root) {
-    animation-duration: 520ms;
-    animation-timing-function: var(--page-flip-spring);
-    animation-fill-mode: both;
-  }
-  :root:active-view-transition-type(page-flip-next)::view-transition-new(root) {
-    animation-name: page-flip-rise-in;
-  }
-  :root:active-view-transition-type(page-flip-prev)::view-transition-new(root) {
-    animation-name: page-flip-drop-in;
-  }
-  :root:active-view-transition-type(page-flip-next)::view-transition-old(root),
-  :root:active-view-transition-type(page-flip-prev)::view-transition-old(root) {
-    animation: 520ms var(--page-flip-spring) both page-flip-recede;
-  }
+html[data-vt]::view-transition-new(root) {
+  animation-duration: 520ms;
+  animation-timing-function: var(--page-flip-spring);
+  animation-fill-mode: both;
+}
+html[data-vt="next"]::view-transition-new(root) {
+  animation-name: page-flip-rise-in;
+}
+html[data-vt="prev"]::view-transition-new(root) {
+  animation-name: page-flip-drop-in;
+}
+html[data-vt]::view-transition-old(root) {
+  animation: 520ms var(--page-flip-spring) both page-flip-recede;
 }
 
 @theme {

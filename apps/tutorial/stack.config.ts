@@ -7,6 +7,7 @@ import { imports, vendor } from '@idealjs/stack/builtins'
 import { nodeFs } from '@idealjs/stack/node'
 import { transform } from 'esbuild-wasm'
 import { tutorialBuild } from './stack-plugins/build.ts'
+import { ssg } from './stack-plugins/ssg.ts'
 
 const appDir = dirname(fileURLToPath(import.meta.url))
 try {
@@ -75,6 +76,7 @@ export default defineConfig({
       },
     },
     imports(),
-    tutorialBuild({ root: appDir, ssg: process.env.STACK_SSG === '1' }),
+    tutorialBuild({ root: appDir }),
+    ssg({ root: appDir }),
   ],
 })
