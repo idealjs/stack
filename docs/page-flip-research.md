@@ -115,6 +115,16 @@ apps/tutorial/src/
 
 落地后机制说明按仓库约定补进 design-* 册，PR 附 before/after 实拍（`docs/assets/page-flip/`）。
 
+### 框架布局与动画调优（2026-11）
+
+翻页动画上线后三个体验问题与对策：
+
+- **滚动条位置**：原 window 级滚动条贯穿视口全高、压过 navbar/footer 区域。`SitePage` 重构为框架布局：`main` 变 `h-dvh flex-col`，navbar 层（flex-none）与 footer 层（flex-none）常驻视口，中间 `[data-scroll-root]` 容器独立滚动——滚动条天然只出现在 navbar 与 footer 之间。
+- **内容滑过 navbar 的违和**：原 root 快照整页 `translateY(100%)` 滑入，堆叠在 `site-header` 组之上，观感是「正文压过导航」。对策：footer 也命名（`site-footer`）常驻 morph，`html[data-vt]` 下给 `site-header`/`site-footer` 组 `z-index: 10` 置于 root 之上，内容从常驻框架后面进出；新页进场从整幅滑入改为 `translateY(±40px)` 小位移淡入（380ms，弹簧曲线保留），`root` 组补 paper 底色防淡入白闪。
+- **navbar 收起**：文档流 navbar 滚走后不可达。框架下 navbar 常驻，初版为「下滚收起、上滚展开」的方向感知；后改为**默认收起＋toggle 手动开合**——桌面紧凑条（brand＋当前章 label＋▼/▲ 按钮）上 `site-nav-expand` checkbox（命名 peer 纯 CSS，同移动抽屉先例）控制分组网格以 `absolute top-full` **遮挡式浮层**展开（不占布局流、不挤压滚动区，透明遮罩点外收起）；移动端维持 `site-nav-toggle` 汉堡→抽屉 sidebar。滚动驱动版曾出现「收起动画 clamp scrollTop 被误判上滚 → 收起⇄展开震荡 → 蓄力被 arrivalGesture 拦截」的反馈循环，toggle 化后布局高度恒定，此类几何干扰整体消失。
+- `scrollRestoration = 'manual'` 随框架布局删除：window 恒不滚动，新文档/刷新后容器天然回顶。
+- 手势层同步适配：`PageFlipZone` 边界检测与 scroll 监听从 window 改为 `[data-scroll-root]`（scroll 不冒泡，监听必须挂容器；wheel/keydown 仍挂 window 靠冒泡到达）。
+
 ## 参考
 
 - [Chrome: Cross-document view transitions for MPAs](https://developer.chrome.com/docs/web-platform/view-transitions/cross-document)

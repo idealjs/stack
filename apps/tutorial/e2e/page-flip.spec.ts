@@ -8,8 +8,21 @@ const chargeByWheel = async (page: Page, deltaY: number, steps = 20) => {
   }
 }
 
-const isAtBottom = () =>
-  window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 1
+const scrollToBottom = () => {
+  const el = document.querySelector('[data-scroll-root]')
+  if (el instanceof HTMLElement) el.scrollTo(0, el.scrollHeight)
+}
+
+const rootScrollTop = () => {
+  const el = document.querySelector('[data-scroll-root]')
+  return el instanceof HTMLElement ? el.scrollTop : window.scrollY
+}
+
+const isAtBottom = () => {
+  const el = document.querySelector('[data-scroll-root]')
+  if (!(el instanceof HTMLElement)) return false
+  return el.scrollTop + el.clientHeight >= el.scrollHeight - 1
+}
 
 const edgeProgress = (side: 'next' | 'prev') => {
   const edge = document.querySelector(`[data-flip-edge="${side}"]`)
@@ -26,7 +39,7 @@ const edgeSettled = (side: 'next' | 'prev') => {
 test('charge past threshold at bottom flips to next chapter', async ({ page }) => {
   await page.goto('./ch1.html')
   await expect(page.locator('[data-flip-edge="next"]')).toHaveCount(1)
-  await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight))
+  await page.evaluate(scrollToBottom)
   await page.waitForTimeout(200)
   await page.mouse.move(640, 450)
   await chargeByWheel(page, 250)
@@ -56,7 +69,7 @@ test('arrival momentum never flips; charge holds after wheel stops; reverse whee
   expect(await page.evaluate(edgeProgress, 'next')).toBe(0)
   expect(page.url()).toContain('ch1.html')
 
-  await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight))
+  await page.evaluate(scrollToBottom)
   await page.waitForTimeout(200)
   await chargeByWheel(page, 250)
   await page.waitForURL('**/ch2.html')
@@ -83,7 +96,7 @@ test('mid-page wheel keeps scrolling without flipping', async ({ page }) => {
 test('PageDown at bottom flips to next chapter', async ({ page }) => {
   await page.goto('./ch1.html')
   await expect(page.locator('[data-flip-edge="next"]')).toHaveCount(1)
-  await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight))
+  await page.evaluate(scrollToBottom)
   await page.keyboard.press('PageDown')
   await page.waitForURL('**/ch2.html')
 })
@@ -91,7 +104,7 @@ test('PageDown at bottom flips to next chapter', async ({ page }) => {
 test('clicking the next-chapter badge jumps directly to the next chapter', async ({ page }) => {
   await page.goto('./ch1.html')
   await expect(page.locator('[data-flip-edge="next"]')).toHaveCount(1)
-  await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight))
+  await page.evaluate(scrollToBottom)
   await page.waitForTimeout(200)
   await page.mouse.move(640, 450)
   await page.mouse.wheel(0, 250)
@@ -102,32 +115,42 @@ test('clicking the next-chapter badge jumps directly to the next chapter', async
 
 test('reload returns to chapter top', async ({ page }) => {
   await page.goto('./ch2.html')
-  await page.evaluate(() => window.scrollTo(0, 600))
+  await page.evaluate(() => {
+    const el = document.querySelector('[data-scroll-root]')
+    if (el instanceof HTMLElement) el.scrollTop = 600
+  })
   await page.waitForTimeout(200)
   await page.reload()
   await page.waitForTimeout(400)
-  expect(await page.evaluate(() => window.scrollY)).toBe(0)
+  expect(await page.evaluate(rootScrollTop)).toBe(0)
 })
 
 test('after flip the next chapter lands at top and first wheel scrolls', async ({ page }) => {
   await page.goto('./ch1.html')
   await expect(page.locator('[data-flip-edge="next"]')).toHaveCount(1)
-  await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight))
+  await page.evaluate(scrollToBottom)
   await page.waitForTimeout(200)
   await page.mouse.move(640, 450)
   await chargeByWheel(page, 250)
   await page.waitForURL('**/ch2.html')
-  await page.waitForFunction(() => window.scrollY === 0, undefined, {
-    polling: 100,
-    timeout: 10_000,
-  })
+  await page.waitForFunction(
+    () => {
+      const el = document.querySelector('[data-scroll-root]')
+      return (el instanceof HTMLElement ? el.scrollTop : window.scrollY) === 0
+    },
+    undefined,
+    {
+      polling: 100,
+      timeout: 10_000,
+    },
+  )
   await page.waitForTimeout(400)
-  expect(await page.evaluate(() => window.scrollY)).toBe(0)
+  expect(await page.evaluate(rootScrollTop)).toBe(0)
 
   await page.waitForTimeout(700)
   await page.mouse.wheel(0, 300)
   await page.waitForTimeout(300)
-  expect(await page.evaluate(() => window.scrollY)).toBeGreaterThan(0)
+  expect(await page.evaluate(rootScrollTop)).toBeGreaterThan(0)
 })
 
 test('weak bottom charge holds next edge symbols on screen, reverse wheel springs them back', async ({
@@ -135,7 +158,7 @@ test('weak bottom charge holds next edge symbols on screen, reverse wheel spring
 }) => {
   await page.goto('./ch1.html')
   await expect(page.locator('[data-flip-edge="next"]')).toHaveCount(1)
-  await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight))
+  await page.evaluate(scrollToBottom)
   await page.waitForTimeout(300)
   expect(await page.evaluate(edgeProgress, 'next')).toBe(0)
 
@@ -170,4 +193,36 @@ test('weak top charge holds prev edge symbols on screen, reverse wheel springs t
   await page.waitForFunction(edgeSettled, 'prev')
   expect(page.url()).toContain('ch2.html')
   expect(await page.evaluate(edgeProgress, 'prev')).toBe(0)
+})
+
+test('navbar stays collapsed by default; toggle expands an overlay without squeezing content', async ({
+  page,
+}) => {
+  await page.goto('./ch1.html')
+  await expect(page.locator('[data-flip-edge="next"]')).toHaveCount(1)
+  const grid = page.locator('#site-nav-drawer')
+  await expect(grid).toBeHidden()
+
+  await page.evaluate(() => {
+    const el = document.querySelector('[data-scroll-root]')
+    if (el instanceof HTMLElement) el.scrollTop = 400
+  })
+  await page.waitForTimeout(300)
+  await expect(grid).toBeHidden()
+
+  const heightBefore = await page.evaluate(() => {
+    const el = document.querySelector('[data-scroll-root]')
+    return el instanceof HTMLElement ? el.clientHeight : 0
+  })
+  await page.getByLabel('展开导航网格').click()
+  await expect(grid).toBeVisible()
+
+  const heightAfter = await page.evaluate(() => {
+    const el = document.querySelector('[data-scroll-root]')
+    return el instanceof HTMLElement ? el.clientHeight : 0
+  })
+  expect(heightAfter).toBe(heightBefore)
+
+  await page.getByLabel('收起导航网格').click()
+  await expect(grid).toBeHidden()
 })

@@ -27,21 +27,16 @@ const edgeStyle = {
   '--flip-pointer': 'none',
 } as CSSProperties
 
-const bubbleTransform = (side: 'prev' | 'next') =>
-  side === 'next'
-    ? 'translateY(calc((1 - var(--flip-progress)) * 24px))'
-    : 'translateY(calc((var(--flip-progress) - 1) * 24px))'
-
 const EDGE_ANCHOR = {
   next: {
     container: 'bottom-0',
-    badge: 'bottom-2',
+    badge: 'bottom-4',
     bar: 'bottom-0',
     label: '▼ 继续滚动 · 翻到下一章',
   },
   prev: {
     container: 'top-0',
-    badge: 'top-2',
+    badge: 'top-4',
     bar: 'top-0',
     label: '▲ 继续滚动 · 翻到上一章',
   },
@@ -68,7 +63,7 @@ function FlipEdge({ side, target, edgeRef, onFlip }: FlipEdgeProps) {
           type="button"
           onClick={onFlip}
           className="cursor-pointer rounded-full border-2 border-ink px-3 py-1 text-[12px] font-bold text-ink shadow-ink transition-[translate,box-shadow] duration-150 [pointer-events:var(--flip-pointer)] hover:-translate-y-0.5 hover:shadow-ink-lift active:translate-x-[2px] active:translate-y-[2px] active:shadow-[1px_1px_0_var(--color-ink)]"
-          style={{ background: target.chapter.color, transform: bubbleTransform(side) }}
+          style={{ background: target.chapter.color }}
         >
           {anchor.label}
         </button>
@@ -99,18 +94,24 @@ export function PageFlipZone({ prev, next, children }: PageFlipZoneProps) {
     let lastWheelAt = 0
     let gesture = 0
     let arrivalGesture = -1
+    let lastScrollTop = 0
     let lastChargeAt = 0
     let quietTimer = 0
     let direction = 0
     let flipping = false
 
-    const atTop = () => window.scrollY <= 0
-    const atBottom = () =>
-      window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 1
+    const scroller = () =>
+      document.querySelector<HTMLElement>('[data-scroll-root]') ?? document.documentElement
+
+    const atTop = () => scroller().scrollTop <= 0
+    const atBottom = () => {
+      const el = scroller()
+      return el.scrollTop + el.clientHeight >= el.scrollHeight - 1
+    }
 
     const wheelDistance = (event: WheelEvent) => {
       if (event.deltaMode === 1) return event.deltaY * 40
-      if (event.deltaMode === 2) return event.deltaY * window.innerHeight
+      if (event.deltaMode === 2) return event.deltaY * scroller().clientHeight
       return event.deltaY
     }
 
@@ -215,7 +216,10 @@ export function PageFlipZone({ prev, next, children }: PageFlipZoneProps) {
 
     const onScroll = () => {
       if (flipping) return
-      if (atTop() || atBottom()) arrivalGesture = gesture
+      const el = scroller()
+      const top = el.scrollTop
+      if (top > lastScrollTop && (atTop() || atBottom())) arrivalGesture = gesture
+      lastScrollTop = top
       const holding = (direction > 0 && atBottom()) || (direction < 0 && atTop())
       if (!holding && (position !== 0 || target !== 0)) settleBack()
     }
@@ -240,12 +244,13 @@ export function PageFlipZone({ prev, next, children }: PageFlipZoneProps) {
       }
     }
 
+    const root = scroller()
     window.addEventListener('wheel', onWheel, { passive: false })
-    window.addEventListener('scroll', onScroll, { passive: true })
+    root.addEventListener('scroll', onScroll, { passive: true })
     window.addEventListener('keydown', onKeyDown)
     return () => {
       window.removeEventListener('wheel', onWheel)
-      window.removeEventListener('scroll', onScroll)
+      root.removeEventListener('scroll', onScroll)
       window.removeEventListener('keydown', onKeyDown)
       window.clearTimeout(quietTimer)
       if (frame !== 0) cancelAnimationFrame(frame)

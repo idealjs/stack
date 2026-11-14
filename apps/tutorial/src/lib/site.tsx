@@ -24,7 +24,7 @@ const FOOTER_GROUPS: { label: string; links: { href: string; label: string }[] }
 
 export function SiteFooter() {
   return (
-    <footer className="mt-12 border-t-2 border-dashed border-ink/15 pt-3">
+    <footer className="border-t-2 border-dashed border-ink/15 pt-3">
       <div className="flex flex-wrap items-baseline gap-x-5 gap-y-1.5">
         {FOOTER_GROUPS.map(({ label, links }) => (
           <span key={label} className="flex items-baseline gap-x-2 text-[12.5px]">
@@ -60,24 +60,34 @@ export function SitePage({
   children,
 }: SitePageProps) {
   return (
-    <main className="mx-auto max-w-[1200px] px-6 py-8 text-content text-body">
+    <main className="flex h-dvh flex-col text-content text-body">
       {nav && (
-        <SiteNavbar
-          brand={nav.brand}
-          rows={nav.rows}
-          active={active}
-          viewTransitionName={viewTransitionName}
-        />
-      )}
-      {(title || subtitle || desc) && (
-        <div className="mb-7">
-          {title && <h1 className="m-0 text-t1 font-extrabold text-ink">{title}</h1>}
-          {subtitle && <p className="m-0 mt-2 text-t2 font-bold text-ink">{subtitle}</p>}
-          {desc && <p className="m-0 mt-2 text-content text-mute">{desc}</p>}
+        <div
+          className="flex-none bg-paper"
+          style={viewTransitionName ? { viewTransitionName } : undefined}
+        >
+          <div className="mx-auto w-full max-w-[1200px] px-6 pt-8">
+            <SiteNavbar brand={nav.brand} rows={nav.rows} active={active} />
+          </div>
         </div>
       )}
-      {children}
-      <SiteFooter />
+      <div data-scroll-root className="min-h-0 flex-1 overflow-y-auto">
+        <div className="mx-auto w-full max-w-[1200px] px-6 pb-8">
+          {(title || subtitle || desc) && (
+            <div className="mb-7">
+              {title && <h1 className="m-0 text-t1 font-extrabold text-ink">{title}</h1>}
+              {subtitle && <p className="m-0 mt-2 text-t2 font-bold text-ink">{subtitle}</p>}
+              {desc && <p className="m-0 mt-2 text-content text-mute">{desc}</p>}
+            </div>
+          )}
+          {children}
+        </div>
+      </div>
+      <div className="flex-none bg-paper" style={{ viewTransitionName: 'site-footer' }}>
+        <div className="mx-auto w-full max-w-[1200px] px-6 pb-6">
+          <SiteFooter />
+        </div>
+      </div>
     </main>
   )
 }

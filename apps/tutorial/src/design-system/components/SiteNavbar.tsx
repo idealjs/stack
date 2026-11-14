@@ -65,17 +65,23 @@ export function SiteNavbar({
   brand,
   rows,
   active,
-  viewTransitionName,
 }: {
   brand: NavSectionLink
 
   rows: NavRowGroup[]
 
   active?: string
-  viewTransitionName?: string
 }) {
   const rowOn = (row: NavRowGroup) =>
     active === row.sectionKey || row.items.some((i) => i.key === active)
+  const activeLabel = (() => {
+    for (const row of rows) {
+      if (row.sectionKey === active && !row.href) return row.label
+      const hit = row.items.find((i) => i.key === active)
+      if (hit) return hit.label
+    }
+    return undefined
+  })()
   let bandCursor = 1
   const bands = rows.map((row) => {
     const divider = bandCursor
@@ -85,18 +91,21 @@ export function SiteNavbar({
     return band
   })
   return (
-    <header
-      className="relative max-lg:z-50 mb-8 rounded-2xl border-2 border-ink bg-paper p-2.5 shadow-ink"
-      style={viewTransitionName ? { viewTransitionName } : undefined}
-    >
+    <header className="relative max-lg:z-50 lg:z-30 mb-8 rounded-2xl border-2 border-ink bg-paper p-2.5 shadow-ink">
+      <input
+        id="site-nav-expand"
+        type="checkbox"
+        aria-label="展开或收起桌面导航网格"
+        className="peer/nav-expand sr-only"
+      />
       <input
         id="site-nav-toggle"
         type="checkbox"
         aria-label="打开或收起导航菜单"
-        className="peer sr-only"
+        className="peer/nav-drawer sr-only"
       />
 
-      <div className="flex flex-wrap items-center gap-1.5 max-lg:peer-checked:[&_.nav-drawer-open]:invisible max-lg:peer-checked:[&_.nav-drawer-close]:visible">
+      <div className="relative z-40 flex flex-wrap items-center gap-1.5 max-lg:peer-checked/nav-drawer:[&_.nav-drawer-open]:invisible max-lg:peer-checked/nav-drawer:[&_.nav-drawer-close]:visible lg:peer-checked/nav-expand:[&_.nav-expand-open]:invisible lg:peer-checked/nav-expand:[&_.nav-expand-close]:visible">
         <span className="hover-host mr-auto inline-flex">
           <ShadowButton
             tone="ghost"
@@ -106,6 +115,37 @@ export function SiteNavbar({
           >
             {brand.label}
           </ShadowButton>
+        </span>
+        {activeLabel && (
+          <span className="hidden rounded-lg bg-paper-deep px-2.5 py-0.5 text-t3 font-extrabold text-ink lg:inline-block">
+            {activeLabel}
+          </span>
+        )}
+        <span className="hover-host hidden lg:inline-grid">
+          {/* biome-ignore lint/a11y/useAriaPropsSupportedByRole: 纯 CSS checkbox 开合的触发 label，aria 状态为增强语义保留 */}
+          <label
+            htmlFor="site-nav-expand"
+            aria-label="展开导航网格"
+            aria-expanded="false"
+            aria-controls="site-nav-drawer"
+            className={`nav-expand-open hidden lg:col-start-1 lg:row-start-1 lg:grid lg:size-10 lg:place-items-center ${shadowButtonClasses({ size: 'none' })}`}
+          >
+            <span aria-hidden="true" className="text-lg font-extrabold leading-none">
+              ▼
+            </span>
+          </label>
+          {/* biome-ignore lint/a11y/useAriaPropsSupportedByRole: 纯 CSS checkbox 开合的触发 label，aria 状态为增强语义保留 */}
+          <label
+            htmlFor="site-nav-expand"
+            aria-label="收起导航网格"
+            aria-expanded="true"
+            aria-controls="site-nav-drawer"
+            className={`nav-expand-close hidden lg:col-start-1 lg:row-start-1 lg:invisible lg:grid lg:size-10 lg:place-items-center ${shadowButtonClasses({ size: 'none' })}`}
+          >
+            <span aria-hidden="true" className="text-lg font-extrabold leading-none">
+              ▲
+            </span>
+          </label>
         </span>
         <span className="hover-host hidden max-lg:inline-grid">
           {/* biome-ignore lint/a11y/useAriaPropsSupportedByRole: 纯 CSS checkbox 开合的触发 label，aria 状态为增强语义保留 */}
@@ -139,7 +179,7 @@ export function SiteNavbar({
 
       <div
         id="site-nav-drawer"
-        className="max-lg:fixed max-lg:inset-y-0 max-lg:left-0 max-lg:z-50 max-lg:w-72 max-lg:overflow-y-auto max-lg:rounded-none max-lg:border-r-2 max-lg:border-ink max-lg:bg-paper max-lg:px-4 max-lg:py-5 max-lg:shadow-[8px_0_0_0_var(--color-ink)] max-lg:invisible max-lg:opacity-0 max-lg:-translate-x-full max-lg:transition-[transform,visibility,opacity] max-lg:duration-300 max-lg:ease-[cubic-bezier(0.32,0.72,0,1)] max-lg:motion-reduce:transition-none max-lg:peer-checked:visible max-lg:peer-checked:translate-x-0 max-lg:peer-checked:opacity-100"
+        className="max-lg:fixed max-lg:inset-y-0 max-lg:left-0 max-lg:z-50 max-lg:w-72 max-lg:overflow-y-auto max-lg:rounded-none max-lg:border-r-2 max-lg:border-ink max-lg:bg-paper max-lg:px-4 max-lg:py-5 max-lg:shadow-[8px_0_0_0_var(--color-ink)] max-lg:invisible max-lg:opacity-0 max-lg:-translate-x-full max-lg:transition-[transform,visibility,opacity] max-lg:duration-300 max-lg:ease-[cubic-bezier(0.32,0.72,0,1)] max-lg:motion-reduce:transition-none max-lg:peer-checked/nav-drawer:visible max-lg:peer-checked/nav-drawer:translate-x-0 max-lg:peer-checked/nav-drawer:opacity-100 lg:pointer-events-none lg:absolute lg:inset-x-0 lg:top-full lg:z-40 lg:mt-2 lg:rounded-2xl lg:border-2 lg:border-ink lg:bg-paper lg:p-3 lg:shadow-ink lg:invisible lg:opacity-0 lg:-translate-y-1 lg:transition-[transform,visibility,opacity] lg:duration-300 lg:ease-[cubic-bezier(0.32,0.72,0,1)] lg:motion-reduce:transition-none lg:peer-checked/nav-expand:pointer-events-auto lg:peer-checked/nav-expand:visible lg:peer-checked/nav-expand:opacity-100 lg:peer-checked/nav-expand:translate-y-0"
       >
         <div className="lg:hidden max-lg:mb-5">
           <span className="hover-host inline-flex">
@@ -148,7 +188,7 @@ export function SiteNavbar({
             </ShadowButton>
           </span>
         </div>
-        <div className="grid gap-x-1.5 gap-y-2 max-lg:grid-cols-2 lg:mt-3 lg:grid-cols-[96px_repeat(6,minmax(0,180px))]">
+        <div className="grid gap-x-1.5 gap-y-2 max-lg:grid-cols-2 lg:grid-cols-[96px_repeat(6,minmax(0,180px))]">
           {bands.map(({ row, divider, start, span }) => (
             <Fragment key={row.sectionKey}>
               <div
@@ -193,7 +233,13 @@ export function SiteNavbar({
       <label
         htmlFor="site-nav-toggle"
         aria-hidden="true"
-        className="hidden max-lg:fixed max-lg:inset-0 max-lg:z-40 max-lg:block max-lg:cursor-pointer max-lg:bg-ink/40 max-lg:invisible max-lg:opacity-0 max-lg:transition-[visibility,opacity] max-lg:duration-300 max-lg:ease-[cubic-bezier(0.32,0.72,0,1)] max-lg:motion-reduce:transition-none max-lg:peer-checked:visible max-lg:peer-checked:opacity-100"
+        className="hidden max-lg:fixed max-lg:inset-0 max-lg:z-40 max-lg:block max-lg:cursor-pointer max-lg:bg-ink/40 max-lg:invisible max-lg:opacity-0 max-lg:transition-[visibility,opacity] max-lg:duration-300 max-lg:ease-[cubic-bezier(0.32,0.72,0,1)] max-lg:motion-reduce:transition-none max-lg:peer-checked/nav-drawer:visible max-lg:peer-checked/nav-drawer:opacity-100"
+      />
+      {/* biome-ignore lint/a11y/noLabelWithoutControl: 桌面透明遮罩，点导航网格外任意处收起 overlay */}
+      <label
+        htmlFor="site-nav-expand"
+        aria-hidden="true"
+        className="hidden lg:fixed lg:inset-0 lg:z-20 lg:block lg:cursor-pointer lg:invisible lg:peer-checked/nav-expand:visible"
       />
     </header>
   )
