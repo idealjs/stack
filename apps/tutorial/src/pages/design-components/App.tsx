@@ -14,6 +14,7 @@ import { LearningKitGallery } from '../../design-system/examples/LearningKitGall
 import { CHAPTERS, PROFILES } from '../../lib/chapters'
 import { relHref } from '../../lib/pages'
 import { Page, Section } from '../../lib/ui'
+import { BrowserMockupPreview } from './BrowserMockupPreview'
 import { DropdownPreview } from './DropdownPreview'
 import { TicketPreview } from './TicketPreview'
 
@@ -266,6 +267,12 @@ export function App() {
         note="placement＝bottom 向下展开／top 向上弹出；点入口开合、Esc 与点面板外收起；tips 贴签、验收夹、陪练 agent 是它的真件应用，站头 navbar 为同型的纯 CSS 实现"
       >
         <DropdownPreview />
+      </Section>
+      <Section
+        label="BrowserMockup · 浏览器取景框"
+        note="参考 daisyUI mockup-browser 的三层结构换成纸面拟物 chrome：三圆点＋放大镜地址栏药丸＋白底视口；内容即插槽，宽高由调用方给"
+      >
+        <BrowserMockupPreview />
       </Section>
       <Section label="入口梳理" note="推荐不是强制——无锁">
         <EntryGuide chapters={CHAPTERS} profiles={PROFILES} />

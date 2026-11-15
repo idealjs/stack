@@ -1,6 +1,6 @@
 # design-system
 
-孟菲斯 × 拟物卡设计系统的唯一定义处：组件（MemphisCard/RouteLine/Ticket/ChapterTicket/AssignBlock/EntryGuide/Scatter/shapes）、tokens（颜色/字体/投影/票券打孔）、类型。
+孟菲斯 × 拟物卡设计系统的唯一定义处：组件（MemphisCard/RouteLine/Ticket/ChapterTicket/BrowserMockup/AssignBlock/EntryGuide/Scatter/shapes）、tokens（颜色/字体/投影/票券打孔）、类型。
 
 教程站内的唯一定义处——特性只改这里，站点直接获得；结构契约与视觉基线的 E2E 在 `apps/tutorial/e2e/`。消费方式：源码直出（stack 构建期 strip TS），调用方按相对路径引 `src/design-system`。
 
@@ -28,6 +28,26 @@ import { Ticket, ChapterTicket } from '../../design-system'
 | `wrapperClassName` | 外层布局类名 | 无 |
 
 `style`、事件与其他 div 属性传给外层。`ChapterTicket` 负责章节内容与完成状态，复用 `Ticket`，同样接受 `holePosition`、`holeSize`、`hover`。`TicketProps` 与 `ChapterTicketProps` 从入口 `index.ts` 导出。
+
+## 浏览器取景框
+
+`BrowserMockup` 把任意内容装进浏览器窗口外形的取景框，用于展示截图、演示页面与实验结果。参考 daisyUI 的 mockup-browser（外壳＋工具栏＋内容三层），视觉换成纸面拟物：border-ink 描边、paper-deep 工具栏、5px 硬投影；三圆点与 learning 系窗口圆点同规格（纸底墨描边）。纯展示件、无状态——URL 超长省略号截断且方向固定 ltr，视口不强制内边距与最小高度，宽高由调用方通过内容或 `className` 给。
+
+```tsx
+import { BrowserMockup } from '../../design-system'
+
+<BrowserMockup url="https://stack.dev/design/components" className="w-full">
+  <div className="flex h-80 items-center justify-center">Hello!</div>
+</BrowserMockup>
+```
+
+| Prop | 含义 | 默认值 |
+| --- | --- | --- |
+| `url` | 地址栏文本 | 必填 |
+| `children` | 视口内容 | 必填 |
+| `className` | 外壳附加类（宽度等） | 无 |
+
+`BrowserMockupProps` 从入口 `index.ts` 导出。
 
 ## 拟物学习组件
 

@@ -1,3 +1,5 @@
+export type { BrowserMockupProps } from './components/BrowserMockup'
+export { BrowserMockup } from './components/BrowserMockup'
 export { Button } from './components/Button'
 export type { ChapterTicketProps } from './components/ChapterTicket'
 export { ChapterTicket } from './components/ChapterTicket'
