@@ -123,7 +123,7 @@ export async function startDevServer(
       const isHtml = served.contentType.startsWith('text/html')
       let code: string | Uint8Array = served.code
       if (isHtml && typeof code === 'string') {
-        let text = base === '' ? code : rewriteWithBase(code, base, withoutBase)
+        let text = base === '' ? code : rewriteWithBase(code, base)
         if (options.liveReload === true) text = text.replace(/<\/body>/i, `${liveScript}</body>`)
         code = text
       }
