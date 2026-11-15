@@ -15,7 +15,7 @@ const TIPS_PANEL = '#tips-dock-panel'
 
 test.describe('练习场 · 陪练 agent 贴签（右下角）', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/practice.html')
+    await page.goto('/practice/')
   })
 
   test('停靠右下角，aria 关系正确；点击展开、再点与 Esc 收起', async ({ page }) => {
@@ -71,7 +71,7 @@ test.describe('练习场 · 陪练 agent 贴签（右下角）', () => {
 
 test.describe('练习场 · 验收清单夹板（顶部右上）', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/practice.html')
+    await page.goto('/practice/')
   })
 
   test('夹具停靠页面右上，aria 关系正确；点击拉出清单、再点与 Esc 收回', async ({ page }) => {
@@ -154,7 +154,7 @@ test.describe('练习场 · 验收清单夹板（顶部右上）', () => {
 
 test.describe('练习场 · tips 喂给陪练（右上角）', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/practice.html')
+    await page.goto('/practice/')
   })
 
   test('tips 贴签停靠右上角，默认收起；点击展开流水线板、再点与 Esc 收起，与验收夹具互斥', async ({
@@ -260,7 +260,7 @@ test.describe('练习场 · tips 喂给陪练（右上角）', () => {
 
 test.describe('练习场 · playground 侧栏（沙箱 + 编辑器）', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/practice.html')
+    await page.goto('/practice/')
   })
 
   test('沙箱撤出主区，整体住进右缘侧栏；编辑器与沙箱两个独特贴签停靠右缘', async ({ page }) => {
@@ -386,7 +386,7 @@ test.describe('练习场 · 布局自查', () => {
   test('320/390/768/1280 无横向溢出，清单夹具与 tips 贴签停靠右上、陪练贴签右下、编辑器签右缘', async ({
     page,
   }) => {
-    await page.goto('/practice.html')
+    await page.goto('/practice/')
     for (const width of [320, 390, 768, 1280]) {
       await page.setViewportSize({ width, height: 900 })
       const overflow = await page.evaluate(

@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test'
 
 test.describe('拟物学习组件', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/design-components.html')
+    await page.goto('/design/components.html')
   })
 
   test('展示 13 类可复用组件，卡片继续沿用统一硬投影', async ({ page }) => {

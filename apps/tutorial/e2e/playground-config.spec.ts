@@ -1,7 +1,14 @@
+import type { Page } from '@playwright/test'
 import { expect, test } from '@playwright/test'
 
+const openEditor = async (page: Page) => {
+  await page.locator('[data-comp="editor-dock-tab"]').click()
+  await expect(page.locator('#playground-dock-panel')).toBeVisible()
+}
+
 test('模板预置 stack.config.ts：文件栏三件套，esbuild.config.json 不存在', async ({ page }) => {
-  await page.goto('/practice.html')
+  await page.goto('/practice/')
+  await openEditor(page)
   await expect(page.getByRole('button', { name: 'index.html', exact: true })).toBeVisible()
   await expect(page.getByRole('button', { name: 'main.ts', exact: true })).toBeVisible()
   await expect(page.getByRole('button', { name: 'stack.config.ts', exact: true })).toBeVisible()
@@ -13,7 +20,8 @@ test('模板预置 stack.config.ts：文件栏三件套，esbuild.config.json �
 test('无配置回退：删掉 stack.config.ts 后 script src 指向不存在文件报错不执行', async ({
   page,
 }) => {
-  await page.goto('/practice.html')
+  await page.goto('/practice/')
+  await openEditor(page)
   await page.getByRole('button', { name: '删除 stack.config.ts' }).click()
   await page.getByRole('button', { name: 'index.html', exact: true }).click()
   await page.getByLabel('模块代码').fill('<script type="module" src="./nope.ts"></script>')
@@ -24,7 +32,8 @@ test('无配置回退：删掉 stack.config.ts 后 script src 指向不存在文
 })
 
 test('无配置回退：改写 script src 指向新建文件，运行走新入口', async ({ page }) => {
-  await page.goto('/practice.html')
+  await page.goto('/practice/')
+  await openEditor(page)
   await page.getByRole('button', { name: '删除 stack.config.ts' }).click()
   await page.getByLabel('新文件名').fill('hello.ts')
   await page.getByRole('button', { name: '新建文件', exact: true }).click()
@@ -39,7 +48,8 @@ test('无配置回退：改写 script src 指向新建文件，运行走新入�
 })
 
 test('inputs 含 index.html：script src 指向 main.ts，运行走 main.ts 闭包', async ({ page }) => {
-  await page.goto('/practice.html')
+  await page.goto('/practice/')
+  await openEditor(page)
   await page.getByRole('button', { name: 'stack.config.ts', exact: true }).click()
   await page
     .getByLabel('模块代码')
@@ -55,7 +65,8 @@ test('inputs 含 index.html：script src 指向 main.ts，运行走 main.ts 闭�
 test('inputs 含 index.html：改写 body 文本后预览框渲染改后文本——index.html 被沙盒应用', async ({
   page,
 }) => {
-  await page.goto('/practice.html')
+  await page.goto('/practice/')
+  await openEditor(page)
   await page.getByRole('button', { name: 'index.html', exact: true }).click()
   await page
     .getByLabel('模块代码')
@@ -73,7 +84,8 @@ test('inputs 含 index.html：改写 body 文本后预览框渲染改后文本�
 })
 
 test('inputs 与 entry 同时出现：inputs 优先，entry 不再消费', async ({ page }) => {
-  await page.goto('/practice.html')
+  await page.goto('/practice/')
+  await openEditor(page)
   await page.getByRole('button', { name: 'stack.config.ts', exact: true }).click()
   await page
     .getByLabel('模块代码')
@@ -88,7 +100,8 @@ test('inputs 与 entry 同时出现：inputs 优先，entry 不再消费', async
 })
 
 test('stack.config.ts 改 entry（旧形态兼容）：运行走 entry', async ({ page }) => {
-  await page.goto('/practice.html')
+  await page.goto('/practice/')
+  await openEditor(page)
   await page.getByLabel('新文件名').fill('hello.ts')
   await page.getByRole('button', { name: '新建文件', exact: true }).click()
   await page.getByRole('button', { name: 'hello.ts', exact: true }).click()
@@ -102,7 +115,8 @@ test('stack.config.ts 改 entry（旧形态兼容）：运行走 entry', async (
 })
 
 test('inputs 指向不存在的文件：报错不执行', async ({ page }) => {
-  await page.goto('/practice.html')
+  await page.goto('/practice/')
+  await openEditor(page)
   await page.getByRole('button', { name: 'stack.config.ts', exact: true }).click()
   await page
     .getByLabel('模块代码')
@@ -115,7 +129,8 @@ test('inputs 指向不存在的文件：报错不执行', async ({ page }) => {
 })
 
 test('stack.config.ts 的 entry 指向不存在的文件：报错不执行', async ({ page }) => {
-  await page.goto('/practice.html')
+  await page.goto('/practice/')
+  await openEditor(page)
   await page.getByRole('button', { name: 'stack.config.ts', exact: true }).click()
   await page.getByLabel('模块代码').fill("export default {\n  entry: 'nope.ts',\n}\n")
   await page.getByRole('button', { name: '运行 ▶' }).click()
@@ -125,7 +140,8 @@ test('stack.config.ts 的 entry 指向不存在的文件：报错不执行', asy
 })
 
 test('stack.config.ts 语法错误：构建徽章报错，不执行不出预览', async ({ page }) => {
-  await page.goto('/practice.html')
+  await page.goto('/practice/')
+  await openEditor(page)
   await page.getByRole('button', { name: 'stack.config.ts', exact: true }).click()
   await page.getByLabel('模块代码').fill('const = ;\n')
   await page.getByRole('button', { name: '运行 ▶' }).click()

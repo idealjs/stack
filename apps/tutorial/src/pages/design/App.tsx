@@ -1,6 +1,7 @@
+import { type PageKey, relHref } from '../../lib/pages'
 import { Page, Section } from '../../lib/ui'
 
-const BOOKS = [
+const BOOKS: { key: PageKey; label: string; desc: string }[] = [
   { key: 'design-colors', label: '颜色', desc: '高饱和 clash 色板与纸色系统——把鲜艳关进形状里。' },
   { key: 'design-typography', label: '字体', desc: '展示、正文、等宽的字阶与排版层级。' },
   {
@@ -32,7 +33,7 @@ export function App() {
           {BOOKS.map((b) => (
             <span key={b.key} className="hover-host block w-fit">
               <a
-                href={`./${b.key}.html`}
+                href={relHref('design', b.key)}
                 className="hoverable-shadow block w-[280px] rounded-2xl border-2 border-ink bg-paper p-5 no-underline shadow-ink transition-[translate,box-shadow] duration-150"
               >
                 <span className="text-t3 font-extrabold text-ink">{b.label}</span>

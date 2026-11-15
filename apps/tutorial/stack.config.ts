@@ -1,6 +1,6 @@
 import { readdirSync } from 'node:fs'
 import { readFile } from 'node:fs/promises'
-import { dirname, resolve } from 'node:path'
+import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { defineConfig } from '@idealjs/stack'
 import { imports, vendor } from '@idealjs/stack/builtins'
@@ -16,9 +16,19 @@ try {
 
 const runtimeDocPath = resolve(appDir, '../web-runner/dist-runtime/index.html')
 
-const pages = readdirSync(appDir)
-  .filter((file) => file.endsWith('.html'))
-  .map((file) => file.replace(/\.html$/, ''))
+const IGNORED_DIRS = new Set(['node_modules', 'dist', '.git'])
+
+const collectPages = (dir: string, prefix: string): string[] =>
+  readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
+    if (entry.isDirectory()) {
+      return IGNORED_DIRS.has(entry.name)
+        ? []
+        : collectPages(join(dir, entry.name), `${prefix}${entry.name}/`)
+    }
+    return entry.name.endsWith('.html') ? [`${prefix}${entry.name.replace(/\.html$/, '')}`] : []
+  })
+
+const pages = collectPages(appDir, '')
 
 const readRuntimeDoc = async (): Promise<string> => {
   try {

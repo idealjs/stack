@@ -8,7 +8,7 @@ import { extractHtmlDocument } from './htmlBody'
 import type { OutputLine } from './OutputPanel'
 import { isRuntimeMessage, PROTOCOL_VERSION } from './protocol'
 
-const WASM_URL = 'esbuild.wasm'
+const WASM_URL = '/esbuild.wasm'
 
 export const RUNTIME_ORIGIN: string = runtimeOrigin
 

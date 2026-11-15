@@ -1,6 +1,5 @@
 import type { CSSProperties, ReactNode, RefObject } from 'react'
 import { useEffect, useRef } from 'react'
-import type { Chapter } from '../lib/types'
 
 const CHARGE_DAMPING = 0.12
 const CHARGE_RATE_CAP = 220
@@ -10,9 +9,14 @@ const GESTURE_GAP_MS = 100
 const SPRING_STIFFNESS = 170
 const SPRING_DAMPING = 18
 
+export interface FlipMeta {
+  title: string
+  color: string
+}
+
 export interface FlipTarget {
   href: string
-  chapter: Chapter
+  meta: FlipMeta
 }
 
 export interface PageFlipZoneProps {
@@ -32,13 +36,13 @@ const EDGE_ANCHOR = {
     container: 'bottom-0',
     badge: 'bottom-4',
     bar: 'bottom-0',
-    label: '▼ 继续滚动 · 翻到下一章',
+    label: (title: string) => `▼ 继续滚动 · 下一页：${title}`,
   },
   prev: {
     container: 'top-0',
     badge: 'top-4',
     bar: 'top-0',
-    label: '▲ 继续滚动 · 翻到上一章',
+    label: (title: string) => `▲ 继续滚动 · 上一页：${title}`,
   },
 } as const
 
@@ -63,9 +67,9 @@ function FlipEdge({ side, target, edgeRef, onFlip }: FlipEdgeProps) {
           type="button"
           onClick={onFlip}
           className="cursor-pointer rounded-full border-2 border-ink px-3 py-1 text-[12px] font-bold text-ink shadow-ink transition-[translate,box-shadow] duration-150 [pointer-events:var(--flip-pointer)] hover:-translate-y-0.5 hover:shadow-ink-lift active:translate-x-[2px] active:translate-y-[2px] active:shadow-[1px_1px_0_var(--color-ink)]"
-          style={{ background: target.chapter.color }}
+          style={{ background: target.meta.color }}
         >
-          {anchor.label}
+          {anchor.label(target.meta.title)}
         </button>
       </div>
       <div aria-hidden className={`absolute inset-x-0 ${anchor.bar} h-1 bg-ink/15`}>

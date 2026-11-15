@@ -2,10 +2,15 @@ import type { Page } from '@playwright/test'
 import { expect, test } from '@playwright/test'
 import type { TicketProps } from '../src/design-system/components/Ticket'
 
-const PAGES = ['design', 'design-colors', 'design-symbols', 'design-components'] as const
+const PAGES = [
+  '/design/',
+  '/design/colors.html',
+  '/design/symbols.html',
+  '/design/components.html',
+] as const
 
 async function mountTicket(page: Page, props: TicketProps = {}) {
-  await page.goto('/design-components.html')
+  await page.goto('/design/components.html')
   const preview = page.getByTestId('ticket-preview')
   await preview.getByLabel('孔位', { exact: true }).fill(String(props.holePosition ?? '50%'))
   await preview.getByLabel('孔径').fill(String(props.holeSize ?? 12))
@@ -30,21 +35,21 @@ async function mountTicket(page: Page, props: TicketProps = {}) {
 
 test.describe('全局画布', () => {
   for (const p of PAGES) {
-    test(`${p}.html 渲染且有内容`, async ({ page }) => {
-      await page.goto(`/${p}.html`)
+    test(`${p} 渲染且有内容`, async ({ page }) => {
+      await page.goto(`${p}`)
       await expect(page.locator('#root')).not.toBeEmpty()
       await expect(page.locator('main')).toBeVisible()
     })
   }
 
   test('body 大底为纸色 #FFF9F0', async ({ page }) => {
-    await page.goto('/design.html')
+    await page.goto('/design/')
     const bg = await page.evaluate(() => getComputedStyle(document.body).backgroundColor)
     expect(bg).toBe('rgb(255, 249, 240)')
   })
 
   test('全站无色彩渐变', async ({ page }) => {
-    await page.goto('/design-colors.html')
+    await page.goto('/design/colors.html')
     const gradients = await page.evaluate(() => {
       const bad: string[] = []
       document.querySelectorAll<HTMLElement>('*').forEach((el) => {
@@ -57,7 +62,7 @@ test.describe('全局画布', () => {
 })
 
 test.describe('CourseCard 规格契约', () => {
-  test.beforeEach(async ({ page }) => await page.goto('/design-components.html'))
+  test.beforeEach(async ({ page }) => await page.goto('/design/components.html'))
 
   test('2px ink 描边 + 统一硬投影（单层 ink，无纸叠）', async ({ page }) => {
     const card = page.locator('a[href="#ch1"]').first()
@@ -155,7 +160,7 @@ test.describe('CourseCard 规格契约', () => {
 })
 
 test.describe('RouteLine 规格契约', () => {
-  test.beforeEach(async ({ page }) => await page.goto('/design-components.html'))
+  test.beforeEach(async ({ page }) => await page.goto('/design/components.html'))
   test.use({ reducedMotion: 'no-preference' })
 
   test('线形：实线先后 2.5px 无 dash；点线同族 0.1/6 圆帽', async ({ page }) => {
@@ -185,8 +190,8 @@ test.describe('RouteLine 规格契约', () => {
       if (!svg) return null
       const wrap = svg.parentElement
       const wb = wrap.getBoundingClientRect()
-      const c1 = wrap.querySelector('a[href="./ch1.html"]').getBoundingClientRect()
-      const c2 = wrap.querySelector('a[href="./ch2.html"]').getBoundingClientRect()
+      const c1 = wrap.querySelector('a[href="../tutorial/ch1.html"]').getBoundingClientRect()
+      const c2 = wrap.querySelector('a[href="../tutorial/ch2.html"]').getBoundingClientRect()
       const stations = [...svg.querySelectorAll('circle')]
         .map((n) => ({ cx: +(n.getAttribute('cx') ?? 0), r: +(n.getAttribute('r') ?? 0) }))
         .filter((s) => s.r === 6)
@@ -226,7 +231,9 @@ test.describe('RouteLine 规格契约', () => {
             .find((d) => d.startsWith('M 600')),
 
           cardTranslate: getComputedStyle(
-            svg.parentElement.querySelector('a[data-comp="course-card"][href="./ch2.html"]'),
+            svg.parentElement.querySelector(
+              'a[data-comp="course-card"][href="../tutorial/ch2.html"]',
+            ),
           ).translate,
         }
       })
@@ -252,7 +259,7 @@ test.describe('RouteLine 规格契约', () => {
 })
 
 test.describe('价值区荧光标记契约', () => {
-  test.beforeEach(async ({ page }) => await page.goto('/design-symbols.html'))
+  test.beforeEach(async ({ page }) => await page.goto('/design/symbols.html'))
 
   test('荧光笔标记文字：mustard 底、无描边、微斜——是标记不是形状', async ({ page }) => {
     const s = await page.evaluate(() => {
@@ -271,7 +278,7 @@ test.describe('价值区荧光标记契约', () => {
 })
 
 test.describe('票券规格契约', () => {
-  test.beforeEach(async ({ page }) => await page.goto('/design-components.html'))
+  test.beforeEach(async ({ page }) => await page.goto('/design/components.html'))
   test.use({ reducedMotion: 'no-preference' })
 
   const chapterTickets = (page: Page) =>
@@ -546,7 +553,7 @@ test.describe('票券规格契约', () => {
 })
 
 test.describe('ShadowButton 按压契约', () => {
-  test.beforeEach(async ({ page }) => await page.goto('/design-components.html'))
+  test.beforeEach(async ({ page }) => await page.goto('/design/components.html'))
   test.use({ reducedMotion: 'no-preference' })
 
   test('多态渲染：有 href=a、无 href=button[type=button]、disabled=虚线占位', async ({ page }) => {
@@ -557,7 +564,7 @@ test.describe('ShadowButton 按压契约', () => {
     expect(tags).toEqual(expect.arrayContaining(['BUTTON', 'A', 'SPAN']))
     await expect(
       page.locator('a[data-comp="shadow-button"]', { hasText: '链接 · href 渲染 a' }),
-    ).toHaveAttribute('href', /learn\.html/)
+    ).toHaveAttribute('href', /tutorial\/index\.html/)
     await expect(page.locator('button[data-comp="shadow-button"]').first()).toHaveAttribute(
       'type',
       'button',
@@ -614,7 +621,7 @@ test.describe('ShadowButton 按压契约', () => {
 })
 
 test.describe('ShadowCard · 四部曲契约', () => {
-  test.beforeEach(async ({ page }) => await page.goto('/design-components.html'))
+  test.beforeEach(async ({ page }) => await page.goto('/design/components.html'))
   test.use({ reducedMotion: 'no-preference' })
 
   const specimens = (page: Page) =>
@@ -673,7 +680,7 @@ test.describe('阴影册 · hover-host 触发模型', () => {
   test.use({ reducedMotion: 'no-preference' })
 
   test('宿主承接 hover：命中区不动，位移作用于内部元素（防边界震荡）', async ({ page }) => {
-    await page.goto('/design-shadow.html')
+    await page.goto('/design/shadow.html')
     const host = page.locator('main section .hover-host').first()
     const inner = host.locator('.hoverable-shadow')
     await expect(inner).toHaveCSS('translate', 'none')
@@ -693,7 +700,7 @@ test.describe('阴影册 · hover-host 触发模型', () => {
 
 test.describe('阴影册 · hover-host 尊重 reduced-motion', () => {
   test('reduce 下宿主 hover 只换影、不位移', async ({ page }) => {
-    await page.goto('/design-shadow.html')
+    await page.goto('/design/shadow.html')
     const host = page.locator('main section .hover-host').first()
     const inner = host.locator('.hoverable-shadow')
     await host.hover()
@@ -710,13 +717,14 @@ test.describe('技能熟悉页', () => {
   ] as const
 
   for (const { key, name } of SKILLS) {
-    test(`${key}.html 渲染有内容，导航新组「技能熟悉」当前项高亮`, async ({ page }) => {
-      await page.goto(`/${key}.html`)
+    test(`${key} 渲染有内容，导航新组「技能熟悉」当前项高亮`, async ({ page }) => {
+      await page.goto(`/skills/${key}.html`)
       await expect(page.locator('#root')).not.toBeEmpty()
       await expect(page.locator('h1')).toHaveText(name)
       await expect(page.getByText('内容建设中')).toBeVisible()
+      await page.getByLabel('展开导航网格').click()
       for (const { key: sibling } of SKILLS) {
-        const item = page.locator(`#site-nav-drawer a[href="./${sibling}.html"]`)
+        const item = page.locator(`#site-nav-drawer a[href="../skills/${sibling}.html"]`)
         await expect(item).toHaveClass(
           sibling === key ? /bg-paper-deep/ : /text-body hover:bg-paper-deep/,
         )
@@ -727,11 +735,11 @@ test.describe('技能熟悉页', () => {
 
   test('practice 侧栏同步出现技能熟悉组与三个入口', async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 900 })
-    await page.goto('/practice.html')
+    await page.goto('/practice/')
     const sidebar = page.locator('#site-sidebar-drawer')
     await expect(sidebar.getByText('技能熟悉')).toBeVisible()
     for (const { key, name } of SKILLS) {
-      await expect(sidebar.locator(`a[href="./${key}.html"]`)).toHaveText(name)
+      await expect(sidebar.locator(`a[href="../skills/${key}.html"]`)).toHaveText(name)
     }
   })
 })

@@ -93,12 +93,13 @@ const renderPage = async (
   workspace: string,
   root: string,
 ): Promise<string> => {
+  const flat = name.replaceAll('/', '__')
   for (const stale of readdirSync(workspace)) {
-    if (stale.startsWith(`${name}-`) && stale.endsWith('.mjs')) {
+    if (stale.startsWith(`${flat}-`) && stale.endsWith('.mjs')) {
       rmSync(join(workspace, stale))
     }
   }
-  const outfile = join(workspace, `${name}-${fingerprint}.mjs`)
+  const outfile = join(workspace, `${flat}-${fingerprint}.mjs`)
   await esbuild({
     entryPoints: [entryId],
     bundle: true,

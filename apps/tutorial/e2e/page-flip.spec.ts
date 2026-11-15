@@ -1,5 +1,5 @@
-import { expect, test } from '@playwright/test'
 import type { Page } from '@playwright/test'
+import { expect, test } from '@playwright/test'
 
 const chargeByWheel = async (page: Page, deltaY: number, steps = 20) => {
   for (let i = 0; i < steps; i += 1) {
@@ -37,7 +37,7 @@ const edgeSettled = (side: 'next' | 'prev') => {
 }
 
 test('charge past threshold at bottom flips to next chapter', async ({ page }) => {
-  await page.goto('./ch1.html')
+  await page.goto('/tutorial/ch1.html')
   await expect(page.locator('[data-flip-edge="next"]')).toHaveCount(1)
   await page.evaluate(scrollToBottom)
   await page.waitForTimeout(200)
@@ -51,7 +51,7 @@ test('charge past threshold at bottom flips to next chapter', async ({ page }) =
 test('arrival momentum never flips; charge holds after wheel stops; reverse wheel clears it', async ({
   page,
 }) => {
-  await page.goto('./ch1.html')
+  await page.goto('/tutorial/ch1.html')
   await expect(page.locator('[data-flip-edge="next"]')).toHaveCount(1)
   await page.mouse.move(640, 450)
   await page.mouse.wheel(0, 6000)
@@ -76,7 +76,7 @@ test('arrival momentum never flips; charge holds after wheel stops; reverse whee
 })
 
 test('charge upward at top flips to previous chapter', async ({ page }) => {
-  await page.goto('./ch2.html')
+  await page.goto('/tutorial/ch2.html')
   await expect(page.locator('[data-flip-edge="next"]')).toHaveCount(1)
   await page.mouse.move(640, 450)
   await chargeByWheel(page, -250)
@@ -85,7 +85,7 @@ test('charge upward at top flips to previous chapter', async ({ page }) => {
 })
 
 test('mid-page wheel keeps scrolling without flipping', async ({ page }) => {
-  await page.goto('./ch3.html')
+  await page.goto('/tutorial/ch3.html')
   await expect(page.locator('[data-flip-edge="next"]')).toHaveCount(1)
   await page.mouse.move(640, 450)
   await page.mouse.wheel(0, 1500)
@@ -94,7 +94,7 @@ test('mid-page wheel keeps scrolling without flipping', async ({ page }) => {
 })
 
 test('PageDown at bottom flips to next chapter', async ({ page }) => {
-  await page.goto('./ch1.html')
+  await page.goto('/tutorial/ch1.html')
   await expect(page.locator('[data-flip-edge="next"]')).toHaveCount(1)
   await page.evaluate(scrollToBottom)
   await page.keyboard.press('PageDown')
@@ -102,19 +102,19 @@ test('PageDown at bottom flips to next chapter', async ({ page }) => {
 })
 
 test('clicking the next-chapter badge jumps directly to the next chapter', async ({ page }) => {
-  await page.goto('./ch1.html')
+  await page.goto('/tutorial/ch1.html')
   await expect(page.locator('[data-flip-edge="next"]')).toHaveCount(1)
   await page.evaluate(scrollToBottom)
   await page.waitForTimeout(200)
   await page.mouse.move(640, 450)
   await page.mouse.wheel(0, 250)
   await page.waitForTimeout(150)
-  await page.getByRole('button', { name: /翻到下一章/ }).click()
+  await page.getByRole('button', { name: /下一页：第 2 章/ }).click()
   await page.waitForURL('**/ch2.html')
 })
 
 test('reload returns to chapter top', async ({ page }) => {
-  await page.goto('./ch2.html')
+  await page.goto('/tutorial/ch2.html')
   await page.evaluate(() => {
     const el = document.querySelector('[data-scroll-root]')
     if (el instanceof HTMLElement) el.scrollTop = 600
@@ -126,7 +126,7 @@ test('reload returns to chapter top', async ({ page }) => {
 })
 
 test('after flip the next chapter lands at top and first wheel scrolls', async ({ page }) => {
-  await page.goto('./ch1.html')
+  await page.goto('/tutorial/ch1.html')
   await expect(page.locator('[data-flip-edge="next"]')).toHaveCount(1)
   await page.evaluate(scrollToBottom)
   await page.waitForTimeout(200)
@@ -156,7 +156,7 @@ test('after flip the next chapter lands at top and first wheel scrolls', async (
 test('weak bottom charge holds next edge symbols on screen, reverse wheel springs them back', async ({
   page,
 }) => {
-  await page.goto('./ch1.html')
+  await page.goto('/tutorial/ch1.html')
   await expect(page.locator('[data-flip-edge="next"]')).toHaveCount(1)
   await page.evaluate(scrollToBottom)
   await page.waitForTimeout(300)
@@ -179,7 +179,7 @@ test('weak bottom charge holds next edge symbols on screen, reverse wheel spring
 test('weak top charge holds prev edge symbols on screen, reverse wheel springs them back', async ({
   page,
 }) => {
-  await page.goto('./ch2.html')
+  await page.goto('/tutorial/ch2.html')
   await expect(page.locator('[data-flip-edge="next"]')).toHaveCount(1)
   await page.mouse.move(640, 450)
   await page.mouse.wheel(0, -200)
@@ -198,7 +198,7 @@ test('weak top charge holds prev edge symbols on screen, reverse wheel springs t
 test('navbar stays collapsed by default; toggle expands an overlay without squeezing content', async ({
   page,
 }) => {
-  await page.goto('./ch1.html')
+  await page.goto('/tutorial/ch1.html')
   await expect(page.locator('[data-flip-edge="next"]')).toHaveCount(1)
   const grid = page.locator('#site-nav-drawer')
   await expect(grid).toBeHidden()
@@ -225,4 +225,39 @@ test('navbar stays collapsed by default; toggle expands an overlay without squee
 
   await page.getByLabel('收起导航网格').click()
   await expect(grid).toBeHidden()
+})
+
+test('charging at index bottom flips into the tutorial hub with next direction', async ({
+  page,
+}) => {
+  await page.goto('/')
+  await expect(page.locator('[data-flip-edge="next"]')).toHaveCount(1)
+  await page.evaluate(scrollToBottom)
+  await page.waitForTimeout(200)
+  await page.mouse.move(640, 450)
+  await chargeByWheel(page, 250)
+  await page.waitForURL('**/tutorial/index.html')
+  await expect(page.locator('html')).toHaveAttribute('data-vt', 'next')
+})
+
+test('charging at ch7 bottom crosses into the skills section', async ({ page }) => {
+  await page.goto('/tutorial/ch7.html')
+  await expect(page.locator('[data-flip-edge="next"]')).toHaveCount(1)
+  await page.evaluate(scrollToBottom)
+  await page.waitForTimeout(200)
+  await page.mouse.move(640, 450)
+  await chargeByWheel(page, 250)
+  await page.waitForURL('**/skills/html.html')
+  await expect(page.locator('html')).toHaveAttribute('data-vt', 'next')
+})
+
+test('charging at practice bottom loops back to the index page', async ({ page }) => {
+  await page.goto('/practice/')
+  await expect(page.locator('[data-flip-edge="next"]')).toHaveCount(1)
+  await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight))
+  await page.waitForTimeout(200)
+  await page.mouse.move(640, 450)
+  await chargeByWheel(page, 250)
+  await page.waitForURL('**/index.html')
+  await expect(page.locator('html')).toHaveAttribute('data-vt', 'next')
 })

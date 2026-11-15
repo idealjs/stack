@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
 import { MONTHS, monthOf, POSTS } from '../content/blogs'
 import { BrickDot, Mark, Tri } from '../design-system'
+import { type PageKey, relHref } from '../lib/pages'
 import { Page, Section } from '../lib/ui'
 
 function inline(text: string): ReactNode[] {
@@ -135,7 +136,7 @@ function Markdown({ raw }: { raw: string }) {
   return <div className="space-y-5">{out}</div>
 }
 
-export function BlogCard({ post }: { post: (typeof POSTS)[number] }) {
+export function BlogCard({ post, from }: { post: (typeof POSTS)[number]; from: PageKey }) {
   const quote =
     post.raw.split('\n').find((l) => l.startsWith('> ') && l.trim() !== '') ??
     post.raw
@@ -147,7 +148,7 @@ export function BlogCard({ post }: { post: (typeof POSTS)[number] }) {
   return (
     <span className="hover-host block w-fit">
       <a
-        href={`./blog-${post.slug}.html`}
+        href={relHref(from, `blog-${post.slug}`)}
         className="hoverable-shadow block w-[420px] rounded-2xl border-2 border-ink bg-paper p-5 no-underline shadow-ink transition-[translate,box-shadow] duration-150"
       >
         <div className="flex items-center gap-2.5">
@@ -180,7 +181,7 @@ export function BlogDatePage({ dateKey }: { dateKey: string }) {
       <Section label="本月文章" note="点卡片进入文章">
         <div className="flex flex-wrap gap-6">
           {month.posts.map((p) => (
-            <BlogCard key={p.slug} post={p} />
+            <BlogCard key={p.slug} post={p} from={`blog-${dateKey}`} />
           ))}
         </div>
       </Section>
@@ -192,7 +193,7 @@ export function BlogPostPage({ slug }: { slug: string }) {
   const post = POSTS.find((p) => p.slug === slug)
   if (!post) throw new Error(`unknown post: ${slug}`)
   return (
-    <Page active={`blog-${monthOf(slug)}`}>
+    <Page active={`blog-${monthOf(slug)}`} chain={`blog-${slug}`}>
       <div className="relative overflow-hidden rounded-2xl border-2 border-ink bg-paper p-5 shadow-ink">
         <span
           className="t-display pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 select-none"
@@ -214,13 +215,13 @@ export function BlogPostPage({ slug }: { slug: string }) {
       </article>
       <div className="mt-10 flex items-center justify-between">
         <a
-          href={`./blog-${monthOf(slug)}.html`}
+          href={relHref(`blog-${slug}`, `blog-${monthOf(slug)}`)}
           className="rounded-xl border-2 border-ink bg-paper px-4 py-2 text-small font-bold text-ink no-underline shadow-ink"
         >
           ← 返回 {monthOf(slug)}
         </a>
         <a
-          href="./index.html"
+          href={relHref(`blog-${slug}`, 'index')}
           className="rounded-xl border-2 border-ink bg-ink px-4 py-2 text-small font-bold text-paper no-underline"
         >
           返回首页

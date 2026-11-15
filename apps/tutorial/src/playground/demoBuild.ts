@@ -9,7 +9,7 @@ import {
 } from '@idealjs/stack'
 import { bundle, imports } from '@idealjs/stack/builtins'
 
-const WASM_URL = 'esbuild.wasm'
+const WASM_URL = '/esbuild.wasm'
 const CONFIG_NAME = 'stack.config.ts'
 const DOC_NAME = 'index.html'
 

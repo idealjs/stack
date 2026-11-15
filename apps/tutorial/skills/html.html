@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>第 7 章 · MPA 入口</title>
+    <title>HTML · 技能熟悉 · idealjs stack</title>
     <style>@view-transition { navigation: auto; }</style>
     <script>
       var vt = sessionStorage.getItem("vt")
@@ -14,11 +14,12 @@
         if (a) sessionStorage.setItem("vt", a.dataset.dir)
       })
     </script>
-    <link rel="stylesheet" href="./src/design-system/styles/tokens.css" />
-    <link rel="stylesheet" href="./src/design-system/styles/learning.css" />
+    <meta name="description" content="技能熟悉 · HTML：用标记描述网页结构。专项教程逐步补充中。" />
+    <link rel="stylesheet" href="../src/design-system/styles/tokens.css" />
+    <link rel="stylesheet" href="../src/design-system/styles/learning.css" />
   </head>
   <body class="bg-paper text-ink">
     <div id="root"></div>
-    <script type="module" src="./src/pages/ch7/main.tsx"></script>
+    <script type="module" src="../src/pages/html/main.tsx"></script>
   </body>
 </html>

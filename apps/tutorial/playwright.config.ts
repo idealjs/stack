@@ -27,7 +27,8 @@ export default defineConfig({
       timeout: 300_000,
     },
     {
-      command: 'yarn workspace @stack/web-runner dev --port 9912',
+      command:
+        'yarn workspace @stack/web-runner build:runtime && yarn workspace @stack/web-runner exec stack preview --port 9912',
       url: 'http://localhost:9912/',
       reuseExistingServer: true,
     },

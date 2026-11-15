@@ -7,7 +7,7 @@ const OVERLAY = 'label[for="site-sidebar-toggle"][aria-hidden="true"]'
 test.describe('练习场 · sidebar 导航（唯一导航形态）', () => {
   test('桌面：顶部 navbar 退场，侧栏常驻在场', async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 900 })
-    await page.goto('/practice.html', { timeout: 20_000 })
+    await page.goto('/practice/', { timeout: 20_000 })
     await expect(page.locator('header')).toHaveCount(0)
     const sidebar = page.locator(SIDEBAR)
     await expect(sidebar).toBeVisible()
@@ -19,7 +19,7 @@ test.describe('练习场 · sidebar 导航（唯一导航形态）', () => {
 
   test('桌面：brand 徽章 ghost 同款（无背景填充＋3px 阴影），在线练习组高亮', async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 900 })
-    await page.goto('/practice.html', { timeout: 20_000 })
+    await page.goto('/practice/', { timeout: 20_000 })
     const brand = page.locator(`${SIDEBAR} a`).first()
     await expect(brand).toHaveText('idealjs stack')
     const background = await brand.evaluate((el) => getComputedStyle(el).backgroundColor)
@@ -34,7 +34,7 @@ test.describe('练习场 · sidebar 导航（唯一导航形态）', () => {
 
   test('桌面：主区一屏放下，沙箱已撤出主区住进右缘侧栏', async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 900 })
-    await page.goto('/practice.html', { timeout: 20_000 })
+    await page.goto('/practice/', { timeout: 20_000 })
     await expect(page.getByRole('heading', { name: '在线练习' })).toBeVisible()
     await expect(page.locator('#practice-sandbox')).toHaveCount(0)
     const overflow = await page.evaluate(
@@ -45,7 +45,7 @@ test.describe('练习场 · sidebar 导航（唯一导航形态）', () => {
 
   test('移动：抽屉开合，brand 同款，遮罩点按收起', async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 })
-    await page.goto('/practice.html', { timeout: 20_000 })
+    await page.goto('/practice/', { timeout: 20_000 })
     const sidebar = page.locator(SIDEBAR)
     await expect(sidebar).toBeHidden()
     await page.locator(OPENER).click()

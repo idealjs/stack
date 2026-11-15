@@ -1,8 +1,11 @@
 import '../design-system'
 import type { ReactNode } from 'react'
+import { PageTurnBar } from '../components/PageTurnBar'
 import { MONTHS } from '../content/blogs'
 import type { ChapterId, NavItemLink, NavRowGroup } from '../design-system'
+import { PageFlipZone } from '../design-system'
 import { CHAPTERS } from './chapters'
+import { flipTargetsOf, type PageKey, relHref } from './pages'
 import type { SiteNav } from './site'
 import { SitePage } from './site'
 
@@ -15,69 +18,76 @@ export type DesignKey =
 
 export type SkillKey = 'html' | 'css' | 'javascript'
 
-const DESIGN: { href: string; label: string; key: DesignKey }[] = [
-  { href: './design-colors.html', label: '颜色', key: 'design-colors' },
-  { href: './design-typography.html', label: '字体', key: 'design-typography' },
-  { href: './design-symbols.html', label: '符号形状', key: 'design-symbols' },
-  { href: './design-components.html', label: '组件', key: 'design-components' },
-  { href: './design-shadow.html', label: '阴影', key: 'design-shadow' },
+const DESIGN: { label: string; key: DesignKey }[] = [
+  { label: '颜色', key: 'design-colors' },
+  { label: '字体', key: 'design-typography' },
+  { label: '符号形状', key: 'design-symbols' },
+  { label: '组件', key: 'design-components' },
+  { label: '阴影', key: 'design-shadow' },
 ]
 
-const SKILLS: { href: string; label: string; key: SkillKey }[] = [
-  { href: './html.html', label: 'HTML', key: 'html' },
-  { href: './css.html', label: 'CSS', key: 'css' },
-  { href: './javascript.html', label: 'JavaScript', key: 'javascript' },
+const SKILLS: { label: string; key: SkillKey }[] = [
+  { label: 'HTML', key: 'html' },
+  { label: 'CSS', key: 'css' },
+  { label: 'JavaScript', key: 'javascript' },
 ]
 
-const CHAPTER_ITEMS: NavItemLink[] = ([1, 2, 3, 4, 5, 6, 7] as ChapterId[]).map((id) => ({
-  key: `ch${id}`,
-  label: CHAPTERS[id].title,
-  href: `./ch${id}.html`,
-  color: CHAPTERS[id].color,
-}))
+const chapterItems = (from: PageKey): NavItemLink[] =>
+  ([1, 2, 3, 4, 5, 6, 7] as ChapterId[]).map((id) => ({
+    key: `ch${id}`,
+    label: CHAPTERS[id].title,
+    href: relHref(from, `ch${id}`),
+    color: CHAPTERS[id].color,
+  }))
 
-const NAV_ROWS: NavRowGroup[] = [
-  { sectionKey: 'tutorial', label: '全栈教程', href: './learn.html', items: CHAPTER_ITEMS },
-  {
-    sectionKey: 'skills',
-    label: '技能熟悉',
-    items: SKILLS.map((n) => ({ key: n.key, label: n.label, href: n.href })),
-  },
-  {
-    sectionKey: 'blog',
-    label: '博客',
-    href: './blog.html',
-    items: MONTHS.map((m) => ({
-      key: `blog-${m.key}`,
-      label: m.key,
-      href: `./blog-${m.key}.html`,
-      mono: true,
-    })),
-  },
-  {
-    sectionKey: 'design',
-    label: '设计系统',
-    href: './design.html',
-    items: DESIGN.map((n) => ({ key: n.key, label: n.label, href: n.href })),
-  },
-  {
-    sectionKey: 'practice',
-    label: '在线练习',
-    href: './practice.html',
-    items: [{ key: 'practice-starter', label: '重建中', href: './practice.html', mono: true }],
-  },
-]
-
-export const SITE_NAV: SiteNav = {
-  brand: { key: 'index', label: 'idealjs stack', href: './index.html' },
-  rows: NAV_ROWS,
-}
+export const siteNavFor = (from: PageKey): SiteNav => ({
+  brand: { key: 'index', label: 'idealjs stack', href: relHref(from, 'index') },
+  rows: [
+    {
+      sectionKey: 'tutorial',
+      label: '全栈教程',
+      href: relHref(from, 'learn'),
+      items: chapterItems(from),
+    },
+    {
+      sectionKey: 'skills',
+      label: '技能熟悉',
+      items: SKILLS.map((n) => ({ key: n.key, label: n.label, href: relHref(from, n.key) })),
+    },
+    {
+      sectionKey: 'blog',
+      label: '博客',
+      href: relHref(from, 'blog'),
+      items: MONTHS.map((m) => ({
+        key: `blog-${m.key}`,
+        label: m.key,
+        href: relHref(from, `blog-${m.key}`),
+        mono: true,
+      })),
+    },
+    {
+      sectionKey: 'design',
+      label: '设计系统',
+      href: relHref(from, 'design'),
+      items: DESIGN.map((n) => ({ key: n.key, label: n.label, href: relHref(from, n.key) })),
+    },
+    {
+      sectionKey: 'practice',
+      label: '在线练习',
+      href: relHref(from, 'practice'),
+      items: [
+        { key: 'practice-starter', label: '重建中', href: relHref(from, 'practice'), mono: true },
+      ],
+    },
+  ] satisfies NavRowGroup[],
+})
 
 export function Page({
   title,
   subtitle,
   desc,
   active,
+  chain,
   children,
 }: {
   title?: string
@@ -93,8 +103,10 @@ export function Page({
     | DesignKey
     | SkillKey
     | `blog-${string}`
+  chain?: PageKey
   children: ReactNode
 }) {
+  const pageKey = (chain ?? (typeof active === 'number' ? `ch${active}` : active)) as PageKey
   const activeKey =
     active === 'index'
       ? 'index'
@@ -104,16 +116,21 @@ export function Page({
           ? `ch${active}`
           : active
 
+  const flips = flipTargetsOf(pageKey)
+
   return (
     <SitePage
-      nav={SITE_NAV}
+      nav={siteNavFor(pageKey)}
       active={activeKey}
       viewTransitionName="site-header"
       title={title}
       subtitle={subtitle}
       desc={desc}
     >
-      {children}
+      <PageFlipZone prev={flips.prev} next={flips.next}>
+        {children}
+        <PageTurnBar from={pageKey} />
+      </PageFlipZone>
     </SitePage>
   )
 }

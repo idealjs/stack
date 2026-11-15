@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>博客 · 2026-08</title>
+    <style>@view-transition { navigation: auto; }</style>
+    <script>
+      var vt = sessionStorage.getItem("vt")
+      if (vt) document.documentElement.dataset.vt = vt
+      sessionStorage.removeItem("vt")
+      document.addEventListener("click", function (e) {
+        var a = e.target.closest("a[data-dir]")
+        if (a) sessionStorage.setItem("vt", a.dataset.dir)
+      })
+    </script>
+    <link rel="stylesheet" href="../src/design-system/styles/tokens.css" />
+    <link rel="stylesheet" href="../src/design-system/styles/learning.css" />
+  </head>
+  <body class="bg-paper text-ink">
+    <div id="root"></div>
+    <script type="module" src="../src/pages/blog-2026-08/main.tsx"></script>
+  </body>
+</html>

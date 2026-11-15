@@ -13,7 +13,7 @@ async function openVisualPage(
   browser: Browser,
   baseURL: string | undefined,
   freezeVt: boolean,
-  path = './ch1.html',
+  path = '/tutorial/ch1.html',
 ) {
   const context = await browser.newContext({
     baseURL,
@@ -87,7 +87,7 @@ test('翻页视觉 · next 翻页 VT 中间帧（50% 冻结）', async ({ browse
 })
 
 test('翻页视觉 · prev 翻页 VT 中间帧（50% 冻结）', async ({ browser, baseURL }) => {
-  const page = await openVisualPage(browser, baseURL, true, './ch2.html')
+  const page = await openVisualPage(browser, baseURL, true, '/tutorial/ch2.html')
   await page.waitForTimeout(300)
   await chargeByWheel(page, -250)
   await page.waitForURL('**/ch1.html')

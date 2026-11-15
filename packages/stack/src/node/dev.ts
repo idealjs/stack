@@ -105,47 +105,49 @@ export async function startDevServer(
         ? requestPath.slice(base.length) || '/'
         : requestPath
     const stripped = withoutBase.endsWith('/') ? withoutBase : `${withoutBase}`
-    for (const candidate of [stripped, join(stripped, 'index.html')]) {
-      const safe = join(distRelative, candidate)
-      if (!safe.startsWith(distRelative)) continue
-      if (options.serve !== undefined) {
-        let served: ServedFile | null
-        try {
-          served = await options.serve(candidate)
-        } catch (error) {
-          const message = error instanceof Error ? error.message : String(error)
-          return c.text(`[stack] dev 构建未就绪：${message}`, 500)
+    const isSafe = (candidate: string): boolean =>
+      join(distRelative, candidate).startsWith(distRelative)
+    const read = async (candidate: string): Promise<ServedFile | null> => {
+      if (options.serve !== undefined) return options.serve(candidate)
+      try {
+        const body = await readFile(join(distRelative, candidate))
+        return {
+          code: body,
+          contentType: MIME[extname(candidate)] ?? 'application/octet-stream',
         }
-        if (served !== null) {
-          const isHtml = served.contentType.startsWith('text/html')
-          let code: string | Uint8Array = served.code
-          if (isHtml && typeof code === 'string') {
-            let text = base === '' ? code : rewriteWithBase(code, base, withoutBase)
-            if (options.liveReload === true)
-              text = text.replace(/<\/body>/i, `${liveScript}</body>`)
-            code = text
-          }
-          return c.body(code, 200, {
-            'Content-Type': served.contentType,
-            'Cache-Control': 'no-store',
-          })
+      } catch {
+        return null
+      }
+    }
+    const respond = async (served: ServedFile): Promise<Response> => {
+      const isHtml = served.contentType.startsWith('text/html')
+      let code: string | Uint8Array = served.code
+      if (isHtml && typeof code === 'string') {
+        let text = base === '' ? code : rewriteWithBase(code, base, withoutBase)
+        if (options.liveReload === true) text = text.replace(/<\/body>/i, `${liveScript}</body>`)
+        code = text
+      }
+      return c.body(code, 200, {
+        'Content-Type': served.contentType,
+        'Cache-Control': 'no-store',
+      })
+    }
+    try {
+      if (isSafe(stripped)) {
+        const exact = await read(stripped)
+        if (exact !== null) return await respond(exact)
+      }
+      const indexCandidate = join(stripped, 'index.html')
+      if (isSafe(indexCandidate)) {
+        const indexPage = await read(indexCandidate)
+        if (indexPage !== null) {
+          if (!withoutBase.endsWith('/')) return c.redirect(`${base}${withoutBase}/`, 308)
+          return await respond(indexPage)
         }
       }
-      try {
-        const body = await readFile(safe)
-        const isHtml = extname(safe) === '.html'
-        let code: string | Buffer = body
-        if (isHtml) {
-          let text = body.toString('utf8')
-          if (base !== '') text = rewriteWithBase(text, base, withoutBase)
-          if (options.liveReload === true) text = text.replace(/<\/body>/i, `${liveScript}</body>`)
-          code = text
-        }
-        return c.body(code, 200, {
-          'Content-Type': MIME[extname(safe)] ?? 'application/octet-stream',
-          'Cache-Control': 'no-store',
-        })
-      } catch {}
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error)
+      return c.text(`[stack] dev 构建未就绪：${message}`, 500)
     }
     return c.text('Not Found', 404)
   })

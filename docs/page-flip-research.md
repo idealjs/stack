@@ -125,6 +125,16 @@ apps/tutorial/src/
 - `scrollRestoration = 'manual'` 随框架布局删除：window 恒不滚动，新文档/刷新后容器天然回顶。
 - 手势层同步适配：`PageFlipZone` 边界检测与 scroll 监听从 window 改为 `[data-scroll-root]`（scroll 不冒泡，监听必须挂容器；wheel/keydown 仍挂 window 靠冒泡到达）。
 
+### 全站翻页链（2026-11）
+
+html 按 navbar 板块入夹（`tutorial/` `skills/` `blog/` `design/` `practice/`，枢纽页用 `index.html`，根 `index.html` 不动），翻页链从 ch1–ch7 扩到全部页面并成环：
+
+- **页面注册表即链**：`src/lib/pages.ts` 的 `PAGES` 有序数组就是链序——index → learn → ch1…ch7 → html/css/javascript → blog（月升序，每月：月页→文章按日期升序，从 `content/blogs.ts` 的 MONTHS/POSTS 派生）→ design → 颜色/字体/符号/组件/阴影 → practice → 回到 index。`neighborsOf()` 环形取邻居，`relHref(from, to)` 按路径深度算相对链接（`./` vs `../`，兼容 `--base` 代理），`flipTargetsOf()` 产出 `PageFlipZone` 的 prev/next。导航 `siteNavFor(from)` 也由注册表生成，站点路径只在这一处定义。
+- **装配上移**：`PageFlipZone` 从 `ChapterPage` 上移到 `lib/ui.tsx` 的 `Page`——所有走 `Page` 的页面自动入链；practice 不走 `Page`，在 App 里手动包。`FlipTarget.chapter: Chapter` 泛化为 `meta: { title, color }`（非章节页从 clash 色板取色），气泡文案随目标动态化（「▼ 继续滚动 · 下一页：{title}」）。
+- **页底翻页条**：新 `components/PageTurnBar`（← 上一页 / 返回首页 / 下一页 →，`data-dir` 带方向握手），`Page` 统一追加在内容尾部；ChapterPage 原私有页底条删除，措辞不丢（注册表 title 本身含「第 N 章 · …」）。博客文章页的「返回月份」行保留在其上。
+- **vt 握手脚本全站化**：所有 html head 都带 sessionStorage 握手内联脚本（原 ch1–ch7 独有），跨文档方向动画对全部页面生效。
+- **配套设施**：`stack.config.ts` 递归扫描入夹 html（input name = 相对路径，如 `blog/gorzil`）；`stack-plugins/ssg.ts` 预渲染临时文件名把 `/` 展平为 `__`；`packages/stack` dev server 对无斜杠目录 URL（如 `/blog`）在 `blog/index.html` 存在时 308 到 `/blog/`，防止相对链接错位解析。
+
 ## 参考
 
 - [Chrome: Cross-document view transitions for MPAs](https://developer.chrome.com/docs/web-platform/view-transitions/cross-document)

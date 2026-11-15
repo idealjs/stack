@@ -1,4 +1,5 @@
 import { Button } from '../../design-system'
+import { relHref } from '../../lib/pages'
 import { Page, Section } from '../../lib/ui'
 
 export function App() {
@@ -15,7 +16,7 @@ export function App() {
           </p>
         </div>
         <div className="mt-4">
-          <Button href="./learn.html">
+          <Button href={relHref('css', 'learn')}>
             打开全栈教程 <span aria-hidden="true">→</span>
           </Button>
         </div>

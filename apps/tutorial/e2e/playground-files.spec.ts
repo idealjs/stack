@@ -11,7 +11,7 @@ async function addFile(page: import('@playwright/test').Page, name: string) {
 }
 
 test('新建文件：进列表并自动激活', async ({ page }) => {
-  await page.goto('/practice.html')
+  await page.goto('/practice/')
   await openEditor(page)
   await addFile(page, 'utils.js')
   const tab = page.getByRole('button', { name: 'utils.js', exact: true })
@@ -20,7 +20,7 @@ test('新建文件：进列表并自动激活', async ({ page }) => {
 })
 
 test('切换文件：两份代码互不串', async ({ page }) => {
-  await page.goto('/practice.html')
+  await page.goto('/practice/')
   await openEditor(page)
   await addFile(page, 'utils.js')
   await page.getByLabel('模块代码').fill('export const one = 1')
@@ -33,7 +33,7 @@ test('切换文件：两份代码互不串', async ({ page }) => {
 })
 
 test('删除文件：删活跃文件后切到首个剩余文件，最后一份不可再删', async ({ page }) => {
-  await page.goto('/practice.html')
+  await page.goto('/practice/')
   await openEditor(page)
   await addFile(page, 'utils.js')
   await page.getByRole('button', { name: '删除 utils.js' }).click()
@@ -56,7 +56,7 @@ test('删除文件：删活跃文件后切到首个剩余文件，最后一份�
 })
 
 test('文件名白名单：路径与非法字符被拒并提示', async ({ page }) => {
-  await page.goto('/practice.html')
+  await page.goto('/practice/')
   await openEditor(page)
   await addFile(page, '../evil')
   await expect(page.getByTestId('file-name-error')).toContainText('文件名只能')

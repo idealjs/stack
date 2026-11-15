@@ -1,16 +1,22 @@
+import type { Page } from '@playwright/test'
 import { expect, test } from '@playwright/test'
+
+const openEditor = async (page: Page) => {
+  await page.locator('[data-comp="editor-dock-tab"]').click()
+  await expect(page.locator('#playground-dock-panel')).toBeVisible()
+}
 
 const RUNTIME_ORIGIN = 'http://localhost:9912'
 
 test('iframe 恰为 allow-scripts，src 指向独立源运行时', async ({ page }) => {
-  await page.goto('/practice.html')
+  await page.goto('/practice/')
   const frame = page.locator('[data-testid="sandbox-frame"]')
   await expect(frame).toHaveAttribute('sandbox', 'allow-scripts')
   await expect(frame).toHaveAttribute('src', `${RUNTIME_ORIGIN}/`)
 })
 
 test('握手自证：独立源部署＋父窗口访问已阻断，无隔离异常', async ({ page }) => {
-  await page.goto('/practice.html')
+  await page.goto('/practice/')
   const status = page.locator('[data-testid="runtime-status"]')
   await expect(status).toContainText(`运行时源：${RUNTIME_ORIGIN}（独立源部署）`, {
     timeout: 10_000,
@@ -23,7 +29,8 @@ test('握手自证：独立源部署＋父窗口访问已阻断，无隔离异�
 test('运行预置 template：宿主 stack 构建后输出面板回传 hello, template，预览框可见并收尾', async ({
   page,
 }) => {
-  await page.goto('/practice.html')
+  await page.goto('/practice/')
+  await openEditor(page)
   await page.getByRole('button', { name: '运行 ▶' }).click()
   const out = page.getByRole('region', { name: '输出' })
   await expect(out).toContainText('hello, template', { timeout: 20_000 })
@@ -32,7 +39,8 @@ test('运行预置 template：宿主 stack 构建后输出面板回传 hello, te
 })
 
 test('异常回传：顶层抛错以 error 级别显示', async ({ page }) => {
-  await page.goto('/practice.html')
+  await page.goto('/practice/')
+  await openEditor(page)
   await page.getByRole('button', { name: 'main.ts', exact: true }).click()
   await page.getByLabel('模块代码').fill(`throw new Error('boom from sandbox')\n`)
   await page.getByRole('button', { name: '运行 ▶' }).click()
@@ -41,7 +49,8 @@ test('异常回传：顶层抛错以 error 级别显示', async ({ page }) => {
 })
 
 test('宿主构建失败：语法错误带「构建」徽章报错，不执行不出预览', async ({ page }) => {
-  await page.goto('/practice.html')
+  await page.goto('/practice/')
+  await openEditor(page)
   await page.getByRole('button', { name: 'main.ts', exact: true }).click()
   await page.getByLabel('模块代码').fill('const = ;\n')
   await page.getByRole('button', { name: '运行 ▶' }).click()

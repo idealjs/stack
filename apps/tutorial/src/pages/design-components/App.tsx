@@ -12,6 +12,7 @@ import {
 } from '../../design-system'
 import { LearningKitGallery } from '../../design-system/examples/LearningKitGallery'
 import { CHAPTERS, PROFILES } from '../../lib/chapters'
+import { relHref } from '../../lib/pages'
 import { Page, Section } from '../../lib/ui'
 import { TicketPreview } from './TicketPreview'
 
@@ -163,19 +164,19 @@ export function App() {
             <RoutableCard
               no={1}
               title="快速开始"
-              href="./ch1.html"
+              href={relHref('design-components', 'ch1')}
               className="absolute left-[60px] top-[110px] w-[180px]"
             />
             <RoutableCard
               no={2}
               title="React"
-              href="./ch2.html"
+              href={relHref('design-components', 'ch2')}
               className="absolute left-[420px] top-[70px] w-[180px] -rotate-1"
             />
             <RoutableCard
               no={5}
               title="全栈基础"
-              href="./ch5.html"
+              href={relHref('design-components', 'ch5')}
               className="absolute left-[780px] top-[70px] w-[180px]"
             />
           </RoutableScene>
@@ -248,7 +249,9 @@ export function App() {
       >
         <div className="flex flex-wrap items-center gap-4">
           <ShadowButton>默认 · paper</ShadowButton>
-          <ShadowButton href="./learn.html">链接 · href 渲染 a</ShadowButton>
+          <ShadowButton href={relHref('design-components', 'learn')}>
+            链接 · href 渲染 a
+          </ShadowButton>
           <ShadowButton tone="clash1b">tone · clash1b</ShadowButton>
           <ShadowButton size="sm">紧凑 · sm</ShadowButton>
           <ShadowButton disabled>占位 · 虚线</ShadowButton>

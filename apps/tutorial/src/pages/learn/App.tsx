@@ -8,6 +8,7 @@ import {
   Mark,
   StickyNote,
 } from '../../design-system'
+import { relHref } from '../../lib/pages'
 import { Page, Section } from '../../lib/ui'
 import { TodoPreview } from './components/TodoPreview'
 import { TodoTour } from './components/TodoTour'
@@ -187,10 +188,10 @@ export function App() {
         </section>
 
         <div className="learn-actions">
-          <Button tone="clash1b" href="./ch1.html">
+          <Button tone="clash1b" href={relHref('learn', 'ch1')}>
             从第一个网页开始 <span aria-hidden="true">→</span>
           </Button>
-          <Button href="./practice.html">打开练习场</Button>
+          <Button href={relHref('learn', 'practice')}>打开练习场</Button>
           <p>你提出需求，Agent 协助实现；再对照结果，理解代码为什么这样工作。</p>
         </div>
 
@@ -274,7 +275,7 @@ export function App() {
                 <p className="learn-environment-note">
                   首次搭建预留 30–60 分钟，从「快速开始」查看环境准备。
                 </p>
-                <Button href="./ch1.html">查看本地环境准备</Button>
+                <Button href={relHref('learn', 'ch1')}>查看本地环境准备</Button>
               </>
             ),
           }}

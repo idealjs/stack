@@ -4,11 +4,13 @@ export function EntryGuide({
   chapters,
   profiles,
   linkChapter = false,
+  chapterHref,
 }: {
   chapters: Record<ChapterId, Chapter>
   profiles: Profile[]
 
   linkChapter?: boolean
+  chapterHref?: (id: ChapterId) => string
 }) {
   return (
     <div className="flex flex-wrap gap-5">
@@ -33,7 +35,7 @@ export function EntryGuide({
                 {i > 0 && <span className="text-small text-mute">→</span>}
                 {linkChapter ? (
                   <a
-                    href={`./ch${id}.html`}
+                    href={(chapterHref ?? ((chapterId: ChapterId) => `./ch${chapterId}.html`))(id)}
                     className={`rounded-full border-[1.5px] border-ink px-2.5 py-0.5 text-small no-underline ${id === p.entry ? 'bg-clash2a font-extrabold' : 'bg-white'}`}
                   >
                     {id === p.entry && ['①', '②', '③'][profiles.indexOf(p)]} {chapters[id].title}

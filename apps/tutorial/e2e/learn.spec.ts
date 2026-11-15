@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test'
 
 test.describe('教程首页', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/learn.html')
+    await page.goto('/tutorial/')
   })
 
   test('成品演示可增删、勾选；空白输入不产生任务，刷新回到示例', async ({ page }) => {
@@ -40,8 +40,9 @@ test.describe('教程首页', () => {
   })
 
   test('站头恒为完整四行：四个行首与各条目在任何页面不缩减', async ({ page }) => {
-    const header = page.locator('main > header')
+    const header = page.locator('main header')
 
+    await page.getByLabel('展开导航网格').click()
     for (const label of ['全栈教程', '博客', '设计系统', '在线练习']) {
       await expect(header.getByRole('link', { name: label, exact: true })).toHaveCount(1)
     }
@@ -55,7 +56,7 @@ test.describe('教程首页', () => {
 
   test('移动端导航抽屉：对称触发器的 aria-expanded 随纯 CSS 开合翻转', async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 })
-    await page.goto('/learn.html')
+    await page.goto('/tutorial/')
     const open = page.locator('label[aria-label="打开导航菜单"]')
     const close = page.locator('label[aria-label="收起导航菜单"]')
     const overlay = page.locator('label[for="site-nav-toggle"][aria-hidden="true"]')
@@ -153,7 +154,7 @@ test.describe('教程首页', () => {
     page,
   }) => {
     await page.setViewportSize({ width: 1280, height: 900 })
-    await page.goto('/learn.html')
+    await page.goto('/tutorial/')
     const trigger = page.getByRole('button', { name: /30 秒上手这个待办应用/ })
     const tooltip = page.locator('.react-joyride__tooltip')
     const demo = page.getByRole('region', { name: '待办应用演示' })
@@ -206,7 +207,7 @@ test.describe('教程首页', () => {
 
   test('新手引导：绕过气泡按钮手动操作待办，每一步仍可推进不卡死', async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 900 })
-    await page.goto('/learn.html')
+    await page.goto('/tutorial/')
     const trigger = page.getByRole('button', { name: /30 秒上手这个待办应用/ })
     const tooltip = page.locator('.react-joyride__tooltip')
     const demo = page.getByRole('region', { name: '待办应用演示' })
@@ -253,7 +254,7 @@ test.describe('教程首页', () => {
 
   test('新手引导：开场就删光待办，改删两步自动跳过直达总结不卡死', async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 900 })
-    await page.goto('/learn.html')
+    await page.goto('/tutorial/')
     const trigger = page.getByRole('button', { name: /30 秒上手这个待办应用/ })
     const tooltip = page.locator('.react-joyride__tooltip')
     const demo = page.getByRole('region', { name: '待办应用演示' })
@@ -287,7 +288,7 @@ test.describe('教程首页', () => {
   })
 
   test('待办演示：搜索实时过滤，可一键清空，无匹配时给出提示', async ({ page }) => {
-    await page.goto('/learn.html')
+    await page.goto('/tutorial/')
     const search = page.getByRole('textbox', { name: '搜索待办' })
     await search.fill('房间')
     await expect(page.locator('.learn-todo-items li')).toHaveCount(1)

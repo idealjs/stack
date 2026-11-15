@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test'
 
-const PAGES = ['/index.html', '/design.html', '/ch7.html', '/blog.html']
+const PAGES = ['/index.html', '/design/', '/tutorial/ch7.html', '/blog/']
 
 test.describe('navbar 品牌徽章一致性', () => {
   test('各页面 brand 徽章：无背景填充、同款 3px 阴影（logo 恒定，不随页面翻转）', async ({

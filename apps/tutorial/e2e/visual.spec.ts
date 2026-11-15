@@ -1,11 +1,11 @@
 import { expect, test } from '@playwright/test'
 
 const CASES: [name: string, path: string][] = [
-  ['design', '/design.html'],
-  ['design-colors', '/design-colors.html'],
-  ['design-symbols', '/design-symbols.html'],
-  ['design-components', '/design-components.html'],
-  ['design-shadow', '/design-shadow.html'],
+  ['design', '/design/'],
+  ['design-colors', '/design/colors.html'],
+  ['design-symbols', '/design/symbols.html'],
+  ['design-components', '/design/components.html'],
+  ['design-shadow', '/design/shadow.html'],
 ]
 
 for (const [name, path] of CASES) {

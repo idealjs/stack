@@ -9,7 +9,7 @@ export function App() {
         <Section key={m.key} label={m.key} note={`${m.posts.length} 篇`}>
           <div className="flex flex-wrap gap-6">
             {m.posts.map((p) => (
-              <BlogCard key={p.slug} post={p} />
+              <BlogCard key={p.slug} post={p} from="blog" />
             ))}
           </div>
         </Section>
