@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react'
 import type { ReactNode } from 'react'
-import { DockSheet } from '../../../design-system'
-import { usePlayground } from '../../../playground'
+import { DockSheet } from '../design-system'
 
 type DockPaneKind = 'editor' | 'sandbox'
 
@@ -19,16 +18,17 @@ export function PlaygroundDock({
   panelId,
   open,
   onToggle,
+  runSeq = 0,
   editor,
   sandbox,
 }: {
   panelId: string
   open: boolean
   onToggle: () => void
+  runSeq?: number
   editor: ReactNode
   sandbox: ReactNode
 }) {
-  const { runSeq } = usePlayground()
   const [pane, setPane] = useState<DockPaneKind>('editor')
 
   useEffect(() => {

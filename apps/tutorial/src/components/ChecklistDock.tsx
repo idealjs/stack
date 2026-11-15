@@ -1,8 +1,9 @@
 import type { ReactNode } from 'react'
-import { Dropdown } from '../../../design-system'
+import { Dropdown } from '../design-system'
 
 export function ChecklistDock({
   panelId,
+  label,
   done,
   total,
   open,
@@ -10,6 +11,7 @@ export function ChecklistDock({
   children,
 }: {
   panelId: string
+  label: string
   done: number
   total: number
   open: boolean
@@ -24,7 +26,7 @@ export function ChecklistDock({
     <Dropdown
       comp="checklist-clip"
       panelId={panelId}
-      label="验收清单"
+      label={label}
       open={open}
       onOpenChange={onOpenChange}
       data-progress={progress}
@@ -45,7 +47,7 @@ export function ChecklistDock({
               {done}/{total}
             </span>
           </span>
-          <span className="sr-only">验收清单</span>
+          <span className="sr-only">{label}</span>
         </>
       }
     >

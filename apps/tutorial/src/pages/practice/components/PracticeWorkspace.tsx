@@ -1,6 +1,12 @@
 import { useMemo, useRef, useState } from 'react'
+import { AgentDock } from '../../../components/AgentDock'
+import type { ChatItem } from '../../../components/ChatPanel'
+import { ChatPanel } from '../../../components/ChatPanel'
+import { ChecklistDock } from '../../../components/ChecklistDock'
+import { PlaygroundDock } from '../../../components/PlaygroundDock'
+import { TipsDock } from '../../../components/TipsDock'
 import type { DataFlowStep } from '../../../design-system'
-import { ClipboardChecklist, DataFlowBoard, DockPop } from '../../../design-system'
+import { ClipboardChecklist, DataFlowBoard } from '../../../design-system'
 import { TEMPLATE_FILES } from '../../../lib/templateFiles'
 import {
   CodeEditor,
@@ -17,12 +23,7 @@ import { hasKey, loadLlmConfig, saveLlmConfig } from '../lib/agent/llm'
 import { runAgentTurn, systemPrompt } from '../lib/agent/loop'
 import { CREATE_PROJECT_EXAMPLES } from '../lib/prompts'
 import { taskFromLocation } from '../lib/tasks'
-import type { ChatItem } from './ChatPanel'
-import { ChatPanel } from './ChatPanel'
-import { ChecklistDock } from './ChecklistDock'
 import { KeyModal } from './KeyModal'
-import { PlaygroundDock } from './PlaygroundDock'
-import { TipsDock } from './TipsDock'
 
 const FLOW_TONES = ['coral', 'teal', 'blue'] as const
 
@@ -55,6 +56,26 @@ function SandboxPane() {
       </div>
       <OutputView />
     </section>
+  )
+}
+
+function PracticeDock({ open, onToggle }: { open: boolean; onToggle: () => void }) {
+  const { runSeq } = usePlayground()
+  return (
+    <PlaygroundDock
+      panelId="playground-dock-panel"
+      open={open}
+      onToggle={onToggle}
+      runSeq={runSeq}
+      editor={
+        <>
+          <FileTabs />
+          <CodeEditor className="min-h-[360px] flex-1" />
+          <RunRow />
+        </>
+      }
+      sandbox={<SandboxPane />}
+    />
   )
 }
 
@@ -140,6 +161,7 @@ export function PracticeWorkspace() {
       <div className="fixed top-3 right-4 z-40 flex items-start gap-2 sm:right-6">
         <ChecklistDock
           panelId="checklist-dock-panel"
+          label="验收清单"
           done={checkedIds.length}
           total={task.acceptance.length}
           open={openDock === 'checklist'}
@@ -159,6 +181,7 @@ export function PracticeWorkspace() {
 
         <TipsDock
           panelId="tips-dock-panel"
+          label="tips · 喂给陪练"
           open={openDock === 'tips'}
           onOpenChange={(open) => setOpenDock((v) => (open ? 'tips' : v === 'tips' ? null : v))}
         >
@@ -174,32 +197,17 @@ export function PracticeWorkspace() {
       </div>
 
       <PlaygroundProvider initialFiles={TEMPLATE_FILES}>
-        <PlaygroundDock
-          panelId="playground-dock-panel"
-          open={dockOpen}
-          onToggle={() => setDockOpen((v) => !v)}
-          editor={
-            <>
-              <FileTabs />
-              <CodeEditor className="min-h-[360px] flex-1" />
-              <RunRow />
-            </>
-          }
-          sandbox={<SandboxPane />}
-        />
+        <PracticeDock open={dockOpen} onToggle={() => setDockOpen((v) => !v)} />
       </PlaygroundProvider>
 
       <div className="fixed right-3 bottom-3 z-40 flex items-end gap-2 sm:right-4 sm:bottom-4">
-        <DockPop
+        <AgentDock
           comp="coach-sticky"
           panelId="coach-sticky-panel"
           label="陪练 agent"
           meta={task.label}
-          accentClass="bg-clash2a"
           open={openDock === 'agent'}
           onOpenChange={openAgent}
-          panelClassName="h-[min(540px,100dvh_-_120px)] w-[min(420px,100vw_-_24px)]"
-          fill
         >
           <ChatPanel
             items={chat}
@@ -215,7 +223,7 @@ export function PracticeWorkspace() {
             onOpenKey={() => setKeyOpen(true)}
             flat
           />
-        </DockPop>
+        </AgentDock>
       </div>
 
       {keyOpen && (
