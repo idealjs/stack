@@ -3,7 +3,7 @@ import { networkInterfaces } from 'node:os'
 import { extname, relative, resolve as resolvePath } from 'node:path'
 import { pathToFileURL } from 'node:url'
 import { cac } from 'cac'
-import { type BuildResult, build, type StackConfig } from '../index.ts'
+import { type BuildResult, build, DEFAULT_DIST, type StackConfig } from '../index.ts'
 import { MIME, type ServedFile, startDevServer } from './dev.ts'
 import { createDevBuildQueue } from './devBuild.ts'
 import { nodeFs } from './fs.ts'
@@ -138,10 +138,12 @@ async function buildOnce(config: StackConfig, summary = true): Promise<void> {
 
 const outputUrlIndex = (config: StackConfig, result: BuildResult): Map<string, ServedFile> => {
   const rootAbsolute = resolvePath(config.root ?? '.')
+  const distAbsolute = resolvePath(rootAbsolute, config.dist ?? DEFAULT_DIST)
   const index = new Map<string, ServedFile>()
   for (const output of result.outputs) {
-    const dir = relative(rootAbsolute, resolvePath(rootAbsolute, output.dir)).replaceAll('\\', '/')
-    const prefix = dir === '.' ? '' : `${dir}/`
+    const dir = relative(distAbsolute, resolvePath(rootAbsolute, output.dir)).replaceAll('\\', '/')
+    if (dir.startsWith('..')) continue
+    const prefix = dir === '' ? '' : `${dir}/`
     for (const file of output.files) {
       index.set(`/${prefix}${file.path}`, {
         code: file.code,

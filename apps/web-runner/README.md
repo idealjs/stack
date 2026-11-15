@@ -62,19 +62,19 @@ Blob URL ＋ 动态 `import()`、`default.init()` 钩子、console 四级捕获�
   src 指向运行时位）；根 `package.json` 的 dev 脚本并行拉起 tutorial dev（8910）与本包
   `stack dev --base /absproxy/8911 --port 8911`。
 - **远程 code-server 同域场景**：根目录 `yarn dev:proxy` 一键启动（等价于本地 dev
-  ＋教程侧 `--base /absproxy/9911` 与环境变量
+  ＋教程侧 `--base /absproxy/8910` 与环境变量
   `VITE_STACK_RUNTIME_ORIGIN=https://code.idealjs.com/absproxy/8911`——运行时与宿主
   同源，同源告警如实亮红，隔离只剩 sandbox 一道，与 srcdoc 等强度）。环境变量已
   下沉到各包的 `dev:proxy` 脚本（tutorial 的 package.json），根脚本只做编排。
-  `stack dev --port` 与 `--base /absproxy/9911` 的端口数字成对，改一处必须
+  `stack dev --port` 与 `--base /absproxy/8910` 的端口数字成对，改一处必须
   同步另一处。
 - **生产**：`VITE_STACK_RUNTIME_ORIGIN=https://<runtime-domain>`——运行时独立域静态托管
   `dist-runtime/`，跨源 src 形态（第二道防线完整）。
 
 修改位置：教程侧 env 全部在 `apps/tutorial/.env.development`（stack.config.ts 经
 `process.loadEnvFile` 载入，进程已设变量不被覆盖）；`--base` 走 dev 脚本旗标。e2e 栈不读这些 env——playwright webServer 构建时经
-进程 env 注入 `VITE_STACK_RUNTIME_ORIGIN=http://localhost:9912` 并以 `dev --port
-9912` 起运行时位，与交互 dev 的 8910/8911 互不抢占、契约独立。
+进程 env 注入 `VITE_STACK_RUNTIME_ORIGIN=http://localhost:9911` 并以 `dev --port
+9911` 起运行时位，与交互 dev 的 8910/8911 互不抢占、契约独立。
 
 注意事项：运行时 doc 零子资源后，鉴权链（code-server 的 SameSite=Lax cookie）只影响
 doc 导航本身——由父页面发起、cookie 可达；宿主页面的 `/esbuild.wasm` 是同源资源、带

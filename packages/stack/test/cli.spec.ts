@@ -56,6 +56,10 @@ test('CLI 的 dev --no-watch 与 preview 同行为：伺服已构建产物', asy
   await assertServesBuiltArtifact(['dev', '--no-watch', '--port', '8922'], 8922)
 })
 
+test('CLI 的 dev（watch 模式）内存索引以 dist 为根伺服产物', async () => {
+  await assertServesBuiltArtifact(['dev', '--port', '8923'], 8923)
+})
+
 test('CLI 以默认配置构建夹具工程：default 与 minify 订阅产出各就各位', () => {
   try {
     const run = runStack(fixtureDir)

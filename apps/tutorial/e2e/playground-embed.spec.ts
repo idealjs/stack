@@ -6,7 +6,7 @@ const openEditor = async (page: Page) => {
   await expect(page.locator('#playground-dock-panel')).toBeVisible()
 }
 
-const RUNTIME_ORIGIN = 'http://localhost:9912'
+const RUNTIME_ORIGIN = 'http://localhost:9911'
 
 test('iframe 恰为 allow-scripts，src 指向独立源运行时', async ({ page }) => {
   await page.goto('/practice/')
