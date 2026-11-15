@@ -59,7 +59,7 @@ function FlipEdge({ side, target, edgeRef, onFlip }: FlipEdgeProps) {
     <div
       ref={edgeRef}
       data-flip-edge={side}
-      className={`pointer-events-none fixed inset-x-0 ${anchor.container} z-40`}
+      className={`pointer-events-none fixed inset-x-0 ${anchor.container} z-[60]`}
       style={edgeStyle}
     >
       <div className={`absolute inset-x-0 ${anchor.badge} flex justify-center`}>
