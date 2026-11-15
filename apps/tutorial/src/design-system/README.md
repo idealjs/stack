@@ -81,17 +81,16 @@ import { ClipboardChecklist, TaskEnvelope } from '../../design-system'
 
 ## 贴签抽拉组件
 
-页面浮层（贴签触发＋抽拉面板）的四个基件，只做 chrome：触发按钮的 aria 关系（`aria-expanded` / `aria-controls`）、Esc 关闭、开关过渡与蒙版。全部是纯展示件，不依赖 playground 等视图层模块——esbuild wasm 只允许出现在调用方（视图组件）里，基件被任何页面引入都不会拖入构建引擎。
+页面浮层（贴签触发＋抽拉面板）的三个基件，只做 chrome：触发按钮的 aria 关系（`aria-expanded` / `aria-controls`）、Esc 关闭、开关过渡与蒙版。全部是纯展示件，不依赖 playground 等视图层模块——esbuild wasm 只允许出现在调用方（视图组件）里，基件被任何页面引入都不会拖入构建引擎。
 
 | 基件 | 形态 | 用法 |
 | --- | --- | --- |
-| `Dropdown` | 下拉面板 | 入口点击展开/收起，点面板外任意处（`pointerdown`）收起，Esc 同；点面板内部不收。收起判定与 `DockPop` 共用 `useDockDismiss`（传入包住入口与面板的 ref）。受控 `open` / `onOpenChange`；面板 `absolute right-0 top-[calc(100%+8px)]`，锚定到最近的定位祖先（调用方用 `fixed` 容器排布入口，面板即对齐右缘、从整排下方展开） |
+| `Dropdown` | 下拉基件 · 双形态 | `placement="bottom"`（默认）面板向下展开、网格 0fr→1fr 揭开；`placement="top"` 面板向上弹出、pop 缩放归位（原 `DockPop` 底角弹层并入此形态）。入口点击展开/收起，点面板外任意处（`pointerdown`）收起，Esc 同；点面板内部不收。受控 `open` / `onOpenChange`；面板 `absolute right-0`，锚定到最近的定位祖先（调用方用 `fixed` 容器排布入口，面板即对齐右缘展开）；面板宽度由 `panelClassName` 给，默认 `w-[min(380px,100vw-24px)]`。真件应用：tips 贴签、验收夹（向下），陪练 agent（向上） |
 | `DockSheet` | 右缘抽屉 | 全高侧栏＋灰色蒙版＋右缘竖排贴签；`tabs` 描述贴签组，`toolbar` 放页签切换等视图内容，✕ 常驻 |
-| `DockPop` | 底角弹层 | 贴签锚定底部，面板向上弹出；点面板外任意处（`pointerdown`）收起，Esc 同，点面板内部不收 |
 | `DockModal` | 居中模态 | 蒙版点击与 Esc 关闭，卡片内容调用方给 |
 
-`Dropdown` 的入口样式由 `triggerClassName` 整体提供（基件不带形状类，避免 tailwind 类冲突），`data-*` 等透传属性直接写在组件上，落到入口按钮。
+`Dropdown` 的入口样式由 `triggerClassName` 整体提供（基件不带形状类，避免 tailwind 类冲突），`data-*` 等透传属性直接写在组件上，落到入口按钮；面板 chrome（描边、撞色、角标）由调用方内容层自带——bottom 形态的网格收起要求外层不能自带 border，否则收起后留残影。
 
 开合时长不对称：展开 200ms，收起 100ms——收起要利落，拖长的退出动画会让页面发黏。duration 类随开合状态二选一挂载（不与静态 duration 同串并存），避免 tailwind 同串冲突后样式表序定胜负。
 
-右缘贴签（`DockSheet.tabs`）不参与开合动画：贴签常驻右缘 z-30，本抽屉面板 z-50 盖在其上，开合只动面板自身——收起时贴签是被面板滑出「揭出来」的，不做自己的过渡，避免多签同时播放入场动画。z-30 同时低于 `Dropdown`/`DockPop` 的调用方浮层容器（z-40 起）与蒙版（z-45）：任何下拉/弹层面板展开时直接盖过贴签，面板右缘与贴签重叠区不吞点击。
+右缘贴签（`DockSheet.tabs`）不参与开合动画：贴签常驻右缘 z-30，本抽屉面板 z-50 盖在其上，开合只动面板自身——收起时贴签是被面板滑出「揭出来」的，不做自己的过渡，避免多签同时播放入场动画。z-30 同时低于 `Dropdown` 的调用方浮层容器（z-40 起）与蒙版（z-45）：任何下拉/弹层面板展开时直接盖过贴签，面板右缘与贴签重叠区不吞点击。

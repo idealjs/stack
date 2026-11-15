@@ -14,6 +14,7 @@ import { LearningKitGallery } from '../../design-system/examples/LearningKitGall
 import { CHAPTERS, PROFILES } from '../../lib/chapters'
 import { relHref } from '../../lib/pages'
 import { Page, Section } from '../../lib/ui'
+import { DropdownPreview } from './DropdownPreview'
 import { TicketPreview } from './TicketPreview'
 
 const nodes = {
@@ -259,6 +260,12 @@ export function App() {
         <div className="mt-3 text-small text-[#555]">
           试着按下：鼠标按住不松，按钮朝阴影方向压进、投影收到 1px。
         </div>
+      </Section>
+      <Section
+        label="Dropdown · 下拉基件"
+        note="placement＝bottom 向下展开／top 向上弹出；点入口开合、Esc 与点面板外收起；tips 贴签、验收夹、陪练 agent 是它的真件应用，站头 navbar 为同型的纯 CSS 实现"
+      >
+        <DropdownPreview />
       </Section>
       <Section label="入口梳理" note="推荐不是强制——无锁">
         <EntryGuide chapters={CHAPTERS} profiles={PROFILES} />
