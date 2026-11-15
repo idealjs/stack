@@ -72,10 +72,10 @@ export function SitePage({
     )
   }
   return (
-    <main className="flex h-dvh flex-col text-content text-body">
+    <main data-scroll-root className="flex h-dvh flex-col overflow-y-auto text-content text-body">
       {nav && (
         <div
-          className="relative z-50 flex-none bg-paper"
+          className="sticky top-0 z-50 flex-none bg-paper"
           style={viewTransitionName ? { viewTransitionName } : undefined}
         >
           <div className={`${SITE_SHELL} pt-8`}>
@@ -83,19 +83,20 @@ export function SitePage({
           </div>
         </div>
       )}
-      <div data-scroll-root className="min-h-0 flex-1 overflow-y-auto">
-        <div className={`${SITE_SHELL} pb-8`}>
-          {(title || subtitle || desc) && (
-            <div className="mb-7">
-              {title && <h1 className="m-0 text-t1 font-extrabold text-ink">{title}</h1>}
-              {subtitle && <p className="m-0 mt-2 text-t2 font-bold text-ink">{subtitle}</p>}
-              {desc && <p className="m-0 mt-2 text-content text-mute">{desc}</p>}
-            </div>
-          )}
-          {children}
-        </div>
+      <div className={`${SITE_SHELL} flex-1 pb-8`}>
+        {(title || subtitle || desc) && (
+          <div className="mb-7">
+            {title && <h1 className="m-0 text-t1 font-extrabold text-ink">{title}</h1>}
+            {subtitle && <p className="m-0 mt-2 text-t2 font-bold text-ink">{subtitle}</p>}
+            {desc && <p className="m-0 mt-2 text-content text-mute">{desc}</p>}
+          </div>
+        )}
+        {children}
       </div>
-      <div className="flex-none bg-paper" style={{ viewTransitionName: 'site-footer' }}>
+      <div
+        className="sticky bottom-0 mt-auto flex-none bg-paper"
+        style={{ viewTransitionName: 'site-footer' }}
+      >
         <div className={`${SITE_SHELL} pb-6`}>
           <SiteFooter groups={footerGroups} />
         </div>
