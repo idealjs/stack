@@ -227,11 +227,15 @@
   min-height: 216px;
   padding: 34px 24px 40px;
   border: 2px solid var(--color-ink);
-  background: var(--learning-accent);
+  background: var(--color-paper);
   clip-path: polygon(0 0, 100% 0, 100% calc(100% - 30px), calc(100% - 30px) 100%, 0 100%);
 }
 .learning-note-paper h3 {
+  width: fit-content;
+  max-width: 100%;
   margin-bottom: 12px;
+  padding: 1px 8px 2px;
+  background: var(--learning-accent);
 }
 .learning-note-pin {
   position: absolute;
@@ -241,7 +245,7 @@
   height: 12px;
   border: 2px solid var(--color-ink);
   border-radius: 50%;
-  background: var(--color-paper);
+  background: var(--learning-accent);
 }
 .learning-note-fold {
   position: absolute;
