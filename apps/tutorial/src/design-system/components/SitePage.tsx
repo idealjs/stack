@@ -1,32 +1,25 @@
 import type { ReactNode } from 'react'
-import type { NavRowGroup, NavSectionLink } from '../design-system'
-import { SiteNavbar } from '../design-system'
+import type { NavRowGroup, NavSectionLink } from './SiteNavbar'
+import { SiteNavbar } from './SiteNavbar'
 
 export interface SiteNav {
   brand: NavSectionLink
   rows: NavRowGroup[]
 }
 
-const FOOTER_GROUPS: { label: string; links: { href: string; label: string }[] }[] = [
-  { label: '友情链接', links: [{ href: 'https://idealjs.com', label: 'idealjs.com' }] },
-  {
-    label: '社交网络',
-    links: [{ href: 'https://github.com/idealjs', label: 'GitHub' }],
-  },
-  {
-    label: '源码',
-    links: [
-      { href: 'https://gitea.idealjs.com/idealjs/stack', label: 'Gitea' },
-      { href: 'https://github.com/idealjs/stack', label: 'GitHub 镜像' },
-    ],
-  },
-]
+export interface SiteFooterGroup {
+  label: string
+  links: { href: string; label: string }[]
+}
 
-export function SiteFooter() {
+const SITE_SHELL = 'mx-auto w-full max-w-[1200px] px-6 2xl:max-w-[1600px]'
+const SITE_SHELL_SLIM = 'mx-auto w-full max-w-[1200px] px-3 2xl:max-w-[1600px]'
+
+export function SiteFooter({ groups }: { groups: SiteFooterGroup[] }) {
   return (
     <footer className="border-t-2 border-dashed border-ink/15 pt-3">
       <div className="flex flex-wrap items-baseline gap-x-5 gap-y-1.5">
-        {FOOTER_GROUPS.map(({ label, links }) => (
+        {groups.map(({ label, links }) => (
           <span key={label} className="flex items-baseline gap-x-2 text-[12.5px]">
             <i className="t-small-mute not-italic">{label}</i>
             {links.map((l, i) => (
@@ -54,11 +47,30 @@ export function SitePage({
   nav,
   active,
   viewTransitionName,
+  sidebar,
+  footerGroups,
   title,
   subtitle,
   desc,
   children,
 }: SitePageProps) {
+  if (sidebar) {
+    return (
+      <div className="flex min-h-dvh text-content text-body">
+        {sidebar}
+        <div className="flex min-w-0 flex-1 flex-col">
+          <main className="mx-auto w-full min-w-0 max-w-[1200px] flex-1 px-3 py-4 2xl:max-w-[1600px] max-lg:pr-12 max-lg:pt-16">
+            {children}
+          </main>
+          <div className="flex-none bg-paper" style={{ viewTransitionName: 'site-footer' }}>
+            <div className={`${SITE_SHELL_SLIM} pb-6`}>
+              <SiteFooter groups={footerGroups} />
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
   return (
     <main className="flex h-dvh flex-col text-content text-body">
       {nav && (
@@ -66,13 +78,13 @@ export function SitePage({
           className="relative z-50 flex-none bg-paper"
           style={viewTransitionName ? { viewTransitionName } : undefined}
         >
-          <div className="mx-auto w-full max-w-[1200px] px-6 pt-8">
+          <div className={`${SITE_SHELL} pt-8`}>
             <SiteNavbar brand={nav.brand} rows={nav.rows} active={active} />
           </div>
         </div>
       )}
       <div data-scroll-root className="min-h-0 flex-1 overflow-y-auto">
-        <div className="mx-auto w-full max-w-[1200px] px-6 pb-8">
+        <div className={`${SITE_SHELL} pb-8`}>
           {(title || subtitle || desc) && (
             <div className="mb-7">
               {title && <h1 className="m-0 text-t1 font-extrabold text-ink">{title}</h1>}
@@ -84,8 +96,8 @@ export function SitePage({
         </div>
       </div>
       <div className="flex-none bg-paper" style={{ viewTransitionName: 'site-footer' }}>
-        <div className="mx-auto w-full max-w-[1200px] px-6 pb-6">
-          <SiteFooter />
+        <div className={`${SITE_SHELL} pb-6`}>
+          <SiteFooter groups={footerGroups} />
         </div>
       </div>
     </main>
@@ -96,37 +108,18 @@ export interface SitePageProps {
   nav?: SiteNav
 
   active?: string
+
   viewTransitionName?: string
+
+  sidebar?: ReactNode
+
+  footerGroups: SiteFooterGroup[]
 
   title?: string
 
   subtitle?: string
-  desc?: string
-  children: ReactNode
-}
 
-export function Section({
-  label,
-  note,
-  id,
-  className = '',
-  children,
-}: {
-  label?: string
-  note?: string
-  id?: string
-  className?: string
+  desc?: string
+
   children: ReactNode
-}) {
-  return (
-    <section id={id} className={`mb-8 ${className}`}>
-      {(label || note) && (
-        <h2 className="mb-2.5 flex flex-wrap items-baseline gap-2">
-          {label && <span className="t-small-strong">{label}</span>}
-          {note && <i className="t-small-mute not-italic">{note}</i>}
-        </h2>
-      )}
-      {children}
-    </section>
-  )
 }

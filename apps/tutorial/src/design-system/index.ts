@@ -57,6 +57,8 @@ export { SHADOW_BUTTON_ACTIVE, ShadowButton, shadowButtonClasses } from './compo
 export { ShadowCard } from './components/ShadowCard'
 export type { NavItemLink, NavRowGroup, NavSectionLink } from './components/SiteNavbar'
 export { SiteNavbar } from './components/SiteNavbar'
+export type { SiteFooterGroup, SiteNav, SitePageProps } from './components/SitePage'
+export { SiteFooter, SitePage } from './components/SitePage'
 export { SiteSidebar } from './components/SiteSidebar'
 export { BrickDot, Mark, Ring, Tri, Wave } from './components/shapes'
 export type { TicketProps } from './components/Ticket'

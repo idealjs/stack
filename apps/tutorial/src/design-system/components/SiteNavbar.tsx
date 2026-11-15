@@ -188,7 +188,7 @@ export function SiteNavbar({
             </ShadowButton>
           </span>
         </div>
-        <div className="grid gap-x-1.5 gap-y-2 max-lg:grid-cols-2 lg:grid-cols-[96px_repeat(6,minmax(0,180px))]">
+        <div className="grid gap-x-1.5 gap-y-2 max-lg:grid-cols-2 lg:grid-cols-[96px_repeat(6,minmax(0,1fr))]">
           {bands.map(({ row, divider, start, span }) => (
             <Fragment key={row.sectionKey}>
               <div

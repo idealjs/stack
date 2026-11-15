@@ -2,12 +2,16 @@ import '../design-system'
 import type { ReactNode } from 'react'
 import { PageTurnBar } from '../components/PageTurnBar'
 import { MONTHS } from '../content/blogs'
-import type { ChapterId, NavItemLink, NavRowGroup } from '../design-system'
-import { PageFlipZone } from '../design-system'
+import type {
+  ChapterId,
+  NavItemLink,
+  NavRowGroup,
+  SiteFooterGroup,
+  SiteNav,
+} from '../design-system'
+import { PageFlipZone, SitePage } from '../design-system'
 import { CHAPTERS } from './chapters'
 import { flipTargetsOf, type PageKey, relHref } from './pages'
-import type { SiteNav } from './site'
-import { SitePage } from './site'
 
 export type DesignKey =
   | 'design-colors'
@@ -30,6 +34,21 @@ const SKILLS: { label: string; key: SkillKey }[] = [
   { label: 'HTML', key: 'html' },
   { label: 'CSS', key: 'css' },
   { label: 'JavaScript', key: 'javascript' },
+]
+
+export const FOOTER_GROUPS: SiteFooterGroup[] = [
+  { label: '友情链接', links: [{ href: 'https://idealjs.com', label: 'idealjs.com' }] },
+  {
+    label: '社交网络',
+    links: [{ href: 'https://github.com/idealjs', label: 'GitHub' }],
+  },
+  {
+    label: '源码',
+    links: [
+      { href: 'https://gitea.idealjs.com/idealjs/stack', label: 'Gitea' },
+      { href: 'https://github.com/idealjs/stack', label: 'GitHub 镜像' },
+    ],
+  },
 ]
 
 const chapterItems = (from: PageKey): NavItemLink[] =>
@@ -123,6 +142,7 @@ export function Page({
       nav={siteNavFor(pageKey)}
       active={activeKey}
       viewTransitionName="site-header"
+      footerGroups={FOOTER_GROUPS}
       title={title}
       subtitle={subtitle}
       desc={desc}
@@ -135,4 +155,28 @@ export function Page({
   )
 }
 
-export { Section } from './site'
+export function Section({
+  label,
+  note,
+  id,
+  className = '',
+  children,
+}: {
+  label?: string
+  note?: string
+  id?: string
+  className?: string
+  children: ReactNode
+}) {
+  return (
+    <section id={id} className={`mb-8 ${className}`}>
+      {(label || note) && (
+        <h2 className="mb-2.5 flex flex-wrap items-baseline gap-2">
+          {label && <span className="t-small-strong">{label}</span>}
+          {note && <i className="t-small-mute not-italic">{note}</i>}
+        </h2>
+      )}
+      {children}
+    </section>
+  )
+}
