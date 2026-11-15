@@ -63,7 +63,7 @@ export function SitePage({
     <main className="flex h-dvh flex-col text-content text-body">
       {nav && (
         <div
-          className="flex-none bg-paper"
+          className="relative z-50 flex-none bg-paper"
           style={viewTransitionName ? { viewTransitionName } : undefined}
         >
           <div className="mx-auto w-full max-w-[1200px] px-6 pt-8">

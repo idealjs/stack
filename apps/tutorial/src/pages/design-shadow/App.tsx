@@ -109,7 +109,7 @@ export function App() {
     <Page
       active="design-shadow"
       title="阴影 · 硬投影"
-      desc="全站只有一种影子：实心硬投影，分静置与拿起两档；撕角、打孔这类异形用轮廓投影。"
+      desc="全站只有一种影子：实心硬投影，分静置与拿起两档；撕角、打孔这类异形用轮廓投影；覆盖内容的浮层直接用拿起档。"
     >
       <Section label="四种影子">
         <ShapeGroup name="硬投影" hint="box-shadow">
