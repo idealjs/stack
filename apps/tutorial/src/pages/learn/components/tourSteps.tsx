@@ -47,7 +47,7 @@ export const buildSteps = (
   const [intro, fill, click, search, check, remove] = actions
   return [
     {
-      target: '[data-comp="experiment-frame"]',
+      target: '[data-comp="browser-mockup"]',
       skipBeacon: true,
       buttons: [],
       placement: large ? 'right' : 'bottom',

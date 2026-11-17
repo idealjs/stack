@@ -55,15 +55,6 @@
   margin: 0;
   max-height: 172px;
   overflow-y: auto;
-  scrollbar-width: thin;
-  scrollbar-color: var(--color-ink) transparent;
-}
-.learn-todo-items::-webkit-scrollbar {
-  width: 8px;
-}
-.learn-todo-items::-webkit-scrollbar-thumb {
-  border-radius: 4px;
-  background: var(--color-ink);
 }
 .learn-todo-items li {
   display: flex;

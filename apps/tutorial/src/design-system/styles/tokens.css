@@ -191,6 +191,19 @@
   );
 }
 
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-ink) transparent;
+}
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+*::-webkit-scrollbar-thumb {
+  border-radius: 4px;
+  background: var(--color-ink);
+}
+
 @keyframes page-flip-rise-in {
   from {
     transform: translateY(100%);

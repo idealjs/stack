@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Joyride } from 'react-joyride'
 import { ShadowButton } from '../../../design-system'
 import { ADD_CLICK, ADD_FILL, CHECK, DELETE, INTRO, SEARCH, SUMMARY, buildSteps } from './tourSteps'
@@ -9,6 +9,39 @@ const SEARCH_TEXT = '牛奶'
 const STEP_FOCUS: Record<number, string> = {
   [ADD_FILL]: '#todo-preview-input',
   [SEARCH]: '#todo-preview-search',
+}
+const SPOT_PADDING = 10
+const SPOT_RADIUS = 4
+
+const spotlightCoverPath = (x: number, y: number, width: number, height: number) => {
+  const r = Math.max(0, Math.min(SPOT_RADIUS, width / 2, height / 2))
+  return (
+    `M${x + r} ${y}H${x + width - r}A${r} ${r} 0 0 1 ${x + width} ${y + r}` +
+    `V${y + height - r}A${r} ${r} 0 0 1 ${x + width - r} ${y + height}` +
+    `H${x + r}A${r} ${r} 0 0 1 ${x} ${y + height - r}` +
+    `V${y + r}A${r} ${r} 0 0 1 ${x + r} ${y}Z`
+  )
+}
+
+const repaintSpotlight = (target: Element) => {
+  const paths = document.querySelectorAll<SVGPathElement>('.react-joyride__spotlight path')
+  if (paths.length === 0) return
+  const rect = target.getBoundingClientRect()
+  const cover = spotlightCoverPath(
+    Math.round(rect.left) - SPOT_PADDING,
+    Math.floor(rect.top) - SPOT_PADDING,
+    Math.round(rect.width) + SPOT_PADDING * 2,
+    Math.round(rect.height) + SPOT_PADDING * 2,
+  )
+  for (const path of paths) {
+    const d = path.getAttribute('d')
+    if (!d) continue
+    if (d.startsWith('M0 0')) {
+      path.setAttribute('d', `${d.slice(0, d.indexOf('Z') + 1)} ${cover}`)
+    } else {
+      path.setAttribute('d', cover)
+    }
+  }
 }
 
 export function TodoTour() {
@@ -50,6 +83,23 @@ export function TodoTour() {
     if (!run) return
     if (milkGone && (stepIndex === CHECK || stepIndex === DELETE)) setStepIndex(SUMMARY)
   }, [milkGone, stepIndex, run])
+
+  useEffect(() => {
+    if (!run) return
+    const root = document.querySelector('[data-scroll-root]')
+    if (!root) return
+    const relay = () => {
+      const { steps: liveSteps, stepIndex: liveIndex } = liveRef.current
+      const target = liveSteps[liveIndex]?.target
+      if (typeof target === 'string') {
+        const element = document.querySelector(target)
+        if (element) repaintSpotlight(element)
+      }
+      window.dispatchEvent(new Event('scroll'))
+    }
+    root.addEventListener('scroll', relay, { passive: true })
+    return () => root.removeEventListener('scroll', relay)
+  }, [run])
 
   useEffect(() => {
     if (!run) return
@@ -143,6 +193,8 @@ export function TodoTour() {
   ]
 
   const steps = buildSteps(large, listEmpty, added, actions, runAction, go, stop)
+  const liveRef = useRef({ steps, stepIndex })
+  liveRef.current = { steps, stepIndex }
 
   return (
     <div className="learn-tour">

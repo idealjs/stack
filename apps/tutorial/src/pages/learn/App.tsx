@@ -1,10 +1,10 @@
 import type { DataFlowStep, ToolboxBrick } from '../../design-system'
 import {
   BrickToolbox,
+  BrowserMockup,
   Button,
   ComparisonBoard,
   DataFlowBoard,
-  ExperimentFrame,
   Mark,
   StickyNote,
 } from '../../design-system'
@@ -168,10 +168,13 @@ export function App() {
 
       <div className="learn-top">
         <div className="learn-preview">
-          <ExperimentFrame title="你的待办应用" address={null} status="demo" caption="刷新后重置">
-            <TodoPreview />
-          </ExperimentFrame>
           <TodoTour />
+          <BrowserMockup url="localhost:3000/todo" className="learn-todo-frame">
+            <div className="learn-todo-viewport">
+              <TodoPreview />
+            </div>
+          </BrowserMockup>
+          <p className="learn-preview-note">你的待办应用 · 可操作演示 · 刷新后重置</p>
         </div>
 
         <section className="learn-copy" aria-labelledby="learn-goal">

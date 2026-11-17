@@ -16,8 +16,33 @@
 }
 .learn-preview {
   width: 100%;
-  max-width: 640px;
   margin: 0 auto;
+}
+.learn-todo-frame {
+  width: 100%;
+}
+.learn-todo-viewport {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 480px;
+  padding: 28px 20px;
+  background: var(--color-paper-deep);
+}
+.learn-todo-viewport .learn-todo {
+  width: 100%;
+  max-width: 400px;
+  padding: 20px;
+  border: 2px solid var(--color-ink);
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: var(--shadow-ink);
+}
+.learn-preview-note {
+  margin: 8px 0 0;
+  color: var(--color-body);
+  font-size: 12px;
+  text-align: center;
 }
 
 .learn-copy > p {

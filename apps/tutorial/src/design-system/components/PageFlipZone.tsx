@@ -119,6 +119,21 @@ export function PageFlipZone({ prev, next, children }: PageFlipZoneProps) {
       return event.deltaY
     }
 
+    const consumesWheel = (event: WheelEvent, distance: number) => {
+      const root = scroller()
+      let node = event.target instanceof Element ? event.target : null
+      while (node && node !== root) {
+        const overflowY = window.getComputedStyle(node).overflowY
+        if (overflowY === 'auto' || overflowY === 'scroll' || overflowY === 'overlay') {
+          const canScrollUp = node.scrollTop > 0
+          const canScrollDown = node.scrollTop + node.clientHeight < node.scrollHeight - 1
+          if ((distance < 0 && canScrollUp) || (distance > 0 && canScrollDown)) return true
+        }
+        node = node.parentElement
+      }
+      return false
+    }
+
     const setProgress = (side: 1 | -1, progress: number) => {
       const edge = side > 0 ? nextEdgeRef.current : prevEdgeRef.current
       if (edge) {
@@ -190,6 +205,10 @@ export function PageFlipZone({ prev, next, children }: PageFlipZoneProps) {
       lastWheelAt = now
 
       const distance = wheelDistance(event)
+      if (consumesWheel(event, distance)) {
+        if (direction !== 0) settleBack()
+        return
+      }
       const pullingNext = distance > 0 && atBottom() && !!edgesRef.current.next
       const pullingPrev = distance < 0 && atTop() && !!edgesRef.current.prev
       if (!pullingNext && !pullingPrev) {

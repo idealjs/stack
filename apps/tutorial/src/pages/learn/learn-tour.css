@@ -1,7 +1,10 @@
 .learn-tour {
-  margin-top: 12px;
+  margin-bottom: 12px;
   display: flex;
   justify-content: center;
+}
+.react-joyride__spotlight path {
+  pointer-events: none !important;
 }
 .learn-tour-add p {
   margin: 0 0 10px;
