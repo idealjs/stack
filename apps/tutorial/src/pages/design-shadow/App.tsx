@@ -104,12 +104,21 @@ function PaperCard({ hover = false }: { hover?: boolean }) {
   )
 }
 
+function HostCard({ children }: { children: ReactNode }) {
+  return (
+    <div className="w-fit rounded-xl border-2 border-ink bg-paper p-4 shadow-ink">
+      <b className="text-small">第一层纸卡</b>
+      <div className="mt-3">{children}</div>
+    </div>
+  )
+}
+
 export function App() {
   return (
     <Page
       active="design-shadow"
       title="阴影 · 硬投影"
-      desc="全站只有一种影子：实心硬投影，分静置与拿起两档；撕角、打孔这类异形用轮廓投影；覆盖内容的浮层直接用拿起档。"
+      desc="全站只有一种影子：实心硬投影，分静置与拿起两档；影子只属于第一层——页面直排的票券/按钮/大卡与浮层，嵌套在卡内的二层交互件零投影，改用描边与底色分层。"
     >
       <Section label="四种影子">
         <ShapeGroup name="硬投影" hint="box-shadow">
@@ -243,6 +252,49 @@ export function App() {
             }
           />
         </div>
+      </Section>
+
+      <Section
+        label="层级投影 · 影子只属于第一层"
+        note="影子是「拿在手里」的信号：直接放在页面背景上的票券、按钮、大卡，以及覆盖页面的浮层，才有资格投影；嵌套在卡片内部的二层交互件（卡内按钮、tab、条目、印章）零投影——卡片已经把内容托在纸面上了，卡内再投影就是影中影"
+      >
+        <Rule
+          demo={
+            <>
+              <DoDont bad text="卡内按钮带投影：影中影">
+                <HostCard>
+                  <button
+                    type="button"
+                    className="cursor-pointer rounded-lg border-2 border-ink bg-paper px-3 py-1.5 text-small font-bold text-ink shadow-[3px_3px_0_var(--color-ink)]"
+                  >
+                    卡内按钮
+                  </button>
+                </HostCard>
+              </DoDont>
+              <DoDont text="卡内按钮零投影：描边＋底色分层，hover 换底色">
+                <HostCard>
+                  <button
+                    type="button"
+                    className="cursor-pointer rounded-lg border-2 border-ink bg-paper px-3 py-1.5 text-small font-bold text-ink transition-[background-color] duration-150 hover:bg-paper-deep active:translate-y-[1px]"
+                  >
+                    卡内按钮
+                  </button>
+                </HostCard>
+              </DoDont>
+            </>
+          }
+        />
+        <p className="mt-4 mb-0 text-content text-body">
+          二层交互件的完整形态：
+          <b className="t-small-strong">
+            描边（2px ink）＋底色，hover 换底色或调亮度，按压位移 1px 不换影
+          </b>
+          。ShadowButton / Button 的
+          <code className="mx-1 rounded bg-paper-deep px-1.5 py-0.5 font-mono text-[12.5px]">
+            nested
+          </code>
+          形态、learning 组件里的翻面钮、工位卡、印章都按此执行。
+        </p>
       </Section>
 
       <Section

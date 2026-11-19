@@ -48,19 +48,23 @@ export function SiteSidebar({
         className="max-lg:fixed max-lg:inset-y-0 max-lg:left-0 max-lg:z-50 max-lg:w-72 max-lg:overflow-y-auto max-lg:shadow-[8px_0_0_0_var(--color-ink)] max-lg:invisible max-lg:opacity-0 max-lg:-translate-x-full max-lg:transition-[transform,visibility,opacity] max-lg:duration-300 max-lg:ease-[cubic-bezier(0.32,0.72,0,1)] max-lg:motion-reduce:transition-none max-lg:peer-checked:visible max-lg:peer-checked:translate-x-0 max-lg:peer-checked:opacity-100 lg:sticky lg:top-0 lg:h-dvh lg:w-60 lg:shrink-0 overflow-y-auto border-r-2 border-ink bg-paper px-4 py-5"
       >
         <div className="mb-5 flex items-center justify-between">
-          <span className="hover-host inline-flex">
-            <ShadowButton tone="ghost" href={brand.href} size="sm" className="font-mono">
-              {brand.label}
-            </ShadowButton>
-          </span>
-          <span className="hover-host inline-flex lg:hidden">
+          <ShadowButton
+            tone="ghost"
+            href={brand.href}
+            size="sm"
+            nested
+            className="font-mono hover:bg-paper-deep"
+          >
+            {brand.label}
+          </ShadowButton>
+          <span className="inline-flex lg:hidden">
             {/* biome-ignore lint/a11y/useAriaPropsSupportedByRole: 纯 CSS checkbox 开合的触发 label，aria 状态为增强语义保留 */}
             <label
               htmlFor="site-sidebar-toggle"
               aria-label="收起侧栏导航"
               aria-expanded="true"
               aria-controls="site-sidebar-drawer"
-              className={`grid size-8 cursor-pointer place-items-center text-lg font-extrabold leading-none ${shadowButtonClasses({ size: 'none' })}`}
+              className={`grid size-8 cursor-pointer place-items-center text-lg font-extrabold leading-none ${shadowButtonClasses({ size: 'none', nested: true, className: 'hover:bg-paper-deep' })}`}
             >
               <span aria-hidden="true">×</span>
             </label>

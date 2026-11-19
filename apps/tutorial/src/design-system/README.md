@@ -4,6 +4,12 @@
 
 教程站内的唯一定义处——特性只改这里，站点直接获得；结构契约与视觉基线的 E2E 在 `apps/tutorial/e2e/`。消费方式：源码直出（stack 构建期 strip TS），调用方按相对路径引 `src/design-system`。
 
+## 阴影层级
+
+影子是「拿在手里」的信号，只属于第一层：直接放在页面背景上的可交互内容（按钮、票券、大卡片）与覆盖页面的浮层（dropdown 面板、modal、sheet、页缘贴签）。嵌套在卡片内部的第二层可交互内容（卡内按钮、tab、条目、印章）一律零投影——卡片已经把内容托在纸面上了，卡内再投影就是影中影。这是设计系统哲学，不是单个组件的约定：任何新组件先问自己在第几层。
+
+二层交互件的形态：描边（2px ink）＋底色分层，hover 换底色或调亮度，按压位移 1px 不换影。`ShadowButton` / `Button` / `shadowButtonClasses` 的 `nested` 形态即此；learning 组件里的翻面钮（`.learning-action`）、工位卡（`.learning-flow-step`）、积木条目（`.learning-brick`）、印章（`.learning-stamp`）同样零投影。浮层内部照样分层：浮层本体投影合法，浮层里的按钮是二层。规范演示见 `design/shadow.html` 的「层级投影」一节。
+
 `Ticket` 是独立的通用票券，内容通过 `children` 传入。票面先用 mask 打孔，内层 `.ticket-shadow` 包裹用 `filter: drop-shadow()` 根据挖空轮廓生成阴影；孔缘描边留在包裹之外，不参与投影（filter 不能放在被 mask 的票面上——同元素上 mask 在 filter 之后应用，会把孔位处的阴影一起裁掉）。上下孔的圆心使用同一个横坐标，位置相对于票面左侧计算。
 
 ```tsx

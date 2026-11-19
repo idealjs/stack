@@ -278,7 +278,9 @@ export function App() {
                 <p className="learn-environment-note">
                   首次搭建预留 30–60 分钟，从「快速开始」查看环境准备。
                 </p>
-                <Button href={relHref('learn', 'ch1')}>查看本地环境准备</Button>
+                <Button href={relHref('learn', 'ch1')} nested>
+                  查看本地环境准备
+                </Button>
               </>
             ),
           }}

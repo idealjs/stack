@@ -68,18 +68,15 @@
   font-size: 12px;
   font-weight: 800;
   cursor: pointer;
-  box-shadow: 3px 3px 0 var(--color-ink);
   transition:
     transform 150ms,
-    box-shadow 150ms;
+    background-color 150ms;
 }
 .learning-action:hover {
-  transform: translateY(-2px);
-  box-shadow: 5px 5px 0 var(--color-ink);
+  background: var(--color-paper-deep);
 }
 .learning-action:active {
-  transform: translate(2px, 2px);
-  box-shadow: 1px 1px 0 var(--color-ink);
+  transform: translate(1px, 1px);
 }
 
 .learning-clipboard {
@@ -640,7 +637,6 @@
   border-radius: 6px;
   background: var(--color-clash1b);
   color: var(--color-ink);
-  box-shadow: var(--shadow-ink);
   font-family: inherit;
   font-size: 12px;
   font-weight: 800;
@@ -740,7 +736,6 @@
   border: 2px solid var(--color-ink);
   border-radius: 5px;
   background: var(--color-paper);
-  box-shadow: 3px 3px 0 var(--color-ink);
 }
 .learning-brick summary {
   position: relative;
@@ -976,7 +971,6 @@
 .learning-manifest-stamp {
   padding: 2px 8px;
   font-size: 10px;
-  box-shadow: 2px 2px 0 var(--color-ink);
 }
 .learning-manifest footer > span {
   color: var(--color-mute);
@@ -1277,18 +1271,14 @@
   border: 2px solid var(--color-ink);
   border-radius: 5px;
   background: var(--color-paper);
-  box-shadow: 3px 3px 0 var(--color-ink);
-  transition:
-    transform 150ms,
-    box-shadow 150ms;
+  transition: background-color 150ms;
 }
 
 .learning-flow-step[data-input="true"] {
   border-style: dashed;
 }
 .learning-flow-step:hover {
-  transform: translateY(-2px);
-  box-shadow: 5px 5px 0 var(--color-ink);
+  background: var(--color-clash2a);
 }
 .learning-flow-step[data-clickable="true"] {
   cursor: pointer;

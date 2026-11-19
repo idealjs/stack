@@ -23,7 +23,7 @@ export function DropdownPreview() {
             label="向下 · tips 形"
             open={downOpen}
             onOpenChange={setDownOpen}
-            triggerClassName="flex items-center gap-1.5 rounded-full border-2 border-ink bg-paper px-3 py-1.5 text-[12.5px] font-extrabold text-ink shadow-[3px_3px_0_var(--color-ink)] transition-[translate] duration-150 motion-reduce:transition-none hover:-translate-y-0.5"
+            triggerClassName="flex items-center gap-1.5 rounded-full border-2 border-ink bg-paper px-3 py-1.5 text-[12.5px] font-extrabold text-ink transition-[background-color] duration-150 motion-reduce:transition-none hover:bg-paper-deep"
             trigger={
               <>
                 <span aria-hidden>💡</span>
@@ -63,7 +63,7 @@ export function DropdownPreview() {
             onOpenChange={setUpOpen}
             placement="top"
             panelClassName="w-[min(360px,100vw_-_24px)]"
-            triggerClassName="flex cursor-pointer items-center gap-2 rounded-t-lg border-2 border-ink bg-clash2a py-2 pr-4 pl-3 text-[12.5px] font-extrabold text-ink shadow-[3px_3px_0_var(--color-ink)]"
+            triggerClassName="flex cursor-pointer items-center gap-2 rounded-t-lg border-2 border-ink bg-clash2a py-2 pr-4 pl-3 text-[12.5px] font-extrabold text-ink transition-[filter] duration-150 motion-reduce:transition-none hover:brightness-95"
             trigger={
               <>
                 <span

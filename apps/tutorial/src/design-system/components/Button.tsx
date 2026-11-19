@@ -10,12 +10,16 @@ const TONE_BG = {
 } as const
 
 const BASE =
-  'inline-block cursor-pointer rounded-xl border-2 border-ink px-4 py-2 text-small font-bold text-ink no-underline shadow-ink hoverable-shadow transition-[translate,box-shadow] duration-150'
+  'inline-block cursor-pointer rounded-xl border-2 border-ink px-4 py-2 text-small font-bold text-ink no-underline shadow-ink hoverable-shadow transition-[translate,box-shadow,background-color,filter] duration-150'
+
+const NESTED =
+  'inline-block cursor-pointer rounded-xl border-2 border-ink px-4 py-2 text-small font-bold text-ink no-underline transition-[background-color,filter] duration-150 hover:brightness-95 active:translate-y-[1px]'
 
 export function Button({
   tone = 'clash1a',
   href,
   disabled = false,
+  nested = false,
   children,
 }: {
   tone?: keyof typeof TONE_BG
@@ -23,6 +27,8 @@ export function Button({
   href?: string
 
   disabled?: boolean
+
+  nested?: boolean
   children: ReactNode
 }) {
   if (disabled) {
@@ -35,18 +41,27 @@ export function Button({
       </span>
     )
   }
+  const cls = `${nested ? NESTED : BASE} ${TONE_BG[tone]}`
   if (href) {
-    return (
+    return nested ? (
+      <a href={href} className={cls}>
+        {children}
+      </a>
+    ) : (
       <span className="hover-host inline-block">
-        <a href={href} className={`${BASE} ${TONE_BG[tone]}`}>
+        <a href={href} className={cls}>
           {children}
         </a>
       </span>
     )
   }
-  return (
+  return nested ? (
+    <button type="button" className={cls}>
+      {children}
+    </button>
+  ) : (
     <span className="hover-host inline-block">
-      <button type="button" className={`${BASE} ${TONE_BG[tone]}`}>
+      <button type="button" className={cls}>
         {children}
       </button>
     </span>

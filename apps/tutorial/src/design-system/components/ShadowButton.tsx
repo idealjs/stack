@@ -22,12 +22,14 @@ const TONE_BG: Record<ShadowButtonTone, string> = {
 }
 
 export const SHADOW_BUTTON_BASE =
-  'cursor-pointer items-center justify-center border-2 border-ink text-ink no-underline transition-[translate,box-shadow,background-color] duration-150 focus-visible:outline-[3px] focus-visible:outline-clash3b focus-visible:outline-offset-2'
+  'cursor-pointer items-center justify-center border-2 border-ink text-ink no-underline transition-[translate,box-shadow,background-color,filter] duration-150 focus-visible:outline-[3px] focus-visible:outline-clash3b focus-visible:outline-offset-2'
 
 export const SHADOW_BUTTON_REST = 'shadow-[3px_3px_0_var(--color-ink)]'
 
 export const SHADOW_BUTTON_ACTIVE =
   'active:translate-x-[2px] active:translate-y-[2px] active:shadow-[1px_1px_0_var(--color-ink)]'
+
+export const SHADOW_BUTTON_NESTED = 'hover:brightness-95 active:translate-y-[1px]'
 
 const RING_REST =
   'bg-paper-deep shadow-[inset_0_0_0_2px_var(--color-ink),3px_3px_0_var(--color-ink)]'
@@ -47,6 +49,8 @@ export interface ShadowButtonClassesOptions {
 
   active?: boolean
 
+  nested?: boolean
+
   size?: keyof typeof SIZE
 
   className?: string
@@ -55,15 +59,18 @@ export interface ShadowButtonClassesOptions {
 export function shadowButtonClasses({
   tone = 'paper',
   active = false,
+  nested = false,
   size = 'md',
   className = '',
 }: ShadowButtonClassesOptions = {}) {
   return [
     SHADOW_BUTTON_BASE,
     SIZE[size],
-    active
-      ? `hoverable-shadow shadow-btn-ring ${RING_REST} ${RING_ACTIVE}`
-      : `hoverable-shadow shadow-btn ${TONE_BG[tone]} ${SHADOW_BUTTON_REST} ${SHADOW_BUTTON_ACTIVE}`,
+    nested
+      ? `${TONE_BG[tone]} ${SHADOW_BUTTON_NESTED}`
+      : active
+        ? `hoverable-shadow shadow-btn-ring ${RING_REST} ${RING_ACTIVE}`
+        : `hoverable-shadow shadow-btn ${TONE_BG[tone]} ${SHADOW_BUTTON_REST} ${SHADOW_BUTTON_ACTIVE}`,
     className,
   ]
     .filter(Boolean)
@@ -74,6 +81,8 @@ export interface ShadowButtonProps {
   tone?: ShadowButtonTone
 
   active?: boolean
+
+  nested?: boolean
 
   href?: string
 
@@ -89,6 +98,7 @@ export interface ShadowButtonProps {
 export function ShadowButton({
   tone = 'paper',
   active = false,
+  nested = false,
   href,
   disabled = false,
   size = 'md',
@@ -96,7 +106,7 @@ export function ShadowButton({
   children,
   onClick,
 }: ShadowButtonProps) {
-  const cls = `inline-flex ${shadowButtonClasses({ tone, active, size, className })}`
+  const cls = `inline-flex ${shadowButtonClasses({ tone, active, nested, size, className })}`
   if (disabled) {
     return (
       <span
@@ -108,17 +118,14 @@ export function ShadowButton({
       </span>
     )
   }
-  return (
-    <span className="hover-host inline-flex">
-      {href ? (
-        <a href={href} data-comp="shadow-button" className={cls}>
-          {children}
-        </a>
-      ) : (
-        <button type="button" data-comp="shadow-button" onClick={onClick} className={cls}>
-          {children}
-        </button>
-      )}
-    </span>
+  const inner = href ? (
+    <a href={href} data-comp="shadow-button" className={cls}>
+      {children}
+    </a>
+  ) : (
+    <button type="button" data-comp="shadow-button" onClick={onClick} className={cls}>
+      {children}
+    </button>
   )
+  return nested ? inner : <span className="hover-host inline-flex">{inner}</span>
 }

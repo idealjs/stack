@@ -36,7 +36,6 @@
   border: 2px solid var(--color-ink);
   border-radius: 10px;
   background: #fff;
-  box-shadow: var(--shadow-ink);
 }
 .learn-preview-note {
   margin: 8px 0 0;

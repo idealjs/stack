@@ -33,7 +33,7 @@ export function BrowserMockupPreview() {
               <p className="m-0 text-small text-[#555]">
                 设计系统组件可以直接放进视口，比如这句里的<Mark>荧光标记</Mark>。
               </p>
-              <ShadowButton>进入教程</ShadowButton>
+              <ShadowButton nested>进入教程</ShadowButton>
             </div>
           </div>
         </BrowserMockup>

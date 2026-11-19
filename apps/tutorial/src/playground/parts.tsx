@@ -122,11 +122,16 @@ export function CodeEditor({ className = '' }: { className?: string }) {
   )
 }
 
-export function RunRow() {
+export function RunRow({ nested = false }: { nested?: boolean }) {
   const { active, building, engineReady, run } = usePlayground()
   return (
     <div className="mt-2.5 flex items-center gap-3">
-      <ShadowButton tone="clash1a" onClick={run} disabled={building || !engineReady}>
+      <ShadowButton
+        tone="clash1a"
+        onClick={run}
+        disabled={building || !engineReady}
+        nested={nested}
+      >
         {engineReady ? '运行 ▶' : '引擎加载中…'}
       </ShadowButton>
       <span className="t-small-mute">

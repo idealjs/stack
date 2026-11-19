@@ -71,7 +71,7 @@ function PracticeDock({ open, onToggle }: { open: boolean; onToggle: () => void 
         <>
           <FileTabs />
           <CodeEditor className="min-h-[360px] flex-1" />
-          <RunRow />
+          <RunRow nested />
         </>
       }
       sandbox={<SandboxPane />}

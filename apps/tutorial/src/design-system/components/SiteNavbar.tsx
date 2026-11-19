@@ -106,12 +106,13 @@ export function SiteNavbar({
       />
 
       <div className="relative z-40 flex flex-wrap items-center gap-1.5 max-lg:peer-checked/nav-drawer:[&_.nav-drawer-open]:invisible max-lg:peer-checked/nav-drawer:[&_.nav-drawer-close]:visible lg:peer-checked/nav-expand:[&_.nav-expand-open]:invisible lg:peer-checked/nav-expand:[&_.nav-expand-close]:visible">
-        <span className="hover-host mr-auto inline-flex">
+        <span className="mr-auto inline-flex">
           <ShadowButton
             tone="ghost"
             href={brand.href}
             size="none"
-            className="px-2.5 py-0.5 font-mono text-t2 font-extrabold"
+            nested
+            className="px-2.5 py-0.5 font-mono text-t2 font-extrabold hover:bg-paper-deep"
           >
             {brand.label}
           </ShadowButton>
@@ -121,14 +122,14 @@ export function SiteNavbar({
             {activeLabel}
           </span>
         )}
-        <span className="hover-host hidden lg:inline-grid">
+        <span className="hidden lg:inline-grid">
           {/* biome-ignore lint/a11y/useAriaPropsSupportedByRole: 纯 CSS checkbox 开合的触发 label，aria 状态为增强语义保留 */}
           <label
             htmlFor="site-nav-expand"
             aria-label="展开导航网格"
             aria-expanded="false"
             aria-controls="site-nav-drawer"
-            className={`nav-expand-open hidden lg:col-start-1 lg:row-start-1 lg:grid lg:size-10 lg:place-items-center ${shadowButtonClasses({ size: 'none' })}`}
+            className={`nav-expand-open hidden lg:col-start-1 lg:row-start-1 lg:grid lg:size-10 lg:place-items-center ${shadowButtonClasses({ size: 'none', nested: true, className: 'hover:bg-paper-deep' })}`}
           >
             <span aria-hidden="true" className="text-lg font-extrabold leading-none">
               ▼
@@ -140,21 +141,21 @@ export function SiteNavbar({
             aria-label="收起导航网格"
             aria-expanded="true"
             aria-controls="site-nav-drawer"
-            className={`nav-expand-close hidden lg:col-start-1 lg:row-start-1 lg:invisible lg:grid lg:size-10 lg:place-items-center ${shadowButtonClasses({ size: 'none' })}`}
+            className={`nav-expand-close hidden lg:col-start-1 lg:row-start-1 lg:invisible lg:grid lg:size-10 lg:place-items-center ${shadowButtonClasses({ size: 'none', nested: true, className: 'hover:bg-paper-deep' })}`}
           >
             <span aria-hidden="true" className="text-lg font-extrabold leading-none">
               ▲
             </span>
           </label>
         </span>
-        <span className="hover-host hidden max-lg:inline-grid">
+        <span className="hidden max-lg:inline-grid">
           {/* biome-ignore lint/a11y/useAriaPropsSupportedByRole: 纯 CSS checkbox 开合的触发 label，aria 状态为增强语义保留 */}
           <label
             htmlFor="site-nav-toggle"
             aria-label="打开导航菜单"
             aria-expanded="false"
             aria-controls="site-nav-drawer"
-            className={`nav-drawer-open hidden max-lg:col-start-1 max-lg:row-start-1 max-lg:grid max-lg:size-10 max-lg:place-items-center ${shadowButtonClasses({ size: 'none' })}`}
+            className={`nav-drawer-open hidden max-lg:col-start-1 max-lg:row-start-1 max-lg:grid max-lg:size-10 max-lg:place-items-center ${shadowButtonClasses({ size: 'none', nested: true, className: 'hover:bg-paper-deep' })}`}
           >
             <span aria-hidden="true" className="flex flex-col gap-[5px]">
               <i className="block h-[3px] w-5 rounded-sm bg-ink" />
@@ -168,7 +169,7 @@ export function SiteNavbar({
             aria-label="收起导航菜单"
             aria-expanded="true"
             aria-controls="site-nav-drawer"
-            className={`nav-drawer-close hidden max-lg:col-start-1 max-lg:row-start-1 max-lg:invisible max-lg:grid max-lg:size-10 max-lg:place-items-center ${shadowButtonClasses({ size: 'none' })}`}
+            className={`nav-drawer-close hidden max-lg:col-start-1 max-lg:row-start-1 max-lg:invisible max-lg:grid max-lg:size-10 max-lg:place-items-center ${shadowButtonClasses({ size: 'none', nested: true, className: 'hover:bg-paper-deep' })}`}
           >
             <span aria-hidden="true" className="text-lg font-extrabold leading-none">
               ×
@@ -182,11 +183,15 @@ export function SiteNavbar({
         className="max-lg:fixed max-lg:inset-y-0 max-lg:left-0 max-lg:z-50 max-lg:w-72 max-lg:overflow-y-auto max-lg:rounded-none max-lg:border-r-2 max-lg:border-ink max-lg:bg-paper max-lg:px-4 max-lg:py-5 max-lg:shadow-[8px_0_0_0_var(--color-ink)] max-lg:invisible max-lg:opacity-0 max-lg:-translate-x-full max-lg:transition-[transform,visibility,opacity] max-lg:duration-300 max-lg:ease-[cubic-bezier(0.32,0.72,0,1)] max-lg:motion-reduce:transition-none max-lg:peer-checked/nav-drawer:visible max-lg:peer-checked/nav-drawer:translate-x-0 max-lg:peer-checked/nav-drawer:opacity-100 lg:pointer-events-none lg:absolute lg:inset-x-0 lg:top-full lg:z-40 lg:mt-2 lg:rounded-2xl lg:border-2 lg:border-ink lg:bg-paper lg:p-3 lg:shadow-ink-lift lg:invisible lg:opacity-0 lg:-translate-y-1 lg:transition-[transform,visibility,opacity] lg:duration-300 lg:ease-[cubic-bezier(0.32,0.72,0,1)] lg:motion-reduce:transition-none lg:peer-checked/nav-expand:pointer-events-auto lg:peer-checked/nav-expand:visible lg:peer-checked/nav-expand:opacity-100 lg:peer-checked/nav-expand:translate-y-0"
       >
         <div className="lg:hidden max-lg:mb-5">
-          <span className="hover-host inline-flex">
-            <ShadowButton tone="ghost" href={brand.href} size="sm" className="font-mono">
-              {brand.label}
-            </ShadowButton>
-          </span>
+          <ShadowButton
+            tone="ghost"
+            href={brand.href}
+            size="sm"
+            nested
+            className="font-mono hover:bg-paper-deep"
+          >
+            {brand.label}
+          </ShadowButton>
         </div>
         <div className="grid gap-x-1.5 gap-y-2 max-lg:grid-cols-2 lg:grid-cols-[96px_repeat(6,minmax(0,1fr))]">
           {bands.map(({ row, divider, start, span }) => (

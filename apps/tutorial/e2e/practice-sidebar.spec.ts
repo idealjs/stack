@@ -17,7 +17,9 @@ test.describe('练习场 · sidebar 导航（唯一导航形态）', () => {
     }
   })
 
-  test('桌面：brand 徽章 ghost 同款（无背景填充＋3px 阴影），在线练习组高亮', async ({ page }) => {
+  test('桌面：brand 徽章 ghost 同款（无背景填充＋嵌套零投影），在线练习组高亮', async ({
+    page,
+  }) => {
     await page.setViewportSize({ width: 1280, height: 900 })
     await page.goto('/practice/', { timeout: 20_000 })
     const brand = page.locator(`${SIDEBAR} a`).first()
@@ -25,7 +27,7 @@ test.describe('练习场 · sidebar 导航（唯一导航形态）', () => {
     const background = await brand.evaluate((el) => getComputedStyle(el).backgroundColor)
     expect(background).toBe('rgba(0, 0, 0, 0)')
     const shadow = await brand.evaluate((el) => getComputedStyle(el).boxShadow)
-    expect(shadow).toContain('3px')
+    expect(shadow).toBe('none')
     const rowShadow = await page
       .locator(`${SIDEBAR} a`, { hasText: '在线练习' })
       .evaluate((el) => getComputedStyle(el).boxShadow)
@@ -53,9 +55,8 @@ test.describe('练习场 · sidebar 导航（唯一导航形态）', () => {
     await page.mouse.move(370, 700)
     const brand = sidebar.locator('a').first()
     await expect(brand).toHaveText('idealjs stack')
-    await expect
-      .poll(async () => brand.evaluate((el) => getComputedStyle(el).boxShadow))
-      .toContain('3px')
+    const brandShadow = await brand.evaluate((el) => getComputedStyle(el).boxShadow)
+    expect(brandShadow).toBe('none')
     await page.locator(OVERLAY).click({ position: { x: 370, y: 100 } })
     await expect(sidebar).toBeHidden()
     await page.locator(OPENER).click()

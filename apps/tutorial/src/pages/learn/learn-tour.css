@@ -23,18 +23,13 @@
   font-weight: 800;
   line-height: 1;
   cursor: pointer;
-  box-shadow: 2px 2px 0 var(--color-ink);
-  transition:
-    translate 150ms,
-    box-shadow 150ms;
+  transition: background-color 150ms;
 }
 .learn-tour-close:hover {
-  translate: -1px -1px;
-  box-shadow: 3px 3px 0 var(--color-ink);
+  background: var(--color-paper-deep);
 }
 .learn-tour-close:active {
-  translate: 1px 1px;
-  box-shadow: 1px 1px 0 var(--color-ink);
+  background: var(--color-paper-deep);
 }
 .learn-tour-close:focus-visible {
   outline: 3px solid var(--color-clash3b);
