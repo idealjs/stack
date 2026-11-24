@@ -1,6 +1,7 @@
+import * as styles from '@idealjs/stack-ui-kit/styles'
+import { BrickDot, Mark, Tri } from '@idealjs/stack-ui-kit'
 import type { ReactNode } from 'react'
 import { MONTHS, monthOf, POSTS } from '../content/blogs'
-import { BrickDot, Mark, Tri } from '../design-system'
 import { type PageKey, relHref } from '../lib/pages'
 import { Page, Section } from '../lib/ui'
 
@@ -17,7 +18,7 @@ function inline(text: string): ReactNode[] {
       parts.push(
         <code
           key={i++}
-          className="rounded bg-paper-deep px-1 py-0.5 font-mono text-[0.9em] text-ink"
+          className={`rounded ${styles.bgPaperDeep} px-1 py-0.5 font-mono text-[0.9em] ${styles.textInk}`}
         >
           {t.slice(1, -1)}
         </code>,
@@ -47,7 +48,7 @@ function Markdown({ raw }: { raw: string }) {
       out.push(
         <pre
           key={key++}
-          className="overflow-x-auto rounded-xl border-2 border-ink bg-ink p-4 font-mono text-small leading-relaxed text-paper shadow-ink"
+          className={`overflow-x-auto rounded-xl border-2 ${styles.borderInk} ${styles.bgInk} p-4 font-mono ${styles.textSmall} leading-relaxed ${styles.textPaper} ${styles.shadowInk}`}
         >
           {buf.join('\n')}
         </pre>,
@@ -58,9 +59,9 @@ function Markdown({ raw }: { raw: string }) {
       out.push(
         <blockquote
           key={key++}
-          className="m-0 rounded-xl border-2 border-dashed border-ink/40 bg-paper-deep/60 p-4"
+          className={`m-0 rounded-xl border-2 border-dashed ${styles.borderInk40} ${styles.bgPaperDeep}/60 p-4`}
         >
-          <p className="m-0 text-content text-body">{inline(ln.slice(2))}</p>
+          <p className={`m-0 ${styles.textContent} ${styles.textBody}`}>{inline(ln.slice(2))}</p>
         </blockquote>,
       )
       i++
@@ -68,7 +69,7 @@ function Markdown({ raw }: { raw: string }) {
     }
     if (ln.startsWith('# ')) {
       out.push(
-        <h1 key={key++} className="m-0 text-t1 font-extrabold text-ink">
+        <h1 key={key++} className={`m-0 ${styles.textT1} font-extrabold ${styles.textInk}`}>
           {inline(ln.slice(2))}
         </h1>,
       )
@@ -77,7 +78,10 @@ function Markdown({ raw }: { raw: string }) {
     }
     if (ln.startsWith('## ')) {
       out.push(
-        <h2 key={key++} className="m-0 flex items-center gap-2 text-t2 font-extrabold text-ink">
+        <h2
+          key={key++}
+          className={`m-0 flex items-center gap-2 ${styles.textT2} font-extrabold ${styles.textInk}`}
+        >
           <Tri size={13} />
           {inline(ln.slice(3))}
         </h2>,
@@ -87,7 +91,7 @@ function Markdown({ raw }: { raw: string }) {
     }
     if (ln.startsWith('### ')) {
       out.push(
-        <h3 key={key++} className="m-0 text-t3 font-bold text-ink">
+        <h3 key={key++} className={`m-0 ${styles.textT3} font-bold ${styles.textInk}`}>
           {inline(ln.slice(4))}
         </h3>,
       )
@@ -109,7 +113,7 @@ function Markdown({ raw }: { raw: string }) {
               <span className="mt-[9px] flex shrink-0">
                 <BrickDot size={11} on={ordered} />
               </span>
-              <span className="text-content text-body">{inline(it)}</span>
+              <span className={`${styles.textContent} ${styles.textBody}`}>{inline(it)}</span>
             </li>
           ))}
         </ul>,
@@ -128,7 +132,7 @@ function Markdown({ raw }: { raw: string }) {
       i++
     }
     out.push(
-      <p key={key++} className="m-0 text-content text-body">
+      <p key={key++} className={`m-0 ${styles.textContent} ${styles.textBody}`}>
         {inline(buf.join(' '))}
       </p>,
     )
@@ -146,22 +150,28 @@ export function BlogCard({ post, from }: { post: (typeof POSTS)[number]; from: P
       ) ??
     ''
   return (
-    <span className="hover-host block w-fit">
+    <span className={`${styles.hoverHost} block w-fit`}>
       <a
         href={relHref(from, `blog-${post.slug}`)}
-        className="hoverable-shadow block w-[420px] rounded-2xl border-2 border-ink bg-paper p-5 no-underline shadow-ink transition-[translate,box-shadow] duration-150"
+        className={`${styles.hoverableShadow} block w-[420px] rounded-2xl border-2 ${styles.borderInk} ${styles.bgPaper} p-5 no-underline ${styles.shadowInk} transition-[translate,box-shadow] duration-150`}
       >
         <div className="flex items-center gap-2.5">
-          <span className="rounded-full bg-clash3b/15 px-2.5 py-0.5 font-mono t-small-strong">
+          <span
+            className={`rounded-full ${styles.bgClash3b15} px-2.5 py-0.5 font-mono ${styles.tSmallStrong}`}
+          >
             {post.date}
           </span>
-          <span className="t-small-mute">{post.author}</span>
+          <span className={`${styles.tSmallMute}`}>{post.author}</span>
         </div>
-        <h2 className="m-0 mt-3 text-t3 font-extrabold text-ink">{post.title}</h2>
-        <p className="m-0 mt-2 line-clamp-2 text-small leading-relaxed text-body">
+        <h2 className={`m-0 mt-3 ${styles.textT3} font-extrabold ${styles.textInk}`}>
+          {post.title}
+        </h2>
+        <p
+          className={`m-0 mt-2 line-clamp-2 ${styles.textSmall} leading-relaxed ${styles.textBody}`}
+        >
           {quote.replace(/^> /, '').slice(0, 90)}…
         </p>
-        <p className="m-0 mt-3 t-small-strong">
+        <p className={`m-0 mt-3 ${styles.tSmallStrong}`}>
           阅读全文 <span aria-hidden>→</span>
         </p>
       </a>
@@ -194,20 +204,26 @@ export function BlogPostPage({ slug }: { slug: string }) {
   if (!post) throw new Error(`unknown post: ${slug}`)
   return (
     <Page active={`blog-${monthOf(slug)}`} chain={`blog-${slug}`}>
-      <div className="relative overflow-hidden rounded-2xl border-2 border-ink bg-paper p-5 shadow-ink">
+      <div
+        className={`relative overflow-hidden rounded-2xl border-2 ${styles.borderInk} ${styles.bgPaper} p-5 ${styles.shadowInk}`}
+      >
         <span
-          className="t-display pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 select-none"
+          className={`${styles.tDisplay} pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 select-none`}
           aria-hidden
         >
           {post.date.slice(2, 4)}
         </span>
-        <h1 className="m-0 max-w-[46ch] text-t1 font-extrabold text-ink">{post.title}</h1>
+        <h1 className={`m-0 max-w-[46ch] ${styles.textT1} font-extrabold ${styles.textInk}`}>
+          {post.title}
+        </h1>
         <p className="m-0 mt-3 flex flex-wrap items-center gap-3">
-          <span className="rounded-full bg-clash3b/15 px-2.5 py-0.5 font-mono t-small-strong">
+          <span
+            className={`rounded-full ${styles.bgClash3b15} px-2.5 py-0.5 font-mono ${styles.tSmallStrong}`}
+          >
             {post.date}
           </span>
-          <span className="t-small-mute">{post.author}</span>
-          <Mark className="t-small-strong">开发自述</Mark>
+          <span className={`${styles.tSmallMute}`}>{post.author}</span>
+          <Mark className={`${styles.tSmallStrong}`}>开发自述</Mark>
         </p>
       </div>
       <article className="mt-8 max-w-[76ch]">
@@ -216,13 +232,13 @@ export function BlogPostPage({ slug }: { slug: string }) {
       <div className="mt-10 flex items-center justify-between">
         <a
           href={relHref(`blog-${slug}`, `blog-${monthOf(slug)}`)}
-          className="rounded-xl border-2 border-ink bg-paper px-4 py-2 text-small font-bold text-ink no-underline shadow-ink"
+          className={`rounded-xl border-2 ${styles.borderInk} ${styles.bgPaper} px-4 py-2 ${styles.textSmall} font-bold ${styles.textInk} no-underline ${styles.shadowInk}`}
         >
           ← 返回 {monthOf(slug)}
         </a>
         <a
           href={relHref(`blog-${slug}`, 'index')}
-          className="rounded-xl border-2 border-ink bg-ink px-4 py-2 text-small font-bold text-paper no-underline"
+          className={`rounded-xl border-2 ${styles.borderInk} ${styles.bgInk} px-4 py-2 ${styles.textSmall} font-bold ${styles.textPaper} no-underline`}
         >
           返回首页
         </a>

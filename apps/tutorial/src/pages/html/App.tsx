@@ -1,4 +1,5 @@
-import { Button } from '../../design-system'
+import * as styles from '@idealjs/stack-ui-kit/styles'
+import { Button } from '@idealjs/stack-ui-kit'
 import { relHref } from '../../lib/pages'
 import { Page, Section } from '../../lib/ui'
 
@@ -11,7 +12,7 @@ export function App() {
             HTML 是描述网页结构的标记语言：标签告诉浏览器哪些是标题、段落、表单和列表。
             在主线教程里，它第一个出场，为待办应用搭出骨架，让每一项数据都有展示的位置。
           </p>
-          <p className="m-0 leading-[1.75] text-body">
+          <p className={`m-0 leading-[1.75] ${styles.textBody}`}>
             专项教程将在这里逐步补充。想先动手做出点什么，直接走主线：
           </p>
         </div>

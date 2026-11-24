@@ -1,5 +1,6 @@
+import * as styles from '@idealjs/stack-ui-kit/styles'
+import { Dropdown } from '@idealjs/stack-ui-kit'
 import type { ReactNode } from 'react'
-import { Dropdown } from '../design-system'
 
 export function TipsDock({
   panelId,
@@ -21,7 +22,7 @@ export function TipsDock({
       label={label}
       open={open}
       onOpenChange={onOpenChange}
-      triggerClassName="flex items-center gap-1.5 rounded-full border-2 border-ink bg-paper px-3 py-1.5 text-[12.5px] font-extrabold text-ink shadow-[3px_3px_0_var(--color-ink)] transition-[translate] duration-150 motion-reduce:transition-none hover:-translate-y-0.5"
+      triggerClassName={`flex items-center gap-1.5 rounded-full border-2 ${styles.borderInk} ${styles.bgPaper} px-3 py-1.5 text-[12.5px] font-extrabold ${styles.textInk} shadow-[3px_3px_0_var(--color-ink)] transition-[translate] duration-150 motion-reduce:transition-none hover:-translate-y-0.5`}
       trigger={
         <>
           <span aria-hidden>💡</span>

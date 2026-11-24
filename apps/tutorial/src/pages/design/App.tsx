@@ -1,3 +1,4 @@
+import * as styles from '@idealjs/stack-ui-kit/styles'
 import { type PageKey, relHref } from '../../lib/pages'
 import { Page, Section } from '../../lib/ui'
 
@@ -17,7 +18,7 @@ const BOOKS: { key: PageKey; label: string; desc: string }[] = [
   {
     key: 'design-shadow',
     label: '阴影',
-    desc: '一份投影配方的四枚 token（两档 × 两形）、拿起动效层 hoverable-shadow，与组件选影归位表。',
+    desc: `一份投影配方的四枚 token（两档 × 两形）、拿起动效层 ${styles.hoverableShadow}，与组件选影归位表。`,
   },
 ]
 
@@ -26,18 +27,24 @@ export function App() {
     <Page
       active="design"
       title="设计系统"
-      desc="孟菲斯 × 拟物卡的四个切面；组件与 tokens 唯一定义于 src/design-system。"
+      desc="孟菲斯 × 拟物卡的四个切面；组件与 tokens 唯一定义于 packages/stack-ui-kit 与 packages/stack-site-ui-kit。"
     >
       <Section label="五册" note="点卡片进入对应册">
         <div className="flex flex-wrap gap-6">
           {BOOKS.map((b) => (
-            <span key={b.key} className="hover-host block w-fit">
+            <span key={b.key} className={`${styles.hoverHost} block w-fit`}>
               <a
                 href={relHref('design', b.key)}
-                className="hoverable-shadow block w-[280px] rounded-2xl border-2 border-ink bg-paper p-5 no-underline shadow-ink transition-[translate,box-shadow] duration-150"
+                className={`${styles.hoverableShadow} block w-[280px] rounded-2xl border-2 ${styles.borderInk} ${styles.bgPaper} p-5 no-underline ${styles.shadowInk} transition-[translate,box-shadow] duration-150`}
               >
-                <span className="text-t3 font-extrabold text-ink">{b.label}</span>
-                <span className="mt-2 block text-small leading-relaxed text-body">{b.desc}</span>
+                <span className={`${styles.textT3} font-extrabold ${styles.textInk}`}>
+                  {b.label}
+                </span>
+                <span
+                  className={`mt-2 block ${styles.textSmall} leading-relaxed ${styles.textBody}`}
+                >
+                  {b.desc}
+                </span>
               </a>
             </span>
           ))}

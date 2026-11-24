@@ -1,3 +1,6 @@
+import * as styles from '@idealjs/stack-ui-kit/styles'
+import type { DataFlowStep } from '@idealjs/stack-site-ui-kit'
+import { ClipboardChecklist, DataFlowBoard } from '@idealjs/stack-site-ui-kit'
 import { useMemo, useRef, useState } from 'react'
 import { AgentDock } from '../../../components/AgentDock'
 import type { ChatItem } from '../../../components/ChatPanel'
@@ -5,8 +8,6 @@ import { ChatPanel } from '../../../components/ChatPanel'
 import { ChecklistDock } from '../../../components/ChecklistDock'
 import { PlaygroundDock } from '../../../components/PlaygroundDock'
 import { TipsDock } from '../../../components/TipsDock'
-import type { DataFlowStep } from '../../../design-system'
-import { ClipboardChecklist, DataFlowBoard } from '../../../design-system'
 import { TEMPLATE_FILES } from '../../../lib/templateFiles'
 import {
   CodeEditor,
@@ -43,12 +44,14 @@ function SandboxPane() {
   return (
     <section aria-label="web runner 沙箱预览" className="flex min-h-0 flex-1 flex-col gap-2.5">
       <StatusLine />
-      <div className="relative h-[320px] shrink-0 overflow-hidden rounded-lg border-2 border-ink bg-white">
+      <div
+        className={`relative h-[320px] shrink-0 overflow-hidden rounded-lg border-2 ${styles.borderInk} bg-white`}
+      >
         <SandboxFrame fill />
         {!preview && (
           <div className="pointer-events-none absolute inset-0 grid place-content-center gap-1 p-4 text-center">
-            <p className="t-small-strong m-0">沙箱预览</p>
-            <p className="t-small-mute m-0">
+            <p className={`${styles.tSmallStrong} m-0`}>沙箱预览</p>
+            <p className={`${styles.tSmallMute} m-0`}>
               切到「编辑器」页签写代码，点「运行 ▶」回到这里，构建产物送进隔离 iframe 真跑。
             </p>
           </div>

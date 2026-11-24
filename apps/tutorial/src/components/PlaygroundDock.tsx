@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react'
+import * as styles from '@idealjs/stack-ui-kit/styles'
+import { DockSheet } from '@idealjs/stack-ui-kit'
 import type { ReactNode } from 'react'
-import { DockSheet } from '../design-system'
+import { useEffect, useState } from 'react'
 
 type DockPaneKind = 'editor' | 'sandbox'
 
@@ -9,10 +10,9 @@ const PANE_META: Record<DockPaneKind, string> = {
   sandbox: '隔离 iframe，postMessage 单通道',
 }
 
-const PANE_TAB_BASE =
-  'cursor-pointer rounded-md border-2 border-ink px-2.5 py-1 text-[12.5px] font-extrabold text-ink transition-colors duration-150 motion-reduce:transition-none'
+const PANE_TAB_BASE = `cursor-pointer rounded-md border-2 ${styles.borderInk} px-2.5 py-1 text-[12.5px] font-extrabold ${styles.textInk} transition-colors duration-150 motion-reduce:transition-none`
 
-const PANE_TAB_IDLE = 'bg-white hover:bg-paper-deep'
+const PANE_TAB_IDLE = `bg-white ${styles.hoverBgPaperDeep}`
 
 export function PlaygroundDock({
   panelId,
@@ -54,13 +54,13 @@ export function PlaygroundDock({
           id: 'editor',
           comp: 'editor-dock-tab',
           label: 'playground · 编辑器',
-          accentClass: 'bg-clash1a',
+          accentClass: `${styles.bgClash1a}`,
         },
         {
           id: 'sandbox',
           comp: 'sandbox-dock-tab',
           label: 'web runner · 沙箱预览',
-          accentClass: 'bg-clash2b',
+          accentClass: `${styles.bgClash2b}`,
         },
       ]}
       toolbar={
@@ -88,7 +88,7 @@ export function PlaygroundDock({
               沙箱预览
             </button>
           </div>
-          <span className="t-small-mute hidden min-w-0 flex-1 truncate sm:block">
+          <span className={`${styles.tSmallMute} hidden min-w-0 flex-1 truncate sm:block`}>
             {PANE_META[pane]}
           </span>
         </>

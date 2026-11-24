@@ -1,5 +1,5 @@
+import type { ChapterId, FlipTarget } from '@idealjs/stack-site-ui-kit'
 import { MONTHS } from '../content/blogs'
-import type { ChapterId, FlipTarget } from '../design-system'
 import { CHAPTERS } from './chapters'
 
 export type PageKey =

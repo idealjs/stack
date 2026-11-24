@@ -1,8 +1,8 @@
+import { ShadowButton } from '@idealjs/stack-ui-kit'
 import { useEffect, useRef, useState } from 'react'
 import { Joyride } from 'react-joyride'
-import { ShadowButton } from '../../../design-system'
-import { ADD_CLICK, ADD_FILL, CHECK, DELETE, INTRO, SEARCH, SUMMARY, buildSteps } from './tourSteps'
 import type { TourAction } from './tourSteps'
+import { ADD_CLICK, ADD_FILL, buildSteps, CHECK, DELETE, INTRO, SEARCH, SUMMARY } from './tourSteps'
 
 const EXAMPLE_TEXT = '买牛奶'
 const SEARCH_TEXT = '牛奶'

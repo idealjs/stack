@@ -1,5 +1,6 @@
+import * as styles from '@idealjs/stack-ui-kit/styles'
+import { Ticket } from '@idealjs/stack-ui-kit'
 import { useState } from 'react'
-import { Ticket } from '../../design-system'
 
 export function TicketPreview() {
   const [position, setPosition] = useState('50%')
@@ -10,11 +11,11 @@ export function TicketPreview() {
 
   return (
     <div data-testid="ticket-preview">
-      <div className="mb-3 flex flex-wrap items-center gap-3 text-small">
+      <div className={`mb-3 flex flex-wrap items-center gap-3 ${styles.textSmall}`}>
         <label className="flex items-center gap-1">
           孔位
           <input
-            className="w-40 rounded border border-ink bg-white px-2 py-1"
+            className={`w-40 rounded border ${styles.borderInk} bg-white px-2 py-1`}
             value={position}
             onChange={(e) => setPosition(e.target.value)}
           />
@@ -25,7 +26,7 @@ export function TicketPreview() {
             type="number"
             min="0"
             step="2"
-            className="w-16 rounded border border-ink bg-white px-2 py-1"
+            className={`w-16 rounded border ${styles.borderInk} bg-white px-2 py-1`}
             value={size}
             onChange={(e) => setSize(Number(e.target.value))}
           />

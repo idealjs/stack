@@ -37,6 +37,7 @@ export interface StackConfig {
   fs?: StackFs
   load?: StackLoader
   hooks?: StackHook[]
+  watchRoots?: string[]
 }
 
 export function defineConfig<T extends StackConfig>(config: T): T {

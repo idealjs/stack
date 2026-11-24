@@ -1,18 +1,17 @@
-import '../design-system'
-import type { ReactNode } from 'react'
-import { PageTurnBar } from '../components/PageTurnBar'
-import { MONTHS } from '../content/blogs'
+import * as styles from '@idealjs/stack-ui-kit/styles'
 import type {
   ChapterId,
   NavItemLink,
   NavRowGroup,
   SiteFooterGroup,
   SiteNav,
-} from '../design-system'
-import { PageFlipZone, SitePage } from '../design-system'
+} from '@idealjs/stack-site-ui-kit'
+import { PageFlipZone, SitePage } from '@idealjs/stack-site-ui-kit'
+import type { ReactNode } from 'react'
+import { PageTurnBar } from '../components/PageTurnBar'
+import { MONTHS } from '../content/blogs'
 import { CHAPTERS } from './chapters'
 import { flipTargetsOf, type PageKey, relHref } from './pages'
-
 export type DesignKey =
   | 'design-colors'
   | 'design-typography'
@@ -172,8 +171,8 @@ export function Section({
     <section id={id} className={`mb-8 ${className}`}>
       {(label || note) && (
         <h2 className="mb-2.5 flex flex-wrap items-baseline gap-2">
-          {label && <span className="t-small-strong">{label}</span>}
-          {note && <i className="t-small-mute not-italic">{note}</i>}
+          {label && <span className={`${styles.tSmallStrong}`}>{label}</span>}
+          {note && <i className={`${styles.tSmallMute} not-italic`}>{note}</i>}
         </h2>
       )}
       {children}

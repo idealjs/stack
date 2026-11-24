@@ -14,7 +14,17 @@
     "strict": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "noFallthroughCasesInSwitch": true
+    "noFallthroughCasesInSwitch": true,
+    "paths": {
+      "@idealjs/stack-ui-kit": ["../../packages/stack-ui-kit/src/index.ts"],
+      "@idealjs/stack-ui-kit/themes": ["../../packages/stack-ui-kit/src/themes/index.ts"],
+      "@idealjs/stack-ui-kit/tokens": ["../../packages/stack-ui-kit/src/tokens/index.ts"],
+      "@idealjs/stack-ui-kit/styles": ["../../packages/stack-ui-kit/src/styles/index.ts"],
+      "@idealjs/stack-ui-kit/components": ["../../packages/stack-ui-kit/src/components/index.ts"],
+      "@idealjs/stack-ui-kit/stack-plugin": ["../../packages/stack-ui-kit/stack-plugin/index.ts"],
+      "@idealjs/stack-site-ui-kit": ["../../packages/stack-site-ui-kit/src/index.ts"],
+      "@idealjs/stack-site-ui-kit/*": ["../../packages/stack-site-ui-kit/*"]
+    }
   },
   "include": ["src", "stack.config.ts", "stack-plugins"]
 }

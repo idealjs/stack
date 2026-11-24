@@ -154,9 +154,11 @@ const outputUrlIndex = (config: StackConfig, result: BuildResult): Map<string, S
   return index
 }
 
-function startWatcher(config: StackConfig, onChange: () => void): FSWatcher {
+function startWatcher(config: StackConfig, onChange: () => void): FSWatcher[] {
   let timer: ReturnType<typeof setTimeout> | undefined
-  const watcher: FSWatcher = watch(config.root ?? '.', { recursive: true }, (_event, filename) => {
+  const root = config.root ?? '.'
+  const roots = [root, ...(config.watchRoots ?? []).map((extra) => resolvePath(root, extra))]
+  const handleChange = (_event: unknown, filename: unknown) => {
     const changed = filename === null ? '' : String(filename).replaceAll('\\', '/')
     if (changed.split('/').some((segment) => IGNORED_WATCH_SEGMENTS.has(segment))) return
     if (timer !== undefined) clearTimeout(timer)
@@ -164,19 +166,23 @@ function startWatcher(config: StackConfig, onChange: () => void): FSWatcher {
       timer = undefined
       onChange()
     }, WATCH_DEBOUNCE_MS)
-  })
+  }
+  const watchers = roots.map((watchRoot) => watch(watchRoot, { recursive: true }, handleChange))
   process.once('SIGINT', () => {
-    watcher.close()
+    for (const watcher of watchers) watcher.close()
     if (timer !== undefined) clearTimeout(timer)
     console.log('\nwatch 已停止')
     process.exit(0)
   })
-  return watcher
+  return watchers
 }
 
 async function runWatch(config: StackConfig, onRebuilt?: () => void): Promise<void> {
   const root = config.root ?? '.'
-  console.log(`stack v${VERSION} watch 模式：监听 ${root}（忽略 node_modules/dist/.git）`)
+  const extra = config.watchRoots ?? []
+  console.log(
+    `stack v${VERSION} watch 模式：监听 ${root}${extra.length > 0 ? ` + ${extra.join('、')}` : ''}（忽略 node_modules/dist/.git）`,
+  )
   const queue = createDevBuildQueue({
     run: () => buildAndWrite(config),
     onBuilt: (result) => {

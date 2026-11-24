@@ -1,4 +1,4 @@
-import type { Chapter, ChapterId, Profile } from '../design-system'
+import type { Chapter, ChapterId, Profile } from '@idealjs/stack-site-ui-kit'
 
 export const CHAPTERS: Record<ChapterId, Chapter> = {
   1: {

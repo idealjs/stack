@@ -1,0 +1,76 @@
+@view-transition {
+  navigation: auto;
+}
+
+@keyframes page-flip-rise-in {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+@keyframes page-flip-drop-in {
+  from {
+    transform: translateY(-100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+@keyframes page-flip-push-out-up {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(-100%);
+  }
+}
+
+@keyframes page-flip-push-out-down {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(100%);
+  }
+}
+
+html[data-vt]::view-transition-group(root) {
+  background: var(--color-paper);
+}
+html[data-vt]::view-transition-group(site-header),
+html[data-vt]::view-transition-group(site-footer) {
+  z-index: 10;
+}
+html[data-vt]::view-transition-old(site-header),
+html[data-vt]::view-transition-new(site-header),
+html[data-vt]::view-transition-old(site-footer),
+html[data-vt]::view-transition-new(site-footer) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+html[data-vt]::view-transition-new(root) {
+  animation-duration: 600ms;
+  animation-timing-function: var(--page-flip-spring);
+  animation-fill-mode: both;
+}
+html[data-vt="next"]::view-transition-new(root) {
+  animation-name: page-flip-rise-in;
+}
+html[data-vt="prev"]::view-transition-new(root) {
+  animation-name: page-flip-drop-in;
+}
+html[data-vt]::view-transition-old(root) {
+  animation-duration: 600ms;
+  animation-timing-function: var(--page-flip-spring);
+  animation-fill-mode: both;
+}
+html[data-vt="next"]::view-transition-old(root) {
+  animation-name: page-flip-push-out-up;
+}
+html[data-vt="prev"]::view-transition-old(root) {
+  animation-name: page-flip-push-out-down;
+}

@@ -1,5 +1,6 @@
+import * as styles from '@idealjs/stack-ui-kit/styles'
+import { BrickDot, Mark, Ring, Tri, Wave } from '@idealjs/stack-ui-kit'
 import type { ReactNode } from 'react'
-import { BrickDot, Mark, Ring, Tri, Wave } from '../../design-system'
 import { Page, Section } from '../../lib/ui'
 
 const SHAPES = [
@@ -73,20 +74,24 @@ export function App() {
         <div className="grid grid-cols-2 gap-3.5 sm:grid-cols-3 lg:grid-cols-5">
           {SHAPES.map((s) => (
             <div key={s.n} className="text-center">
-              <div className="mx-auto flex h-[46px] w-[46px] items-center justify-center rounded-xl border-2 border-ink bg-white">
+              <div
+                className={`mx-auto flex h-[46px] w-[46px] items-center justify-center rounded-xl border-2 ${styles.borderInk} bg-white`}
+              >
                 {s.el}
               </div>
               <div className="mt-1.5 text-[11px] font-bold">{s.n}</div>
-              <div className="mt-0.5 text-small leading-snug text-body">{s.d}</div>
-              <div className="mt-0.5 t-small-mute leading-tight">场景 · {s.s}</div>
+              <div className={`mt-0.5 ${styles.textSmall} leading-snug ${styles.textBody}`}>
+                {s.d}
+              </div>
+              <div className={`mt-0.5 ${styles.tSmallMute} leading-tight`}>场景 · {s.s}</div>
             </div>
           ))}
         </div>
       </Section>
       <Section label="词汇表 · 父子层级" note="与 ai-era-tutorial 词汇表对齐">
-        <table className="w-full border-collapse text-small text-body">
+        <table className={`w-full border-collapse ${styles.textSmall} ${styles.textBody}`}>
           <thead>
-            <tr className="border-b-2 border-[#d5d5d3] text-left text-ink">
+            <tr className={`border-b-2 border-[#d5d5d3] text-left ${styles.textInk}`}>
               <th className="w-24 py-1 pr-2">父词</th>
               <th className="w-44 py-1 pr-2">图形 · 子词</th>
               <th className="py-1 pr-2">释义（skill 口径）</th>
@@ -99,7 +104,7 @@ export function App() {
                   {i === 0 && (
                     <td
                       rowSpan={g.rows.length}
-                      className="py-1 pr-2 align-top font-extrabold text-ink"
+                      className={`py-1 pr-2 align-top font-extrabold ${styles.textInk}`}
                     >
                       {g.p}
                     </td>

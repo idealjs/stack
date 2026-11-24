@@ -10,12 +10,12 @@ export interface TutorialBuildOptions {
   root: string
 }
 
-const TOKENS_PATH = 'src/design-system/styles/tokens.css'
+const TOKENS_PATH = 'src/styles/tailwind.css'
 
 export function tutorialBuild(options: TutorialBuildOptions): StackHook {
   const hook: WatchHook = {
     name: 'tutorial-build',
-    watch: ['default'],
+    watch: ['vanilla-extract'],
     lower: async (ctx, watched) => {
       const files = watched.files.map((file) => ({ ...file }))
       const byPath = new Map(files.map((file) => [file.path, file]))

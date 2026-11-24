@@ -1,13 +1,11 @@
-import type { DataFlowStep, ToolboxBrick } from '../../design-system'
+import { BrowserMockup, Button, Mark } from '@idealjs/stack-ui-kit'
+import type { DataFlowStep, ToolboxBrick } from '@idealjs/stack-site-ui-kit'
 import {
   BrickToolbox,
-  BrowserMockup,
-  Button,
   ComparisonBoard,
   DataFlowBoard,
-  Mark,
   StickyNote,
-} from '../../design-system'
+} from '@idealjs/stack-site-ui-kit'
 import { relHref } from '../../lib/pages'
 import { Page, Section } from '../../lib/ui'
 import { TodoPreview } from './components/TodoPreview'

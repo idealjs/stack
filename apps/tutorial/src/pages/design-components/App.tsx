@@ -1,16 +1,14 @@
+import * as styles from '@idealjs/stack-ui-kit/styles'
+import { Button, Mark, ShadowButton, ShadowCard } from '@idealjs/stack-ui-kit'
 import {
-  Button,
   ChapterTicket,
   EntryGuide,
-  Mark,
+  LearningKitGallery,
   MemphisCard,
   RoutableCard,
   RoutableScene,
   RouteLine,
-  ShadowButton,
-  ShadowCard,
-} from '../../design-system'
-import { LearningKitGallery } from '../../design-system/examples/LearningKitGallery'
+} from '@idealjs/stack-site-ui-kit'
 import { CHAPTERS, PROFILES } from '../../lib/chapters'
 import { relHref } from '../../lib/pages'
 import { Page, Section } from '../../lib/ui'
@@ -97,7 +95,7 @@ export function App() {
       >
         <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
           {LINES.map((l) => (
-            <div key={l.n} className="rounded-xl border-2 border-ink bg-white p-3">
+            <div key={l.n} className={`rounded-xl border-2 ${styles.borderInk} bg-white p-3`}>
               <svg
                 role="img"
                 aria-label={`线条标本 ${l.n}`}
@@ -134,10 +132,10 @@ export function App() {
                 )}
               </svg>
               <div className="mt-1 text-[13px] font-extrabold">{l.n}</div>
-              <div className="text-small text-[#555]">{l.m}</div>
+              <div className={`${styles.textSmall} text-[#555]`}>{l.m}</div>
             </div>
           ))}
-          <div className="rounded-xl border-2 border-ink bg-white p-3">
+          <div className={`rounded-xl border-2 ${styles.borderInk} bg-white p-3`}>
             <svg role="img" aria-label="手写标本线" className="h-auto w-full" viewBox="0 0 188 44">
               <path
                 d="M12 22 q10 -22 20 0 t20 0 t20 0 t20 0 t20 0 t20 0 t20 0 t20 0 t20 0"
@@ -148,7 +146,7 @@ export function App() {
               />
             </svg>
             <div className="mt-1 text-[13px] font-extrabold">波浪带 ＝ 代理交接</div>
-            <div className="text-small text-[#555]">agent 边界 · 区域标记，不连线</div>
+            <div className={`${styles.textSmall} text-[#555]`}>agent 边界 · 区域标记，不连线</div>
           </div>
         </div>
         <div className="mt-5 overflow-x-auto">
@@ -192,22 +190,26 @@ export function App() {
           <div>
             <ShadowCard className="h-[80px]" />
             <div className="mt-1 text-[13px] font-extrabold">1 · 基础 shadow-card</div>
-            <div className="text-small text-[#555]">border-ink＋paper＋shadow-ink，内容空</div>
+            <div className={`${styles.textSmall} text-[#555]`}>
+              border-ink＋paper＋shadow-ink，内容空
+            </div>
           </div>
           <div>
             <ShadowCard hover className="h-[80px]" />
             <div className="mt-1 text-[13px] font-extrabold">2 · hover 拿起</div>
-            <div className="text-small text-[#555]">浮 3px＋阴影 5→8（同 Button 规格）</div>
+            <div className={`${styles.textSmall} text-[#555]`}>
+              浮 3px＋阴影 5→8（同 Button 规格）
+            </div>
           </div>
           <div>
             <ShadowCard ticket className="h-[80px]" />
             <div className="mt-1 text-[13px] font-extrabold">3 · ticket 打孔</div>
-            <div className="text-small text-[#555]">同一张卡＋撕线＋咬边孔</div>
+            <div className={`${styles.textSmall} text-[#555]`}>同一张卡＋撕线＋咬边孔</div>
           </div>
           <div>
             <ShadowCard ticket hover className="h-[80px]" />
             <div className="mt-1 text-[13px] font-extrabold">4 · 打孔 hover 拿起</div>
-            <div className="text-small text-[#555]">
+            <div className={`${styles.textSmall} text-[#555]`}>
               浮 3px＋阴影 5→8 跟随打孔轮廓（虚线撕线不动）
             </div>
           </div>
@@ -258,7 +260,7 @@ export function App() {
           <ShadowButton size="sm">紧凑 · sm</ShadowButton>
           <ShadowButton disabled>占位 · 虚线</ShadowButton>
         </div>
-        <div className="mt-3 text-small text-[#555]">
+        <div className={`mt-3 ${styles.textSmall} text-[#555]`}>
           试着按下：鼠标按住不松，按钮朝阴影方向压进、投影收到 1px。
         </div>
       </Section>

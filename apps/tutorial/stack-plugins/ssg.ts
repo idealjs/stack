@@ -1,5 +1,6 @@
 import { createHash } from 'node:crypto'
-import { mkdirSync, readdirSync, rmSync, statSync } from 'node:fs'
+import { existsSync, mkdirSync, readdirSync, rmSync, statSync } from 'node:fs'
+import { resolve as resolvePath2 } from 'node:path'
 import { readFile } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 import { pathToFileURL } from 'node:url'
@@ -9,6 +10,8 @@ import { renderToString } from 'react-dom/server'
 
 export interface SsgOptions {
   root: string
+  vanillaLoad?: (id: string) => Promise<string | null | undefined>
+  themeClasses?: () => Record<string, string>
 }
 
 interface OutputContextLike {
@@ -26,9 +29,28 @@ const RUNTIME_DOC_FALLBACK =
 
 const cache = new Map<string, { fingerprint: string; html: string }>()
 
-const tutorialSsrPlugin = (root: string): esbuildWasmPlugin => ({
+const tutorialSsrPlugin = (
+  root: string,
+  vanillaLoad?: SsgOptions['vanillaLoad'],
+): esbuildWasmPlugin => ({
   name: 'tutorial-ssr',
   setup(build) {
+    build.onResolve({ filter: /\.css$/ }, (args) => {
+      const abs = resolvePath2(args.resolveDir ?? '', args.path)
+      if (existsSync(`${abs}.ts`)) return { path: `${abs}.ts` }
+      return { path: `ssr-css-empty:${args.path}`, namespace: 'ssr-css-empty' }
+    })
+    build.onLoad({ filter: /.*/, namespace: 'ssr-css-empty' }, () => ({
+      contents: '',
+      loader: 'js',
+    }))
+    if (vanillaLoad !== undefined) {
+      build.onLoad({ filter: /\.css\.ts$/ }, async (args) => {
+        const code = await vanillaLoad(args.path)
+        if (code === undefined || code === null) return null
+        return { contents: code, loader: 'js' }
+      })
+    }
     build.onResolve({ filter: /\?raw$/ }, (args) => ({
       path: join(dirname(args.importer), args.path.slice(0, -RAW_SUFFIX.length)) + RAW_SUFFIX,
     }))
@@ -69,6 +91,8 @@ const realPathOf = (id: string): string | null => {
   return id
 }
 
+const SSG_PLUGIN_VERSION = 'css-ts-jump-v3'
+
 const fingerprintOf = (entryId: string, ctx: OutputContextLike, root: string): string => {
   const byId = new Map(ctx.modules.map((module) => [module.id, module]))
   const seen = new Set<string>()
@@ -83,6 +107,7 @@ const fingerprintOf = (entryId: string, ctx: OutputContextLike, root: string): s
     for (const dep of byId.get(id)?.deps ?? []) queue.push(dep)
   }
   parts.push(`runtime-doc@${mtimeOf(join(root, RUNTIME_DOC))}`)
+  parts.push(SSG_PLUGIN_VERSION)
   return createHash('sha1').update(parts.sort().join('\n')).digest('hex')
 }
 
@@ -92,6 +117,7 @@ const renderPage = async (
   fingerprint: string,
   workspace: string,
   root: string,
+  vanillaLoad: SsgOptions['vanillaLoad'],
 ): Promise<string> => {
   const flat = name.replaceAll('/', '__')
   for (const stale of readdirSync(workspace)) {
@@ -106,8 +132,8 @@ const renderPage = async (
     format: 'esm',
     platform: 'node',
     jsx: 'automatic',
-    external: ['react', 'react-dom', 'react-joyride', '@idealjs/stack', 'esbuild-wasm'],
-    plugins: [tutorialSsrPlugin(root)],
+    external: ['react', 'react-dom', 'react-joyride', '@idealjs/stack', 'esbuild-wasm', '*.css'],
+    plugins: [tutorialSsrPlugin(root, vanillaLoad)],
     outfile,
     logLevel: 'silent',
   })
@@ -119,6 +145,8 @@ const renderPages = async (
   ctx: OutputContextLike,
   byPath: Map<string, { path: string; code: string }>,
   root: string,
+  vanillaLoad: SsgOptions['vanillaLoad'],
+  themeClasses: SsgOptions['themeClasses'],
 ): Promise<void> => {
   const workspace = join(root, WORKSPACE_DIR)
   mkdirSync(workspace, { recursive: true })
@@ -139,7 +167,7 @@ const renderPages = async (
     if (entry === undefined || entry.fingerprint !== fingerprint) {
       entry = {
         fingerprint,
-        html: await renderPage(input.name, entryId, fingerprint, workspace, root),
+        html: await renderPage(input.name, entryId, fingerprint, workspace, root, vanillaLoad),
       }
       cache.set(input.name, entry)
       rendered += 1
@@ -149,8 +177,29 @@ const renderPages = async (
       throw new Error(`[ssg] ${input.name}.html 缺少 #root 挂载点`)
     }
     htmlFile.code = htmlFile.code.replace(marker, `<div id="root">${entry.html}</div>`)
+    htmlFile.code = applyThemeClasses(htmlFile.code, themeClasses?.())
   }
   console.log(`[ssg] ${rendered}/${pages} 页预渲染`)
+}
+
+const applyThemeClasses = (code: string, classes?: Record<string, string>): string => {
+  if (classes === undefined) return code
+  const htmlClasses = ['paletteClass', 'themeClass', 'siteClass']
+    .map((key) => classes[key])
+    .filter(Boolean)
+  let next = code
+  if (htmlClasses.length > 0 && !/<html[^>]*\sclass="/.test(next)) {
+    next = next.replace(/<html(?=[\s>])/, `<html class="${htmlClasses.join(' ')}"`)
+  }
+  const pageBase = classes.pageBase
+  if (pageBase !== undefined) {
+    if (/<body[^>]*\sclass="/.test(next)) {
+      next = next.replace(/(<body[^>]*\sclass=")[^"]*"/, `$1${pageBase}"`)
+    } else {
+      next = next.replace(/<body(?=[\s>])/, `<body class="${pageBase}"`)
+    }
+  }
+  return next
 }
 
 export function ssg(options: SsgOptions): StackHook {
@@ -160,7 +209,7 @@ export function ssg(options: SsgOptions): StackHook {
     lower: async (ctx, watched) => {
       const files = watched.files.map((file) => ({ ...file }))
       const byPath = new Map(files.map((file) => [file.path, file]))
-      await renderPages(ctx, byPath, options.root)
+      await renderPages(ctx, byPath, options.root, options.vanillaLoad, options.themeClasses)
       ctx.output({ name: 'ssg', dir: watched.dir, files })
     },
   }

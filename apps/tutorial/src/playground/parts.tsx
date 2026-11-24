@@ -1,24 +1,25 @@
+import * as styles from '@idealjs/stack-ui-kit/styles'
+import { ShadowButton } from '@idealjs/stack-ui-kit'
 import runtimeDoc from 'virtual:web-runner-doc'
-import { ShadowButton } from '../design-system'
 import { RUNTIME_ORIGIN, usePlayground } from './context'
 import { OutputPanel } from './OutputPanel'
 
 export function StatusLine() {
   const { status, sameOriginAlert } = usePlayground()
   return (
-    <p className="t-small-mute m-0 mb-2.5" data-testid="runtime-status">
+    <p className={`${styles.tSmallMute} m-0 mb-2.5`} data-testid="runtime-status">
       {status
         ? `运行时源：${RUNTIME_ORIGIN ? `${RUNTIME_ORIGIN}（独立源部署）` : 'null（opaque origin，srcdoc 退化）'} · 文档 origin：${status.origin}`
         : '运行时启动中…'}
       {status && ' · '}
       {status &&
         (status.parentBlocked ? (
-          <span className="font-bold text-ink">父窗口访问已阻断</span>
+          <span className={`font-bold ${styles.textInk}`}>父窗口访问已阻断</span>
         ) : (
-          <span className="font-bold text-clash1a">父窗口访问未被阻断——隔离异常！</span>
+          <span className={`font-bold ${styles.textClash1a}`}>父窗口访问未被阻断——隔离异常！</span>
         ))}
       {sameOriginAlert && (
-        <span className="font-bold text-clash1a"> · 运行时与宿主同源——隔离失效！</span>
+        <span className={`font-bold ${styles.textClash1a}`}> · 运行时与宿主同源——隔离失效！</span>
       )}
     </p>
   )
@@ -43,7 +44,7 @@ export function FileTabs() {
         {files.map((f) => (
           <span
             key={f.name}
-            className="inline-flex items-center overflow-hidden rounded-md border-2 border-ink bg-white"
+            className={`inline-flex items-center overflow-hidden rounded-md border-2 ${styles.borderInk} bg-white`}
           >
             <button
               type="button"
@@ -61,7 +62,7 @@ export function FileTabs() {
                 onClick={() => removeFile(f.name)}
                 aria-label={`删除 ${f.name}`}
                 title={`删除 ${f.name}`}
-                className="px-1.5 py-0.5 text-[12px] text-mute hover:text-clash1a"
+                className={`px-1.5 py-0.5 text-[12px] ${styles.textMute} ${styles.hoverTextClash1a}`}
               >
                 ×
               </button>
@@ -84,12 +85,12 @@ export function FileTabs() {
               setNameError(null)
             }}
             placeholder="新建文件…"
-            className="w-28 rounded-md border-2 border-ink bg-white px-2 py-0.5 font-mono text-[12px] text-ink outline-none focus:bg-white"
+            className={`w-28 rounded-md border-2 ${styles.borderInk} bg-white px-2 py-0.5 font-mono text-[12px] ${styles.textInk} outline-none focus:bg-white`}
           />
           <button
             type="submit"
             aria-label="新建文件"
-            className="rounded-md border-2 border-ink bg-white px-2 py-0.5 text-[12px] text-ink hover:bg-paper-deep"
+            className={`rounded-md border-2 ${styles.borderInk} bg-white px-2 py-0.5 text-[12px] ${styles.textInk} ${styles.hoverBgPaperDeep}`}
           >
             ＋
           </button>
@@ -99,7 +100,7 @@ export function FileTabs() {
         <p
           role="alert"
           data-testid="file-name-error"
-          className="t-small-mute m-0 mb-2 font-bold text-clash1a"
+          className={`${styles.tSmallMute} m-0 mb-2 font-bold ${styles.textClash1a}`}
         >
           {nameError}
         </p>
@@ -117,7 +118,7 @@ export function CodeEditor({ className = '' }: { className?: string }) {
       onChange={(e) => updateActiveCode(e.target.value)}
       spellCheck={false}
       rows={12}
-      className={`w-full resize-y rounded-xl border-2 border-ink bg-white p-3 font-mono text-[13px] leading-relaxed text-ink outline-none selection:bg-white ${className}`}
+      className={`w-full resize-y rounded-xl border-2 ${styles.borderInk} bg-white p-3 font-mono text-[13px] leading-relaxed ${styles.textInk} outline-none selection:bg-white ${className}`}
     />
   )
 }
@@ -134,7 +135,7 @@ export function RunRow({ nested = false }: { nested?: boolean }) {
       >
         {engineReady ? '运行 ▶' : '引擎加载中…'}
       </ShadowButton>
-      <span className="t-small-mute">
+      <span className={`${styles.tSmallMute}`}>
         {building
           ? 'stack 构建中（宿主）…'
           : `「${active.name}」宿主 stack 构建（入口按 stack.config.ts 的 inputs，缺省由 index.html 的 script src 推导）→ 产物送沙箱执行`}
@@ -176,7 +177,9 @@ export function SandboxFrame({ fill = false }: { fill?: boolean }) {
       {...iframeProps(preview)}
       ref={iframeRef}
       onLoad={pingRuntime}
-      className={preview ? 'mt-4 block w-full rounded-xl border-2 border-ink bg-white' : 'border-0'}
+      className={
+        preview ? `mt-4 block w-full rounded-xl border-2 ${styles.borderInk} bg-white` : 'border-0'
+      }
       style={preview ? { height: 240 } : { width: 0, height: 0 }}
     />
   )

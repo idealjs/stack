@@ -1,15 +1,18 @@
+import * as styles from '@idealjs/stack-ui-kit/styles'
 import { TEMPLATE_FILES } from '../../lib/templateFiles'
 import { Section } from '../../lib/ui'
 import { Playground } from '../../playground'
 
 function CodeCard({ label, code }: { label: string; code: string }) {
   return (
-    <div className="min-w-0 rounded-xl border-2 border-ink bg-paper p-3.5 shadow-ink">
-      <p className="t-small-strong m-0 mb-2 font-mono">{label}</p>
+    <div
+      className={`min-w-0 rounded-xl border-2 ${styles.borderInk} ${styles.bgPaper} p-3.5 ${styles.shadowInk}`}
+    >
+      <p className={`${styles.tSmallStrong} m-0 mb-2 font-mono`}>{label}</p>
       <pre
         tabIndex={0}
         aria-label={`${label} 源码`}
-        className="m-0 overflow-x-auto font-mono text-[12.5px] leading-relaxed text-body"
+        className={`m-0 overflow-x-auto font-mono text-[12.5px] leading-relaxed ${styles.textBody}`}
       >
         <code>{code}</code>
       </pre>
@@ -23,7 +26,7 @@ export function TemplateLab() {
       label="实验室：template 进沙箱"
       note="预置的就是 examples/template 的真实文件——MPA 入口在 playground 里跑起来"
     >
-      <p className="m-0 text-content text-body">
+      <p className={`m-0 ${styles.textContent} ${styles.textBody}`}>
         template 包的全部就是下面三个文件：index.html 是入口文档（挂载点＋一行 module
         script），main.ts 是被引进来的 TS，stack.config.ts 用 inputs 向宿主声明构建输入 ——index.html
         即入口（html 输入，引擎按 script src 把 main.ts 拉成闭包并重写引用 路径）；旧 entry

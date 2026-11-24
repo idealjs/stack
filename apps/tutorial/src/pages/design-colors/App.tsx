@@ -1,3 +1,4 @@
+import * as styles from '@idealjs/stack-ui-kit/styles'
 import { Page, Section } from '../../lib/ui'
 
 const PAIRS = [
@@ -11,8 +12,11 @@ const PAIRS = [
   { a: '#FF8FAB', b: '#5B8DEF', name: '对 3 · pink × blue', use: '点缀对：代理区与散落形状' },
 ]
 const NEUTRALS = [
-  { c: '#111111', n: 'ink', h: '#111111 · 描边/字/硬投影' },
-  { c: '#FFF9F0', n: 'paper', h: '#FFF9F0 · 卡面/大底' },
+  { c: '#111111', n: 'ink', h: 'palette-black · 描边/字/硬投影' },
+  { c: '#FFF9F0', n: 'paper', h: 'palette-cream · 卡面/大底' },
+  { c: '#F2EAD9', n: 'paper-deep', h: 'palette-sand · 深纸/工具栏' },
+  { c: '#8A7A5C', n: 'mute', h: 'palette-clay · 弱字/注释' },
+  { c: '#3D3D3D', n: 'body', h: 'palette-graphite · 正文' },
 ]
 const CHAPTERS6 = [
   { c: '#FF6B6B', n: 'ch1 快速开始' },
@@ -26,9 +30,12 @@ const CHAPTERS6 = [
 function Chip({ c, n, h }: { c: string; n: string; h: string }) {
   return (
     <div>
-      <div className="h-12 rounded-[10px] border-2 border-ink" style={{ background: c }} />
-      <div className="mt-1 whitespace-nowrap text-small font-bold">{n}</div>
-      <div className="whitespace-nowrap font-mono t-small-mute">{h}</div>
+      <div
+        className={`h-12 rounded-[10px] border-2 ${styles.borderInk}`}
+        style={{ background: c }}
+      />
+      <div className={`mt-1 whitespace-nowrap ${styles.textSmall} font-bold`}>{n}</div>
+      <div className={`whitespace-nowrap font-mono ${styles.tSmallMute}`}>{h}</div>
     </div>
   )
 }
@@ -43,15 +50,15 @@ const RULES = [
     badCap: '同色相邻失去碰撞',
     goodCap: '相邻必撞色（跨对取色）',
     badDemo: (
-      <div className="flex overflow-hidden rounded-lg border-2 border-ink">
-        <div className="h-10 w-20 bg-clash1a" />
-        <div className="h-10 w-20 bg-clash1a" />
+      <div className={`flex overflow-hidden rounded-lg border-2 ${styles.borderInk}`}>
+        <div className={`h-10 w-20 ${styles.bgClash1a}`} />
+        <div className={`h-10 w-20 ${styles.bgClash1a}`} />
       </div>
     ),
     goodDemo: (
-      <div className="flex overflow-hidden rounded-lg border-2 border-ink">
-        <div className="h-10 w-20 bg-clash1a" />
-        <div className="h-10 w-20 bg-clash1b" />
+      <div className={`flex overflow-hidden rounded-lg border-2 ${styles.borderInk}`}>
+        <div className={`h-10 w-20 ${styles.bgClash1a}`} />
+        <div className={`h-10 w-20 ${styles.bgClash1b}`} />
       </div>
     ),
   },
@@ -63,8 +70,12 @@ const RULES = [
     ],
     badCap: '无描边的鲜艳摊平刺眼',
     goodCap: '一切鲜艳以 2px ink 描边为界',
-    badDemo: <div className="h-10 w-40 rounded-lg bg-clash2a" />,
-    goodDemo: <div className="h-10 w-40 rounded-lg border-2 border-ink bg-clash2a shadow-ink" />,
+    badDemo: <div className={`h-10 w-40 rounded-lg ${styles.bgClash2a}`} />,
+    goodDemo: (
+      <div
+        className={`h-10 w-40 rounded-lg border-2 ${styles.borderInk} ${styles.bgClash2a} ${styles.shadowInk}`}
+      />
+    ),
   },
   {
     name: '底色定义',
@@ -75,12 +86,16 @@ const RULES = [
     badCap: '大底鲜艳，字被淹没',
     goodCap: '大底纸色，鲜艳只进局部',
     badDemo: (
-      <div className="flex h-10 w-40 items-center justify-center rounded-lg border-2 border-ink bg-clash1b text-[11px] font-bold">
+      <div
+        className={`flex h-10 w-40 items-center justify-center rounded-lg border-2 ${styles.borderInk} ${styles.bgClash1b} text-[11px] font-bold`}
+      >
         大底鲜艳
       </div>
     ),
     goodDemo: (
-      <div className="flex h-10 w-40 items-center justify-center rounded-lg border-2 border-ink bg-paper text-[11px] font-bold">
+      <div
+        className={`flex h-10 w-40 items-center justify-center rounded-lg border-2 ${styles.borderInk} ${styles.bgPaper} text-[11px] font-bold`}
+      >
         纸底安放正文
       </div>
     ),
@@ -99,12 +114,14 @@ function DoDont({
   return (
     <div className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1.5 max-md:pb-1 md:flex-nowrap md:py-4 md:pl-4 md:pr-5">
       <span
-        className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 border-ink text-[11px] font-extrabold ${bad ? 'bg-clash1a text-paper' : 'bg-clash1b'}`}
+        className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 ${styles.borderInk} text-[11px] font-extrabold ${bad ? 'bg-clash1a text-paper' : 'bg-clash1b'}`}
       >
         {bad ? '✗' : '✓'}
       </span>
       {children}
-      <p className="m-0 flex-1 basis-[160px] text-small leading-snug text-body">{text}</p>
+      <p className={`m-0 flex-1 basis-[160px] ${styles.textSmall} leading-snug ${styles.textBody}`}>
+        {text}
+      </p>
     </div>
   )
 }
@@ -114,24 +131,24 @@ export function App() {
     <Page
       active="design-colors"
       title="颜色 · 鲜艳与碰撞"
-      desc="三组撞色对轮转，黑描边收束一切鲜艳，大底永远是纸色。章节色只进相框，状态不用颜色——用形状。"
+      desc="颜色分两层：色板描述（--palette-*，theme 换肤只切这层）与语义描述（--color-*，组件组成只消费这层）。三组撞色对轮转，黑描边收束一切鲜艳，大底永远是纸色。章节色只进相框，状态不用颜色——用形状。"
     >
-      <Section label="撞色对" note="相邻的鲜艳必须来自不同对">
+      <Section label="撞色对" note="色板层——相邻的鲜艳必须来自不同对">
         <div className="grid grid-cols-3 gap-4">
           {PAIRS.map((p) => (
             <div key={p.name}>
-              <div className="flex overflow-hidden rounded-xl border-2 border-ink">
+              <div className={`flex overflow-hidden rounded-xl border-2 ${styles.borderInk}`}>
                 <div className="h-11 w-[88px]" style={{ background: p.a }} />
                 <div className="h-11 w-[88px]" style={{ background: p.b }} />
               </div>
               <div className="mt-1.5 text-[11px] font-bold">{p.name}</div>
-              <div className="text-small text-[#555]">{p.use}</div>
+              <div className={`${styles.textSmall} text-[#555]`}>{p.use}</div>
             </div>
           ))}
         </div>
       </Section>
-      <Section label="中性阶" note="纸的世界——字、边、投影、底">
-        <div className="grid grid-cols-2 gap-3">
+      <Section label="中性阶" note="语义层——纸的世界：字、边、投影、底">
+        <div className="grid grid-cols-2 gap-3 md:grid-cols-5">
           {NEUTRALS.map((x) => (
             <Chip key={x.n} {...x} />
           ))}
@@ -149,17 +166,22 @@ export function App() {
           {RULES.map((r, i) => (
             <div
               key={r.name}
-              className="grid gap-y-3 rounded-xl border-2 border-ink bg-paper p-4 md:grid-cols-[minmax(0,320px)_minmax(0,1fr)_minmax(0,1fr)] md:gap-y-0 md:divide-x-2 md:divide-ink/15 md:p-0"
+              className={`grid gap-y-3 rounded-xl border-2 ${styles.borderInk} ${styles.bgPaper} p-4 md:grid-cols-[minmax(0,320px)_minmax(0,1fr)_minmax(0,1fr)] md:gap-y-0 md:divide-x-2 md:divide-ink/15 md:p-0`}
             >
               <div className="grid content-start gap-1.5 md:py-4 md:pr-4 md:pl-5">
                 <div className="flex items-center gap-2">
-                  <span className="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-full border-2 border-ink bg-ink text-[10px] font-extrabold text-paper">
+                  <span
+                    className={`flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-full border-2 ${styles.borderInk} ${styles.bgInk} text-[10px] font-extrabold ${styles.textPaper}`}
+                  >
                     {i + 1}
                   </span>
                   <b className="text-[13px]">{r.name}</b>
                 </div>
                 {r.note.map((para) => (
-                  <p key={para} className="m-0 indent-[2em] text-content text-body">
+                  <p
+                    key={para}
+                    className={`m-0 indent-[2em] ${styles.textContent} ${styles.textBody}`}
+                  >
                     {para}
                   </p>
                 ))}

@@ -1,9 +1,9 @@
+import * as styles from '@idealjs/stack-ui-kit/styles'
+import { PageFlipZone, SitePage, SiteSidebar } from '@idealjs/stack-site-ui-kit'
 import { PageTurnBar } from '../../components/PageTurnBar'
-import { PageFlipZone, SitePage, SiteSidebar } from '../../design-system'
 import { flipTargetsOf } from '../../lib/pages'
-import { siteNavFor, FOOTER_GROUPS } from '../../lib/ui'
+import { FOOTER_GROUPS, siteNavFor } from '../../lib/ui'
 import { PracticeWorkspace } from './components/PracticeWorkspace'
-
 export function App() {
   const nav = siteNavFor('practice')
   const flips = flipTargetsOf('practice')
@@ -14,8 +14,8 @@ export function App() {
         footerGroups={FOOTER_GROUPS}
       >
         <div className="mb-4">
-          <h1 className="m-0 text-t1 font-extrabold text-ink">在线练习</h1>
-          <p className="m-0 mt-1.5 text-content text-mute">
+          <h1 className={`m-0 ${styles.textT1} font-extrabold ${styles.textInk}`}>在线练习</h1>
+          <p className={`m-0 mt-1.5 ${styles.textContent} ${styles.textMute}`}>
             沙箱写真跑：web runner 沙箱预览与 playground
             编辑器同住右缘侧栏——点紫色的「沙箱预览」签直接看沙箱，点「编辑器」签写码；点「运行
             ▶」构建产物送进隔离 iframe

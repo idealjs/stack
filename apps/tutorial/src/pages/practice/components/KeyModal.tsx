@@ -1,9 +1,9 @@
+import * as styles from '@idealjs/stack-ui-kit/styles'
+import { DockModal } from '@idealjs/stack-ui-kit'
 import { useState } from 'react'
-import { DockModal } from '../../../design-system'
 import type { LlmConfig } from '../lib/agent/llm'
 
-const FIELD =
-  'w-full rounded-lg border-2 border-ink bg-paper px-2.5 py-1.5 font-mono text-[13px] outline-none focus:bg-paper-deep'
+const FIELD = `w-full rounded-lg border-2 ${styles.borderInk} ${styles.bgPaper} px-2.5 py-1.5 font-mono text-[13px] outline-none ${styles.focusBgPaperDeep}`
 
 export function KeyModal({
   config,
@@ -20,8 +20,8 @@ export function KeyModal({
 
   return (
     <DockModal label="模型接入" className="w-full max-w-md" onClose={onClose}>
-      <h2 className="m-0 text-t3 font-extrabold text-ink">模型接入</h2>
-      <p className="t-small-mute mt-1.5 mb-4">
+      <h2 className={`m-0 ${styles.textT3} font-extrabold ${styles.textInk}`}>模型接入</h2>
+      <p className={`${styles.tSmallMute} mt-1.5 mb-4`}>
         默认 DeepSeek；也可填任何 OpenAI 兼容端点。key 仅保存在浏览器 localStorage。
       </p>
       <form
@@ -30,7 +30,7 @@ export function KeyModal({
           onSave({ baseURL: baseURL.trim(), apiKey: apiKey.trim(), model: model.trim() })
         }}
       >
-        <label htmlFor="km-base-url" className="t-small-strong mb-1 block">
+        <label htmlFor="km-base-url" className={`${styles.tSmallStrong} mb-1 block`}>
           API 地址（baseURL）
         </label>
         <input
@@ -40,7 +40,7 @@ export function KeyModal({
           onChange={(e) => setBaseURL(e.target.value)}
           spellCheck={false}
         />
-        <label htmlFor="km-api-key" className="t-small-strong mt-3 mb-1 block">
+        <label htmlFor="km-api-key" className={`${styles.tSmallStrong} mt-3 mb-1 block`}>
           API Key
         </label>
         <input
@@ -53,7 +53,7 @@ export function KeyModal({
           autoComplete="off"
           spellCheck={false}
         />
-        <label htmlFor="km-model" className="t-small-strong mt-3 mb-1 block">
+        <label htmlFor="km-model" className={`${styles.tSmallStrong} mt-3 mb-1 block`}>
           模型
         </label>
         <input
@@ -67,13 +67,13 @@ export function KeyModal({
           <button
             type="button"
             onClick={onClose}
-            className="cursor-pointer rounded-lg border-2 border-ink bg-paper px-3 py-1.5 text-[13px] font-bold text-body transition-colors hover:bg-paper-deep"
+            className={`cursor-pointer rounded-lg border-2 ${styles.borderInk} ${styles.bgPaper} px-3 py-1.5 text-[13px] font-bold ${styles.textBody} transition-colors ${styles.hoverBgPaperDeep}`}
           >
             取消
           </button>
           <button
             type="submit"
-            className="cursor-pointer rounded-lg border-2 border-ink bg-clash1b px-3 py-1.5 text-[13px] font-bold text-ink transition-colors hover:bg-clash1b/80"
+            className={`cursor-pointer rounded-lg border-2 ${styles.borderInk} ${styles.bgClash1b} px-3 py-1.5 text-[13px] font-bold ${styles.textInk} transition-colors ${styles.hoverBgClash1b80}`}
           >
             保存
           </button>

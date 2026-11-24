@@ -13,6 +13,8 @@
   },
   "dependencies": {
     "@idealjs/stack": "workspace:*",
+    "@idealjs/stack-site-ui-kit": "workspace:*",
+    "@idealjs/stack-ui-kit": "workspace:*",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-joyride": "^3.2.0"

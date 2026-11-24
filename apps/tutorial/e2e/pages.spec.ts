@@ -1,6 +1,6 @@
 import type { Page } from '@playwright/test'
 import { expect, test } from '@playwright/test'
-import type { TicketProps } from '../src/design-system/components/Ticket'
+import type { TicketProps } from '@idealjs/stack-ui-kit'
 
 const PAGES = [
   '/design/',
@@ -87,7 +87,8 @@ test.describe('CourseCard 规格契约', () => {
       ]
 
       const recipe = (el: Element) => {
-        const target = el.dataset.comp === 'ticket' ? el.querySelector('.ticket-shadow')! : el
+        const target =
+          el.dataset.comp === 'ticket' ? el.querySelector('[class*="ticketShadow"]')! : el
         const cs = getComputedStyle(target)
         return cs.filter !== 'none' ? cs.filter : cs.boxShadow
       }
@@ -282,10 +283,10 @@ test.describe('票券规格契约', () => {
   test.use({ reducedMotion: 'no-preference' })
 
   const chapterTickets = (page: Page) =>
-    page.locator('[data-comp="ticket"]').filter({ has: page.locator('.ticket-stub') })
+    page.locator('[data-comp="ticket"]').filter({ has: page.locator('[class*="ticketStub"]') })
 
   test('裁切式：overflow hidden + 单一 2px 描边 + 头部色块无独立边框', async ({ page }) => {
-    const done = chapterTickets(page).first().locator('.ticket-face')
+    const done = chapterTickets(page).first().locator('[class*="ticketFace"]')
     await expect(done).toBeVisible()
     const s = await done.evaluate((el) => {
       const cs = getComputedStyle(el)
@@ -305,7 +306,7 @@ test.describe('票券规格契约', () => {
   })
 
   test('票面 mask 打孔，内层包裹 drop-shadow 跟随轮廓，孔缘对齐撕线', async ({ page }) => {
-    const done = chapterTickets(page).first().locator('.ticket-face')
+    const done = chapterTickets(page).first().locator('[class*="ticketFace"]')
     const mask = await done.evaluate((el) => {
       const cs = getComputedStyle(el)
       return cs.maskImage || cs.webkitMaskImage || 'none'
@@ -330,7 +331,7 @@ test.describe('票券规格契约', () => {
 
     const arcs = await done.evaluate((el) => {
       const shell = el.closest('.ticket-shell') as HTMLElement
-      const stub = shell.querySelector('.ticket-stub') as HTMLElement
+      const stub = shell.querySelector('[class*="ticketStub"]') as HTMLElement
       const tearX =
         stub.getBoundingClientRect().x + parseFloat(getComputedStyle(stub).borderLeftWidth) / 2
       return [...shell.querySelectorAll('.pk-arc')].map((a) => {
@@ -356,7 +357,7 @@ test.describe('票券规格契约', () => {
     const plain = await page.evaluate(() => {
       const t = document.querySelector('[data-comp="ticket"]:not(.tk-pk)')!
       return [
-        getComputedStyle(t.querySelector('.ticket-face')!).maskImage,
+        getComputedStyle(t.querySelector('[class*="ticketFace"]')!).maskImage,
         getComputedStyle(t, '::before').maskImage,
       ]
     })
@@ -365,7 +366,7 @@ test.describe('票券规格契约', () => {
 
   test('撕线：完成=虚线、未开始=实线', async ({ page }) => {
     const styles = await page.evaluate(() =>
-      [...document.querySelectorAll('[data-comp="ticket"] .ticket-stub')].map(
+      [...document.querySelectorAll('[data-comp="ticket"] [class*="ticketStub"]')].map(
         (el) => getComputedStyle(el).borderLeftStyle,
       ),
     )
@@ -396,7 +397,7 @@ test.describe('票券规格契约', () => {
         }, background)
         const geometry = await ticket.evaluate((el) => {
           const rect = el.getBoundingClientRect()
-          const stub = el.querySelector('.ticket-stub')!
+          const stub = el.querySelector('[class*="ticketStub"]')!
           const tearX =
             stub.getBoundingClientRect().x + parseFloat(getComputedStyle(stub).borderLeftWidth) / 2
           return { x: rect.x, y: rect.y, width: rect.width, height: rect.height, tearX }
@@ -433,7 +434,7 @@ test.describe('票券规格契约', () => {
         expect(pixels.slice(0, 2)).toEqual(Array.from({ length: 2 }, () => [...background, 255]))
         expect(pixels[2]).toEqual([17, 17, 17, 255])
 
-        const face = ticket.locator('.ticket-face')
+        const face = ticket.locator('[class*="ticketFace"]')
         await face.evaluate((el) => {
           ;(el as HTMLElement).style.maskImage = 'none'
         })
@@ -513,7 +514,9 @@ test.describe('票券规格契约', () => {
       const ticket = await mountTicket(page, props)
       await expect(ticket.locator('.pk-arc')).toHaveCount(0)
       expect(
-        await ticket.locator('.ticket-face').evaluate((el) => getComputedStyle(el).maskImage),
+        await ticket
+          .locator('[class*="ticketFace"]')
+          .evaluate((el) => getComputedStyle(el).maskImage),
       ).toBe('none')
     }
   })
@@ -526,12 +529,16 @@ test.describe('票券规格契约', () => {
       const initial = (await ticket.boundingBox())!
       await ticket.hover()
       await expect
-        .poll(() => ticket.locator('.ticket-shadow').evaluate((el) => getComputedStyle(el).filter))
+        .poll(() =>
+          ticket.locator('[class*="ticketShadow"]').evaluate((el) => getComputedStyle(el).filter),
+        )
         .toBe('drop-shadow(rgb(17, 17, 17) 8px 8px 0px)')
       expect((await ticket.boundingBox())!.y).toBeCloseTo(initial.y - 3, 1)
       await page.mouse.move(0, 0)
       await expect
-        .poll(() => ticket.locator('.ticket-shadow').evaluate((el) => getComputedStyle(el).filter))
+        .poll(() =>
+          ticket.locator('[class*="ticketShadow"]').evaluate((el) => getComputedStyle(el).filter),
+        )
         .toBe('drop-shadow(rgb(17, 17, 17) 5px 5px 0px)')
       expect((await ticket.boundingBox())!.y).toBeCloseTo(initial.y, 1)
     })
@@ -635,10 +642,10 @@ test.describe('ShadowCard · 四部曲契约', () => {
     await expect(cards).toHaveCount(4)
     const combos = await cards.evaluateAll((ns) =>
       ns.map((el) => {
-        const face = el.querySelector<HTMLElement>('.ticket-face')
+        const face = el.querySelector<HTMLElement>('[class*="ticketFace"]')
         return {
           ticket: !!face,
-          hover: el.classList.contains('hoverable-shadow') || el.classList.contains('ticket-lift'),
+          hover: el.classList.contains('hoverableShadow') || el.classList.contains('ticketLift'),
           punched: !!face && getComputedStyle(face).maskImage.includes('radial-gradient'),
         }
       }),
@@ -655,12 +662,12 @@ test.describe('ShadowCard · 四部曲契约', () => {
     const card = specimens(page).nth(3)
     await card.scrollIntoViewIfNeeded()
     await page.mouse.move(0, 0)
-    const shadow = card.locator('.ticket-shadow')
+    const shadow = card.locator('[class*="ticketShadow"]')
     await expect
       .poll(() => shadow.evaluate((el) => getComputedStyle(el).filter))
       .toBe('drop-shadow(rgb(17, 17, 17) 5px 5px 0px)')
     expect(
-      await card.locator('.ticket-face').evaluate((el) => getComputedStyle(el).maskImage),
+      await card.locator('[class*="ticketFace"]').evaluate((el) => getComputedStyle(el).maskImage),
     ).toContain('radial-gradient')
     const initial = (await card.boundingBox())!
     await card.hover()
@@ -681,8 +688,8 @@ test.describe('阴影册 · hover-host 触发模型', () => {
 
   test('宿主承接 hover：命中区不动，位移作用于内部元素（防边界震荡）', async ({ page }) => {
     await page.goto('/design/shadow.html')
-    const host = page.locator('main section .hover-host').first()
-    const inner = host.locator('.hoverable-shadow')
+    const host = page.locator('main section [class*="hoverHost"]').first()
+    const inner = host.locator('[class*="hoverableShadow"]')
     await expect(inner).toHaveCSS('translate', 'none')
 
     await host.hover()
@@ -701,8 +708,8 @@ test.describe('阴影册 · hover-host 触发模型', () => {
 test.describe('阴影册 · hover-host 尊重 reduced-motion', () => {
   test('reduce 下宿主 hover 只换影、不位移', async ({ page }) => {
     await page.goto('/design/shadow.html')
-    const host = page.locator('main section .hover-host').first()
-    const inner = host.locator('.hoverable-shadow')
+    const host = page.locator('main section [class*="hoverHost"]').first()
+    const inner = host.locator('[class*="hoverableShadow"]')
     await host.hover()
     await expect(inner).toHaveCSS('translate', 'none')
     await expect(inner).toHaveCSS('box-shadow', /rgb\(17, 17, 17\) 8px 8px 0px 0px/)
@@ -726,7 +733,7 @@ test.describe('技能熟悉页', () => {
       for (const { key: sibling } of SKILLS) {
         const item = page.locator(`#site-nav-drawer a[href="../skills/${sibling}.html"]`)
         await expect(item).toHaveClass(
-          sibling === key ? /bg-paper-deep/ : /text-body hover:bg-paper-deep/,
+          sibling === key ? /bgPaperDeep/ : /textBody.*hoverBgPaperDeep|hoverBgPaperDeep.*textBody/,
         )
       }
       await expect(page.locator('#site-nav-drawer').getByText('技能熟悉')).toBeVisible()

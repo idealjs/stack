@@ -1,5 +1,5 @@
+import { ShadowButton } from '@idealjs/stack-ui-kit'
 import type { Step } from 'react-joyride'
-import { ShadowButton } from '../../../design-system'
 
 export const INTRO = 0
 export const ADD_FILL = 1
