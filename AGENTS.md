@@ -6,7 +6,18 @@
 
 | 场景 | 文档 |
 |------|------|
+| 切分支、分支命名、同步 main | docs/contributing/branches.md |
+| 编写提交信息（含 Agent 身份与签名的操作方式） | docs/contributing/commits.md |
 | 创建 PR、贴截图、评审回复、合并 | docs/contributing/pr.md |
+
+## 全局红线
+
+以下约束贯穿一切操作：
+
+- 所有提交必须 GPG 签名，禁止以任何方式绕过签名。
+- 每个 Agent 使用 Agent 身份提交，提交前确认 git config 的 user.name 和 user.email 正确；本仓库的操作方式见 docs/contributing/commits.md。
+- main 受分支保护，禁止直推，禁止 force push，一切变更通过 PR 合入。
+- 未收到明确的记录文档指令时，禁止将文档（markdown 等叙述性记录）新增、提交或推送到本仓库；教程正文、包 README、设计册（design-*）与 docs/contributing 规范属于仓库内容，随对应改动维护，不在此列。
 
 ## Git：main 禁止直推，并入一律 PR ＋ rebase
 
