@@ -11,9 +11,9 @@
   absproxy 入口用、默认不携带——301 前缀跳转会被浏览器永久缓存，现为 302）——各环境变量
   远程同域场景可用包级 `yarn dev:proxy`（`--base`＋运行时 origin 注入）；
   与同域接缝的完整说明见 [../web-runner/README.md](../web-runner/README.md)「远程访问」节
-- **E2E 防画面偏差**（两层，针对设计系统四册页）：
+- **E2E 防画面偏差**（两层）：
   1. **结构契约**（`e2e/pages.spec.ts` + `e2e/learning-kit.spec.ts`）：规格级断言——卡片 2px 描边/硬投影/纸叠三层、16:9 相框比例与内阴影、积木点实心数、站点 r6 半嵌（源骑黑影外缘/目标贴描边）、票券裁切式（overflow hidden + 头部无框 + 双打孔 + 撕线虚/实）、拟物学习组件交互。布局微调不误报，破坏规格必红。
-  2. **视觉基线**（`e2e/visual.spec.ts` + `e2e/visual.spec.ts-snapshots/`）：设计四册整页截图像素比对，容差 1%。**基线需随代码提交**；有意变更用 `yarn test:e2e:update` 生成新基线后一并提交。
+  2. **视觉基线**（`e2e/visual.spec.ts` + `e2e/visual.spec.ts-snapshots/`）：全部 24 个页面的桌面整页截图（1280 宽），另有 4 个页面的移动端 390×844 首屏与抽屉展开态，像素比对容差 0.1%。整页截图前会把 `main` 滚动容器展开、粘性元素改为相对定位，页面从头到尾进一张图，不受首屏限制。**基线需随代码提交**；有意变更用 `yarn test:e2e:update` 重建后一并提交。
 
   测试在 `prefers-reduced-motion` 下运行（卡片的 8000ms 翻转与动效关闭，截图稳定）；跑前先 `yarn build`（webServer 走 `stack preview`）。
 

@@ -9,7 +9,7 @@
     "dev:proxy": "VITE_STACK_RUNTIME_ORIGIN=https://code.idealjs.com/absproxy/8911 stack dev --base /absproxy/8910 --port 8910",
     "preview": "stack preview",
     "test:e2e": "playwright test",
-    "test:e2e:update": "playwright test --update-snapshots"
+    "test:e2e:update": "playwright test e2e/visual.spec.ts e2e/page-flip-visual.spec.ts --update-snapshots=all"
   },
   "dependencies": {
     "@idealjs/stack": "workspace:*",
