@@ -1,5 +1,5 @@
 import { Ring, Tri } from '@idealjs/stack-ui-kit'
-import { hoverHost, hoverableShadow } from '@idealjs/stack-ui-kit/styles'
+import { hoverHost, hoverableShadow, shadowInk } from '@idealjs/stack-ui-kit/styles'
 import { type ReactNode, useEffect, useRef, useState } from 'react'
 import type { Chapter } from '../types'
 import {
@@ -103,7 +103,7 @@ export function MemphisCard({
         ref={boxRef}
         href={href ?? `#ch${chapter.id}`}
         data-comp="course-card"
-        className={`group ${hoverableShadow} ${cardLink}`}
+        className={`group ${hoverableShadow} ${shadowInk} ${cardLink}`}
         onMouseEnter={() => setLocked(true)}
         onMouseLeave={() => setLocked(false)}
         onFocus={() => setLocked(true)}
@@ -112,7 +112,6 @@ export function MemphisCard({
       >
         {entry && <EntryBadge n={entry} />}
         {corner}
-        {/* ○ 预期结果：16:9 相框（章节撞色只进这里） */}
         <div
           className={cardZone}
           style={{
@@ -139,7 +138,6 @@ export function MemphisCard({
           <span className={cardZoneBadge}>预期结果{showGif ? ' · GIF' : ''}</span>
           <Ring size={16} className="absolute bottom-1.5 right-1.5" />
         </div>
-        {/* 卡头：▲ 目标 + 标题 + ● 积木点列 */}
         <div className={cardHead}>
           <Tri size={14} />
           <b className={cardTitle}>{chapter.title}</b>

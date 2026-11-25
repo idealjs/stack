@@ -15,6 +15,7 @@
 
 - `styles/learning.css`：学习套件组件样式（按 `--color-*` 原名变量消费 token，`--learning-accent` 由 `toneStyle` 注入）
 - `styles/page-flip.css`：`@view-transition` 与 `html[data-vt]` 翻页动画（`--page-flip-spring` 由 ui-kit 的 `src/tokens/site.css.ts` 提供——theme 相关 token 统一收在 `@idealjs/stack-ui-kit`）
+- `src/components/*.css.ts`：token 一律 `import { theme } from '@idealjs/stack-ui-kit/tokens'`（纯 TS 常量，按原名 `var(--color-*)` 引用）；不得 import ui-kit 的 `.css.ts` token 模块，否则它会被编译进第二个变量作用域，引用全部悬空
 
 app html 以包说明符引入：`<link rel="stylesheet" href="@idealjs/stack-site-ui-kit/styles/learning.css">`，构建期解析并落位 `__shared/`。
 

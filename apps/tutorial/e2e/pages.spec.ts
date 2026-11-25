@@ -112,7 +112,7 @@ test.describe('CourseCard 规格契约', () => {
       return {
         bg: cs.backgroundColor,
         rot: cs.rotate,
-        inZone: !!card.querySelector('.aspect-video mark'),
+        inZone: !!card.querySelector(':scope > div mark'),
         txt: mark.textContent,
       }
     })
@@ -124,7 +124,7 @@ test.describe('CourseCard 规格契约', () => {
   })
 
   test('16:9 相框：比例、3px 黑边、内阴影、章节撞色', async ({ page }) => {
-    const zone = page.locator('a[href="#ch1"] .aspect-video').first()
+    const zone = page.locator('a[href="#ch1"] > div').first()
     const s = await zone.evaluate((el) => {
       const cs = getComputedStyle(el)
       const r = el.getBoundingClientRect()
@@ -150,7 +150,7 @@ test.describe('CourseCard 规格契约', () => {
     )
     expect(filled).toBe(2)
 
-    const hasTri = await card.evaluate((el) => !!el.querySelector('.mt-2 svg'))
+    const hasTri = await card.evaluate((el) => !!el.lastElementChild?.querySelector('svg'))
     expect(hasTri).toBeTruthy()
   })
 
@@ -645,7 +645,7 @@ test.describe('ShadowCard · 四部曲契约', () => {
         const face = el.querySelector<HTMLElement>('[class*="ticketFace"]')
         return {
           ticket: !!face,
-          hover: el.classList.contains('hoverableShadow') || el.classList.contains('ticketLift'),
+          hover: [...el.classList].some((cls) => /_(hoverableShadow|ticketLift)__/.test(cls)),
           punched: !!face && getComputedStyle(face).maskImage.includes('radial-gradient'),
         }
       }),
@@ -710,6 +710,37 @@ test.describe('阴影册 · hover-host 尊重 reduced-motion', () => {
     await page.goto('/design/shadow.html')
     const host = page.locator('main section [class*="hoverHost"]').first()
     const inner = host.locator('[class*="hoverableShadow"]')
+    await host.hover()
+    await expect(inner).toHaveCSS('translate', 'none')
+    await expect(inner).toHaveCSS('box-shadow', /rgb\(17, 17, 17\) 8px 8px 0px 0px/)
+  })
+})
+
+test.describe('阴影册 · hover-host 静态类', () => {
+  test.use({ reducedMotion: 'no-preference' })
+
+  test('手写静态类：宿主承接 hover，位移 3px 并换拿起档投影，离开复原', async ({ page }) => {
+    await page.goto('/design/shadow.html')
+    const host = page.locator('main section .hover-host').first()
+    const inner = host.locator('.hoverable-shadow')
+    await expect(inner).toHaveCSS('translate', 'none')
+    await expect(inner).toHaveCSS('box-shadow', /rgb\(17, 17, 17\) 5px 5px 0px 0px/)
+
+    await host.hover()
+    await expect(inner).toHaveCSS('translate', '0px -3px')
+    await expect(inner).toHaveCSS('box-shadow', /rgb\(17, 17, 17\) 8px 8px 0px 0px/)
+
+    await page.mouse.move(0, 0)
+    await expect(inner).toHaveCSS('translate', 'none')
+    await expect(inner).toHaveCSS('box-shadow', /rgb\(17, 17, 17\) 5px 5px 0px 0px/)
+  })
+})
+
+test.describe('阴影册 · hover-host 静态类尊重 reduced-motion', () => {
+  test('reduce 下宿主 hover 只换影、不位移', async ({ page }) => {
+    await page.goto('/design/shadow.html')
+    const host = page.locator('main section .hover-host').first()
+    const inner = host.locator('.hoverable-shadow')
     await host.hover()
     await expect(inner).toHaveCSS('translate', 'none')
     await expect(inner).toHaveCSS('box-shadow', /rgb\(17, 17, 17\) 8px 8px 0px 0px/)

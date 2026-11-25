@@ -117,7 +117,7 @@ export function SiteSidebar({
       <label
         htmlFor="site-sidebar-toggle"
         aria-hidden="true"
-        className={`hidden max-lg:fixed max-lg:inset-0 max-lg:z-40 max-lg:block max-lg:cursor-pointer ${styles.maxLgBgInk}/40 max-lg:invisible max-lg:opacity-0 max-lg:transition-[visibility,opacity] max-lg:duration-300 max-lg:ease-[cubic-bezier(0.32,0.72,0,1)] max-lg:motion-reduce:transition-none max-lg:peer-checked:visible max-lg:peer-checked:opacity-100`}
+        className={`hidden max-lg:fixed max-lg:inset-0 max-lg:z-40 max-lg:block max-lg:cursor-pointer max-lg:bg-ink/40 max-lg:invisible max-lg:opacity-0 max-lg:transition-[visibility,opacity] max-lg:duration-300 max-lg:ease-[cubic-bezier(0.32,0.72,0,1)] max-lg:motion-reduce:transition-none max-lg:peer-checked:visible max-lg:peer-checked:opacity-100`}
       />
     </>
   )

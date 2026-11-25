@@ -1,5 +1,5 @@
 import { style } from '@vanilla-extract/css'
-import { themeVars } from '@idealjs/stack-ui-kit/tokens'
+import { theme } from '@idealjs/stack-ui-kit/tokens'
 
 export const edge = style({
   pointerEvents: 'none',
@@ -22,22 +22,22 @@ export const flipButton = style({
   borderRadius: '9999px',
   borderWidth: 2,
   borderStyle: 'solid',
-  borderColor: themeVars.color.ink,
+  borderColor: theme.color.ink,
   padding: '0.25rem 0.75rem',
   fontSize: '12px',
   fontWeight: 700,
-  color: themeVars.color.ink,
-  boxShadow: themeVars.shadow.ink,
+  color: theme.color.ink,
+  boxShadow: theme.shadow.ink,
   transitionProperty: 'translate, box-shadow',
   transitionDuration: '150ms',
   pointerEvents: 'var(--flip-pointer)',
   ':hover': {
     translate: '0 -0.125rem',
-    boxShadow: themeVars.shadow['ink-lift'],
+    boxShadow: theme.shadow['ink-lift'],
   },
   ':active': {
     translate: '2px 2px',
-    boxShadow: `1px 1px 0 ${themeVars.color.ink}`,
+    boxShadow: `1px 1px 0 ${theme.color.ink}`,
   },
 })
 
@@ -46,12 +46,12 @@ export const barAnchorPrev = style({ position: 'absolute', left: 0, right: 0, to
 
 export const barTrack = style({
   height: '0.25rem',
-  backgroundColor: `color-mix(in oklab, ${themeVars.color.ink} 15%, transparent)`,
+  backgroundColor: `color-mix(in oklab, ${theme.color.ink} 15%, transparent)`,
 })
 
 export const barFill = style({
   height: '100%',
   width: '100%',
   transformOrigin: 'left',
-  backgroundColor: themeVars.color.ink,
+  backgroundColor: theme.color.ink,
 })

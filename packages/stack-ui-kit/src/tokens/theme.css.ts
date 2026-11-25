@@ -39,17 +39,17 @@ export const themeVars = createThemeContract({
 
 export const themeClass = createTheme(themeVars, {
   color: {
-    clash1a: paletteVars.coral,
-    clash1b: paletteVars.teal,
-    clash2a: paletteVars.mustard,
-    clash2b: paletteVars.violet,
-    clash3a: paletteVars.pink,
-    clash3b: paletteVars.blue,
-    ink: paletteVars.black,
-    paper: paletteVars.cream,
-    'paper-deep': paletteVars.sand,
-    mute: paletteVars.clay,
-    body: paletteVars.graphite,
+    clash1a: paletteVars.palette.coral,
+    clash1b: paletteVars.palette.teal,
+    clash2a: paletteVars.palette.mustard,
+    clash2b: paletteVars.palette.violet,
+    clash3a: paletteVars.palette.pink,
+    clash3b: paletteVars.palette.blue,
+    ink: paletteVars.palette.black,
+    paper: paletteVars.palette.cream,
+    'paper-deep': paletteVars.palette.sand,
+    mute: paletteVars.palette.clay,
+    body: paletteVars.palette.graphite,
   },
   shadow: {
     ink: `5px 5px 0 ${themeVars.color.ink}`,

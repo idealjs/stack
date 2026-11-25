@@ -1,4 +1,5 @@
 import { Ticket, TicketProps } from '@idealjs/stack-ui-kit'
+import { ticketStub, ticketTitle } from '@idealjs/stack-ui-kit/styles'
 import type { Chapter } from '../types'
 import {
   emojiZone,
@@ -22,10 +23,10 @@ export function ChapterTicket({ chapter, done, ...ticketProps }: ChapterTicketPr
       <div className={emojiZone} style={{ background: chapter.color }}>
         {chapter.emoji}
       </div>
-      <div className={titleZone}>
+      <div className={`${ticketTitle} ${titleZone}`}>
         <b className={titleText}>{chapter.title}</b>
       </div>
-      <div className={`${stubZone} ${done ? stubDashed : stubSolid}`}>
+      <div className={`${ticketStub} ${stubZone} ${done ? stubDashed : stubSolid}`}>
         №{String(chapter.id).padStart(2, '0')}
       </div>
     </Ticket>

@@ -18,13 +18,13 @@ export const siteVars = createThemeContract({
 
 export const siteClass = createTheme(siteVars, {
   color: {
-    ch1: paletteVars.coral,
-    ch2: paletteVars.pink,
-    ch3: paletteVars.mustard,
-    ch4: paletteVars.teal,
-    ch5: paletteVars.blue,
-    ch6: paletteVars.violet,
-    ch7: paletteVars.green,
+    ch1: paletteVars.palette.coral,
+    ch2: paletteVars.palette.pink,
+    ch3: paletteVars.palette.mustard,
+    ch4: paletteVars.palette.teal,
+    ch5: paletteVars.palette.blue,
+    ch6: paletteVars.palette.violet,
+    ch7: paletteVars.palette.green,
   },
   'page-flip': {
     spring:

@@ -59,7 +59,7 @@ function Markdown({ raw }: { raw: string }) {
       out.push(
         <blockquote
           key={key++}
-          className={`m-0 rounded-xl border-2 border-dashed ${styles.borderInk40} ${styles.bgPaperDeep}/60 p-4`}
+          className={`m-0 rounded-xl border-2 border-dashed ${styles.borderInk40} bg-paper-deep/60 p-4`}
         >
           <p className={`m-0 ${styles.textContent} ${styles.textBody}`}>{inline(ln.slice(2))}</p>
         </blockquote>,

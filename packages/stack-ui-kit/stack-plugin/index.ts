@@ -60,7 +60,14 @@ const importJs = async (code: string): Promise<Record<string, unknown>> => {
 
 const flattenVars = (value: unknown, path: string[], into: Map<string, string>): void => {
   if (typeof value === 'string') {
-    into.set(`--${path.join('-')}`, value)
+    const name = `--${path.join('-')}`
+    const known = into.get(name)
+    if (known !== undefined && known !== value) {
+      throw new Error(
+        `[vanilla-extract] ${name} 被编译进两个变量作用域（${known} 与 ${value}）：别的包的 .css.ts 不得 import 本包的 .css.ts，token 一律按原名 var(--*) 引用`,
+      )
+    }
+    into.set(name, value)
     return
   }
   if (value === null || value === undefined) return

@@ -4,6 +4,31 @@
 @source "../../../../packages/stack-ui-kit/src";
 @source "../../../../packages/stack-site-ui-kit/src";
 
+@theme reference {
+  --color-clash1a: var(--color-clash1a);
+  --color-clash1b: var(--color-clash1b);
+  --color-clash2a: var(--color-clash2a);
+  --color-clash2b: var(--color-clash2b);
+  --color-clash3a: var(--color-clash3a);
+  --color-clash3b: var(--color-clash3b);
+  --color-ink: var(--color-ink);
+  --color-paper: var(--color-paper);
+  --color-paper-deep: var(--color-paper-deep);
+  --color-mute: var(--color-mute);
+  --color-body: var(--color-body);
+  --color-ch1: var(--color-ch1);
+  --color-ch2: var(--color-ch2);
+  --color-ch3: var(--color-ch3);
+  --color-ch4: var(--color-ch4);
+  --color-ch5: var(--color-ch5);
+  --color-ch6: var(--color-ch6);
+  --color-ch7: var(--color-ch7);
+  --shadow-ink: var(--shadow-ink);
+  --shadow-ink-lift: var(--shadow-ink-lift);
+  --drop-shadow-ink: var(--drop-shadow-ink);
+  --drop-shadow-ink-lift: var(--drop-shadow-ink-lift);
+}
+
 * {
   scrollbar-width: thin;
   scrollbar-color: var(--color-ink) transparent;

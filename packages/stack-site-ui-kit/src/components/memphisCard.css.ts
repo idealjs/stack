@@ -1,5 +1,5 @@
 import { style } from '@vanilla-extract/css'
-import { themeVars } from '@idealjs/stack-ui-kit/tokens'
+import { theme } from '@idealjs/stack-ui-kit/tokens'
 
 export const brickDots = style({
   display: 'flex',
@@ -14,7 +14,7 @@ export const brickDot = style({
   borderRadius: '9999px',
   borderWidth: '1.5px',
   borderStyle: 'solid',
-  borderColor: themeVars.color.ink,
+  borderColor: theme.color.ink,
 })
 
 export const entryBadge = style({
@@ -30,11 +30,11 @@ export const entryBadge = style({
   borderRadius: '9999px',
   borderWidth: 2,
   borderStyle: 'solid',
-  borderColor: themeVars.color.paper,
-  backgroundColor: themeVars.color.ink,
+  borderColor: theme.color.paper,
+  backgroundColor: theme.color.ink,
   fontSize: '12px',
   fontWeight: 800,
-  color: themeVars.color.clash2a,
+  color: theme.color.clash2a,
 })
 
 export const cardLink = style({
@@ -43,13 +43,16 @@ export const cardLink = style({
   borderRadius: '14px',
   borderWidth: 2,
   borderStyle: 'solid',
-  borderColor: themeVars.color.ink,
-  backgroundColor: themeVars.color.paper,
+  borderColor: theme.color.ink,
+  backgroundColor: theme.color.paper,
   padding: '11px',
   textDecoration: 'none',
+  transitionProperty: 'translate, box-shadow',
+  transitionDuration: '150ms',
   ':focus-visible': {
     outline: 'none',
     translate: '0 -3px',
+    boxShadow: theme.shadow['ink-lift'],
   },
 })
 
@@ -63,7 +66,7 @@ export const cardZone = style({
   borderRadius: '0.5rem',
   borderWidth: 3,
   borderStyle: 'solid',
-  borderColor: themeVars.color.ink,
+  borderColor: theme.color.ink,
 })
 
 export const cardZoneGif = style({
@@ -75,13 +78,13 @@ export const cardZoneGif = style({
 export const cardZoneTextBase = style({
   padding: '0 0.75rem',
   textAlign: 'center',
-  fontSize: themeVars.text.small,
+  fontSize: theme.text.small,
   lineHeight: '1.375',
 })
 
 export const cardZoneExpect = style({
   fontWeight: 700,
-  color: themeVars.color.paper,
+  color: theme.color.paper,
 })
 
 export const cardZoneGoal = style({
@@ -91,18 +94,18 @@ export const cardZoneGoal = style({
 
 export const cardZoneZoneText = style({
   fontWeight: 600,
-  color: themeVars.color.ink,
+  color: theme.color.ink,
 })
 
 export const cardZoneBadge = style({
   position: 'absolute',
   left: '0.375rem',
   top: '0.25rem',
-  fontSize: themeVars.text.small,
-  lineHeight: `var(--tw-leading, ${themeVars.text['small--line-height']})`,
+  fontSize: theme.text.small,
+  lineHeight: `var(--tw-leading, ${theme.text['small--line-height']})`,
   fontWeight: 700,
   letterSpacing: '0.025em',
-  color: themeVars.color.paper,
+  color: theme.color.paper,
 })
 
 export const cardHead = style({
@@ -114,8 +117,8 @@ export const cardHead = style({
 
 export const cardTitle = style({
   flexGrow: 1,
-  fontSize: themeVars.text.t3,
-  lineHeight: `var(--tw-leading, ${themeVars.text['t3--line-height']})`,
+  fontSize: theme.text.t3,
+  lineHeight: `var(--tw-leading, ${theme.text['t3--line-height']})`,
   color: '#2b1d10',
   textShadow: '0 1px 1px rgba(255,255,255,0.9)',
 })

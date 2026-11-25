@@ -67,7 +67,7 @@ function Particle({
 }) {
   return (
     <div className="flex min-w-0 flex-col items-center gap-2">
-      <div className={`flex h-[110px] items-center justify-center ${host ? 'hover-host' : ''}`}>
+      <div className={`flex h-[110px] items-center justify-center ${host ? styles.hoverHost : ''}`}>
         {children}
       </div>
       <div className={`${styles.textSmall} font-extrabold ${styles.textInk}`}>{title}</div>
@@ -103,7 +103,7 @@ function Rule({ demo }: { demo: ReactNode }) {
 function PaperCard({ hover = false }: { hover?: boolean }) {
   return (
     <div
-      className={`w-[150px] rounded-xl border-2 ${styles.borderInk} ${styles.bgPaper} px-3.5 py-3 ${styles.shadowInk} ${hover ? 'hoverable-shadow cursor-pointer' : ''}`}
+      className={`w-[150px] rounded-xl border-2 ${styles.borderInk} ${styles.bgPaper} px-3.5 py-3 ${styles.shadowInk} ${hover ? `${styles.hoverableShadow} cursor-pointer` : ''}`}
     >
       <b className={`${styles.textSmall}`}>纸卡</b>
     </div>
@@ -318,7 +318,7 @@ export function App() {
       </Section>
 
       <Section
-        label={`触发模型 · ${styles.hoverHost}`}
+        label="触发模型 · hover-host"
         note="位移的 :hover 挂在不动的宿主上——命中区不跟位移，底边不抖"
       >
         <Rule
@@ -331,11 +331,9 @@ export function App() {
                   <b className={`${styles.textSmall}`}>纸卡</b>
                 </div>
               </DoDont>
-              <DoDont text={`${styles.hoverHost}：宿主承接 hover，子元素才位移`}>
-                <div className={`${styles.hoverHost} w-fit`}>
-                  <div
-                    className={`${styles.hoverableShadow} ${styles.shadowInk} w-fit cursor-pointer rounded-xl border-2 ${styles.borderInk} ${styles.bgPaper} px-3.5 py-3`}
-                  >
+              <DoDont text="hover-host：宿主承接 hover，子元素才位移">
+                <div className="hover-host w-fit">
+                  <div className="hoverable-shadow shadow-ink w-fit cursor-pointer rounded-xl border-2 border-ink bg-paper px-3.5 py-3">
                     <b className={`${styles.textSmall}`}>纸卡</b>
                   </div>
                 </div>

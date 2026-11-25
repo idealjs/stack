@@ -1,5 +1,5 @@
 import { style } from '@vanilla-extract/css'
-import { themeVars } from '@idealjs/stack-ui-kit/tokens'
+import { theme } from '@idealjs/stack-ui-kit/tokens'
 
 export const ticketFaceRow = style({
   display: 'flex',
@@ -27,8 +27,8 @@ export const titleZone = style({
 })
 
 export const titleText = style({
-  fontSize: themeVars.text.content,
-  lineHeight: `var(--tw-leading, ${themeVars.text['content--line-height']})`,
+  fontSize: theme.text.content,
+  lineHeight: `var(--tw-leading, ${theme.text['content--line-height']})`,
   fontWeight: 700,
 })
 
@@ -39,9 +39,9 @@ export const stubZone = style({
   justifyContent: 'center',
   fontFamily:
     'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace',
-  fontSize: themeVars.text.small,
-  lineHeight: `var(--tw-leading, ${themeVars.text['small--line-height']})`,
-  color: themeVars.color.mute,
+  fontSize: theme.text.small,
+  lineHeight: `var(--tw-leading, ${theme.text['small--line-height']})`,
+  color: theme.color.mute,
 })
 
 export const stubDashed = style({ borderStyle: 'dashed' })

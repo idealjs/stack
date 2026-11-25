@@ -18,7 +18,7 @@ const BOOKS: { key: PageKey; label: string; desc: string }[] = [
   {
     key: 'design-shadow',
     label: '阴影',
-    desc: `一份投影配方的四枚 token（两档 × 两形）、拿起动效层 ${styles.hoverableShadow}，与组件选影归位表。`,
+    desc: '一份投影配方的四枚 token（两档 × 两形）、拿起动效层 hoverable-shadow，与组件选影归位表。',
   },
 ]
 

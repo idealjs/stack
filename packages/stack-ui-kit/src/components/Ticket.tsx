@@ -53,7 +53,7 @@ export function Ticket({
       <div
         {...props}
         data-comp={component}
-        className={`${ticketShell} ${hover ? ticketLift : ''} ${wrapperClassName}`}
+        className={`ticket-shell ${ticketShell} ${hasHoles ? 'tk-pk' : ''} ${hover ? ticketLift : ''} ${wrapperClassName}`}
         style={ticketStyle}
       >
         <div className={ticketShadow}>
@@ -61,8 +61,8 @@ export function Ticket({
         </div>
         {hasHoles && (
           <>
-            <i className={`${pkArc} ${pkArcT}`} aria-hidden />
-            <i className={`${pkArc} ${pkArcB}`} aria-hidden />
+            <i className={`${pkArc} ${pkArcT} pk-arc pk-arc-t`} aria-hidden />
+            <i className={`${pkArc} ${pkArcB} pk-arc pk-arc-b`} aria-hidden />
           </>
         )}
       </div>

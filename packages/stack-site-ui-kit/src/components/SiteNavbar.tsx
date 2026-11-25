@@ -187,7 +187,7 @@ export function SiteNavbar({
 
       <div
         id="site-nav-drawer"
-        className={`max-lg:fixed max-lg:inset-y-0 max-lg:left-0 max-lg:z-50 max-lg:w-72 max-lg:overflow-y-auto max-lg:rounded-none max-lg:border-r-2 ${styles.maxLgBorderInk} max-lg:${styles.bgPaper} max-lg:px-4 max-lg:py-5 max-lg:shadow-[8px_0_0_0_var(--color-ink)] max-lg:invisible max-lg:opacity-0 max-lg:-translate-x-full max-lg:transition-[transform,visibility,opacity] max-lg:duration-300 max-lg:ease-[cubic-bezier(0.32,0.72,0,1)] max-lg:motion-reduce:transition-none max-lg:peer-checked/nav-drawer:visible max-lg:peer-checked/nav-drawer:translate-x-0 max-lg:peer-checked/nav-drawer:opacity-100 lg:pointer-events-none lg:absolute lg:inset-x-0 lg:top-full lg:z-40 lg:mt-2 lg:rounded-2xl lg:border-2 ${styles.lgBorderInk} ${styles.lgBgPaper} lg:p-3 ${styles.lgShadowInkLift} lg:invisible lg:opacity-0 lg:-translate-y-1 lg:transition-[transform,visibility,opacity] lg:duration-300 lg:ease-[cubic-bezier(0.32,0.72,0,1)] lg:motion-reduce:transition-none lg:peer-checked/nav-expand:pointer-events-auto lg:peer-checked/nav-expand:visible lg:peer-checked/nav-expand:opacity-100 lg:peer-checked/nav-expand:translate-y-0`}
+        className={`max-lg:fixed max-lg:inset-y-0 max-lg:left-0 max-lg:z-50 max-lg:w-72 max-lg:overflow-y-auto max-lg:rounded-none max-lg:border-r-2 ${styles.maxLgBorderInk} max-lg:bg-paper max-lg:px-4 max-lg:py-5 max-lg:shadow-[8px_0_0_0_var(--color-ink)] max-lg:invisible max-lg:opacity-0 max-lg:-translate-x-full max-lg:transition-[transform,visibility,opacity] max-lg:duration-300 max-lg:ease-[cubic-bezier(0.32,0.72,0,1)] max-lg:motion-reduce:transition-none max-lg:peer-checked/nav-drawer:visible max-lg:peer-checked/nav-drawer:translate-x-0 max-lg:peer-checked/nav-drawer:opacity-100 lg:pointer-events-none lg:absolute lg:inset-x-0 lg:top-full lg:z-40 lg:mt-2 lg:rounded-2xl lg:border-2 ${styles.lgBorderInk} ${styles.lgBgPaper} lg:p-3 ${styles.lgShadowInkLift} lg:invisible lg:opacity-0 lg:-translate-y-1 lg:transition-[transform,visibility,opacity] lg:duration-300 lg:ease-[cubic-bezier(0.32,0.72,0,1)] lg:motion-reduce:transition-none lg:peer-checked/nav-expand:pointer-events-auto lg:peer-checked/nav-expand:visible lg:peer-checked/nav-expand:opacity-100 lg:peer-checked/nav-expand:translate-y-0`}
       >
         <div className="lg:hidden max-lg:mb-5">
           <ShadowButton
@@ -245,7 +245,7 @@ export function SiteNavbar({
       <label
         htmlFor="site-nav-toggle"
         aria-hidden="true"
-        className={`hidden max-lg:fixed max-lg:inset-0 max-lg:z-40 max-lg:block max-lg:cursor-pointer ${styles.maxLgBgInk}/40 max-lg:invisible max-lg:opacity-0 max-lg:transition-[visibility,opacity] max-lg:duration-300 max-lg:ease-[cubic-bezier(0.32,0.72,0,1)] max-lg:motion-reduce:transition-none max-lg:peer-checked/nav-drawer:visible max-lg:peer-checked/nav-drawer:opacity-100`}
+        className={`hidden max-lg:fixed max-lg:inset-0 max-lg:z-40 max-lg:block max-lg:cursor-pointer max-lg:bg-ink/40 max-lg:invisible max-lg:opacity-0 max-lg:transition-[visibility,opacity] max-lg:duration-300 max-lg:ease-[cubic-bezier(0.32,0.72,0,1)] max-lg:motion-reduce:transition-none max-lg:peer-checked/nav-drawer:visible max-lg:peer-checked/nav-drawer:opacity-100`}
       />
       {/* biome-ignore lint/a11y/noLabelWithoutControl: 桌面透明遮罩，点导航网格外任意处收起 overlay */}
       <label
